@@ -8,6 +8,7 @@ import {
     LayoutDashboard,
     Users,
     Building2,
+    TrendingUp,
     Settings,
     ChevronLeft,
     ChevronRight,
@@ -19,6 +20,7 @@ const menuItems = [
     { name: "Dashboard", href: "/app", icon: LayoutDashboard },
     { name: "Contacts", href: "/app/contacts", icon: Users },
     { name: "Companies", href: "/app/companies", icon: Building2 },
+    { name: "Negocios", href: "/app/deals", icon: TrendingUp },
     { name: "Settings", href: "/app/settings", icon: Settings },
 ];
 
