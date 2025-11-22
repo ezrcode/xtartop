@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Plan {
+  FREE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  passwordHash  String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  workspaces    Workspace[]
+}
+
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String?  @unique
+  createdAt DateTime @default(now())
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  subscription Subscription?
+}
+
+model Subscription {
+  id          String             @id @default(cuid())
+  workspaceId String             @unique
+  workspace   Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  plan        Plan               @default(FREE)
+  status      SubscriptionStatus @default(ACTIVE)
+  startedAt   DateTime           @default(now())
+  cancelledAt DateTime?
+}
