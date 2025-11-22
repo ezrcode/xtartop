@@ -34,7 +34,7 @@ export type ContactState = {
 
 export async function getContacts() {
     const session = await auth();
-    if (!session?.user?.email) redirect("/login");
+    if (!session?.user?.email) return [];
 
     // In a real app, we would filter by Workspace. 
     // For MVP, we assume user sees all contacts they have access to (or all in DB if single tenant logic)
@@ -54,7 +54,7 @@ export async function getContacts() {
 
 export async function getContact(id: string) {
     const session = await auth();
-    if (!session?.user?.email) redirect("/login");
+    if (!session?.user?.email) return null;
 
     return await prisma.contact.findUnique({
         where: { id },
@@ -66,7 +66,7 @@ export async function getContact(id: string) {
 
 export async function getCompanies() {
     const session = await auth();
-    if (!session?.user?.email) redirect("/login");
+    if (!session?.user?.email) return [];
 
     return await prisma.company.findMany({
         orderBy: { name: "asc" }

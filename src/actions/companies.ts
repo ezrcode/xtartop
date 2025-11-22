@@ -53,7 +53,7 @@ export type CompanyState = {
 
 export async function getCompanies() {
     const session = await auth();
-    if (!session?.user?.email) redirect("/login");
+    if (!session?.user?.email) return [];
 
     return await prisma.company.findMany({
         include: {
@@ -70,7 +70,7 @@ export async function getCompanies() {
 
 export async function getCompany(id: string) {
     const session = await auth();
-    if (!session?.user?.email) redirect("/login");
+    if (!session?.user?.email) return null;
 
     return await prisma.company.findUnique({
         where: { id },
@@ -83,7 +83,7 @@ export async function getCompany(id: string) {
 
 export async function getContacts() {
     const session = await auth();
-    if (!session?.user?.email) redirect("/login");
+    if (!session?.user?.email) return [];
 
     return await prisma.contact.findMany({
         orderBy: { fullName: "asc" }
