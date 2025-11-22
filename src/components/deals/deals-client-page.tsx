@@ -72,18 +72,51 @@ function DealCard({ deal, isDragging = false }: { deal: DealWithRelations, isDra
         <div
             ref={setNodeRef}
             style={style}
-            className={`bg-white border border-graphite-gray rounded-lg p-4 hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing ${isDragging ? 'opacity-50' : ''}`}
-            {...attributes}
-            {...listeners}
+            className={`bg-white border border-graphite-gray rounded-lg p-4 hover:shadow-md transition-shadow ${isDragging ? 'opacity-50' : ''}`}
         >
             <div className="space-y-3">
                 <div>
-                    <h4 className="text-sm font-medium text-dark-slate line-clamp-2">
-                        {deal.name}
-                    </h4>
-                    <p className="text-lg font-bold text-xtartop-black mt-1">
-                        {formatCurrency(deal.value)}
-                    </p>
+                    {/* Draggable Handle Area - Arriba y a la derecha del título */}
+                    <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1">
+                            <Link 
+                                href={`/app/deals/${deal.id}`}
+                                className="text-sm font-medium text-founder-blue hover:text-ocean-blue hover:underline line-clamp-2 block"
+                            >
+                                {deal.name}
+                            </Link>
+                            <p className="text-lg font-bold text-xtartop-black mt-1">
+                                {formatCurrency(deal.value)}
+                            </p>
+                        </div>
+                        {/* Drag Handle */}
+                        <div 
+                            className="flex-shrink-0 cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded"
+                            {...attributes}
+                            {...listeners}
+                            title="Arrastra para mover"
+                        >
+                            <svg 
+                                xmlns="http://www.w3.org/2000/svg" 
+                                width="16" 
+                                height="16" 
+                                viewBox="0 0 24 24" 
+                                fill="none" 
+                                stroke="currentColor" 
+                                strokeWidth="2" 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round"
+                                className="text-gray-400"
+                            >
+                                <circle cx="9" cy="5" r="1"/>
+                                <circle cx="9" cy="12" r="1"/>
+                                <circle cx="9" cy="19" r="1"/>
+                                <circle cx="15" cy="5" r="1"/>
+                                <circle cx="15" cy="12" r="1"/>
+                                <circle cx="15" cy="19" r="1"/>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
 
                 {(deal.company || deal.contact) && (
