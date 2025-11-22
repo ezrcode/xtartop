@@ -1,0 +1,8 @@
+import { getCompanies } from "@/actions/contacts";
+import { ContactForm } from "@/components/contacts/contact-form";
+
+export default async function NewContactPage() {
+    const companies = await getCompanies();
+
+    return <ContactForm companies={companies} isEditMode={false} />;
+}

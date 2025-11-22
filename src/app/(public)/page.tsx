@@ -1,10 +1,19 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function LandingPage() {
     return (
         <div className="min-h-screen flex flex-col bg-white text-xtartop-black font-sans">
             <header className="flex items-center justify-between px-6 py-4 border-b border-soft-gray">
-                <div className="text-2xl font-bold tracking-tight">xtartop</div>
+                <Link href="/" className="flex items-center">
+                    <Image 
+                        src="/xtartop_logo.png" 
+                        alt="xtartop" 
+                        width={150} 
+                        height={40}
+                        className="h-8 w-auto"
+                    />
+                </Link>
                 <div className="space-x-4">
                     <Link
                         href="/login"

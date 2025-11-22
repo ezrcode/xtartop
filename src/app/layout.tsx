@@ -7,6 +7,11 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 export const metadata: Metadata = {
   title: "xtartop",
   description: "The OS for Early Founders",
+  icons: {
+    icon: "/xtartop_isotipo.png",
+    shortcut: "/xtartop_isotipo.png",
+    apple: "/xtartop_isotipo.png",
+  },
 };
 
 export default function RootLayout({

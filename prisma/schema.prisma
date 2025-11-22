@@ -16,6 +16,23 @@ enum SubscriptionStatus {
   CANCELLED
 }
 
+enum CompanyStatus {
+  PROSPECTO
+  POTENCIAL
+  CLIENTE
+  DESCARTADA
+  INACTIVA
+}
+
+enum CompanyOrigin {
+  PROSPECCION_MANUAL
+  REFERIDO_CLIENTE
+  REFERIDO_ALIADO
+  INBOUND_MARKETING
+  OUTBOUND_MARKETING
+  EVENTO_PRESENCIAL
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -25,6 +42,8 @@ model User {
   updatedAt     DateTime  @updatedAt
 
   workspaces    Workspace[]
+  contacts      Contact[]
+  companies     Company[]
 }
 
 model Workspace {
@@ -46,4 +65,60 @@ model Subscription {
   status      SubscriptionStatus @default(ACTIVE)
   startedAt   DateTime           @default(now())
   cancelledAt DateTime?
+}
+
+model Company {
+  id              String         @id @default(cuid())
+  name            String
+  logoUrl         String?
+  taxId           String?
+  country         String?
+  city            String?
+  phone           String?
+  website         String?
+  instagramUrl    String?
+  linkedinUrl     String?
+  primaryContactId String?
+  primaryContact  Contact?       @relation("PrimaryContact", fields: [primaryContactId], references: [id])
+  origin          CompanyOrigin?
+  status          CompanyStatus  @default(PROSPECTO)
+  
+  createdById     String
+  createdBy       User           @relation(fields: [createdById], references: [id])
+  
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  contacts        Contact[]      @relation("CompanyContacts")
+}
+
+enum ContactStatus {
+  PROSPECTO
+  POTENCIAL
+  CLIENTE
+  INVERSIONISTA
+  DESCARTADO
+}
+
+model Contact {
+  id           String        @id @default(cuid())
+  fullName     String
+  photoUrl     String?
+  title        String?
+  email        String
+  mobile       String?
+  instagramUrl String?
+  linkedinUrl  String?
+  status       ContactStatus @default(PROSPECTO)
+
+  companyId    String?
+  company      Company?      @relation("CompanyContacts", fields: [companyId], references: [id])
+
+  createdById  String
+  createdBy    User          @relation(fields: [createdById], references: [id])
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  
+  primaryCompanies Company[] @relation("PrimaryContact")
 }
