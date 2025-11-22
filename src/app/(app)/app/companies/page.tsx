@@ -2,6 +2,8 @@ import { getCompanies } from "@/actions/companies";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
+export const dynamic = 'force-dynamic';
+
 export default async function CompaniesPage() {
     const companies = await getCompanies();
 
@@ -94,17 +96,16 @@ export default async function CompaniesPage() {
                                                 )}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                                    company.status === "CLIENTE" 
+                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${company.status === "CLIENTE"
                                                         ? "bg-success-green/10 text-success-green"
                                                         : company.status === "POTENCIAL"
-                                                        ? "bg-founder-blue/10 text-founder-blue"
-                                                        : company.status === "PROSPECTO"
-                                                        ? "bg-gray-100 text-gray-800"
-                                                        : company.status === "DESCARTADA"
-                                                        ? "bg-error-red/10 text-error-red"
-                                                        : "bg-gray-100 text-gray-600"
-                                                }`}>
+                                                            ? "bg-founder-blue/10 text-founder-blue"
+                                                            : company.status === "PROSPECTO"
+                                                                ? "bg-gray-100 text-gray-800"
+                                                                : company.status === "DESCARTADA"
+                                                                    ? "bg-error-red/10 text-error-red"
+                                                                    : "bg-gray-100 text-gray-600"
+                                                    }`}>
                                                     {company.status}
                                                 </span>
                                             </td>

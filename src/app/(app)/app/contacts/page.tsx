@@ -2,6 +2,8 @@ import { getContacts } from "@/actions/contacts";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
+export const dynamic = 'force-dynamic';
+
 export default async function ContactsPage() {
     const contacts = await getContacts();
 
@@ -71,14 +73,14 @@ export default async function ContactsPage() {
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span
                                                 className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${contact.status === "CLIENTE"
-                                                        ? "bg-success-green/10 text-success-green"
-                                                        : contact.status === "PROSPECTO"
-                                                            ? "bg-blue-100 text-blue-800"
-                                                            : contact.status === "POTENCIAL"
-                                                                ? "bg-warning-amber/10 text-warning-amber"
-                                                                : contact.status === "INVERSIONISTA"
-                                                                    ? "bg-purple-100 text-purple-800"
-                                                                    : "bg-gray-100 text-gray-800"
+                                                    ? "bg-success-green/10 text-success-green"
+                                                    : contact.status === "PROSPECTO"
+                                                        ? "bg-blue-100 text-blue-800"
+                                                        : contact.status === "POTENCIAL"
+                                                            ? "bg-warning-amber/10 text-warning-amber"
+                                                            : contact.status === "INVERSIONISTA"
+                                                                ? "bg-purple-100 text-purple-800"
+                                                                : "bg-gray-100 text-gray-800"
                                                     }`}
                                             >
                                                 {contact.status}
