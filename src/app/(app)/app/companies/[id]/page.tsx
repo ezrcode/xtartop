@@ -3,15 +3,17 @@ import { CompanyForm } from "@/components/companies/company-form";
 import { notFound } from "next/navigation";
 
 export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
 export const revalidate = 0;
 
-export async function generateStaticParams() {
-    return [];
-}
-
-export default async function EditCompanyPage({ params }: { params: { id: string } }) {
+export default async function EditCompanyPage({ 
+    params 
+}: { 
+    params: Promise<{ id: string }> 
+}) {
+    const { id } = await params;
     const [company, contacts] = await Promise.all([
-        getCompany(params.id),
+        getCompany(id),
         getContacts(),
     ]);
 
