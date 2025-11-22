@@ -33,11 +33,18 @@ enum CompanyOrigin {
   EVENTO_PRESENCIAL
 }
 
+enum DealViewPreference {
+  TABLE
+  KANBAN
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
   email         String    @unique
   passwordHash  String
+  photoUrl      String?
+  dealsViewPref DealViewPreference @default(TABLE)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

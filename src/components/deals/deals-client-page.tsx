@@ -26,6 +26,7 @@ type DealWithRelations = Deal & {
 
 interface DealsClientPageProps {
     deals: DealWithRelations[];
+    defaultView?: "table" | "kanban";
 }
 
 const dealStatusConfig = {
@@ -195,8 +196,8 @@ function KanbanColumn({ status, deals }: { status: DealStatus, deals: DealWithRe
     );
 }
 
-export function DealsClientPage({ deals: initialDeals }: DealsClientPageProps) {
-    const [viewMode, setViewMode] = useState<"table" | "kanban">("table");
+export function DealsClientPage({ deals: initialDeals, defaultView = "table" }: DealsClientPageProps) {
+    const [viewMode, setViewMode] = useState<"table" | "kanban">(defaultView);
     const [deals, setDeals] = useState<DealWithRelations[]>(initialDeals);
     const [activeDeal, setActiveDeal] = useState<DealWithRelations | null>(null);
 

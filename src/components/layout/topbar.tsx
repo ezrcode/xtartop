@@ -9,6 +9,7 @@ interface TopbarProps {
     user: {
         name?: string | null;
         email?: string | null;
+        photoUrl?: string | null;
     };
 }
 
@@ -48,16 +49,29 @@ export function Topbar({ user }: TopbarProps) {
     return (
         <div className="sticky top-0 z-40 bg-white border-b border-graphite-gray shadow-sm">
             <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
-                {/* Left side - User Profile */}
+                {/* Left side - Empty / Future breadcrumbs */}
+                <div className="flex-1">
+                    {/* Placeholder para breadcrumbs o título de página */}
+                </div>
+
+                {/* Right side - User Profile */}
                 <div className="relative" ref={dropdownRef}>
                     <button
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                         className="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-soft-gray transition-colors group"
                     >
                         {/* Avatar */}
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-founder-blue to-ocean-blue flex items-center justify-center text-white font-semibold shadow-sm">
-                            {getInitials()}
-                        </div>
+                        {user.photoUrl ? (
+                            <img
+                                src={user.photoUrl}
+                                alt={user.name || "Profile"}
+                                className="h-10 w-10 rounded-full object-cover shadow-sm"
+                            />
+                        ) : (
+                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-founder-blue to-ocean-blue flex items-center justify-center text-white font-semibold shadow-sm">
+                                {getInitials()}
+                            </div>
+                        )}
 
                         {/* User Info */}
                         <div className="hidden sm:block text-left">
@@ -78,7 +92,7 @@ export function Topbar({ user }: TopbarProps) {
 
                     {/* Dropdown Menu */}
                     {isDropdownOpen && (
-                        <div className="absolute left-0 mt-2 w-56 bg-white border border-graphite-gray rounded-lg shadow-lg py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="absolute right-0 mt-2 w-56 bg-white border border-graphite-gray rounded-lg shadow-lg py-2 animate-in fade-in slide-in-from-top-2 duration-200">
                             {/* User Info in Dropdown (mobile) */}
                             <div className="sm:hidden px-4 py-3 border-b border-graphite-gray">
                                 <p className="text-sm font-medium text-dark-slate">
@@ -114,7 +128,7 @@ export function Topbar({ user }: TopbarProps) {
                     )}
                 </div>
 
-                {/* Right side - Future actions/notifications */}
+                {/* Right side - Empty space */}
                 <div className="flex items-center space-x-4">
                     {/* Placeholder para futuras notificaciones o acciones */}
                 </div>
