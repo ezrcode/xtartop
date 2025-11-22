@@ -3,7 +3,20 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Plus, Table2, LayoutGrid } from "lucide-react";
-import { Deal, Company, Contact, User } from "@prisma/client";
+import { Deal, Company, Contact, User, DealStatus } from "@prisma/client";
+import {
+    DndContext,
+    DragEndEvent,
+    DragOverlay,
+    DragStartEvent,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    closestCorners,
+    useDroppable,
+    useDraggable,
+} from "@dnd-kit/core";
+import { updateDealStatus } from "@/actions/deals";
 
 type DealWithRelations = Deal & {
     company?: Company | null;
@@ -34,8 +47,133 @@ const kanbanColumns = [
     "CIERRE_PERDIDO",
 ] as const;
 
-export function DealsClientPage({ deals }: DealsClientPageProps) {
+// DealCard Component with draggable functionality
+function DealCard({ deal, isDragging = false }: { deal: DealWithRelations, isDragging?: boolean }) {
+    const { attributes, listeners, setNodeRef, transform } = useDraggable({
+        id: deal.id,
+    });
+
+    const formatCurrency = (value: number | string) => {
+        const numValue = typeof value === 'string' ? parseFloat(value) : value;
+        return new Intl.NumberFormat('es-ES', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        }).format(numValue);
+    };
+
+    const style = transform ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+        opacity: isDragging ? 0.5 : 1,
+    } : undefined;
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            className={`bg-white border border-graphite-gray rounded-lg p-4 hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing ${isDragging ? 'opacity-50' : ''}`}
+            {...attributes}
+            {...listeners}
+        >
+            <div className="space-y-3">
+                <div>
+                    <h4 className="text-sm font-medium text-dark-slate line-clamp-2">
+                        {deal.name}
+                    </h4>
+                    <p className="text-lg font-bold text-xtartop-black mt-1">
+                        {formatCurrency(deal.value)}
+                    </p>
+                </div>
+
+                {(deal.company || deal.contact) && (
+                    <div className="space-y-1 text-xs text-gray-600">
+                        {deal.company && (
+                            <div className="flex items-center">
+                                <span className="font-medium mr-1">Empresa:</span>
+                                <span className="truncate">{deal.company.name}</span>
+                            </div>
+                        )}
+                        {deal.contact && (
+                            <div className="flex items-center">
+                                <span className="font-medium mr-1">Contacto:</span>
+                                <span className="truncate">{deal.contact.fullName}</span>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Created By Avatar Placeholder */}
+                <div className="flex items-center pt-2 border-t border-gray-100">
+                    <div className="flex items-center space-x-2">
+                        <div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center">
+                            <span className="text-xs font-medium text-gray-600">
+                                {deal.createdBy?.name?.charAt(0) || deal.createdBy?.email?.charAt(0) || "?"}
+                            </span>
+                        </div>
+                        <span className="text-xs text-gray-500">
+                            {deal.createdBy?.name || deal.createdBy?.email || "Usuario"}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// Droppable Column Component
+function KanbanColumn({ status, deals }: { status: DealStatus, deals: DealWithRelations[] }) {
+    const { setNodeRef, isOver } = useDroppable({
+        id: status,
+    });
+
+    return (
+        <div className="flex-shrink-0 w-80">
+            <div className={`bg-white rounded-lg border shadow-sm transition-colors ${isOver ? 'border-founder-blue border-2' : 'border-graphite-gray'}`}>
+                {/* Column Header */}
+                <div className="px-4 py-3 border-b border-graphite-gray">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-semibold text-dark-slate">
+                            {dealStatusConfig[status].label}
+                        </h3>
+                        <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-medium text-gray-600 bg-gray-100 rounded-full">
+                            {deals.length}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Cards Container */}
+                <div
+                    ref={setNodeRef}
+                    className={`p-3 space-y-3 min-h-[200px] max-h-[calc(100vh-300px)] overflow-y-auto transition-colors ${isOver ? 'bg-founder-blue/5' : ''}`}
+                >
+                    {deals.length > 0 ? (
+                        deals.map((deal) => (
+                            <DealCard key={deal.id} deal={deal} />
+                        ))
+                    ) : (
+                        <div className="text-center py-8 text-sm text-gray-400">
+                            Sin negocios
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export function DealsClientPage({ deals: initialDeals }: DealsClientPageProps) {
     const [viewMode, setViewMode] = useState<"table" | "kanban">("table");
+    const [deals, setDeals] = useState<DealWithRelations[]>(initialDeals);
+    const [activeDeal, setActiveDeal] = useState<DealWithRelations | null>(null);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8, // Permite clicks normales, solo activa drag después de 8px
+            },
+        })
+    );
 
     const dealsByStatus = kanbanColumns.reduce((acc, status) => {
         acc[status] = deals.filter(deal => deal.status === status);
@@ -50,6 +188,48 @@ export function DealsClientPage({ deals }: DealsClientPageProps) {
             minimumFractionDigits: 0,
             maximumFractionDigits: 0,
         }).format(numValue);
+    };
+
+    const handleDragStart = (event: DragStartEvent) => {
+        const dealId = event.active.id as string;
+        const deal = deals.find(d => d.id === dealId);
+        if (deal) {
+            setActiveDeal(deal);
+        }
+    };
+
+    const handleDragEnd = async (event: DragEndEvent) => {
+        const { active, over } = event;
+        setActiveDeal(null);
+
+        if (!over) return;
+
+        const dealId = active.id as string;
+        const newStatus = over.id as DealStatus;
+        const deal = deals.find(d => d.id === dealId);
+
+        if (!deal || deal.status === newStatus) return;
+
+        // Actualización optimista - actualiza UI inmediatamente
+        const oldStatus = deal.status;
+        setDeals(prevDeals =>
+            prevDeals.map(d =>
+                d.id === dealId ? { ...d, status: newStatus } : d
+            )
+        );
+
+        // Actualiza en el servidor
+        try {
+            await updateDealStatus(dealId, newStatus);
+        } catch (error) {
+            console.error("Error updating deal status:", error);
+            // Revertir el cambio si falla
+            setDeals(prevDeals =>
+                prevDeals.map(d =>
+                    d.id === dealId ? { ...d, status: oldStatus } : d
+                )
+            );
+        }
     };
 
     return (
@@ -200,88 +380,31 @@ export function DealsClientPage({ deals }: DealsClientPageProps) {
 
                 {/* Kanban View */}
                 {viewMode === "kanban" && (
-                    <div className="overflow-x-auto pb-4">
-                        <div className="inline-flex space-x-4 min-w-full">
-                            {kanbanColumns.map((status) => (
-                                <div key={status} className="flex-shrink-0 w-80">
-                                    <div className="bg-white rounded-lg border border-graphite-gray shadow-sm">
-                                        {/* Column Header */}
-                                        <div className="px-4 py-3 border-b border-graphite-gray">
-                                            <div className="flex items-center justify-between">
-                                                <h3 className="text-sm font-semibold text-dark-slate">
-                                                    {dealStatusConfig[status].label}
-                                                </h3>
-                                                <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-medium text-gray-600 bg-gray-100 rounded-full">
-                                                    {dealsByStatus[status]?.length || 0}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        {/* Cards Container */}
-                                        <div className="p-3 space-y-3 min-h-[200px] max-h-[calc(100vh-300px)] overflow-y-auto">
-                                            {dealsByStatus[status]?.map((deal) => (
-                                                <Link
-                                                    key={deal.id}
-                                                    href={`/app/deals/${deal.id}`}
-                                                    className="block bg-white border border-graphite-gray rounded-lg p-4 hover:shadow-md transition-shadow"
-                                                >
-                                                    <div className="space-y-3">
-                                                        <div>
-                                                            <h4 className="text-sm font-medium text-dark-slate line-clamp-2">
-                                                                {deal.name}
-                                                            </h4>
-                                                            <p className="text-lg font-bold text-xtartop-black mt-1">
-                                                                {formatCurrency(deal.value)}
-                                                            </p>
-                                                        </div>
-
-                                                        {(deal.company || deal.contact) && (
-                                                            <div className="space-y-1 text-xs text-gray-600">
-                                                                {deal.company && (
-                                                                    <div className="flex items-center">
-                                                                        <span className="font-medium mr-1">Empresa:</span>
-                                                                        <span className="truncate">{deal.company.name}</span>
-                                                                    </div>
-                                                                )}
-                                                                {deal.contact && (
-                                                                    <div className="flex items-center">
-                                                                        <span className="font-medium mr-1">Contacto:</span>
-                                                                        <span className="truncate">{deal.contact.fullName}</span>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        )}
-
-                                                        {/* Created By Avatar Placeholder */}
-                                                        <div className="flex items-center pt-2 border-t border-gray-100">
-                                                            <div className="flex items-center space-x-2">
-                                                                <div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center">
-                                                                    <span className="text-xs font-medium text-gray-600">
-                                                                        {deal.createdBy?.name?.charAt(0) || deal.createdBy?.email?.charAt(0) || "?"}
-                                                                    </span>
-                                                                </div>
-                                                                <span className="text-xs text-gray-500">
-                                                                    {deal.createdBy?.name || deal.createdBy?.email || "Usuario"}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </Link>
-                                            ))}
-                                            {(!dealsByStatus[status] || dealsByStatus[status].length === 0) && (
-                                                <div className="text-center py-8 text-sm text-gray-400">
-                                                    Sin negocios
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
+                    <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCorners}
+                        onDragStart={handleDragStart}
+                        onDragEnd={handleDragEnd}
+                    >
+                        <div className="overflow-x-auto pb-4">
+                            <div className="inline-flex space-x-4 min-w-full">
+                                {kanbanColumns.map((status) => (
+                                    <KanbanColumn
+                                        key={status}
+                                        status={status as DealStatus}
+                                        deals={dealsByStatus[status] || []}
+                                    />
+                                ))}
+                            </div>
                         </div>
-                    </div>
+
+                        {/* Drag Overlay */}
+                        <DragOverlay>
+                            {activeDeal && <DealCard deal={activeDeal} isDragging />}
+                        </DragOverlay>
+                    </DndContext>
                 )}
             </div>
         </div>
     );
 }
-

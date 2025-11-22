@@ -213,3 +213,22 @@ export async function deleteDeal(id: string) {
     redirect("/app/deals");
 }
 
+export async function updateDealStatus(id: string, status: DealStatus) {
+    const session = await auth();
+    if (!session?.user?.email) {
+        throw new Error("Unauthorized");
+    }
+
+    try {
+        await prisma.deal.update({
+            where: { id },
+            data: { status },
+        });
+        revalidatePath("/app/deals");
+        return { success: true };
+    } catch (error) {
+        console.error("Database Error:", error);
+        throw new Error("Failed to update deal status.");
+    }
+}
+
