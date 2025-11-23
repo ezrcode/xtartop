@@ -116,7 +116,7 @@ function DealCard({ deal, isDragging = false }: { deal: DealWithRelations, isDra
 
             {/* Value */}
             <p className="text-base font-bold text-xtartop-black mb-2">
-                {formatCurrency(deal.value)}
+                {formatCurrency(Number(deal.value))}
             </p>
 
             {/* Company & Contact */}
@@ -398,7 +398,7 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table" }: 
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="text-sm font-medium text-dark-slate">
-                                                        {formatCurrency(deal.value)}
+                                                        {formatCurrency(Number(deal.value))}
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
