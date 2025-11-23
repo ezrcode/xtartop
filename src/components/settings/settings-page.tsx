@@ -113,9 +113,9 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
     return (
         <div className="min-h-screen bg-soft-gray py-8">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-xtartop-black">Configuración</h1>
-                    <p className="text-dark-slate mt-2">
+                <div className="mb-6 sm:mb-8">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-xtartop-black">Configuración</h1>
+                    <p className="text-sm sm:text-base text-dark-slate mt-2">
                         Gestiona tu workspace, equipo y configuraciones
                     </p>
                 </div>

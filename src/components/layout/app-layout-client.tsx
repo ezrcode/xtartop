@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 
@@ -27,6 +27,22 @@ interface AppLayoutClientProps {
 
 export function AppLayoutClient({ user, userRole, children }: AppLayoutClientProps) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+    // Listen to sidebar collapse state from localStorage
+    useEffect(() => {
+        const checkCollapsed = () => {
+            const stored = localStorage.getItem("sidebarCollapsed");
+            if (stored && window.innerWidth >= 768) {
+                setSidebarCollapsed(JSON.parse(stored));
+            }
+        };
+        checkCollapsed();
+        
+        // Listen for storage events (when sidebar toggles)
+        const interval = setInterval(checkCollapsed, 100);
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <div className="flex min-h-screen bg-soft-gray">
@@ -35,7 +51,7 @@ export function AppLayoutClient({ user, userRole, children }: AppLayoutClientPro
                 isMobileOpen={isMobileMenuOpen}
                 setIsMobileOpen={setIsMobileMenuOpen}
             />
-            <div className="flex-1 md:ml-20 transition-all duration-300">
+            <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
                 <Suspense fallback={<TopbarSkeleton />}>
                     <Topbar 
                         user={user} 

@@ -278,46 +278,47 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table" }: 
         <div className="min-h-screen bg-soft-gray py-8">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-xtartop-black">Negocios</h1>
-                        <p className="text-dark-slate mt-2">
+                        <h1 className="text-2xl sm:text-3xl font-bold text-xtartop-black">Negocios</h1>
+                        <p className="text-dark-slate mt-2 text-sm sm:text-base">
                             Gestiona tu pipeline de ventas y oportunidades
                         </p>
                     </div>
-                    <div className="flex items-center space-x-3">
+                    <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-3">
                         {/* View Toggle */}
                         <div className="inline-flex rounded-md shadow-sm">
                             <button
                                 onClick={() => setViewMode("table")}
-                                className={`inline-flex items-center px-4 py-2 text-sm font-medium border ${
+                                className={`inline-flex items-center justify-center px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium border ${
                                     viewMode === "table"
                                         ? "bg-xtartop-black text-white border-xtartop-black"
                                         : "bg-white text-dark-slate border-graphite-gray hover:bg-gray-50"
                                 } rounded-l-md transition-colors`}
                             >
-                                <Table2 size={16} className="mr-2" />
-                                Tabla
+                                <Table2 size={16} className="sm:mr-2" />
+                                <span className="hidden sm:inline">Tabla</span>
                             </button>
                             <button
                                 onClick={() => setViewMode("kanban")}
-                                className={`inline-flex items-center px-4 py-2 text-sm font-medium border-t border-r border-b ${
+                                className={`inline-flex items-center justify-center px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium border-t border-r border-b ${
                                     viewMode === "kanban"
                                         ? "bg-xtartop-black text-white border-xtartop-black"
                                         : "bg-white text-dark-slate border-graphite-gray hover:bg-gray-50"
                                 } rounded-r-md transition-colors`}
                             >
-                                <LayoutGrid size={16} className="mr-2" />
-                                Kanban
+                                <LayoutGrid size={16} className="sm:mr-2" />
+                                <span className="hidden sm:inline">Kanban</span>
                             </button>
                         </div>
 
                         <Link
                             href="/app/deals/new"
-                            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-xtartop-black hover:bg-gray-900 transition-colors"
+                            className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-xtartop-black hover:bg-gray-900 transition-colors"
                         >
                             <Plus size={20} className="mr-2" />
-                            Nuevo Negocio
+                            <span className="hidden sm:inline">Nuevo Negocio</span>
+                            <span className="sm:hidden">Nuevo</span>
                         </Link>
                     </div>
                 </div>
@@ -326,8 +327,8 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table" }: 
                 {viewMode === "table" && (
                     <div className="bg-white shadow-sm rounded-lg border border-graphite-gray overflow-hidden">
                         {deals.length === 0 ? (
-                            <div className="text-center py-12">
-                                <p className="text-dark-slate text-lg">No hay negocios registrados</p>
+                            <div className="text-center py-8 sm:py-12 px-4">
+                                <p className="text-dark-slate text-base sm:text-lg">No hay negocios registrados</p>
                                 <Link
                                     href="/app/deals/new"
                                     className="inline-flex items-center px-4 py-2 mt-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-xtartop-black hover:bg-gray-900"
@@ -337,85 +338,126 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table" }: 
                                 </Link>
                             </div>
                         ) : (
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-graphite-gray">
-                                    <thead className="bg-soft-gray">
-                                        <tr>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
-                                                Nombre
-                                            </th>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
-                                                Empresa
-                                            </th>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
-                                                Contacto
-                                            </th>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
-                                                Valor
-                                            </th>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
-                                                Tipo
-                                            </th>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
-                                                Estado
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-graphite-gray">
-                                        {deals.map((deal) => (
-                                            <tr key={deal.id} className="hover:bg-soft-gray transition-colors">
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <Link
-                                                        href={`/app/deals/${deal.id}`}
-                                                        className="text-sm font-medium text-founder-blue hover:text-ocean-blue"
-                                                    >
-                                                        {deal.name}
-                                                    </Link>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    {deal.company ? (
-                                                        <Link
-                                                            href={`/app/companies/${deal.company.id}`}
-                                                            className="text-sm text-founder-blue hover:text-ocean-blue"
-                                                        >
-                                                            {deal.company.name}
-                                                        </Link>
-                                                    ) : (
-                                                        <span className="text-sm text-gray-400">-</span>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    {deal.contact ? (
-                                                        <Link
-                                                            href={`/app/contacts/${deal.contact.id}`}
-                                                            className="text-sm text-founder-blue hover:text-ocean-blue"
-                                                        >
-                                                            {deal.contact.fullName}
-                                                        </Link>
-                                                    ) : (
-                                                        <span className="text-sm text-gray-400">-</span>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm font-medium text-dark-slate">
-                                                        {formatCurrency(Number(deal.value))}
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm text-dark-slate">
-                                                        {deal.type === "CLIENTE_NUEVO" ? "Cliente nuevo" : deal.type === "UPSELLING" ? "Upselling" : "-"}
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${dealStatusConfig[deal.status].color}`}>
-                                                        {dealStatusConfig[deal.status].label}
-                                                    </span>
-                                                </td>
+                            <>
+                                {/* Desktop Table */}
+                                <div className="hidden md:block overflow-x-auto">
+                                    <table className="min-w-full divide-y divide-graphite-gray">
+                                        <thead className="bg-soft-gray">
+                                            <tr>
+                                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
+                                                    Nombre
+                                                </th>
+                                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
+                                                    Empresa
+                                                </th>
+                                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
+                                                    Contacto
+                                                </th>
+                                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
+                                                    Valor
+                                                </th>
+                                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
+                                                    Tipo
+                                                </th>
+                                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
+                                                    Estado
+                                                </th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                        </thead>
+                                        <tbody className="bg-white divide-y divide-graphite-gray">
+                                            {deals.map((deal) => (
+                                                <tr key={deal.id} className="hover:bg-soft-gray transition-colors">
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <Link
+                                                            href={`/app/deals/${deal.id}`}
+                                                            className="text-sm font-medium text-founder-blue hover:text-ocean-blue"
+                                                        >
+                                                            {deal.name}
+                                                        </Link>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        {deal.company ? (
+                                                            <Link
+                                                                href={`/app/companies/${deal.company.id}`}
+                                                                className="text-sm text-founder-blue hover:text-ocean-blue"
+                                                            >
+                                                                {deal.company.name}
+                                                            </Link>
+                                                        ) : (
+                                                            <span className="text-sm text-gray-400">-</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        {deal.contact ? (
+                                                            <Link
+                                                                href={`/app/contacts/${deal.contact.id}`}
+                                                                className="text-sm text-founder-blue hover:text-ocean-blue"
+                                                            >
+                                                                {deal.contact.fullName}
+                                                            </Link>
+                                                        ) : (
+                                                            <span className="text-sm text-gray-400">-</span>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="text-sm font-medium text-dark-slate">
+                                                            {formatCurrency(Number(deal.value))}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="text-sm text-dark-slate">
+                                                            {deal.type === "CLIENTE_NUEVO" ? "Cliente nuevo" : deal.type === "UPSELLING" ? "Upselling" : "-"}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${dealStatusConfig[deal.status].color}`}>
+                                                            {dealStatusConfig[deal.status].label}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Mobile Card View */}
+                                <div className="md:hidden divide-y divide-graphite-gray">
+                                    {deals.map((deal) => (
+                                        <Link
+                                            key={deal.id}
+                                            href={`/app/deals/${deal.id}`}
+                                            className="block p-4 hover:bg-soft-gray transition-colors"
+                                        >
+                                            <div className="flex items-start justify-between mb-2">
+                                                <h3 className="text-base font-semibold text-founder-blue flex-1">
+                                                    {deal.name}
+                                                </h3>
+                                                <span className={`ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full whitespace-nowrap ${dealStatusConfig[deal.status].color}`}>
+                                                    {dealStatusConfig[deal.status].label}
+                                                </span>
+                                            </div>
+                                            <p className="text-lg font-bold text-xtartop-black mb-2">
+                                                {formatCurrency(Number(deal.value))}
+                                            </p>
+                                            <div className="space-y-1 text-sm text-dark-slate">
+                                                {deal.company && (
+                                                    <p>
+                                                        <span className="font-medium">Empresa:</span> {deal.company.name}
+                                                    </p>
+                                                )}
+                                                {deal.contact && (
+                                                    <p>
+                                                        <span className="font-medium">Contacto:</span> {deal.contact.fullName}
+                                                    </p>
+                                                )}
+                                                <p>
+                                                    <span className="font-medium">Tipo:</span> {deal.type === "CLIENTE_NUEVO" ? "Cliente nuevo" : "Upselling"}
+                                                </p>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </>
                         )}
                     </div>
                 )}

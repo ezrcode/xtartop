@@ -71,25 +71,25 @@ export function ComposeEmailModal({
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center p-4">
+            <div className="flex min-h-full items-center justify-center p-2 sm:p-4">
                 {/* Overlay */}
                 <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={onClose} />
 
                 {/* Modal */}
-                <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full">
+                <div className="relative bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[95vh] overflow-y-auto">
                     {/* Header */}
-                    <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                        <h2 className="text-xl font-semibold text-xtartop-black">Nuevo Email</h2>
+                    <div className="sticky top-0 bg-white flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 z-10">
+                        <h2 className="text-lg sm:text-xl font-semibold text-xtartop-black">Nuevo Email</h2>
                         <button
                             onClick={onClose}
                             className="text-gray-400 hover:text-gray-600 transition-colors"
                         >
-                            <X size={24} />
+                            <X size={20} className="sm:w-6 sm:h-6" />
                         </button>
                     </div>
 
                     {/* Form */}
-                    <form ref={formRef} onSubmit={handleSubmit} className="p-6 space-y-4">
+                    <form ref={formRef} onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
                         {error && (
                             <div className="p-4 rounded-md bg-red-50 text-red-800 text-sm">
                                 {error}
@@ -146,9 +146,9 @@ export function ComposeEmailModal({
                             <textarea
                                 name="body"
                                 id="body"
-                                rows={10}
+                                rows={8}
                                 required
-                                className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue text-sm"
                                 placeholder="Escribe tu mensaje aquí..."
                             />
                         </div>
@@ -166,7 +166,7 @@ export function ComposeEmailModal({
                             <button
                                 type="button"
                                 onClick={() => fileInputRef.current?.click()}
-                                className="inline-flex items-center px-3 py-2 border border-graphite-gray rounded-md shadow-sm text-sm font-medium text-dark-slate bg-white hover:bg-gray-50 transition-colors"
+                                className="inline-flex items-center px-3 py-2 border border-graphite-gray rounded-md shadow-sm text-xs sm:text-sm font-medium text-dark-slate bg-white hover:bg-gray-50 transition-colors"
                             >
                                 <Paperclip size={16} className="mr-2" />
                                 Adjuntar archivos
@@ -179,11 +179,11 @@ export function ComposeEmailModal({
                                             key={index}
                                             className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-200"
                                         >
-                                            <span className="text-sm text-dark-slate">{file.name}</span>
+                                            <span className="text-xs sm:text-sm text-dark-slate truncate flex-1 mr-2">{file.name}</span>
                                             <button
                                                 type="button"
                                                 onClick={() => handleRemoveAttachment(index)}
-                                                className="text-error-red hover:text-red-700"
+                                                className="text-error-red hover:text-red-700 flex-shrink-0"
                                             >
                                                 <X size={16} />
                                             </button>
@@ -194,7 +194,7 @@ export function ComposeEmailModal({
                         </div>
 
                         {/* Actions */}
-                        <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
+                        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-200">
                             <button
                                 type="button"
                                 onClick={onClose}
@@ -205,7 +205,7 @@ export function ComposeEmailModal({
                             <button
                                 type="submit"
                                 disabled={isPending}
-                                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-founder-blue hover:bg-ocean-blue transition-colors disabled:opacity-50"
+                                className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-founder-blue hover:bg-ocean-blue transition-colors disabled:opacity-50"
                             >
                                 {isPending ? (
                                     <>

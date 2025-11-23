@@ -244,27 +244,27 @@ export function QuoteModal({
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div className="flex min-h-full items-start justify-center p-4 pt-10">
+            <div className="flex min-h-full items-start justify-center p-2 sm:p-4 pt-4 sm:pt-10">
                 {/* Overlay */}
                 <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={onClose} />
 
                 {/* Modal */}
-                <div className="relative bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+                <div className="relative bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
                     {/* Header */}
-                    <div className="sticky top-0 bg-white z-10 flex items-center justify-between p-6 border-b border-gray-200">
-                        <h2 className="text-xl font-semibold text-xtartop-black">
+                    <div className="sticky top-0 bg-white z-10 flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
+                        <h2 className="text-lg sm:text-xl font-semibold text-xtartop-black">
                             {isEditMode ? `Editar Cotización #${String(quote.number).padStart(3, "0")}` : "Nueva Cotización"}
                         </h2>
                         <button
                             onClick={onClose}
                             className="text-gray-400 hover:text-gray-600 transition-colors"
                         >
-                            <X size={24} />
+                            <X size={20} className="sm:w-6 sm:h-6" />
                         </button>
                     </div>
 
                     {/* Form */}
-                    <div className="p-6 space-y-6">
+                    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                         {error && (
                             <div className="p-4 rounded-md bg-red-50 text-red-800 text-sm">
                                 {error}
@@ -278,7 +278,7 @@ export function QuoteModal({
                         )}
 
                         {/* Company & Contact (Read-only) */}
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-dark-slate mb-2">
                                     Empresa
@@ -287,7 +287,7 @@ export function QuoteModal({
                                     type="text"
                                     value={companyName}
                                     readOnly
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md bg-gray-50 text-gray-600"
+                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md bg-gray-50 text-gray-600 text-sm"
                                 />
                             </div>
                             <div>
@@ -298,13 +298,13 @@ export function QuoteModal({
                                     type="text"
                                     value={contactName}
                                     readOnly
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md bg-gray-50 text-gray-600"
+                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md bg-gray-50 text-gray-600 text-sm"
                                 />
                             </div>
                         </div>
 
                         {/* Date, Validity, Currency */}
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
                                 <label htmlFor="date" className="block text-sm font-medium text-dark-slate mb-2">
                                     Fecha *
@@ -315,7 +315,7 @@ export function QuoteModal({
                                     id="date"
                                     defaultValue={quote?.date ? new Date(quote.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]}
                                     required
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md"
+                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md text-sm"
                                 />
                             </div>
                             <div>
@@ -327,7 +327,7 @@ export function QuoteModal({
                                     id="validity"
                                     defaultValue={quote?.validity || "30 días"}
                                     required
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md"
+                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md text-sm"
                                 >
                                     <option value="10 días">10 días</option>
                                     <option value="20 días">20 días</option>
@@ -343,7 +343,7 @@ export function QuoteModal({
                                     id="currency"
                                     defaultValue={quote?.currency || "USD"}
                                     required
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md"
+                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md text-sm"
                                 >
                                     <option value="USD">USD</option>
                                     <option value="DOP">DOP</option>
@@ -360,79 +360,80 @@ export function QuoteModal({
                                 <button
                                     type="button"
                                     onClick={handleAddItem}
-                                    className="inline-flex items-center px-2 py-1 text-sm text-founder-blue hover:bg-blue-50 rounded transition-colors"
+                                    className="inline-flex items-center px-2 py-1 text-xs sm:text-sm text-founder-blue hover:bg-blue-50 rounded transition-colors"
                                 >
                                     <Plus size={16} className="mr-1" />
-                                    Agregar Producto
+                                    <span className="hidden sm:inline">Agregar Producto</span>
+                                    <span className="sm:hidden">Agregar</span>
                                 </button>
                             </div>
                             
-                            <div className="border border-graphite-gray rounded-md overflow-hidden">
+                            <div className="border border-graphite-gray rounded-md overflow-x-auto">
                                 <table className="min-w-full divide-y divide-gray-200">
                                     <thead className="bg-gray-50">
                                         <tr>
-                                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
-                                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Precio</th>
-                                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Cantidad</th>
-                                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Frecuencia</th>
-                                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Precio Neto</th>
-                                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase w-10"></th>
+                                            <th className="px-2 sm:px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
+                                            <th className="px-2 sm:px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Precio</th>
+                                            <th className="px-2 sm:px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Cant.</th>
+                                            <th className="px-2 sm:px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Frec.</th>
+                                            <th className="px-2 sm:px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Neto</th>
+                                            <th className="px-2 sm:px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase w-10"></th>
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
                                         {items.map((item, index) => (
                                             <tr key={index}>
-                                                <td className="px-3 py-2">
+                                                <td className="px-2 sm:px-3 py-2">
                                                     <input
                                                         type="text"
                                                         value={item.name}
                                                         onChange={(e) => handleItemChange(index, "name", e.target.value)}
-                                                        placeholder="Nombre del producto"
+                                                        placeholder="Nombre"
                                                         required
-                                                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                                        className="w-full min-w-[120px] px-2 py-1 border border-gray-300 rounded text-xs sm:text-sm"
                                                     />
                                                 </td>
-                                                <td className="px-3 py-2">
+                                                <td className="px-2 sm:px-3 py-2">
                                                     <input
                                                         type="number"
                                                         step="0.01"
                                                         value={item.price}
                                                         onChange={(e) => handleItemChange(index, "price", parseFloat(e.target.value) || 0)}
                                                         required
-                                                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                                        className="w-full min-w-[80px] px-2 py-1 border border-gray-300 rounded text-xs sm:text-sm"
                                                     />
                                                 </td>
-                                                <td className="px-3 py-2">
+                                                <td className="px-2 sm:px-3 py-2">
                                                     <input
                                                         type="number"
                                                         step="0.01"
                                                         value={item.quantity}
                                                         onChange={(e) => handleItemChange(index, "quantity", parseFloat(e.target.value) || 1)}
                                                         required
-                                                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                                        className="w-full min-w-[60px] px-2 py-1 border border-gray-300 rounded text-xs sm:text-sm"
                                                     />
                                                 </td>
-                                                <td className="px-3 py-2">
+                                                <td className="px-2 sm:px-3 py-2">
                                                     <select
                                                         value={item.frequency}
                                                         onChange={(e) => handleItemChange(index, "frequency", e.target.value as PaymentFrequency)}
-                                                        className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                                        className="w-full min-w-[100px] px-2 py-1 border border-gray-300 rounded text-xs sm:text-sm"
                                                     >
-                                                        <option value="PAGO_UNICO">Pago único</option>
+                                                        <option value="PAGO_UNICO">Único</option>
                                                         <option value="MENSUAL">Mensual</option>
                                                     </select>
                                                 </td>
-                                                <td className="px-3 py-2 text-sm font-medium">
+                                                <td className="px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium whitespace-nowrap">
                                                     {(typeof item.netPrice === 'number' ? item.netPrice : parseFloat(String(item.netPrice) || '0')).toFixed(2)}
                                                 </td>
-                                                <td className="px-3 py-2">
+                                                <td className="px-2 sm:px-3 py-2">
                                                     <button
                                                         type="button"
                                                         onClick={() => handleRemoveItem(index)}
                                                         disabled={items.length === 1}
                                                         className="text-error-red hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed"
                                                     >
-                                                        <Trash2 size={16} />
+                                                        <Trash2 size={14} className="sm:w-4 sm:h-4" />
                                                     </button>
                                                 </td>
                                             </tr>
@@ -443,7 +444,7 @@ export function QuoteModal({
                         </div>
 
                         {/* Totals */}
-                        <div className="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-md">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-md">
                             <div>
                                 <label className="block text-sm font-medium text-dark-slate mb-1">
                                     Total Pago Único

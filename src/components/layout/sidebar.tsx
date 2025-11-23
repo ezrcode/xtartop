@@ -47,9 +47,21 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
     // Load collapsed state from localStorage on mount
     useEffect(() => {
         const stored = localStorage.getItem("sidebarCollapsed");
-        if (stored) {
+        if (stored && window.innerWidth >= 768) {
             setIsCollapsed(JSON.parse(stored));
         }
+    }, []);
+
+    // Don't collapse on mobile
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 768) {
+                setIsCollapsed(false);
+            }
+        };
+        window.addEventListener('resize', handleResize);
+        handleResize(); // Call on mount
+        return () => window.removeEventListener('resize', handleResize);
     }, []);
 
     // Handle click outside to minimize sidebar
@@ -168,10 +180,10 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
                                 <item.icon
                                     size={20}
                                     className={`${isActive ? "text-founder-blue" : "text-dark-slate group-hover:text-xtartop-black"} ${
-                                        showText ? "mr-3" : "mx-auto md:mx-auto"
+                                        !isCollapsed ? "mr-3" : "mx-auto"
                                     }`}
                                 />
-                                <span className={`font-medium ${showText ? "block" : "hidden"}`}>{item.name}</span>
+                                <span className={`font-medium ${!isCollapsed ? "block" : "hidden md:hidden"}`}>{item.name}</span>
                             </Link>
                         );
                     })}
