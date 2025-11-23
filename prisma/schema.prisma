@@ -38,31 +38,128 @@ enum DealViewPreference {
   KANBAN
 }
 
+enum QuoteStatus {
+  BORRADOR
+  ACTIVA
+  RECHAZADA
+  APROBADA
+}
+
+enum Currency {
+  USD
+  DOP
+}
+
+enum TaxType {
+  INCLUIDOS
+  NO_INCLUIDOS
+}
+
+enum PaymentFrequency {
+  PAGO_UNICO
+  MENSUAL
+}
+
+enum MemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
+enum ActivityType {
+  EMAIL
+  NOTE
+  CALL
+  MEETING
+}
+
+enum EmailStatus {
+  SENT
+  FAILED
+  PENDING
+}
+
 model User {
-  id            String    @id @default(cuid())
+  id            String             @id @default(cuid())
   name          String?
-  email         String    @unique
+  email         String             @unique
   passwordHash  String
   photoUrl      String?
   dealsViewPref DealViewPreference @default(TABLE)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  
+  // Email Configuration (Personal - for sending emails)
+  emailConfigured  Boolean @default(false)
+  emailFromAddress String?
+  emailFromName    String?
+  emailPassword    String? // Gmail app password
+  
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
 
-  workspaces    Workspace[]
-  contacts      Contact[]
-  companies     Company[]
-  deals         Deal[]
+  ownedWorkspaces Workspace[]        @relation("WorkspaceOwner")
+  memberships     WorkspaceMember[]
+  sentInvitations Invitation[]
+  contacts        Contact[]
+  companies       Company[]
+  deals           Deal[]
+  activities      Activity[]
+  quotes          Quote[]
 }
 
 model Workspace {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String?  @unique
-  createdAt DateTime @default(now())
-  ownerId   String
-  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  id          String   @id @default(cuid())
+  name        String
+  slug        String?  @unique
+  legalName   String?  // Nombre o Razón social
+  rnc         String?  // RNC
+  address     String?  @db.Text
+  phone       String?
+  logoUrl     String?  // Logo path
+  createdAt   DateTime @default(now())
+  ownerId     String
+  owner       User     @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
 
   subscription Subscription?
+  members      WorkspaceMember[]
+  invitations  Invitation[]
+  contacts     Contact[]
+  companies    Company[]
+  deals        Deal[]
+  activities   Activity[]
+}
+
+model WorkspaceMember {
+  id          String     @id @default(cuid())
+  workspaceId String
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        MemberRole @default(MEMBER)
+  joinedAt    DateTime   @default(now())
+
+  @@unique([workspaceId, userId])
+}
+
+model Invitation {
+  id          String           @id @default(cuid())
+  workspaceId String
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  email       String
+  role        MemberRole       @default(MEMBER)
+  token       String           @unique
+  status      InvitationStatus @default(PENDING)
+  invitedBy   String
+  inviter     User             @relation(fields: [invitedBy], references: [id])
+  createdAt   DateTime         @default(now())
+  expiresAt   DateTime
 }
 
 model Subscription {
@@ -76,29 +173,34 @@ model Subscription {
 }
 
 model Company {
-  id              String         @id @default(cuid())
-  name            String
-  logoUrl         String?
-  taxId           String?
-  country         String?
-  city            String?
-  phone           String?
-  website         String?
-  instagramUrl    String?
-  linkedinUrl     String?
+  id               String         @id @default(cuid())
+  name             String
+  logoUrl          String?
+  taxId            String?
+  country          String?
+  city             String?
+  phone            String?
+  website          String?
+  instagramUrl     String?
+  linkedinUrl      String?
   primaryContactId String?
-  primaryContact  Contact?       @relation("PrimaryContact", fields: [primaryContactId], references: [id])
-  origin          CompanyOrigin?
-  status          CompanyStatus  @default(PROSPECTO)
+  primaryContact   Contact?       @relation("PrimaryContact", fields: [primaryContactId], references: [id])
+  origin           CompanyOrigin?
+  status           CompanyStatus  @default(PROSPECTO)
   
-  createdById     String
-  createdBy       User           @relation(fields: [createdById], references: [id])
-  
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  contacts        Contact[]      @relation("CompanyContacts")
-  deals           Deal[]
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  contacts   Contact[]  @relation("CompanyContacts")
+  deals      Deal[]
+  activities Activity[]
+  quotes     Quote[]
 }
 
 enum ContactStatus {
@@ -135,37 +237,138 @@ model Contact {
   linkedinUrl  String?
   status       ContactStatus @default(PROSPECTO)
 
-  companyId    String?
-  company      Company?      @relation("CompanyContacts", fields: [companyId], references: [id])
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  createdById  String
-  createdBy    User          @relation(fields: [createdById], references: [id])
+  companyId String?
+  company   Company? @relation("CompanyContacts", fields: [companyId], references: [id])
 
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  
-  primaryCompanies Company[] @relation("PrimaryContact")
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  primaryCompanies Company[]    @relation("PrimaryContact")
   deals            Deal[]
+  activities       Activity[]
+  quotes           Quote[]
 }
 
 model Deal {
-  id          String     @id @default(cuid())
-  name        String
-  value       Decimal    @default(0)
-  mrr         Decimal?
-  arr         Decimal?
-  type        DealType?
-  status      DealStatus @default(PROSPECCION)
+  id     String     @id @default(cuid())
+  name   String
+  value  Decimal    @default(0)
+  mrr    Decimal?
+  arr    Decimal?
+  type   DealType?
+  status DealStatus @default(PROSPECCION)
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  contactId String?
+  contact   Contact? @relation(fields: [contactId], references: [id])
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  activities Activity[]
+  quotes     Quote[]
+}
+
+model Quote {
+  id                 String            @id @default(cuid())
+  number             Int               // Auto-increment per deal
+  date               DateTime          @default(now())
+  validity           String            // "10 días", "20 días", "30 días"
+  status             QuoteStatus       @default(BORRADOR)
+  
+  // Totals
+  totalOneTime       Decimal           @default(0)
+  totalMonthly       Decimal           @default(0)
+  
+  // Additional fields
+  proposalDescription String?          @db.Text
+  paymentConditions   String?          @db.Text
+  currency            Currency          @default(USD)
+  deliveryTime        String?
+  taxType             TaxType           @default(INCLUIDOS)
+  
+  // Relations
+  dealId      String
+  deal        Deal   @relation(fields: [dealId], references: [id], onDelete: Cascade)
   
   companyId   String?
-  company     Company?   @relation(fields: [companyId], references: [id])
+  company     Company? @relation(fields: [companyId], references: [id])
   
   contactId   String?
-  contact     Contact?   @relation(fields: [contactId], references: [id])
+  contact     Contact? @relation(fields: [contactId], references: [id])
   
   createdById String
-  createdBy   User       @relation(fields: [createdById], references: [id])
+  createdBy   User   @relation(fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  items QuoteItem[]
+  
+  @@unique([dealId, number])
+}
+
+model QuoteItem {
+  id        String           @id @default(cuid())
+  name      String
+  price     Decimal
+  quantity  Decimal
+  frequency PaymentFrequency @default(PAGO_UNICO)
+  netPrice  Decimal          // price * quantity
+  
+  quoteId String
+  quote   Quote  @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Activity {
+  id   String       @id @default(cuid())
+  type ActivityType
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  // Relations to entities
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  contactId String?
+  contact   Contact? @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  dealId String?
+  deal   Deal?   @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  // Email specific fields
+  emailTo      String?
+  emailSubject String?
+  emailBody    String?  @db.Text
+  emailStatus  EmailStatus?
+  attachments  String?  @db.Text // JSON array of file paths
+  errorMsg     String?  @db.Text
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([workspaceId])
+  @@index([companyId])
+  @@index([contactId])
+  @@index([dealId])
 }

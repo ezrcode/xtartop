@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { User, LogOut, ChevronDown } from "lucide-react";
+import { User, LogOut, ChevronDown, Menu } from "lucide-react";
 import { logout } from "@/actions/auth";
 
 interface TopbarProps {
@@ -11,9 +11,10 @@ interface TopbarProps {
         email?: string | null;
         photoUrl?: string | null;
     };
+    onMenuClick: () => void;
 }
 
-export function Topbar({ user }: TopbarProps) {
+export function Topbar({ user, onMenuClick }: TopbarProps) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -49,9 +50,15 @@ export function Topbar({ user }: TopbarProps) {
     return (
         <div className="sticky top-0 z-40 bg-white border-b border-graphite-gray shadow-sm">
             <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
-                {/* Left side - Empty / Future breadcrumbs */}
-                <div className="flex-1">
-                    {/* Placeholder para breadcrumbs o título de página */}
+                {/* Left side - Mobile Menu Button */}
+                <div className="flex items-center flex-1">
+                    <button
+                        onClick={onMenuClick}
+                        className="md:hidden p-2 rounded-lg hover:bg-soft-gray transition-colors text-dark-slate"
+                        aria-label="Abrir menú"
+                    >
+                        <Menu size={24} />
+                    </button>
                 </div>
 
                 {/* Right side - User Profile */}
@@ -126,11 +133,6 @@ export function Topbar({ user }: TopbarProps) {
                             </form>
                         </div>
                     )}
-                </div>
-
-                {/* Right side - Empty space */}
-                <div className="flex items-center space-x-4">
-                    {/* Placeholder para futuras notificaciones o acciones */}
                 </div>
             </div>
         </div>

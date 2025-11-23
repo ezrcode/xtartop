@@ -1,8 +1,8 @@
-import { Sidebar } from "@/components/layout/sidebar";
-import { Topbar } from "@/components/layout/topbar";
+import { Suspense } from "react";
+import { AppLayoutClient } from "@/components/layout/app-layout-client";
 import { auth } from "@/auth";
-import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import { getCachedUserWithRole } from "@/lib/cache/queries";
 
 export default async function AppLayout({
     children,
@@ -15,25 +15,15 @@ export default async function AppLayout({
         redirect("/login");
     }
 
-    // Get user with photo
-    const user = await prisma.user.findUnique({
-        where: { email: session.user.email },
-        select: {
-            name: true,
-            email: true,
-            photoUrl: true,
-        },
-    });
+    // Get user with workspace role using cached function
+    const userWithRole = await getCachedUserWithRole(session.user.email);
 
     return (
-        <div className="flex min-h-screen bg-soft-gray">
-            <Sidebar />
-            <div className="flex-1 md:ml-20 transition-all duration-300">
-                <Topbar user={user || session.user} />
-                <main>
-                    {children}
-                </main>
-            </div>
-        </div>
+        <AppLayoutClient 
+            user={userWithRole?.user || session.user}
+            userRole={userWithRole?.role || null}
+        >
+            {children}
+        </AppLayoutClient>
     );
 }

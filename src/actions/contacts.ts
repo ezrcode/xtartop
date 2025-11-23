@@ -6,6 +6,7 @@ import { ContactStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { getCurrentWorkspace } from "./workspace";
 
 const ContactSchema = z.object({
     fullName: z.string().min(1, "Full name is required"),
@@ -36,13 +37,13 @@ export async function getContacts() {
     const session = await auth();
     if (!session?.user?.email) return [];
 
-    // In a real app, we would filter by Workspace. 
-    // For MVP, we assume user sees all contacts they have access to (or all in DB if single tenant logic)
-    // But the requirement says "Creado por (relation to User)". 
-    // Let's just fetch all for now, or filter by creator? 
-    // Usually CRM is shared. Let's fetch all.
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) return [];
 
     return await prisma.contact.findMany({
+        where: {
+            workspaceId: workspace.id,
+        },
         include: {
             company: true,
         },
@@ -56,8 +57,14 @@ export async function getContact(id: string) {
     const session = await auth();
     if (!session?.user?.email) return null;
 
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) return null;
+
     return await prisma.contact.findUnique({
-        where: { id },
+        where: {
+            id,
+            workspaceId: workspace.id,
+        },
         include: {
             company: true,
         },
@@ -68,7 +75,13 @@ export async function getCompanies() {
     const session = await auth();
     if (!session?.user?.email) return [];
 
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) return [];
+
     return await prisma.company.findMany({
+        where: {
+            workspaceId: workspace.id,
+        },
         orderBy: { name: "asc" }
     });
 }
@@ -79,6 +92,9 @@ export async function createContact(prevState: any, formData: FormData) {
 
     const user = await prisma.user.findUnique({ where: { email: session.user.email } });
     if (!user) redirect("/login");
+
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) redirect("/login");
 
     const rawData = {
         fullName: formData.get("fullName"),
@@ -104,6 +120,7 @@ export async function createContact(prevState: any, formData: FormData) {
         await prisma.contact.create({
             data: {
                 ...validatedFields.data,
+                workspaceId: workspace.id,
                 createdById: user.id,
             },
         });
@@ -138,6 +155,9 @@ export async function createContactAction(prevState: ContactState | undefined, f
     const user = await prisma.user.findUnique({ where: { email: session.user.email } });
     if (!user) redirect("/login");
 
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) redirect("/login");
+
     const rawData = {
         fullName: formData.get("fullName"),
         email: formData.get("email"),
@@ -164,6 +184,7 @@ export async function createContactAction(prevState: ContactState | undefined, f
             data: {
                 ...validatedFields.data,
                 createdById: user.id,
+                workspaceId: workspace.id,
             },
         });
     } catch (error) {

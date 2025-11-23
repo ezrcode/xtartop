@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Save, Trash2, ArrowLeft } from "lucide-react";
 import { createCompanyAction, updateCompanyAction, deleteCompany, CompanyState } from "@/actions/companies";
 import { Company, Contact, CompanyStatus, CompanyOrigin } from "@prisma/client";
+import { ActivitiesWithSuspense } from "../activities/activities-with-suspense";
 
 interface CompanyFormProps {
     company?: Company & { primaryContact?: Contact | null };
@@ -354,16 +355,22 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                         </form>
                     </div>
 
-                    {/* Right Column: Activities Placeholder */}
+                    {/* Right Column: Activities */}
                     <div className="lg:col-span-5">
                         <div className="bg-white shadow-sm rounded-lg border border-graphite-gray p-6 h-full min-h-[400px]">
-                            <h3 className="text-lg font-medium text-dark-slate mb-4">Actividades</h3>
-                            <div className="flex flex-col items-center justify-center h-64 text-center border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
-                                <p className="text-gray-500">
-                                    Aquí irá la línea de tiempo de actividades <br />
-                                    (llamadas, notas, tareas, etc.)
-                                </p>
-                            </div>
+                            {isEditMode && company ? (
+                                <ActivitiesWithSuspense
+                                    entityType="company"
+                                    entityId={company.id}
+                                    defaultEmail={company.primaryContact?.email || ""}
+                                />
+                            ) : (
+                                <div className="flex flex-col items-center justify-center h-64 text-center border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
+                                    <p className="text-gray-500">
+                                        Guarda la empresa primero para registrar actividades
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     </div>
 

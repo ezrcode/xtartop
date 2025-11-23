@@ -4,8 +4,8 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// Cache for 30 seconds - good balance for list pages
+export const revalidate = 30;
 
 export default async function DealsPage() {
     const session = await auth();

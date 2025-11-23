@@ -6,6 +6,7 @@ import { DealStatus, DealType } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { getCurrentWorkspace } from "./workspace";
 
 const DealSchema = z.object({
     name: z.string().min(1, "Deal name is required"),
@@ -44,7 +45,13 @@ export async function getDeals() {
     const session = await auth();
     if (!session?.user?.email) return [];
 
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) return [];
+
     return await prisma.deal.findMany({
+        where: {
+            workspaceId: workspace.id,
+        },
         include: {
             company: true,
             contact: true,
@@ -53,6 +60,7 @@ export async function getDeals() {
                     id: true,
                     name: true,
                     email: true,
+                    photoUrl: true,
                 }
             }
         },
@@ -66,8 +74,14 @@ export async function getDeal(id: string) {
     const session = await auth();
     if (!session?.user?.email) return null;
 
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) return null;
+
     return await prisma.deal.findUnique({
-        where: { id },
+        where: {
+            id,
+            workspaceId: workspace.id,
+        },
         include: {
             company: true,
             contact: true,
@@ -76,6 +90,7 @@ export async function getDeal(id: string) {
                     id: true,
                     name: true,
                     email: true,
+                    photoUrl: true,
                 }
             }
         },
@@ -86,7 +101,13 @@ export async function getCompanies() {
     const session = await auth();
     if (!session?.user?.email) return [];
 
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) return [];
+
     return await prisma.company.findMany({
+        where: {
+            workspaceId: workspace.id,
+        },
         orderBy: { name: "asc" }
     });
 }
@@ -95,7 +116,13 @@ export async function getContacts() {
     const session = await auth();
     if (!session?.user?.email) return [];
 
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) return [];
+
     return await prisma.contact.findMany({
+        where: {
+            workspaceId: workspace.id,
+        },
         orderBy: { fullName: "asc" }
     });
 }
@@ -106,6 +133,9 @@ export async function createDealAction(prevState: DealState | undefined, formDat
 
     const user = await prisma.user.findUnique({ where: { email: session.user.email } });
     if (!user) redirect("/login");
+
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) redirect("/login");
 
     const rawData = {
         name: formData.get("name"),
@@ -132,6 +162,7 @@ export async function createDealAction(prevState: DealState | undefined, formDat
         deal = await prisma.deal.create({
             data: {
                 ...validatedFields.data,
+                workspaceId: workspace.id,
                 createdById: user.id,
             },
         });

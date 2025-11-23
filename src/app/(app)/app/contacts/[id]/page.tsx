@@ -1,10 +1,11 @@
 import { getContact, getCompanies } from "@/actions/contacts";
 import { ContactForm } from "@/components/contacts/contact-form";
 import { notFound } from "next/navigation";
+import { ClientOnly } from "@/components/client-only";
 
-export const dynamic = 'force-dynamic';
+// Cache for 60 seconds - detail pages can be cached longer
+export const revalidate = 60;
 export const dynamicParams = true;
-export const revalidate = 0;
 
 export default async function EditContactPage({ 
     params 
@@ -12,12 +13,20 @@ export default async function EditContactPage({
     params: Promise<{ id: string }> 
 }) {
     const { id } = await params;
-    const contact = await getContact(id);
-    const companies = await getCompanies();
+    
+    // Don't fetch activities here - let Suspense handle it
+    const [contact, companies] = await Promise.all([
+        getContact(id),
+        getCompanies(),
+    ]);
 
     if (!contact) {
         notFound();
     }
 
-    return <ContactForm contact={contact} companies={companies} isEditMode={true} />;
+    return (
+        <ClientOnly>
+            <ContactForm contact={contact} companies={companies} isEditMode={true} />
+        </ClientOnly>
+    );
 }

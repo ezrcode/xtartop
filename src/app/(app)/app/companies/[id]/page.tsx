@@ -1,10 +1,11 @@
 import { getCompany, getContacts } from "@/actions/companies";
 import { CompanyForm } from "@/components/companies/company-form";
 import { notFound } from "next/navigation";
+import { ClientOnly } from "@/components/client-only";
 
-export const dynamic = 'force-dynamic';
+// Cache for 60 seconds - detail pages can be cached longer
+export const revalidate = 60;
 export const dynamicParams = true;
-export const revalidate = 0;
 
 export default async function EditCompanyPage({ 
     params 
@@ -12,6 +13,8 @@ export default async function EditCompanyPage({
     params: Promise<{ id: string }> 
 }) {
     const { id } = await params;
+    
+    // Don't fetch activities here - let Suspense handle it
     const [company, contacts] = await Promise.all([
         getCompany(id),
         getContacts(),
@@ -21,6 +24,10 @@ export default async function EditCompanyPage({
         notFound();
     }
 
-    return <CompanyForm company={company} contacts={contacts} isEditMode={true} />;
+    return (
+        <ClientOnly>
+            <CompanyForm company={company} contacts={contacts} isEditMode={true} />
+        </ClientOnly>
+    );
 }
 

@@ -6,6 +6,7 @@ import { CompanyStatus, CompanyOrigin } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { getCurrentWorkspace } from "./workspace";
 
 const CompanySchema = z.object({
     name: z.string().min(1, "Company name is required"),
@@ -55,7 +56,13 @@ export async function getCompanies() {
     const session = await auth();
     if (!session?.user?.email) return [];
 
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) return [];
+
     return await prisma.company.findMany({
+        where: {
+            workspaceId: workspace.id,
+        },
         include: {
             primaryContact: true,
             _count: {
@@ -72,8 +79,14 @@ export async function getCompany(id: string) {
     const session = await auth();
     if (!session?.user?.email) return null;
 
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) return null;
+
     return await prisma.company.findUnique({
-        where: { id },
+        where: {
+            id,
+            workspaceId: workspace.id,
+        },
         include: {
             primaryContact: true,
             contacts: true,
@@ -85,7 +98,13 @@ export async function getContacts() {
     const session = await auth();
     if (!session?.user?.email) return [];
 
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) return [];
+
     return await prisma.contact.findMany({
+        where: {
+            workspaceId: workspace.id,
+        },
         orderBy: { fullName: "asc" }
     });
 }
@@ -96,6 +115,9 @@ export async function createCompanyAction(prevState: CompanyState | undefined, f
 
     const user = await prisma.user.findUnique({ where: { email: session.user.email } });
     if (!user) redirect("/login");
+
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) redirect("/login");
 
     const rawData = {
         name: formData.get("name"),
@@ -125,6 +147,7 @@ export async function createCompanyAction(prevState: CompanyState | undefined, f
         company = await prisma.company.create({
             data: {
                 ...validatedFields.data,
+                workspaceId: workspace.id,
                 createdById: user.id,
             },
         });

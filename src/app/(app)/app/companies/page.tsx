@@ -2,8 +2,8 @@ import { getCompanies } from "@/actions/companies";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// Cache for 30 seconds - good balance for list pages
+export const revalidate = 30;
 
 export default async function CompaniesPage() {
     const companies = await getCompanies();

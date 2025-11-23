@@ -1,8 +1,9 @@
 import { getCompanies, getContacts } from "@/actions/deals";
 import { DealForm } from "@/components/deals/deal-form";
+import { ClientOnly } from "@/components/client-only";
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// Cache for 2 minutes - "new" pages rarely change
+export const revalidate = 120;
 
 export default async function NewDealPage() {
     const [companies, contacts] = await Promise.all([
@@ -10,6 +11,10 @@ export default async function NewDealPage() {
         getContacts(),
     ]);
 
-    return <DealForm companies={companies} contacts={contacts} isEditMode={false} />;
+    return (
+        <ClientOnly>
+            <DealForm companies={companies} contacts={contacts} isEditMode={false} />
+        </ClientOnly>
+    );
 }
 

@@ -21,7 +21,7 @@ import { updateDealStatus } from "@/actions/deals";
 type DealWithRelations = Deal & {
     company?: Company | null;
     contact?: Contact | null;
-    createdBy?: Pick<User, 'id' | 'name' | 'email'> | null;
+    createdBy?: Pick<User, 'id' | 'name' | 'email' | 'photoUrl'> | null;
 };
 
 interface DealsClientPageProps {
@@ -73,83 +73,91 @@ function DealCard({ deal, isDragging = false }: { deal: DealWithRelations, isDra
         <div
             ref={setNodeRef}
             style={style}
-            className={`bg-white border border-graphite-gray rounded-lg p-4 hover:shadow-md transition-shadow ${isDragging ? 'opacity-50' : ''}`}
+            className={`bg-white border border-graphite-gray rounded-lg p-3 hover:shadow-md transition-shadow ${isDragging ? 'opacity-50' : ''}`}
         >
-            <div className="space-y-3">
-                <div>
-                    {/* Draggable Handle Area - Arriba y a la derecha del título */}
-                    <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1">
-                            <Link 
-                                href={`/app/deals/${deal.id}`}
-                                className="text-sm font-medium text-founder-blue hover:text-ocean-blue hover:underline line-clamp-2 block"
-                            >
-                                {deal.name}
-                            </Link>
-                            <p className="text-lg font-bold text-xtartop-black mt-1">
-                                {formatCurrency(deal.value)}
-                            </p>
-                        </div>
-                        {/* Drag Handle */}
-                        <div 
-                            className="flex-shrink-0 cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded"
-                            {...attributes}
-                            {...listeners}
-                            title="Arrastra para mover"
-                        >
-                            <svg 
-                                xmlns="http://www.w3.org/2000/svg" 
-                                width="16" 
-                                height="16" 
-                                viewBox="0 0 24 24" 
-                                fill="none" 
-                                stroke="currentColor" 
-                                strokeWidth="2" 
-                                strokeLinecap="round" 
-                                strokeLinejoin="round"
-                                className="text-gray-400"
-                            >
-                                <circle cx="9" cy="5" r="1"/>
-                                <circle cx="9" cy="12" r="1"/>
-                                <circle cx="9" cy="19" r="1"/>
-                                <circle cx="15" cy="5" r="1"/>
-                                <circle cx="15" cy="12" r="1"/>
-                                <circle cx="15" cy="19" r="1"/>
-                            </svg>
-                        </div>
-                    </div>
+            {/* Drag Handle & Title */}
+            <div className="flex items-start justify-between gap-2 mb-2">
+                <div className="flex-1 min-w-0">
+                    <Link 
+                        href={`/app/deals/${deal.id}`}
+                        className="text-sm font-semibold text-founder-blue hover:text-ocean-blue hover:underline line-clamp-2 block"
+                    >
+                        {deal.name}
+                    </Link>
                 </div>
+                {/* Drag Handle */}
+                <div 
+                    className="flex-shrink-0 cursor-grab active:cursor-grabbing p-0.5 hover:bg-gray-100 rounded"
+                    {...attributes}
+                    {...listeners}
+                    title="Arrastra para mover"
+                >
+                    <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        width="14" 
+                        height="14" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="2" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                        className="text-gray-400"
+                    >
+                        <circle cx="9" cy="5" r="1"/>
+                        <circle cx="9" cy="12" r="1"/>
+                        <circle cx="9" cy="19" r="1"/>
+                        <circle cx="15" cy="5" r="1"/>
+                        <circle cx="15" cy="12" r="1"/>
+                        <circle cx="15" cy="19" r="1"/>
+                    </svg>
+                </div>
+            </div>
 
-                {(deal.company || deal.contact) && (
-                    <div className="space-y-1 text-xs text-gray-600">
-                        {deal.company && (
-                            <div className="flex items-center">
-                                <span className="font-medium mr-1">Empresa:</span>
-                                <span className="truncate">{deal.company.name}</span>
-                            </div>
-                        )}
-                        {deal.contact && (
-                            <div className="flex items-center">
-                                <span className="font-medium mr-1">Contacto:</span>
-                                <span className="truncate">{deal.contact.fullName}</span>
-                            </div>
-                        )}
-                    </div>
-                )}
+            {/* Value */}
+            <p className="text-base font-bold text-xtartop-black mb-2">
+                {formatCurrency(deal.value)}
+            </p>
 
-                {/* Created By Avatar Placeholder */}
-                <div className="flex items-center pt-2 border-t border-gray-100">
-                    <div className="flex items-center space-x-2">
-                        <div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center">
-                            <span className="text-xs font-medium text-gray-600">
+            {/* Company & Contact */}
+            {(deal.company || deal.contact) && (
+                <div className="space-y-0.5 text-xs text-gray-600 mb-2">
+                    {deal.company && (
+                        <div className="truncate">
+                            <span className="text-gray-500">Empresa:</span> {deal.company.name}
+                        </div>
+                    )}
+                    {deal.contact && (
+                        <div className="truncate">
+                            <span className="text-gray-500">Contacto:</span> {deal.contact.fullName}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Created By Avatar & Date */}
+            <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                <div className="flex items-center space-x-1.5">
+                    {deal.createdBy?.photoUrl ? (
+                        <img
+                            src={deal.createdBy.photoUrl}
+                            alt={deal.createdBy.name || ""}
+                            className="h-5 w-5 rounded-full object-cover"
+                        />
+                    ) : (
+                        <div className="h-5 w-5 rounded-full bg-gradient-to-br from-founder-blue to-ocean-blue flex items-center justify-center">
+                            <span className="text-[10px] font-semibold text-white">
                                 {deal.createdBy?.name?.charAt(0) || deal.createdBy?.email?.charAt(0) || "?"}
                             </span>
                         </div>
-                        <span className="text-xs text-gray-500">
-                            {deal.createdBy?.name || deal.createdBy?.email || "Usuario"}
-                        </span>
-                    </div>
+                    )}
+                    <span className="text-xs text-gray-500 truncate">
+                        {deal.createdBy?.name || deal.createdBy?.email || "Usuario"}
+                    </span>
                 </div>
+                <span className="text-[10px] text-gray-400">
+                    {new Date(deal.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                </span>
             </div>
         </div>
     );
@@ -162,10 +170,10 @@ function KanbanColumn({ status, deals }: { status: DealStatus, deals: DealWithRe
     });
 
     return (
-        <div className="flex-shrink-0 w-80">
+        <div className="flex-shrink-0 w-72">
             <div className={`bg-white rounded-lg border shadow-sm transition-colors ${isOver ? 'border-founder-blue border-2' : 'border-graphite-gray'}`}>
                 {/* Column Header */}
-                <div className="px-4 py-3 border-b border-graphite-gray">
+                <div className="px-3 py-2.5 border-b border-graphite-gray">
                     <div className="flex items-center justify-between">
                         <h3 className="text-sm font-semibold text-dark-slate">
                             {dealStatusConfig[status].label}
@@ -179,7 +187,7 @@ function KanbanColumn({ status, deals }: { status: DealStatus, deals: DealWithRe
                 {/* Cards Container */}
                 <div
                     ref={setNodeRef}
-                    className={`p-3 space-y-3 min-h-[200px] max-h-[calc(100vh-300px)] overflow-y-auto transition-colors ${isOver ? 'bg-founder-blue/5' : ''}`}
+                    className={`p-3 space-y-2.5 min-h-[200px] max-h-[calc(100vh-300px)] overflow-y-auto transition-colors ${isOver ? 'bg-founder-blue/5' : ''}`}
                 >
                     {deals.length > 0 ? (
                         deals.map((deal) => (

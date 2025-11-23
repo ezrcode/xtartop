@@ -6,6 +6,8 @@ import Link from "next/link";
 import { Save, Trash2, ArrowLeft } from "lucide-react";
 import { createDealAction, updateDealAction, deleteDeal, DealState } from "@/actions/deals";
 import { Deal, Company, Contact, DealStatus, DealType, User } from "@prisma/client";
+import { ActivitiesWithSuspense } from "../activities/activities-with-suspense";
+import { QuotesTable } from "../quotes/quotes-table";
 
 interface DealFormProps {
     deal?: Deal & { 
@@ -16,9 +18,16 @@ interface DealFormProps {
     companies: Company[];
     contacts: Contact[];
     isEditMode?: boolean;
+    workspace?: {
+        legalName?: string | null;
+        rnc?: string | null;
+        address?: string | null;
+        phone?: string | null;
+        logoUrl?: string | null;
+    };
 }
 
-export function DealForm({ deal, companies, contacts, isEditMode = false }: DealFormProps) {
+export function DealForm({ deal, companies, contacts, isEditMode = false, workspace }: DealFormProps) {
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [actionType, setActionType] = useState<string>("save");
     const [activeTab, setActiveTab] = useState<"general" | "quotes">("general");
@@ -319,27 +328,40 @@ export function DealForm({ deal, companies, contacts, isEditMode = false }: Deal
                             )}
 
                             {/* Tab Content: Quotes */}
-                            {activeTab === "quotes" && (
+                            {activeTab === "quotes" && isEditMode && deal && (
+                                <QuotesTable 
+                                    dealId={deal.id}
+                                    companyName={deal.company?.name}
+                                    contactName={deal.contact?.fullName}
+                                    workspace={workspace}
+                                />
+                            )}
+                            {activeTab === "quotes" && !isEditMode && (
                                 <div className="flex flex-col items-center justify-center h-64 text-center border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
                                     <p className="text-gray-500">
-                                        La pestaña de Cotizaciones <br />
-                                        se implementará próximamente
+                                        Guarda el negocio primero para poder crear cotizaciones
                                     </p>
                                 </div>
                             )}
                         </form>
                     </div>
 
-                    {/* Right Column: Activities Placeholder */}
+                    {/* Right Column: Activities */}
                     <div className="lg:col-span-5">
                         <div className="bg-white shadow-sm rounded-lg border border-graphite-gray p-6 h-full min-h-[400px]">
-                            <h3 className="text-lg font-medium text-dark-slate mb-4">Actividades</h3>
-                            <div className="flex flex-col items-center justify-center h-64 text-center border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
-                                <p className="text-gray-500">
-                                    Aquí irá la línea de tiempo de actividades <br />
-                                    (llamadas, notas, tareas, etc.)
-                                </p>
-                            </div>
+                            {isEditMode && deal ? (
+                                <ActivitiesWithSuspense
+                                    entityType="deal"
+                                    entityId={deal.id}
+                                    defaultEmail={deal.contact?.email || ""}
+                                />
+                            ) : (
+                                <div className="flex flex-col items-center justify-center h-64 text-center border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
+                                    <p className="text-gray-500">
+                                        Guarda el negocio primero para registrar actividades
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     </div>
 

@@ -1,11 +1,16 @@
 import { getCompanies } from "@/actions/contacts";
 import { ContactForm } from "@/components/contacts/contact-form";
+import { ClientOnly } from "@/components/client-only";
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// Cache for 2 minutes - "new" pages rarely change
+export const revalidate = 120;
 
 export default async function NewContactPage() {
     const companies = await getCompanies();
 
-    return <ContactForm companies={companies} isEditMode={false} />;
+    return (
+        <ClientOnly>
+            <ContactForm companies={companies} isEditMode={false} />
+        </ClientOnly>
+    );
 }
