@@ -102,8 +102,9 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
             <aside
                 ref={sidebarRef}
                 className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-white border-r border-graphite-gray transition-all duration-300 ease-in-out
-                    ${isMobileOpen ? "translate-x-0 w-64" : "-translate-x-full w-64"}
-                    md:translate-x-0 md:${isCollapsed ? "w-20" : "w-64"}`}
+                    ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
+                    ${isMobileOpen || !isCollapsed ? "w-64" : "w-64"}
+                    md:translate-x-0 ${isCollapsed ? "md:w-20" : "md:w-64"}`}
             >
                 {/* Header */}
                 <div className="flex items-center justify-between h-16 px-4 border-b border-graphite-gray">
