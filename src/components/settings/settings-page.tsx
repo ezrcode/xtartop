@@ -474,7 +474,7 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                                 </div>
                                             </div>
                                             <div className="flex items-center space-x-3">
-                                                <span className="px-3 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
+                                                <span className="px-3 py-1 text-xs font-medium rounded-full bg-warning-amber/20 text-warning-amber">
                                                     Pendiente
                                                 </span>
                                                 <button

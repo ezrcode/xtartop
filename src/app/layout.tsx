@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "NEARBY CRM",
+  title: "NEARBY",
   description: "Sistema de gestión de relaciones con clientes de NEARBY",
   manifest: "/manifest.json",
   icons: {
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "NEARBY CRM",
+    title: "NEARBY",
   },
   formatDetection: {
     telephone: false,

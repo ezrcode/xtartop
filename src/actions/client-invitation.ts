@@ -94,7 +94,7 @@ export async function sendClientInvitation(companyId: string, contactId: string)
                         <p style="color: #666; font-size: 14px;">Este enlace expira en 7 días.</p>
                         <p style="color: #666; font-size: 14px;">Si no esperabas este email, puedes ignorarlo.</p>
                         <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-                        <p style="color: #999; font-size: 12px;">NEARBY CRM</p>
+                        <p style="color: #999; font-size: 12px;">NEARBY</p>
                     </div>
                 `,
             });
