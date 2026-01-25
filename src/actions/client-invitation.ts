@@ -140,10 +140,24 @@ export async function revokeInvitation(invitationId: string) {
         return { error: "No autorizado" };
     }
 
+    const invitation = await prisma.clientInvitation.findUnique({
+        where: { id: invitationId },
+    });
+
+    if (!invitation) {
+        return { error: "Invitación no encontrada" };
+    }
+
+    if (invitation.status !== "PENDING") {
+        return { error: "Solo se pueden cancelar invitaciones pendientes" };
+    }
+
     await prisma.clientInvitation.update({
         where: { id: invitationId },
         data: { status: "REVOKED" },
     });
+
+    revalidatePath(`/app/companies/${invitation.companyId}`);
 
     return { success: true };
 }

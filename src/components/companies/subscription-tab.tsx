@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle, AlertCircle, Send, Clock, XCircle, Mail } from "lucide-react";
-import { sendClientInvitation } from "@/actions/client-invitation";
+import { CheckCircle, AlertCircle, Send, Clock, XCircle, Mail, Trash2, Loader2 } from "lucide-react";
+import { sendClientInvitation, revokeInvitation } from "@/actions/client-invitation";
 import { Contact } from "@prisma/client";
 
 interface SubscriptionTabProps {
@@ -30,6 +30,7 @@ interface SubscriptionTabProps {
 
 export function SubscriptionTab({ company, contacts, pendingInvitations }: SubscriptionTabProps) {
     const [loading, setLoading] = useState(false);
+    const [cancelingId, setCancelingId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [selectedContactId, setSelectedContactId] = useState<string>("");
@@ -61,6 +62,26 @@ export function SubscriptionTab({ company, contacts, pendingInvitations }: Subsc
         }
 
         setLoading(false);
+    };
+
+    const handleCancelInvitation = async (invitationId: string) => {
+        setCancelingId(invitationId);
+        setError(null);
+        setSuccess(null);
+
+        try {
+            const result = await revokeInvitation(invitationId);
+
+            if ("error" in result && result.error) {
+                setError(result.error);
+            } else {
+                setSuccess("Invitación cancelada exitosamente");
+            }
+        } catch (err) {
+            setError("Ocurrió un error al cancelar la invitación");
+        }
+
+        setCancelingId(null);
     };
 
     return (
@@ -220,10 +241,24 @@ export function SubscriptionTab({ company, contacts, pendingInvitations }: Subsc
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     {inv.status === "PENDING" && new Date() < new Date(inv.expiresAt) ? (
-                                        <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-warning-amber/10 text-warning-amber rounded">
-                                            <Clock size={12} className="mr-1" />
-                                            Pendiente
-                                        </span>
+                                        <>
+                                            <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-warning-amber/10 text-warning-amber rounded">
+                                                <Clock size={12} className="mr-1" />
+                                                Pendiente
+                                            </span>
+                                            <button
+                                                onClick={() => handleCancelInvitation(inv.id)}
+                                                disabled={cancelingId === inv.id}
+                                                className="inline-flex items-center px-2 py-1 text-xs font-medium text-error-red hover:bg-error-red/10 rounded transition-colors disabled:opacity-50"
+                                                title="Cancelar invitación"
+                                            >
+                                                {cancelingId === inv.id ? (
+                                                    <Loader2 size={14} className="animate-spin" />
+                                                ) : (
+                                                    <Trash2 size={14} />
+                                                )}
+                                            </button>
+                                        </>
                                     ) : inv.status === "ACCEPTED" ? (
                                         <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-success-green/10 text-success-green rounded">
                                             <CheckCircle size={12} className="mr-1" />
@@ -232,7 +267,7 @@ export function SubscriptionTab({ company, contacts, pendingInvitations }: Subsc
                                     ) : (
                                         <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-gray-100 text-gray-500 rounded">
                                             <XCircle size={12} className="mr-1" />
-                                            Expirada
+                                            {inv.status === "REVOKED" ? "Cancelada" : "Expirada"}
                                         </span>
                                     )}
                                 </div>
