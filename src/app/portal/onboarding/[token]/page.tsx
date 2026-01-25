@@ -1,5 +1,6 @@
 import { getInvitationByToken } from "@/actions/client-invitation";
 import { OnboardingForm } from "@/components/portal/onboarding-form";
+import { prisma } from "@/lib/prisma";
 import Image from "next/image";
 import Link from "next/link";
 import { AlertCircle, CheckCircle } from "lucide-react";
@@ -14,6 +15,15 @@ interface OnboardingPageProps {
 export default async function OnboardingPage({ params }: OnboardingPageProps) {
     const { token } = await params;
     const invitation = await getInvitationByToken(token);
+
+    // Check if user already exists for this contact
+    let userExists = false;
+    if (invitation?.contact?.email) {
+        const existingUser = await prisma.user.findUnique({
+            where: { email: invitation.contact.email },
+        });
+        userExists = !!existingUser;
+    }
 
     return (
         <div className="min-h-screen bg-soft-gray py-12 px-4">
@@ -84,6 +94,7 @@ export default async function OnboardingPage({ params }: OnboardingPageProps) {
                         token={token}
                         company={invitation.company}
                         contact={invitation.contact}
+                        userExists={userExists}
                     />
                 )}
             </div>

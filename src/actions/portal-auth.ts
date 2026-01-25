@@ -98,11 +98,7 @@ export async function registerClientUser(
             });
         }
 
-        await prisma.clientInvitation.update({
-            where: { id: invitation.id },
-            data: { status: "ACCEPTED", usedAt: new Date() },
-        });
-
+        // Don't mark as ACCEPTED yet - wait for T&C acceptance
         return { success: true, userId: existingUser.id };
     }
 
@@ -119,12 +115,7 @@ export async function registerClientUser(
         },
     });
 
-    // Mark invitation as accepted
-    await prisma.clientInvitation.update({
-        where: { id: invitation.id },
-        data: { status: "ACCEPTED", usedAt: new Date() },
-    });
-
+    // Don't mark as ACCEPTED yet - wait for T&C acceptance
     return { success: true, userId: user.id };
 }
 
@@ -163,7 +154,8 @@ export async function updateCompanyData(
 export async function acceptTermsAndConditions(
     companyId: string,
     contactId: string,
-    contactName: string
+    contactName: string,
+    token?: string
 ) {
     const company = await prisma.company.findUnique({
         where: { id: companyId },
@@ -192,6 +184,20 @@ export async function acceptTermsAndConditions(
             termsVersion: "v1.0 - 2026-01",
         },
     });
+
+    // Mark invitation as accepted now that T&C are complete
+    if (token) {
+        await prisma.clientInvitation.updateMany({
+            where: { 
+                token,
+                status: "PENDING",
+            },
+            data: { 
+                status: "ACCEPTED", 
+                usedAt: new Date() 
+            },
+        });
+    }
 
     return { success: true };
 }

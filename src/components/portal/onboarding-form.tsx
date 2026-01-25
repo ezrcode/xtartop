@@ -21,13 +21,15 @@ interface OnboardingFormProps {
         fullName: string;
         email: string;
     };
+    userExists?: boolean;
 }
 
 type Step = "account" | "company" | "terms" | "complete";
 
-export function OnboardingForm({ token, company, contact }: OnboardingFormProps) {
+export function OnboardingForm({ token, company, contact, userExists = false }: OnboardingFormProps) {
     const router = useRouter();
-    const [step, setStep] = useState<Step>("account");
+    // If user already exists, skip to company step
+    const [step, setStep] = useState<Step>(userExists ? "company" : "account");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -129,7 +131,8 @@ export function OnboardingForm({ token, company, contact }: OnboardingFormProps)
             const result = await acceptTermsAndConditions(
                 company.id,
                 contact.id,
-                name
+                name,
+                token
             );
 
             if ("error" in result && result.error) {
@@ -268,6 +271,11 @@ export function OnboardingForm({ token, company, contact }: OnboardingFormProps)
                                 Datos de la Empresa
                             </h2>
                             <p className="text-dark-slate mt-1">{company.name}</p>
+                            {userExists && (
+                                <p className="text-sm text-success-green mt-2">
+                                    ¡Bienvenido de nuevo, {contact.fullName}! Completa los datos de la empresa.
+                                </p>
+                            )}
                         </div>
 
                         <div>
