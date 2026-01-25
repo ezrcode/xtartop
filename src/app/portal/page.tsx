@@ -24,8 +24,37 @@ export default async function PortalDashboard() {
         },
     });
 
-    if (!user || user.userType !== "CLIENT" || !user.contact?.company) {
+    if (!user) {
         redirect("/portal/login");
+    }
+
+    // If user is not CLIENT type, redirect to internal app
+    if (user.userType !== "CLIENT") {
+        redirect("/app");
+    }
+
+    // If user doesn't have a linked contact/company, show error
+    if (!user.contact?.company) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="text-center">
+                    <h1 className="text-xl font-semibold text-nearby-dark mb-2">
+                        Error de configuración
+                    </h1>
+                    <p className="text-dark-slate mb-4">
+                        Tu cuenta no está vinculada a una empresa. Por favor contacta a NEARBY.
+                    </p>
+                    <form action={logout}>
+                        <button
+                            type="submit"
+                            className="px-4 py-2 bg-nearby-accent text-white rounded-md hover:bg-nearby-dark"
+                        >
+                            Cerrar sesión
+                        </button>
+                    </form>
+                </div>
+            </div>
+        );
     }
 
     const company = user.contact.company;

@@ -430,12 +430,12 @@ export function OnboardingForm({ token, company, contact, userExists = false }: 
                             Has aceptado exitosamente los términos y condiciones.
                             Ya puedes acceder al Portal de Clientes.
                         </p>
-                        <button
-                            onClick={goToPortal}
-                            className="px-8 py-3 bg-nearby-accent text-white rounded-md hover:bg-nearby-dark transition-colors"
+                        <a
+                            href="/portal/login"
+                            className="inline-block px-8 py-3 bg-nearby-accent text-white rounded-md hover:bg-nearby-dark transition-colors"
                         >
                             Ir al Portal
-                        </button>
+                        </a>
                     </div>
                 )}
             </div>
