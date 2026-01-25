@@ -3,6 +3,9 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { CompanyDataForm } from "@/components/portal/company-data-form";
 
+// Force dynamic rendering
+export const dynamic = "force-dynamic";
+
 export default async function PortalCompanyPage() {
     const session = await auth();
     if (!session?.user?.email) {

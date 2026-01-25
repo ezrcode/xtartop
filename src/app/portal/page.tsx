@@ -4,6 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { LogOut, Building2, FileText, CheckCircle, AlertCircle } from "lucide-react";
 import { logout } from "@/actions/auth";
 
+// Force dynamic rendering
+export const dynamic = "force-dynamic";
+
 export default async function PortalDashboard() {
     const session = await auth();
     if (!session?.user?.email) {

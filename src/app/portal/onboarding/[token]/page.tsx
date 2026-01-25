@@ -4,6 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { AlertCircle, CheckCircle } from "lucide-react";
 
+// Force dynamic rendering
+export const dynamic = "force-dynamic";
+
 interface OnboardingPageProps {
     params: Promise<{ token: string }>;
 }

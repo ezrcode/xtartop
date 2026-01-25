@@ -2,6 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { PortalLoginForm } from "@/components/portal/portal-login-form";
 
+// Force dynamic rendering
+export const dynamic = "force-dynamic";
+
 export default function PortalLoginPage() {
     return (
         <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-soft-gray">
