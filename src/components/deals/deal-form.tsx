@@ -54,7 +54,7 @@ export function DealForm({ deal, companies, contacts, isEditMode = false, worksp
                             >
                                 <ArrowLeft size={20} />
                             </Link>
-                            <h1 className="text-xl font-bold text-xtartop-black">
+                            <h1 className="text-xl font-bold text-nearby-dark">
                                 {isEditMode ? deal?.name : "Nuevo Negocio"}
                             </h1>
                         </div>
@@ -63,7 +63,7 @@ export function DealForm({ deal, companies, contacts, isEditMode = false, worksp
                                 type="submit"
                                 form="deal-form"
                                 onClick={() => handleSubmit("save")}
-                                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-xtartop-black rounded-md hover:bg-gray-900 transition-colors"
+                                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-nearby-dark rounded-md hover:bg-gray-900 transition-colors"
                             >
                                 <Save size={16} className="mr-2" />
                                 Guardar
@@ -107,7 +107,7 @@ export function DealForm({ deal, companies, contacts, isEditMode = false, worksp
                                     onClick={() => setActiveTab("general")}
                                     className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                                         activeTab === "general"
-                                            ? "border-founder-blue text-founder-blue"
+                                            ? "border-nearby-accent text-nearby-accent"
                                             : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                                     }`}
                                 >
@@ -118,7 +118,7 @@ export function DealForm({ deal, companies, contacts, isEditMode = false, worksp
                                     onClick={() => setActiveTab("quotes")}
                                     className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                                         activeTab === "quotes"
-                                            ? "border-founder-blue text-founder-blue"
+                                            ? "border-nearby-accent text-nearby-accent"
                                             : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                                     }`}
                                 >
@@ -154,7 +154,7 @@ export function DealForm({ deal, companies, contacts, isEditMode = false, worksp
                                                 id="name"
                                                 defaultValue={deal?.name}
                                                 required
-                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                             />
                                             {state?.errors?.name && (
                                                 <p className="mt-1 text-sm text-error-red">{state.errors.name}</p>
@@ -175,7 +175,7 @@ export function DealForm({ deal, companies, contacts, isEditMode = false, worksp
                                                     id="value"
                                                     step="0.01"
                                                     defaultValue={deal?.value ? deal.value.toString() : "0"}
-                                                    className="block w-full pl-7 px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                                    className="block w-full pl-7 px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                                 />
                                             </div>
                                         </div>
@@ -194,7 +194,7 @@ export function DealForm({ deal, companies, contacts, isEditMode = false, worksp
                                                     id="mrr"
                                                     step="0.01"
                                                     defaultValue={deal?.mrr ? deal.mrr.toString() : ""}
-                                                    className="block w-full pl-7 px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                                    className="block w-full pl-7 px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                                 />
                                             </div>
                                         </div>
@@ -213,7 +213,7 @@ export function DealForm({ deal, companies, contacts, isEditMode = false, worksp
                                                     id="arr"
                                                     step="0.01"
                                                     defaultValue={deal?.arr ? deal.arr.toString() : ""}
-                                                    className="block w-full pl-7 px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                                    className="block w-full pl-7 px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                                 />
                                             </div>
                                         </div>
@@ -226,7 +226,7 @@ export function DealForm({ deal, companies, contacts, isEditMode = false, worksp
                                                 id="companyId"
                                                 name="companyId"
                                                 defaultValue={deal?.companyId || "null"}
-                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                             >
                                                 <option value="null">Sin empresa</option>
                                                 {companies.map((company) => (
@@ -245,7 +245,7 @@ export function DealForm({ deal, companies, contacts, isEditMode = false, worksp
                                                 id="contactId"
                                                 name="contactId"
                                                 defaultValue={deal?.contactId || "null"}
-                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                             >
                                                 <option value="null">Sin contacto</option>
                                                 {contacts.map((contact) => (
@@ -264,7 +264,7 @@ export function DealForm({ deal, companies, contacts, isEditMode = false, worksp
                                                 id="type"
                                                 name="type"
                                                 defaultValue={deal?.type || "null"}
-                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                             >
                                                 <option value="null">Seleccionar tipo</option>
                                                 <option value="CLIENTE_NUEVO">Cliente nuevo</option>
@@ -281,7 +281,7 @@ export function DealForm({ deal, companies, contacts, isEditMode = false, worksp
                                                 name="status"
                                                 defaultValue={deal?.status || "PROSPECCION"}
                                                 required
-                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                             >
                                                 <option value="PROSPECCION">Prospección</option>
                                                 <option value="CALIFICACION">Calificación</option>

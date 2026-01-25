@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
-const inputFile = path.join(__dirname, '../public/xtartop_isotipo.png');
+const inputFile = path.join(__dirname, '../public/nearby_isotipo.png');
 const outputDir = path.join(__dirname, '../public/icons');
 
 // Create icons directory if it doesn't exist

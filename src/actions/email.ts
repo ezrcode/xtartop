@@ -96,7 +96,7 @@ export async function testEmailConnection() {
             userId: user.id,
             to: session.user.email,
             subject: "Test Email - Configuración exitosa",
-            body: `<h2>¡Felicitaciones!</h2><p>Tu configuración de email está funcionando correctamente.</p><p>Ya puedes enviar emails desde xtartop.</p>`,
+            body: `<h2>¡Felicitaciones!</h2><p>Tu configuración de email está funcionando correctamente.</p><p>Ya puedes enviar emails desde NEARBY CRM.</p>`,
         });
 
         if (result.success) {

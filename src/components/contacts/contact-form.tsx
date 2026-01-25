@@ -19,8 +19,8 @@ function SubmitButton({ actionName, label, icon: Icon, variant = "primary" }: an
 
     const baseClasses = "inline-flex items-center px-4 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors";
     const variants = {
-        primary: "text-white bg-xtartop-black hover:bg-gray-900 focus:ring-xtartop-black",
-        secondary: "text-dark-slate bg-white border border-graphite-gray hover:bg-gray-50 focus:ring-founder-blue",
+        primary: "text-white bg-nearby-dark hover:bg-gray-900 focus:ring-nearby-dark",
+        secondary: "text-dark-slate bg-white border border-graphite-gray hover:bg-gray-50 focus:ring-nearby-accent",
         danger: "text-white bg-error-red hover:bg-red-700 focus:ring-error-red",
     };
 
@@ -65,7 +65,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
                             >
                                 <ArrowLeft size={20} />
                             </Link>
-                            <h1 className="text-xl font-bold text-xtartop-black">
+                            <h1 className="text-xl font-bold text-nearby-dark">
                                 {isEditMode ? contact?.fullName : "Nuevo Contacto"}
                             </h1>
                         </div>
@@ -78,7 +78,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
                                 type="submit"
                                 form="contact-form"
                                 onClick={() => handleSubmit("save")}
-                                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-xtartop-black rounded-md hover:bg-gray-900 transition-colors"
+                                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-nearby-dark rounded-md hover:bg-gray-900 transition-colors"
                             >
                                 <Save size={16} className="mr-2" />
                                 Guardar
@@ -155,7 +155,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
                                             id="fullName"
                                             defaultValue={contact?.fullName}
                                             required
-                                            className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                            className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                         />
                                         {state?.errors?.fullName && (
                                             <p className="mt-1 text-sm text-error-red">{state.errors.fullName}</p>
@@ -171,7 +171,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
                                             name="title"
                                             id="title"
                                             defaultValue={contact?.title || ""}
-                                            className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                            className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                         />
                                     </div>
 
@@ -183,7 +183,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
                                             id="companyId"
                                             name="companyId"
                                             defaultValue={contact?.companyId || "null"}
-                                            className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                            className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                         >
                                             <option value="null">Sin empresa</option>
                                             {companies.map((company) => (
@@ -209,7 +209,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
                                             id="email"
                                             defaultValue={contact?.email}
                                             required
-                                            className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                            className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                         />
                                         {state?.errors?.email && (
                                             <p className="mt-1 text-sm text-error-red">{state.errors.email}</p>
@@ -225,7 +225,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
                                             name="mobile"
                                             id="mobile"
                                             defaultValue={contact?.mobile || ""}
-                                            className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                            className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                         />
                                     </div>
 
@@ -239,7 +239,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
                                             id="instagramUrl"
                                             defaultValue={contact?.instagramUrl || ""}
                                             placeholder="https://instagram.com/..."
-                                            className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                            className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                         />
                                         {state?.errors?.instagramUrl && (
                                             <p className="mt-1 text-sm text-error-red">{state.errors.instagramUrl}</p>
@@ -256,7 +256,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
                                             id="linkedinUrl"
                                             defaultValue={contact?.linkedinUrl || ""}
                                             placeholder="https://linkedin.com/in/..."
-                                            className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                            className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                         />
                                         {state?.errors?.linkedinUrl && (
                                             <p className="mt-1 text-sm text-error-red">{state.errors.linkedinUrl}</p>
@@ -276,7 +276,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
                                             id="status"
                                             name="status"
                                             defaultValue={contact?.status || "PROSPECTO"}
-                                            className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                            className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                         >
                                             {Object.values(ContactStatus).map((status) => (
                                                 <option key={status} value={status}>

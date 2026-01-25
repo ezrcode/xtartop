@@ -5,23 +5,23 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "xtartop CRM",
-  description: "Sistema de gestión de relaciones con clientes para startups y emprendedores",
+  title: "NEARBY CRM",
+  description: "Sistema de gestión de relaciones con clientes de NEARBY",
   manifest: "/manifest.json",
   icons: {
-    icon: "/xtartop_isotipo.png",
-    shortcut: "/xtartop_isotipo.png",
-    apple: "/xtartop_isotipo.png",
+    icon: "/nearby_isotipo.png",
+    shortcut: "/nearby_isotipo.png",
+    apple: "/nearby_isotipo.png",
   },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "xtartop CRM",
+    title: "NEARBY CRM",
   },
   formatDetection: {
     telephone: false,
   },
-  themeColor: "#1a56db",
+  themeColor: "#2d3e50",
   viewport: {
     width: "device-width",
     initialScale: 1,

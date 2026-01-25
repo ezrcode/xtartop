@@ -14,14 +14,14 @@ export default async function ContactsPage() {
                 {/* Page Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="text-2xl sm:text-3xl font-bold text-xtartop-black">Contactos</h1>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-nearby-dark">Contactos</h1>
                         <p className="text-dark-slate mt-2 text-sm sm:text-base">
                             Gestiona tu red de contactos
                         </p>
                     </div>
                     <Link
                         href="/app/contacts/new"
-                        className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-xtartop-black rounded-md hover:bg-gray-900 transition-colors"
+                        className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-nearby-dark rounded-md hover:bg-gray-900 transition-colors"
                     >
                         <Plus size={16} className="mr-2" />
                         Nuevo
@@ -36,7 +36,7 @@ export default async function ContactsPage() {
                             <p className="text-sm sm:text-base text-gray-500 mb-6">Comienza creando tu primer contacto.</p>
                             <Link
                                 href="/app/contacts/new"
-                                className="inline-flex items-center px-4 py-2 text-sm font-medium text-founder-blue bg-founder-blue/10 rounded-md hover:bg-founder-blue/20 transition-colors"
+                                className="inline-flex items-center px-4 py-2 text-sm font-medium text-nearby-accent bg-nearby-accent/10 rounded-md hover:bg-nearby-accent/20 transition-colors"
                             >
                                 Crear contacto
                             </Link>
@@ -68,7 +68,7 @@ export default async function ContactsPage() {
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <Link
                                                         href={`/app/contacts/${contact.id}`}
-                                                        className="text-sm font-medium text-founder-blue hover:underline"
+                                                        className="text-sm font-medium text-nearby-accent hover:underline"
                                                     >
                                                         {contact.fullName}
                                                     </Link>
@@ -110,7 +110,7 @@ export default async function ContactsPage() {
                                         className="block p-4 hover:bg-soft-gray transition-colors"
                                     >
                                         <div className="flex items-start justify-between mb-2">
-                                            <h3 className="text-base font-semibold text-founder-blue">
+                                            <h3 className="text-base font-semibold text-nearby-accent">
                                                 {contact.fullName}
                                             </h3>
                                             <span

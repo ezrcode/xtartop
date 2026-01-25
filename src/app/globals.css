@@ -1,12 +1,15 @@
 @import "tailwindcss";
 
 @theme {
-  --color-xtartop-black: #111111;
-  --color-founder-blue: #4BD3FF;
+  /* NEARBY Brand Colors */
+  --color-nearby-dark: #2d3e50;
+  --color-nearby-accent: #fc5a34;
+  --color-nearby-light: #c9d9de;
+  
+  /* UI Colors */
   --color-soft-gray: #F5F6F7;
   --color-graphite-gray: #D7D9DB;
   --color-dark-slate: #4A4A4A;
-  --color-ocean-blue: #0BA7D9;
   --color-success-green: #1BC47D;
   --color-warning-amber: #FFC93C;
   --color-error-red: #FF4E4E;
@@ -16,7 +19,7 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #111111;
+  --foreground: #2d3e50;
 }
 
 body {

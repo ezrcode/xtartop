@@ -84,12 +84,12 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-xtartop-black">
+                <h3 className="text-lg font-semibold text-nearby-dark">
                     Cotizaciones ({quotes.length})
                 </h3>
                 <button
                     onClick={() => setShowModal(true)}
-                    className="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-founder-blue hover:bg-ocean-blue transition-colors"
+                    className="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-accent hover:bg-nearby-dark transition-colors"
                 >
                     <Plus size={16} className="mr-1" />
                     Nueva Cotización
@@ -101,7 +101,7 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
                     <p className="text-gray-500 mb-4">No hay cotizaciones creadas</p>
                     <button
                         onClick={() => setShowModal(true)}
-                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-founder-blue hover:bg-ocean-blue transition-colors"
+                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-accent hover:bg-nearby-dark transition-colors"
                     >
                         <Plus size={16} className="mr-2" />
                         Crear Primera Cotización
@@ -135,7 +135,7 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <button
                                             onClick={() => handleEdit(quote)}
-                                            className="text-sm font-medium text-founder-blue hover:text-ocean-blue hover:underline"
+                                            className="text-sm font-medium text-nearby-accent hover:text-nearby-dark hover:underline"
                                         >
                                             #{String(quote.number).padStart(3, "0")}
                                         </button>

@@ -252,7 +252,7 @@ export function QuoteModal({
                 <div className="relative bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
                     {/* Header */}
                     <div className="sticky top-0 bg-white z-10 flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
-                        <h2 className="text-lg sm:text-xl font-semibold text-xtartop-black">
+                        <h2 className="text-lg sm:text-xl font-semibold text-nearby-dark">
                             {isEditMode ? `Editar Cotización #${String(quote.number).padStart(3, "0")}` : "Nueva Cotización"}
                         </h2>
                         <button
@@ -360,7 +360,7 @@ export function QuoteModal({
                                 <button
                                     type="button"
                                     onClick={handleAddItem}
-                                    className="inline-flex items-center px-2 py-1 text-xs sm:text-sm text-founder-blue hover:bg-blue-50 rounded transition-colors"
+                                    className="inline-flex items-center px-2 py-1 text-xs sm:text-sm text-nearby-accent hover:bg-blue-50 rounded transition-colors"
                                 >
                                     <Plus size={16} className="mr-1" />
                                     <span className="hidden sm:inline">Agregar Producto</span>
@@ -449,7 +449,7 @@ export function QuoteModal({
                                 <label className="block text-sm font-medium text-dark-slate mb-1">
                                     Total Pago Único
                                 </label>
-                                <div className="text-lg font-bold text-xtartop-black">
+                                <div className="text-lg font-bold text-nearby-dark">
                                     {formatCurrency(totals.oneTime, "USD")}
                                 </div>
                             </div>
@@ -457,7 +457,7 @@ export function QuoteModal({
                                 <label className="block text-sm font-medium text-dark-slate mb-1">
                                     Total Mensual
                                 </label>
-                                <div className="text-lg font-bold text-xtartop-black">
+                                <div className="text-lg font-bold text-nearby-dark">
                                     {formatCurrency(totals.monthly, "USD")}
                                 </div>
                             </div>
@@ -570,7 +570,7 @@ export function QuoteModal({
                                     type="button"
                                     onClick={handleSave}
                                     disabled={isPending}
-                                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-founder-blue hover:bg-ocean-blue transition-colors disabled:opacity-50"
+                                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-accent hover:bg-nearby-dark transition-colors disabled:opacity-50"
                                 >
                                     {isPending ? (
                                         <>Guardando...</>

@@ -45,11 +45,11 @@ export function ActivitiesSection({
         <div className="space-y-4">
             {/* Header */}
             <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-xtartop-black">Actividades</h3>
+                <h3 className="text-lg font-semibold text-nearby-dark">Actividades</h3>
                 <div className="relative">
                     <button
                         onClick={() => setShowMenu(!showMenu)}
-                        className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-founder-blue text-white hover:bg-ocean-blue transition-colors"
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-nearby-accent text-white hover:bg-ocean-blue transition-colors"
                     >
                         <Plus size={18} />
                     </button>

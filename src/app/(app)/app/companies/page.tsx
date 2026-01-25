@@ -14,14 +14,14 @@ export default async function CompaniesPage() {
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="text-2xl sm:text-3xl font-bold text-xtartop-black">Empresas</h1>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-nearby-dark">Empresas</h1>
                         <p className="text-dark-slate mt-2 text-sm sm:text-base">
                             Gestiona tu cartera de empresas y clientes
                         </p>
                     </div>
                     <Link
                         href="/app/companies/new"
-                        className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-xtartop-black hover:bg-gray-900 transition-colors"
+                        className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900 transition-colors"
                     >
                         <Plus size={20} className="mr-2" />
                         Nueva Empresa
@@ -35,7 +35,7 @@ export default async function CompaniesPage() {
                             <p className="text-dark-slate text-base sm:text-lg">No hay empresas registradas</p>
                             <Link
                                 href="/app/companies/new"
-                                className="inline-flex items-center px-4 py-2 mt-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-xtartop-black hover:bg-gray-900"
+                                className="inline-flex items-center px-4 py-2 mt-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900"
                             >
                                 <Plus size={16} className="mr-2" />
                                 Agregar primera empresa
@@ -71,7 +71,7 @@ export default async function CompaniesPage() {
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <Link
                                                         href={`/app/companies/${company.id}`}
-                                                        className="text-sm font-medium text-founder-blue hover:text-ocean-blue"
+                                                        className="text-sm font-medium text-nearby-accent hover:text-nearby-dark"
                                                     >
                                                         {company.name}
                                                     </Link>
@@ -90,7 +90,7 @@ export default async function CompaniesPage() {
                                                     {company.primaryContact ? (
                                                         <Link
                                                             href={`/app/contacts/${company.primaryContact.id}`}
-                                                            className="text-sm text-founder-blue hover:text-ocean-blue"
+                                                            className="text-sm text-nearby-accent hover:text-nearby-dark"
                                                         >
                                                             {company.primaryContact.fullName}
                                                         </Link>
@@ -102,7 +102,7 @@ export default async function CompaniesPage() {
                                                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${company.status === "CLIENTE"
                                                         ? "bg-success-green/10 text-success-green"
                                                         : company.status === "POTENCIAL"
-                                                            ? "bg-founder-blue/10 text-founder-blue"
+                                                            ? "bg-nearby-accent/10 text-nearby-accent"
                                                             : company.status === "PROSPECTO"
                                                                 ? "bg-gray-100 text-gray-800"
                                                                 : company.status === "DESCARTADA"
@@ -127,13 +127,13 @@ export default async function CompaniesPage() {
                                         className="block p-4 hover:bg-soft-gray transition-colors"
                                     >
                                         <div className="flex items-start justify-between mb-2">
-                                            <h3 className="text-base font-semibold text-founder-blue">
+                                            <h3 className="text-base font-semibold text-nearby-accent">
                                                 {company.name}
                                             </h3>
                                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${company.status === "CLIENTE"
                                                 ? "bg-success-green/10 text-success-green"
                                                 : company.status === "POTENCIAL"
-                                                    ? "bg-founder-blue/10 text-founder-blue"
+                                                    ? "bg-nearby-accent/10 text-nearby-accent"
                                                     : company.status === "PROSPECTO"
                                                         ? "bg-gray-100 text-gray-800"
                                                         : company.status === "DESCARTADA"

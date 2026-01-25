@@ -75,7 +75,7 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                                 className="h-10 w-10 rounded-full object-cover shadow-sm"
                             />
                         ) : (
-                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-founder-blue to-ocean-blue flex items-center justify-center text-white font-semibold shadow-sm">
+                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-dark flex items-center justify-center text-white font-semibold shadow-sm">
                                 {getInitials()}
                             </div>
                         )}

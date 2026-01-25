@@ -46,7 +46,7 @@ function ProfileTab({ user }: { user: ProfileFormProps['user'] }) {
                     name="name"
                     id="name"
                     defaultValue={user.name || ""}
-                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                 />
                 {profileState?.errors?.name && (
                     <p className="mt-1 text-sm text-error-red">{profileState.errors.name}</p>
@@ -62,7 +62,7 @@ function ProfileTab({ user }: { user: ProfileFormProps['user'] }) {
                     name="email"
                     id="email"
                     defaultValue={user.email}
-                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                 />
                 {profileState?.errors?.email && (
                     <p className="mt-1 text-sm text-error-red">{profileState.errors.email}</p>
@@ -79,7 +79,7 @@ function ProfileTab({ user }: { user: ProfileFormProps['user'] }) {
                     id="photoUrl"
                     defaultValue={user.photoUrl || ""}
                     placeholder="https://ejemplo.com/foto.jpg"
-                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                 />
                 {profileState?.errors?.photoUrl && (
                     <p className="mt-1 text-sm text-error-red">{profileState.errors.photoUrl}</p>
@@ -89,7 +89,7 @@ function ProfileTab({ user }: { user: ProfileFormProps['user'] }) {
             <div className="flex justify-end">
                 <button
                     type="submit"
-                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-xtartop-black hover:bg-gray-900 transition-colors"
+                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900 transition-colors"
                 >
                     <Save size={16} className="mr-2" />
                     Guardar Cambios
@@ -121,7 +121,7 @@ function PasswordTab() {
                     name="currentPassword"
                     id="currentPassword"
                     required
-                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                 />
                 {passwordState?.errors?.currentPassword && (
                     <p className="mt-1 text-sm text-error-red">{passwordState.errors.currentPassword}</p>
@@ -138,7 +138,7 @@ function PasswordTab() {
                     id="newPassword"
                     required
                     minLength={6}
-                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                 />
                 {passwordState?.errors?.newPassword && (
                     <p className="mt-1 text-sm text-error-red">{passwordState.errors.newPassword}</p>
@@ -155,7 +155,7 @@ function PasswordTab() {
                     id="confirmPassword"
                     required
                     minLength={6}
-                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                 />
                 {passwordState?.errors?.confirmPassword && (
                     <p className="mt-1 text-sm text-error-red">{passwordState.errors.confirmPassword}</p>
@@ -165,7 +165,7 @@ function PasswordTab() {
             <div className="flex justify-end">
                 <button
                     type="submit"
-                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-xtartop-black hover:bg-gray-900 transition-colors"
+                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900 transition-colors"
                 >
                     <Save size={16} className="mr-2" />
                     Actualizar Contraseña
@@ -199,7 +199,7 @@ function PreferencesTab({ user }: { user: ProfileFormProps['user'] }) {
                             name="dealsViewPref"
                             value="TABLE"
                             defaultChecked={user.dealsViewPref === "TABLE"}
-                            className="h-4 w-4 text-founder-blue focus:ring-founder-blue border-gray-300"
+                            className="h-4 w-4 text-nearby-accent focus:ring-nearby-accent border-gray-300"
                         />
                         <div className="ml-3">
                             <span className="block text-sm font-medium text-dark-slate">
@@ -217,7 +217,7 @@ function PreferencesTab({ user }: { user: ProfileFormProps['user'] }) {
                             name="dealsViewPref"
                             value="KANBAN"
                             defaultChecked={user.dealsViewPref === "KANBAN"}
-                            className="h-4 w-4 text-founder-blue focus:ring-founder-blue border-gray-300"
+                            className="h-4 w-4 text-nearby-accent focus:ring-nearby-accent border-gray-300"
                         />
                         <div className="ml-3">
                             <span className="block text-sm font-medium text-dark-slate">
@@ -237,7 +237,7 @@ function PreferencesTab({ user }: { user: ProfileFormProps['user'] }) {
             <div className="flex justify-end">
                 <button
                     type="submit"
-                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-xtartop-black hover:bg-gray-900 transition-colors"
+                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900 transition-colors"
                 >
                     <Save size={16} className="mr-2" />
                     Guardar Preferencias
@@ -254,7 +254,7 @@ export function ProfileForm({ user, emailConfig }: ProfileFormProps) {
         <div className="min-h-screen bg-soft-gray py-8">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-xtartop-black">Mi Perfil</h1>
+                    <h1 className="text-3xl font-bold text-nearby-dark">Mi Perfil</h1>
                     <p className="text-dark-slate mt-2">
                         Gestiona tu información personal y preferencias
                     </p>
@@ -268,7 +268,7 @@ export function ProfileForm({ user, emailConfig }: ProfileFormProps) {
                                 onClick={() => setActiveTab("profile")}
                                 className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                                     activeTab === "profile"
-                                        ? "border-founder-blue text-founder-blue"
+                                        ? "border-nearby-accent text-nearby-accent"
                                         : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                                 }`}
                             >
@@ -279,7 +279,7 @@ export function ProfileForm({ user, emailConfig }: ProfileFormProps) {
                                 onClick={() => setActiveTab("password")}
                                 className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                                     activeTab === "password"
-                                        ? "border-founder-blue text-founder-blue"
+                                        ? "border-nearby-accent text-nearby-accent"
                                         : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                                 }`}
                             >
@@ -290,7 +290,7 @@ export function ProfileForm({ user, emailConfig }: ProfileFormProps) {
                                 onClick={() => setActiveTab("email")}
                                 className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                                     activeTab === "email"
-                                        ? "border-founder-blue text-founder-blue"
+                                        ? "border-nearby-accent text-nearby-accent"
                                         : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                                 }`}
                             >
@@ -301,7 +301,7 @@ export function ProfileForm({ user, emailConfig }: ProfileFormProps) {
                                 onClick={() => setActiveTab("preferences")}
                                 className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                                     activeTab === "preferences"
-                                        ? "border-founder-blue text-founder-blue"
+                                        ? "border-nearby-accent text-nearby-accent"
                                         : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                                 }`}
                             >

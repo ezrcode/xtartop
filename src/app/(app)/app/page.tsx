@@ -15,7 +15,7 @@ export default async function DashboardPage() {
         <div className="min-h-screen bg-soft-gray py-8">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-xtartop-black">
+                    <h1 className="text-3xl font-bold text-nearby-dark">
                         Hola, {session.user.name || session.user.email}
                     </h1>
                     <p className="text-dark-slate mt-2">
@@ -26,7 +26,7 @@ export default async function DashboardPage() {
                 {/* Placeholder for future dashboard widgets */}
                 <div className="bg-white shadow-sm rounded-lg border border-graphite-gray p-12">
                     <div className="flex flex-col items-center justify-center text-center">
-                        <div className="h-20 w-20 rounded-full bg-gradient-to-br from-founder-blue to-ocean-blue flex items-center justify-center mb-6">
+                        <div className="h-20 w-20 rounded-full bg-gradient-to-br from-nearby-accent to-ocean-blue flex items-center justify-center mb-6">
                             <svg 
                                 xmlns="http://www.w3.org/2000/svg" 
                                 width="40" 
@@ -44,7 +44,7 @@ export default async function DashboardPage() {
                                 <path d="M8 17v-3"/>
                             </svg>
                         </div>
-                        <h2 className="text-2xl font-bold text-xtartop-black mb-2">
+                        <h2 className="text-2xl font-bold text-nearby-dark mb-2">
                             Dashboard de Métricas
                         </h2>
                         <p className="text-gray-600 max-w-md">

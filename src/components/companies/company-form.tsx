@@ -41,7 +41,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                             >
                                 <ArrowLeft size={20} />
                             </Link>
-                            <h1 className="text-xl font-bold text-xtartop-black">
+                            <h1 className="text-xl font-bold text-nearby-dark">
                                 {isEditMode ? company?.name : "Nueva Empresa"}
                             </h1>
                         </div>
@@ -50,7 +50,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                 type="submit"
                                 form="company-form"
                                 onClick={() => handleSubmit("save")}
-                                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-xtartop-black rounded-md hover:bg-gray-900 transition-colors"
+                                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-nearby-dark rounded-md hover:bg-gray-900 transition-colors"
                             >
                                 <Save size={16} className="mr-2" />
                                 Guardar
@@ -94,7 +94,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                     onClick={() => setActiveTab("general")}
                                     className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                                         activeTab === "general"
-                                            ? "border-founder-blue text-founder-blue"
+                                            ? "border-nearby-accent text-nearby-accent"
                                             : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                                     }`}
                                 >
@@ -105,7 +105,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                     onClick={() => setActiveTab("subscription")}
                                     className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                                         activeTab === "subscription"
-                                            ? "border-founder-blue text-founder-blue"
+                                            ? "border-nearby-accent text-nearby-accent"
                                             : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                                     }`}
                                 >
@@ -153,7 +153,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                 id="name"
                                                 defaultValue={company?.name}
                                                 required
-                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                             />
                                             {state?.errors?.name && (
                                                 <p className="mt-1 text-sm text-error-red">{state.errors.name}</p>
@@ -169,7 +169,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                 name="taxId"
                                                 id="taxId"
                                                 defaultValue={company?.taxId || ""}
-                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                             />
                                         </div>
 
@@ -182,7 +182,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                 name="phone"
                                                 id="phone"
                                                 defaultValue={company?.phone || ""}
-                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                             />
                                         </div>
 
@@ -195,7 +195,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                 name="country"
                                                 id="country"
                                                 defaultValue={company?.country || ""}
-                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                             />
                                         </div>
 
@@ -208,7 +208,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                 name="city"
                                                 id="city"
                                                 defaultValue={company?.city || ""}
-                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                             />
                                         </div>
 
@@ -222,7 +222,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                 id="website"
                                                 defaultValue={company?.website || ""}
                                                 placeholder="https://example.com"
-                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                             />
                                             {state?.errors?.website && (
                                                 <p className="mt-1 text-sm text-error-red">{state.errors.website}</p>
@@ -239,7 +239,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                 id="instagramUrl"
                                                 defaultValue={company?.instagramUrl || ""}
                                                 placeholder="https://instagram.com/..."
-                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                             />
                                             {state?.errors?.instagramUrl && (
                                                 <p className="mt-1 text-sm text-error-red">{state.errors.instagramUrl}</p>
@@ -256,7 +256,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                 id="linkedinUrl"
                                                 defaultValue={company?.linkedinUrl || ""}
                                                 placeholder="https://linkedin.com/company/..."
-                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                             />
                                             {state?.errors?.linkedinUrl && (
                                                 <p className="mt-1 text-sm text-error-red">{state.errors.linkedinUrl}</p>
@@ -271,7 +271,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                 id="primaryContactId"
                                                 name="primaryContactId"
                                                 defaultValue={company?.primaryContactId || "null"}
-                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                             >
                                                 <option value="null">Sin contacto principal</option>
                                                 {contacts.map((contact) => (
@@ -290,7 +290,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                 id="origin"
                                                 name="origin"
                                                 defaultValue={company?.origin || "null"}
-                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                                className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                             >
                                                 <option value="null">Seleccionar origen</option>
                                                 <option value="PROSPECCION_MANUAL">Prospección manual</option>
@@ -314,7 +314,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                     id="status"
                                                     name="status"
                                                     defaultValue={company?.status || "PROSPECTO"}
-                                                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                                 >
                                                     {Object.values(CompanyStatus).map((status) => (
                                                         <option key={status} value={status}>

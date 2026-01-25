@@ -38,7 +38,7 @@ export function EmailConfigTab({ emailConfig }: EmailConfigTabProps) {
             <div className="bg-white shadow-sm rounded-lg border border-graphite-gray p-6">
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h2 className="text-lg font-semibold text-xtartop-black">Configuración de Email</h2>
+                        <h2 className="text-lg font-semibold text-nearby-dark">Configuración de Email</h2>
                         <p className="text-sm text-gray-500 mt-1">
                             Configura tu cuenta de Gmail para enviar emails desde la plataforma
                         </p>
@@ -87,7 +87,7 @@ export function EmailConfigTab({ emailConfig }: EmailConfigTabProps) {
                             defaultValue={emailConfig?.emailFromAddress || ""}
                             placeholder="tu-email@gmail.com"
                             required
-                            className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                            className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                         />
                         {state?.errors?.emailFromAddress && (
                             <p className="mt-1 text-sm text-error-red">{state.errors.emailFromAddress}</p>
@@ -105,7 +105,7 @@ export function EmailConfigTab({ emailConfig }: EmailConfigTabProps) {
                             defaultValue={emailConfig?.emailFromName || ""}
                             placeholder="Mi Empresa"
                             required
-                            className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                            className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                         />
                         {state?.errors?.emailFromName && (
                             <p className="mt-1 text-sm text-error-red">{state.errors.emailFromName}</p>
@@ -123,7 +123,7 @@ export function EmailConfigTab({ emailConfig }: EmailConfigTabProps) {
                             defaultValue={emailConfig?.emailPassword || ""}
                             placeholder="•••• •••• •••• ••••"
                             required
-                            className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm font-mono"
+                            className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm font-mono"
                         />
                         {state?.errors?.emailPassword && (
                             <p className="mt-1 text-sm text-error-red">{state.errors.emailPassword}</p>
@@ -134,7 +134,7 @@ export function EmailConfigTab({ emailConfig }: EmailConfigTabProps) {
                                 href="https://myaccount.google.com/apppasswords"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-founder-blue hover:underline"
+                                className="text-nearby-accent hover:underline"
                             >
                                 https://myaccount.google.com/apppasswords
                             </a>
@@ -144,7 +144,7 @@ export function EmailConfigTab({ emailConfig }: EmailConfigTabProps) {
                     <div className="flex items-center gap-4">
                         <button
                             type="submit"
-                            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-xtartop-black hover:bg-gray-900 transition-colors"
+                            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900 transition-colors"
                         >
                             <Mail size={16} className="mr-2" />
                             Guardar Configuración

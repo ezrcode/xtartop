@@ -111,8 +111,8 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
                     {/* Mobile: Always show full logo */}
                     <div className="md:hidden">
                         <Image 
-                            src="/xtartop_logo.png" 
-                            alt="xtartop" 
+                            src="/nearby_logo.png" 
+                            alt="NEARBY" 
                             width={150} 
                             height={40}
                             className="h-8 w-auto"
@@ -124,8 +124,8 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
                         {isCollapsed ? (
                             <div className="flex items-center justify-center w-full">
                                 <Image 
-                                    src="/xtartop_isotipo.png" 
-                                    alt="xtartop" 
+                                    src="/nearby_isotipo.png" 
+                                    alt="NEARBY" 
                                     width={32} 
                                     height={32}
                                     className="w-8 h-8"
@@ -133,8 +133,8 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
                             </div>
                         ) : (
                             <Image 
-                                src="/xtartop_logo.png" 
-                                alt="xtartop" 
+                                src="/nearby_logo.png" 
+                                alt="NEARBY" 
                                 width={150} 
                                 height={40}
                                 className="h-8 w-auto"
@@ -173,14 +173,14 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
                                 href={item.href}
                                 onClick={() => setIsMobileOpen(false)}
                                 className={`flex items-center px-3 py-2 rounded-md transition-colors group ${isActive
-                                        ? "bg-founder-blue/10 text-founder-blue border-l-4 border-founder-blue"
-                                        : "text-dark-slate hover:bg-soft-gray hover:text-xtartop-black"
+                                        ? "bg-nearby-accent/10 text-nearby-accent border-l-4 border-nearby-accent"
+                                        : "text-dark-slate hover:bg-soft-gray hover:text-nearby-dark"
                                     }`}
                                 title={isCollapsed ? item.name : undefined}
                             >
                                 <item.icon
                                     size={20}
-                                    className={`${isActive ? "text-founder-blue" : "text-dark-slate group-hover:text-xtartop-black"} ${
+                                    className={`${isActive ? "text-nearby-accent" : "text-dark-slate group-hover:text-nearby-dark"} ${
                                         !isCollapsed ? "mr-3" : "mx-auto"
                                     }`}
                                 />

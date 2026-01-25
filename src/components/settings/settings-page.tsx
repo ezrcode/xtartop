@@ -114,7 +114,7 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
         <div className="min-h-screen bg-soft-gray py-8">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mb-6 sm:mb-8">
-                    <h1 className="text-2xl sm:text-3xl font-bold text-xtartop-black">Configuración</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-nearby-dark">Configuración</h1>
                     <p className="text-sm sm:text-base text-dark-slate mt-2">
                         Gestiona tu workspace, equipo y configuraciones
                     </p>
@@ -132,7 +132,7 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                         onClick={() => setActiveTab(tab.id)}
                                         className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                                             activeTab === tab.id
-                                                ? 'border-founder-blue text-founder-blue'
+                                                ? 'border-nearby-accent text-nearby-accent'
                                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                         }`}
                                     >
@@ -150,7 +150,7 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                     <div className="space-y-6">
                         {/* Workspace Info */}
                         <div className="bg-white shadow-sm rounded-lg border border-graphite-gray p-6">
-                            <h2 className="text-lg font-semibold text-xtartop-black mb-6">Información del Workspace</h2>
+                            <h2 className="text-lg font-semibold text-nearby-dark mb-6">Información del Workspace</h2>
                             
                             <form action={workspaceAction} className="space-y-6">
                                 {workspaceState?.message && (
@@ -209,7 +209,7 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                             id="name"
                                             defaultValue={workspace.name}
                                             required
-                                            className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                            className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                         />
                                         {workspaceState?.errors?.name && (
                                             <p className="mt-1 text-sm text-error-red">{workspaceState.errors.name}</p>
@@ -225,7 +225,7 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                             name="legalName"
                                             id="legalName"
                                             defaultValue={workspace.legalName || ''}
-                                            className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                            className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                         />
                                     </div>
 
@@ -239,7 +239,7 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                             id="rnc"
                                             defaultValue={workspace.rnc || ''}
                                             placeholder="000-0000000-0"
-                                            className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                            className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                         />
                                     </div>
 
@@ -253,7 +253,7 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                             id="phone"
                                             defaultValue={workspace.phone || ''}
                                             placeholder="+1 (809) 000-0000"
-                                            className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                            className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                         />
                                     </div>
                                 </div>
@@ -268,7 +268,7 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                         rows={3}
                                         defaultValue={workspace.address || ''}
                                         placeholder="Calle, Número, Sector, Ciudad, País"
-                                        className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                        className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                     />
                                 </div>
 
@@ -284,7 +284,7 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                 <div className="flex justify-end">
                                     <button
                                         type="submit"
-                                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-xtartop-black hover:bg-gray-900 transition-colors"
+                                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900 transition-colors"
                                     >
                                         <Save size={16} className="mr-2" />
                                         Guardar Cambios
@@ -301,7 +301,7 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                         <div className="bg-white shadow-sm rounded-lg border border-graphite-gray p-6">
                             <div className="flex items-center justify-between mb-6">
                                 <div>
-                                    <h2 className="text-lg font-semibold text-xtartop-black">Equipo</h2>
+                                    <h2 className="text-lg font-semibold text-nearby-dark">Equipo</h2>
                                     <p className="text-sm text-gray-500 mt-1">
                                         {totalMembers} de 5 miembros (Plan FREE)
                                     </p>
@@ -309,7 +309,7 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                 {canAddMembers && (
                                     <button
                                         onClick={() => setShowInviteForm(!showInviteForm)}
-                                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-xtartop-black hover:bg-gray-900 transition-colors"
+                                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900 transition-colors"
                                     >
                                         <UserPlus size={16} className="mr-2" />
                                         Invitar Miembro
@@ -348,7 +348,7 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                                 id="email"
                                                 placeholder="miembro@email.com"
                                                 required
-                                                className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                                className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                             />
                                             {invitationState?.errors?.email && (
                                                 <p className="mt-1 text-sm text-error-red">{invitationState.errors.email}</p>
@@ -363,7 +363,7 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                                 name="role"
                                                 id="role"
                                                 defaultValue="MEMBER"
-                                                className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-founder-blue focus:border-founder-blue sm:text-sm"
+                                                className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                             >
                                                 <option value="MEMBER">Member</option>
                                                 <option value="ADMIN">Admin</option>
@@ -375,7 +375,7 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                     <div className="mt-4 flex justify-end">
                                         <button
                                             type="submit"
-                                            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-founder-blue hover:bg-ocean-blue transition-colors"
+                                            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-accent hover:bg-nearby-dark transition-colors"
                                         >
                                             <Mail size={16} className="mr-2" />
                                             Enviar Invitación
@@ -398,7 +398,7 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                                 className="h-10 w-10 rounded-full object-cover"
                                             />
                                         ) : (
-                                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-founder-blue to-ocean-blue flex items-center justify-center text-white font-semibold">
+                                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-dark flex items-center justify-center text-white font-semibold">
                                                 {getInitials(workspace.owner.name, workspace.owner.email)}
                                             </div>
                                         )}
@@ -425,7 +425,7 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                                     className="h-10 w-10 rounded-full object-cover"
                                                 />
                                             ) : (
-                                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-founder-blue to-ocean-blue flex items-center justify-center text-white font-semibold">
+                                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-dark flex items-center justify-center text-white font-semibold">
                                                     {getInitials(member.user.name, member.user.email)}
                                                 </div>
                                             )}

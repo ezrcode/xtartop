@@ -8,18 +8,18 @@ export default function SignupPage() {
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 <Link href="/" className="flex justify-center">
                     <Image 
-                        src="/xtartop_logo.png" 
-                        alt="xtartop" 
+                        src="/nearby_logo.png" 
+                        alt="NEARBY" 
                         width={200} 
                         height={50}
                         className="h-12 w-auto"
                     />
                 </Link>
                 <h2 className="mt-6 text-center text-3xl font-extrabold text-dark-slate">
-                    Create your account
+                    Crear cuenta
                 </h2>
                 <p className="mt-2 text-center text-sm text-dark-slate">
-                    Start managing your startup today.
+                    Comienza a gestionar tus clientes hoy.
                 </p>
             </div>
 

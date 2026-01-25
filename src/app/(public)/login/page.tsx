@@ -8,15 +8,15 @@ export default function LoginPage() {
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 <Link href="/" className="flex justify-center">
                     <Image 
-                        src="/xtartop_logo.png" 
-                        alt="xtartop" 
+                        src="/nearby_logo.png" 
+                        alt="NEARBY" 
                         width={200} 
                         height={50}
                         className="h-12 w-auto"
                     />
                 </Link>
                 <h2 className="mt-6 text-center text-3xl font-extrabold text-dark-slate">
-                    Log in to your account
+                    Iniciar sesión
                 </h2>
             </div>
 

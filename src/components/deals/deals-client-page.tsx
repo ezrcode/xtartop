@@ -80,7 +80,7 @@ function DealCard({ deal, isDragging = false }: { deal: DealWithRelations, isDra
                 <div className="flex-1 min-w-0">
                     <Link 
                         href={`/app/deals/${deal.id}`}
-                        className="text-sm font-semibold text-founder-blue hover:text-ocean-blue hover:underline line-clamp-2 block"
+                        className="text-sm font-semibold text-nearby-accent hover:text-nearby-dark hover:underline line-clamp-2 block"
                     >
                         {deal.name}
                     </Link>
@@ -115,7 +115,7 @@ function DealCard({ deal, isDragging = false }: { deal: DealWithRelations, isDra
             </div>
 
             {/* Value */}
-            <p className="text-base font-bold text-xtartop-black mb-2">
+            <p className="text-base font-bold text-nearby-dark mb-2">
                 {formatCurrency(Number(deal.value))}
             </p>
 
@@ -145,7 +145,7 @@ function DealCard({ deal, isDragging = false }: { deal: DealWithRelations, isDra
                             className="h-5 w-5 rounded-full object-cover"
                         />
                     ) : (
-                        <div className="h-5 w-5 rounded-full bg-gradient-to-br from-founder-blue to-ocean-blue flex items-center justify-center">
+                        <div className="h-5 w-5 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-dark flex items-center justify-center">
                             <span className="text-[10px] font-semibold text-white">
                                 {deal.createdBy?.name?.charAt(0) || deal.createdBy?.email?.charAt(0) || "?"}
                             </span>
@@ -171,7 +171,7 @@ function KanbanColumn({ status, deals }: { status: DealStatus, deals: DealWithRe
 
     return (
         <div className="flex-shrink-0 w-72">
-            <div className={`bg-white rounded-lg border shadow-sm transition-colors ${isOver ? 'border-founder-blue border-2' : 'border-graphite-gray'}`}>
+            <div className={`bg-white rounded-lg border shadow-sm transition-colors ${isOver ? 'border-nearby-accent border-2' : 'border-graphite-gray'}`}>
                 {/* Column Header */}
                 <div className="px-3 py-2.5 border-b border-graphite-gray">
                     <div className="flex items-center justify-between">
@@ -187,7 +187,7 @@ function KanbanColumn({ status, deals }: { status: DealStatus, deals: DealWithRe
                 {/* Cards Container */}
                 <div
                     ref={setNodeRef}
-                    className={`p-3 space-y-2.5 min-h-[200px] max-h-[calc(100vh-300px)] overflow-y-auto transition-colors ${isOver ? 'bg-founder-blue/5' : ''}`}
+                    className={`p-3 space-y-2.5 min-h-[200px] max-h-[calc(100vh-300px)] overflow-y-auto transition-colors ${isOver ? 'bg-nearby-accent/5' : ''}`}
                 >
                     {deals.length > 0 ? (
                         deals.map((deal) => (
@@ -280,7 +280,7 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table" }: 
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="text-2xl sm:text-3xl font-bold text-xtartop-black">Negocios</h1>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-nearby-dark">Negocios</h1>
                         <p className="text-dark-slate mt-2 text-sm sm:text-base">
                             Gestiona tu pipeline de ventas y oportunidades
                         </p>
@@ -292,7 +292,7 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table" }: 
                                 onClick={() => setViewMode("table")}
                                 className={`inline-flex items-center justify-center px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium border ${
                                     viewMode === "table"
-                                        ? "bg-xtartop-black text-white border-xtartop-black"
+                                        ? "bg-nearby-dark text-white border-nearby-dark"
                                         : "bg-white text-dark-slate border-graphite-gray hover:bg-gray-50"
                                 } rounded-l-md transition-colors`}
                             >
@@ -303,7 +303,7 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table" }: 
                                 onClick={() => setViewMode("kanban")}
                                 className={`inline-flex items-center justify-center px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium border-t border-r border-b ${
                                     viewMode === "kanban"
-                                        ? "bg-xtartop-black text-white border-xtartop-black"
+                                        ? "bg-nearby-dark text-white border-nearby-dark"
                                         : "bg-white text-dark-slate border-graphite-gray hover:bg-gray-50"
                                 } rounded-r-md transition-colors`}
                             >
@@ -314,7 +314,7 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table" }: 
 
                         <Link
                             href="/app/deals/new"
-                            className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-xtartop-black hover:bg-gray-900 transition-colors"
+                            className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900 transition-colors"
                         >
                             <Plus size={20} className="mr-2" />
                             <span className="hidden sm:inline">Nuevo Negocio</span>
@@ -331,7 +331,7 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table" }: 
                                 <p className="text-dark-slate text-base sm:text-lg">No hay negocios registrados</p>
                                 <Link
                                     href="/app/deals/new"
-                                    className="inline-flex items-center px-4 py-2 mt-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-xtartop-black hover:bg-gray-900"
+                                    className="inline-flex items-center px-4 py-2 mt-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900"
                                 >
                                     <Plus size={16} className="mr-2" />
                                     Agregar primer negocio
@@ -370,7 +370,7 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table" }: 
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         <Link
                                                             href={`/app/deals/${deal.id}`}
-                                                            className="text-sm font-medium text-founder-blue hover:text-ocean-blue"
+                                                            className="text-sm font-medium text-nearby-accent hover:text-nearby-dark"
                                                         >
                                                             {deal.name}
                                                         </Link>
@@ -379,7 +379,7 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table" }: 
                                                         {deal.company ? (
                                                             <Link
                                                                 href={`/app/companies/${deal.company.id}`}
-                                                                className="text-sm text-founder-blue hover:text-ocean-blue"
+                                                                className="text-sm text-nearby-accent hover:text-nearby-dark"
                                                             >
                                                                 {deal.company.name}
                                                             </Link>
@@ -391,7 +391,7 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table" }: 
                                                         {deal.contact ? (
                                                             <Link
                                                                 href={`/app/contacts/${deal.contact.id}`}
-                                                                className="text-sm text-founder-blue hover:text-ocean-blue"
+                                                                className="text-sm text-nearby-accent hover:text-nearby-dark"
                                                             >
                                                                 {deal.contact.fullName}
                                                             </Link>
@@ -429,14 +429,14 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table" }: 
                                             className="block p-4 hover:bg-soft-gray transition-colors"
                                         >
                                             <div className="flex items-start justify-between mb-2">
-                                                <h3 className="text-base font-semibold text-founder-blue flex-1">
+                                                <h3 className="text-base font-semibold text-nearby-accent flex-1">
                                                     {deal.name}
                                                 </h3>
                                                 <span className={`ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full whitespace-nowrap ${dealStatusConfig[deal.status].color}`}>
                                                     {dealStatusConfig[deal.status].label}
                                                 </span>
                                             </div>
-                                            <p className="text-lg font-bold text-xtartop-black mb-2">
+                                            <p className="text-lg font-bold text-nearby-dark mb-2">
                                                 {formatCurrency(Number(deal.value))}
                                             </p>
                                             <div className="space-y-1 text-sm text-dark-slate">

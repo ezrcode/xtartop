@@ -1,8 +1,8 @@
-# xtartop
+# NEARBY CRM
 
-**The OS for Early Founders**
+**Sistema de Gestión de Relaciones con Clientes**
 
-xtartop is a SaaS platform designed to help early-stage founders manage their startups. This repository contains the MVP version focusing on authentication, workspace management, and subscription foundations.
+NEARBY CRM es el sistema interno de gestión de clientes de NEARBY. Permite administrar empresas, contactos, oportunidades de negocio y cotizaciones.
 
 ## Tech Stack
 
@@ -13,50 +13,58 @@ xtartop is a SaaS platform designed to help early-stage founders manage their st
 - **ORM**: Prisma
 - **Authentication**: Auth.js (NextAuth)
 
+## Características
+
+- **Empresas**: Gestión de empresas y clientes
+- **Contactos**: Administración de contactos asociados a empresas
+- **Negocios**: Pipeline de ventas con vista Kanban y tabla
+- **Cotizaciones**: Generación de cotizaciones con PDF
+- **Email**: Envío de emails desde la plataforma
+- **Workspaces**: Colaboración en equipo con roles
+
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+
-- PostgreSQL database
+- PostgreSQL database (o usar Docker)
 
-### Installation
+### Con Docker
 
-1.  Clone the repository:
+```bash
+docker-compose up -d
+```
+
+### Instalación Manual
+
+1.  Clonar el repositorio:
     ```bash
     git clone <repository-url>
-    cd xtartop
+    cd nearby-crm
     ```
 
-2.  Install dependencies:
+2.  Instalar dependencias:
     ```bash
     npm install
     ```
 
-3.  Set up environment variables:
-    Copy `.env.example` to `.env` and fill in your values.
+3.  Configurar variables de entorno:
     ```bash
     cp .env.example .env
     ```
 
-4.  Run database migrations:
+4.  Ejecutar migraciones:
     ```bash
     npx prisma migrate dev
     ```
 
-5.  Start the development server:
+5.  Iniciar servidor de desarrollo:
     ```bash
     npm run dev
     ```
 
-    Open [http://localhost:3000](http://localhost:3000) with your browser.
-
-## Future Modules
-
-- **CRM**: Manage clients, deals, and pipelines.
-- **Invoicing**: Create and send invoices.
-- **Proposals**: Generate and track proposals.
+    Abrir [http://localhost:3000](http://localhost:3000) en el navegador.
 
 ## License
 
-MIT
+Propiedad de NEARBY
