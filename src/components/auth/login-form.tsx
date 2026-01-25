@@ -2,7 +2,6 @@
 
 import { useFormState, useFormStatus } from "react-dom";
 import { authenticate } from "@/actions/auth";
-import Link from "next/link";
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -13,7 +12,7 @@ function SubmitButton() {
             disabled={pending}
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nearby-dark disabled:opacity-50 disabled:cursor-not-allowed"
         >
-            {pending ? "Logging in..." : "Log In"}
+            {pending ? "Ingresando..." : "Ingresar"}
         </button>
     );
 }
@@ -25,13 +24,13 @@ export function LoginForm() {
         <form action={action} className="space-y-4">
             <div>
                 <label htmlFor="email" className="block text-sm font-medium text-dark-slate">
-                    Email Address
+                    Correo electrónico
                 </label>
                 <input
                     id="email"
                     name="email"
                     type="email"
-                    placeholder="you@example.com"
+                    placeholder="tu@email.com"
                     required
                     className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:outline-none focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                 />
@@ -39,7 +38,7 @@ export function LoginForm() {
 
             <div>
                 <label htmlFor="password" className="block text-sm font-medium text-dark-slate">
-                    Password
+                    Contraseña
                 </label>
                 <input
                     id="password"
@@ -58,13 +57,6 @@ export function LoginForm() {
             )}
 
             <SubmitButton />
-
-            <div className="text-center text-sm text-dark-slate">
-                Don't have an account?{" "}
-                <Link href="/signup" className="font-medium text-nearby-accent hover:text-nearby-dark">
-                    Sign up
-                </Link>
-            </div>
         </form>
     );
 }
