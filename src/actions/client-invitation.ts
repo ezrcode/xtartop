@@ -8,23 +8,23 @@ import { sendEmail } from "@/lib/email/sender";
 
 export async function sendClientInvitation(companyId: string, contactId: string) {
     const session = await auth();
-    console.log("[sendClientInvitation] session:", JSON.stringify(session, null, 2));
     
     if (!session?.user?.email) {
-        console.log("[sendClientInvitation] No session email");
-        return { error: "No autorizado" };
+        return { error: "No autorizado - sesión no encontrada" };
     }
 
     const user = await prisma.user.findUnique({
         where: { email: session.user.email },
     });
 
-    console.log("[sendClientInvitation] user found:", user?.id, "userType:", user?.userType);
+    if (!user) {
+        return { error: "No autorizado - usuario no encontrado" };
+    }
 
-    // userType null = usuario existente antes de la migración (tratado como INTERNAL)
-    if (!user || (user.userType && user.userType !== "INTERNAL")) {
-        console.log("[sendClientInvitation] User auth failed - user:", !!user, "userType:", user?.userType);
-        return { error: "No autorizado" };
+    // Solo bloquear usuarios explícitamente marcados como CLIENT
+    // userType null o INTERNAL = puede enviar invitaciones
+    if (user.userType === "CLIENT") {
+        return { error: "No autorizado - solo usuarios internos pueden enviar invitaciones" };
     }
 
     // Get company and contact
