@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { CheckCircle, AlertCircle, Send, Clock, XCircle, Mail, Trash2, Loader2 } from "lucide-react";
 import { sendClientInvitation, revokeInvitation } from "@/actions/client-invitation";
 import { Contact } from "@prisma/client";
@@ -29,6 +30,7 @@ interface SubscriptionTabProps {
 }
 
 export function SubscriptionTab({ company, contacts, pendingInvitations }: SubscriptionTabProps) {
+    const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [cancelingId, setCancelingId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -56,6 +58,7 @@ export function SubscriptionTab({ company, contacts, pendingInvitations }: Subsc
             } else {
                 setSuccess("Invitación enviada exitosamente");
                 setSelectedContactId("");
+                router.refresh();
             }
         } catch (err) {
             setError("Ocurrió un error al enviar la invitación");
@@ -76,6 +79,7 @@ export function SubscriptionTab({ company, contacts, pendingInvitations }: Subsc
                 setError(result.error);
             } else {
                 setSuccess("Invitación cancelada exitosamente");
+                router.refresh();
             }
         } catch (err) {
             setError("Ocurrió un error al cancelar la invitación");
