@@ -24,7 +24,7 @@ function SubmitButton({ actionName, label, loadingLabel, icon: Icon, variant = "
     actionName: string;
     label: string;
     loadingLabel?: string;
-    icon?: React.ComponentType<{ size?: number; className?: string }>;
+    icon?: React.ElementType;
     variant?: "primary" | "secondary" | "danger";
 }) {
     const { pending } = useFormStatus();
