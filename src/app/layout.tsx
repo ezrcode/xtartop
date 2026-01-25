@@ -9,9 +9,19 @@ export const metadata: Metadata = {
   description: "Sistema de gestión de relaciones con clientes de NEARBY",
   manifest: "/manifest.json",
   icons: {
-    icon: "/nearby_isotipo.png",
-    shortcut: "/nearby_isotipo.png",
-    apple: "/nearby_isotipo.png",
+    icon: [
+      { url: "/favicon.png", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/nearby_isotipo.png", sizes: "512x512", type: "image/png" },
+    ],
+    shortcut: "/favicon.png",
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    other: [
+      { rel: "mask-icon", url: "/nearby_isotipo.png", color: "#2d3e50" },
+    ],
   },
   appleWebApp: {
     capable: true,
