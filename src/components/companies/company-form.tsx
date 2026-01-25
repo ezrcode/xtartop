@@ -5,11 +5,17 @@ import { useFormState, useFormStatus } from "react-dom";
 import Link from "next/link";
 import { Save, Trash2, ArrowLeft } from "lucide-react";
 import { createCompanyAction, updateCompanyAction, deleteCompany, CompanyState } from "@/actions/companies";
-import { Company, Contact, CompanyStatus, CompanyOrigin } from "@prisma/client";
+import { Company, Contact, CompanyStatus, CompanyOrigin, ClientInvitation } from "@prisma/client";
 import { ActivitiesWithSuspense } from "../activities/activities-with-suspense";
+import { SubscriptionTab } from "./subscription-tab";
+
+type CompanyWithTerms = Company & { 
+    primaryContact?: Contact | null;
+    clientInvitations?: (ClientInvitation & { contact: Contact })[];
+};
 
 interface CompanyFormProps {
-    company?: Company & { primaryContact?: Contact | null };
+    company?: CompanyWithTerms;
     contacts: Contact[];
     isEditMode?: boolean;
 }
@@ -344,13 +350,32 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                             )}
 
                             {/* Tab Content: Subscription */}
-                            {activeTab === "subscription" && (
-                                <div className="flex flex-col items-center justify-center h-64 text-center border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
-                                    <p className="text-gray-500">
-                                        La pestaña de Suscripción <br />
-                                        se implementará próximamente
-                                    </p>
-                                </div>
+                            {activeTab === "subscription" && company && (
+                                <SubscriptionTab
+                                    company={{
+                                        id: company.id,
+                                        name: company.name,
+                                        legalName: company.legalName,
+                                        taxId: company.taxId,
+                                        fiscalAddress: company.fiscalAddress,
+                                        termsAccepted: company.termsAccepted,
+                                        termsAcceptedAt: company.termsAcceptedAt,
+                                        termsAcceptedByName: company.termsAcceptedByName,
+                                        termsVersion: company.termsVersion,
+                                    }}
+                                    contacts={contacts}
+                                    pendingInvitations={company.clientInvitations?.map(inv => ({
+                                        id: inv.id,
+                                        contactId: inv.contactId,
+                                        status: inv.status,
+                                        createdAt: inv.createdAt,
+                                        expiresAt: inv.expiresAt,
+                                        contact: {
+                                            fullName: inv.contact.fullName,
+                                            email: inv.contact.email,
+                                        },
+                                    })) || []}
+                                />
                             )}
                         </form>
                     </div>

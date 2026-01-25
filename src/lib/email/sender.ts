@@ -75,3 +75,55 @@ export async function sendEmailWithGmail({
         };
     }
 }
+
+// Send email with user credentials directly (without userId lookup)
+export async function sendEmail({
+    user,
+    to,
+    subject,
+    body,
+    attachments,
+}: {
+    user: {
+        emailFromAddress: string;
+        emailFromName: string;
+        emailPassword: string;
+    };
+    to: string;
+    subject: string;
+    body: string;
+    attachments?: { filename: string; path: string }[];
+}) {
+    try {
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: user.emailFromAddress,
+                pass: user.emailPassword,
+            },
+        });
+
+        const mailOptions = {
+            from: `"${user.emailFromName}" <${user.emailFromAddress}>`,
+            to,
+            subject,
+            html: body,
+            attachments,
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        
+        return {
+            success: true,
+            messageId: info.messageId,
+            error: null,
+        };
+    } catch (error: any) {
+        console.error("Email sending error:", error);
+        return {
+            success: false,
+            messageId: null,
+            error: error.message || "Failed to send email",
+        };
+    }
+}

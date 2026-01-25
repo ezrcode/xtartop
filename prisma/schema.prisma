@@ -87,12 +87,18 @@ enum EmailStatus {
   PENDING
 }
 
+enum UserType {
+  INTERNAL  // Equipo NEARBY (@nearbycrm.com)
+  CLIENT    // Contacto de empresa cliente
+}
+
 model User {
   id            String             @id @default(cuid())
   name          String?
   email         String             @unique
   passwordHash  String
   photoUrl      String?
+  userType      UserType           @default(INTERNAL)
   dealsViewPref DealViewPreference @default(TABLE)
   
   // Email Configuration (Personal - for sending emails)
@@ -100,6 +106,10 @@ model User {
   emailFromAddress String?
   emailFromName    String?
   emailPassword    String? // Gmail app password
+  
+  // Client user link to Contact
+  contactId     String?            @unique
+  contact       Contact?           @relation("UserContact", fields: [contactId], references: [id])
   
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
@@ -176,7 +186,9 @@ model Company {
   id               String         @id @default(cuid())
   name             String
   logoUrl          String?
-  taxId            String?
+  taxId            String?        // RNC
+  legalName        String?        // Razón Social
+  fiscalAddress    String?        @db.Text  // Dirección Fiscal
   country          String?
   city             String?
   phone            String?
@@ -188,6 +200,13 @@ model Company {
   origin           CompanyOrigin?
   status           CompanyStatus  @default(PROSPECTO)
   
+  // Terms & Conditions
+  termsAccepted       Boolean   @default(false)
+  termsAcceptedAt     DateTime?
+  termsAcceptedById   String?
+  termsAcceptedByName String?   // Nombre de quien firmó
+  termsVersion        String?   // Ej: "v1.0 - 2026-01"
+  
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
@@ -197,10 +216,11 @@ model Company {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  contacts   Contact[]  @relation("CompanyContacts")
-  deals      Deal[]
-  activities Activity[]
-  quotes     Quote[]
+  contacts          Contact[]          @relation("CompanyContacts")
+  deals             Deal[]
+  activities        Activity[]
+  quotes            Quote[]
+  clientInvitations ClientInvitation[]
 }
 
 enum ContactStatus {
@@ -249,10 +269,29 @@ model Contact {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  primaryCompanies Company[]    @relation("PrimaryContact")
-  deals            Deal[]
-  activities       Activity[]
-  quotes           Quote[]
+  primaryCompanies  Company[]          @relation("PrimaryContact")
+  deals             Deal[]
+  activities        Activity[]
+  quotes            Quote[]
+  clientInvitations ClientInvitation[]
+  userAccount       User?              @relation("UserContact")
+}
+
+model ClientInvitation {
+  id          String           @id @default(cuid())
+  companyId   String
+  company     Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  contactId   String
+  contact     Contact          @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  token       String           @unique
+  status      InvitationStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  expiresAt   DateTime
+  usedAt      DateTime?
+  
+  @@index([token])
+  @@index([companyId])
+  @@index([contactId])
 }
 
 model Deal {

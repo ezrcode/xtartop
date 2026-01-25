@@ -90,6 +90,14 @@ export async function getCompany(id: string) {
         include: {
             primaryContact: true,
             contacts: true,
+            clientInvitations: {
+                include: {
+                    contact: true,
+                },
+                orderBy: {
+                    createdAt: "desc",
+                },
+            },
         },
     });
 }
