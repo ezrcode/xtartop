@@ -16,7 +16,8 @@ export async function sendClientInvitation(companyId: string, contactId: string)
         where: { email: session.user.email },
     });
 
-    if (!user || user.userType !== "INTERNAL") {
+    // userType null = usuario existente antes de la migración (tratado como INTERNAL)
+    if (!user || (user.userType && user.userType !== "INTERNAL")) {
         return { error: "No autorizado" };
     }
 
