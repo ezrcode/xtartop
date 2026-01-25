@@ -106,7 +106,7 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
     const canAddMembers = totalMembers < 5;
 
     const tabs = [
-        { id: 'workspace' as Tab, name: 'Workspace', icon: Building2 },
+        { id: 'workspace' as Tab, name: 'Espacio de trabajo', icon: Building2 },
         { id: 'team' as Tab, name: 'Equipo', icon: Users2 },
     ];
 
@@ -365,9 +365,9 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                                 defaultValue="MEMBER"
                                                 className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                             >
-                                                <option value="MEMBER">Member</option>
-                                                <option value="ADMIN">Admin</option>
-                                                <option value="VIEWER">Viewer</option>
+                                                <option value="MEMBER">Miembro</option>
+                                                <option value="ADMIN">Administrador</option>
+                                                <option value="VIEWER">Solo lectura</option>
                                             </select>
                                         </div>
                                     </div>

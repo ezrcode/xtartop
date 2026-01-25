@@ -18,11 +18,11 @@ import {
 import { logout } from "@/actions/auth";
 
 const menuItems = [
-    { name: "Dashboard", href: "/app", icon: LayoutDashboard },
-    { name: "Contacts", href: "/app/contacts", icon: Users },
-    { name: "Companies", href: "/app/companies", icon: Building2 },
+    { name: "Inicio", href: "/app", icon: LayoutDashboard },
+    { name: "Contactos", href: "/app/contacts", icon: Users },
+    { name: "Empresas", href: "/app/companies", icon: Building2 },
     { name: "Negocios", href: "/app/deals", icon: TrendingUp },
-    { name: "Settings", href: "/app/settings", icon: Settings, requiresAdmin: true },
+    { name: "Configuración", href: "/app/settings", icon: Settings, requiresAdmin: true },
 ];
 
 interface SidebarProps {
@@ -198,10 +198,10 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
                             onClick={() => setIsMobileOpen(false)}
                             className={`flex items-center w-full px-3 py-2 rounded-md text-dark-slate hover:bg-soft-gray hover:text-error-red transition-colors group ${isCollapsed ? "md:justify-center" : ""
                                 }`}
-                            title="Log Out"
+                            title="Cerrar sesión"
                         >
                             <LogOut size={20} className={`text-dark-slate group-hover:text-error-red ${!isCollapsed ? "mr-3" : "md:mr-0"}`} />
-                            <span className={`font-medium ${!isCollapsed ? "block" : "hidden"}`}>Log Out</span>
+                            <span className={`font-medium ${!isCollapsed ? "block" : "hidden"}`}>Cerrar sesión</span>
                         </button>
                     </form>
                 </div>

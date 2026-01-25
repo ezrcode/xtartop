@@ -479,7 +479,7 @@ export function QuoteModal({
                         </div>
 
                         {/* Payment Conditions, Delivery Time */}
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label htmlFor="paymentConditions" className="block text-sm font-medium text-dark-slate mb-2">
                                     Condiciones de Pago
@@ -509,7 +509,7 @@ export function QuoteModal({
                         </div>
 
                         {/* Tax Type & Status */}
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label htmlFor="taxType" className="block text-sm font-medium text-dark-slate mb-2">
                                     Impuestos *
