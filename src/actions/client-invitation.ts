@@ -8,7 +8,10 @@ import { sendEmail } from "@/lib/email/sender";
 
 export async function sendClientInvitation(companyId: string, contactId: string) {
     const session = await auth();
+    console.log("[sendClientInvitation] session:", JSON.stringify(session, null, 2));
+    
     if (!session?.user?.email) {
+        console.log("[sendClientInvitation] No session email");
         return { error: "No autorizado" };
     }
 
@@ -16,8 +19,11 @@ export async function sendClientInvitation(companyId: string, contactId: string)
         where: { email: session.user.email },
     });
 
+    console.log("[sendClientInvitation] user found:", user?.id, "userType:", user?.userType);
+
     // userType null = usuario existente antes de la migración (tratado como INTERNAL)
     if (!user || (user.userType && user.userType !== "INTERNAL")) {
+        console.log("[sendClientInvitation] User auth failed - user:", !!user, "userType:", user?.userType);
         return { error: "No autorizado" };
     }
 
