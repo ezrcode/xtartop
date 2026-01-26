@@ -180,6 +180,7 @@ export function CompanyActivitiesSection({
                 <h3 className="text-lg font-semibold text-nearby-dark">Actividades</h3>
                 <div className="relative">
                     <button
+                        type="button"
                         onClick={() => setShowMenu(!showMenu)}
                         className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-nearby-accent text-white hover:bg-ocean-blue transition-colors"
                     >
@@ -196,6 +197,7 @@ export function CompanyActivitiesSection({
                             <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20">
                                 <div className="py-1">
                                     <button
+                                        type="button"
                                         onClick={handleNewEmail}
                                         className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                     >
@@ -204,6 +206,7 @@ export function CompanyActivitiesSection({
                                     </button>
                                     {!contractStatus.termsAccepted && (
                                         <button
+                                            type="button"
                                             onClick={handleNewInvitation}
                                             className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                         >
@@ -236,6 +239,7 @@ export function CompanyActivitiesSection({
                     <div className="flex items-center justify-between">
                         <h4 className="font-medium text-dark-slate text-sm">Nueva Invitación</h4>
                         <button
+                            type="button"
                             onClick={() => setShowInviteForm(false)}
                             className="text-gray-400 hover:text-gray-600"
                         >
@@ -263,6 +267,7 @@ export function CompanyActivitiesSection({
                                 </select>
                             </div>
                             <button
+                                type="button"
                                 onClick={handleSendInvitation}
                                 disabled={loading || !selectedContactId}
                                 className="inline-flex items-center px-3 py-2 bg-nearby-accent text-white rounded-md hover:bg-nearby-dark transition-colors disabled:opacity-50 text-sm"
@@ -381,6 +386,7 @@ export function CompanyActivitiesSection({
                                                         Pendiente
                                                     </span>
                                                     <button
+                                                        type="button"
                                                         onClick={() => handleCancelInvitation(invitation.id)}
                                                         disabled={cancelingId === invitation.id}
                                                         className="inline-flex items-center px-2 py-1 text-xs font-medium text-error-red hover:bg-error-red/10 rounded transition-colors disabled:opacity-50"
