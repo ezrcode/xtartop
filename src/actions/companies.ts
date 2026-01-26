@@ -34,6 +34,8 @@ const CompanySchema = z.object({
         "DESCARTADA",
         "INACTIVA"
     ]),
+    initialProjects: z.number().int().min(0).optional(),
+    initialUsers: z.number().int().min(0).optional(),
 });
 
 export type CompanyState = {
@@ -138,6 +140,9 @@ export async function createCompanyAction(prevState: CompanyState | undefined, f
     const workspace = await getCurrentWorkspace();
     if (!workspace) redirect("/login");
 
+    const initialProjectsValue = formData.get("initialProjects");
+    const initialUsersValue = formData.get("initialUsers");
+
     const rawData = {
         name: formData.get("name"),
         logoUrl: formData.get("logoUrl") || "",
@@ -151,6 +156,8 @@ export async function createCompanyAction(prevState: CompanyState | undefined, f
         primaryContactId: formData.get("primaryContactId") === "null" ? null : formData.get("primaryContactId") || null,
         origin: formData.get("origin") === "null" ? null : formData.get("origin") || null,
         status: formData.get("status"),
+        initialProjects: initialProjectsValue ? parseInt(initialProjectsValue as string, 10) : 0,
+        initialUsers: initialUsersValue ? parseInt(initialUsersValue as string, 10) : 0,
     };
 
     const validatedFields = CompanySchema.safeParse(rawData);
@@ -190,6 +197,9 @@ export async function updateCompanyAction(id: string, prevState: CompanyState | 
     const session = await auth();
     if (!session?.user?.email) redirect("/login");
 
+    const initialProjectsValue = formData.get("initialProjects");
+    const initialUsersValue = formData.get("initialUsers");
+
     const rawData = {
         name: formData.get("name"),
         logoUrl: formData.get("logoUrl") || "",
@@ -203,6 +213,8 @@ export async function updateCompanyAction(id: string, prevState: CompanyState | 
         primaryContactId: formData.get("primaryContactId") === "null" ? null : formData.get("primaryContactId") || null,
         origin: formData.get("origin") === "null" ? null : formData.get("origin") || null,
         status: formData.get("status"),
+        initialProjects: initialProjectsValue ? parseInt(initialProjectsValue as string, 10) : undefined,
+        initialUsers: initialUsersValue ? parseInt(initialUsersValue as string, 10) : undefined,
     };
 
     const validatedFields = CompanySchema.safeParse(rawData);

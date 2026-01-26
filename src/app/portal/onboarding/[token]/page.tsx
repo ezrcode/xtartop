@@ -24,7 +24,11 @@ Representado por: {{CLIENTE_REPRESENTANTE}}</p>
 <hr/>
 
 <h4>CLÁUSULA PRIMERA: OBJETO</h4>
-<p>El presente contrato tiene por objeto establecer los términos y condiciones bajo los cuales el PROVEEDOR prestará servicios al CLIENTE.</p>
+<p>El presente contrato tiene por objeto establecer los términos y condiciones bajo los cuales el PROVEEDOR prestará servicios al CLIENTE, incluyendo:</p>
+<ul>
+<li>Proyectos contratados: <strong>{{PROYECTOS_INICIALES}}</strong></li>
+<li>Usuarios contratados: <strong>{{USUARIOS_INICIALES}}</strong></li>
+</ul>
 
 <h4>CLÁUSULA SEGUNDA: OBLIGACIONES DEL CLIENTE</h4>
 <p>El CLIENTE se compromete a:</p>

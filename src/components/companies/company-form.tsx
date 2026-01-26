@@ -462,6 +462,44 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                         {company.fiscalAddress || <span className="text-gray-400 italic">Pendiente</span>}
                                                     </div>
                                                 </div>
+                                                
+                                                {/* Proyectos y Usuarios Iniciales - Editables antes de enviar invitación */}
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label htmlFor="initialProjects" className="block text-sm font-medium text-dark-slate mb-1">
+                                                            Proyectos iniciales
+                                                        </label>
+                                                        <input
+                                                            type="number"
+                                                            name="initialProjects"
+                                                            id="initialProjects"
+                                                            min={0}
+                                                            defaultValue={company.initialProjects || 0}
+                                                            disabled={company.termsAccepted}
+                                                            className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                                        />
+                                                        {company.termsAccepted && (
+                                                            <p className="text-xs text-gray-500 mt-1">No editable después de aceptar contrato</p>
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <label htmlFor="initialUsers" className="block text-sm font-medium text-dark-slate mb-1">
+                                                            Usuarios iniciales
+                                                        </label>
+                                                        <input
+                                                            type="number"
+                                                            name="initialUsers"
+                                                            id="initialUsers"
+                                                            min={0}
+                                                            defaultValue={company.initialUsers || 0}
+                                                            disabled={company.termsAccepted}
+                                                            className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                                        />
+                                                        {company.termsAccepted && (
+                                                            <p className="text-xs text-gray-500 mt-1">No editable después de aceptar contrato</p>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 

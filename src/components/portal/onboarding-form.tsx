@@ -15,6 +15,8 @@ interface OnboardingFormProps {
         taxId: string | null;
         fiscalAddress: string | null;
         termsAccepted: boolean;
+        initialProjects: number | null;
+        initialUsers: number | null;
     };
     contact: {
         id: string;
@@ -37,6 +39,8 @@ function replaceContractVariables(
         clientAddress: string;
         clientRepresentative: string;
         providerName: string;
+        initialProjects: number;
+        initialUsers: number;
     }
 ): string {
     const today = new Date().toLocaleDateString("es-DO", {
@@ -50,6 +54,8 @@ function replaceContractVariables(
         .replace(/\{\{CLIENTE_RNC\}\}/g, data.clientRnc || "—")
         .replace(/\{\{CLIENTE_DIRECCION\}\}/g, data.clientAddress || "—")
         .replace(/\{\{CLIENTE_REPRESENTANTE\}\}/g, data.clientRepresentative || "—")
+        .replace(/\{\{PROYECTOS_INICIALES\}\}/g, String(data.initialProjects || 0))
+        .replace(/\{\{USUARIOS_INICIALES\}\}/g, String(data.initialUsers || 0))
         .replace(/\{\{PROVEEDOR_NOMBRE\}\}/g, data.providerName || "—")
         .replace(/\{\{FECHA_ACTUAL\}\}/g, today);
 }
@@ -378,6 +384,8 @@ export function OnboardingForm({ token, company, contact, userExists = false, co
                                         clientAddress: fiscalAddress || company.fiscalAddress || "",
                                         clientRepresentative: name,
                                         providerName: providerName,
+                                        initialProjects: company.initialProjects || 0,
+                                        initialUsers: company.initialUsers || 0,
                                     })
                                 }}
                             />

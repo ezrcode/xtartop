@@ -52,7 +52,11 @@ Representado por: {{CLIENTE_REPRESENTANTE}}</p>
 <hr/>
 
 <h4>CLÁUSULA PRIMERA: OBJETO</h4>
-<p>El presente contrato tiene por objeto establecer los términos y condiciones bajo los cuales el PROVEEDOR prestará servicios al CLIENTE.</p>
+<p>El presente contrato tiene por objeto establecer los términos y condiciones bajo los cuales el PROVEEDOR prestará servicios al CLIENTE, incluyendo:</p>
+<ul>
+<li>Proyectos contratados: <strong>{{PROYECTOS_INICIALES}}</strong></li>
+<li>Usuarios contratados: <strong>{{USUARIOS_INICIALES}}</strong></li>
+</ul>
 
 <h4>CLÁUSULA SEGUNDA: OBLIGACIONES DEL CLIENTE</h4>
 <p>El CLIENTE se compromete a:</p>
@@ -375,6 +379,8 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                     <code className="bg-white px-2 py-1 rounded">{"{{CLIENTE_RNC}}"}</code>
                                     <code className="bg-white px-2 py-1 rounded">{"{{CLIENTE_DIRECCION}}"}</code>
                                     <code className="bg-white px-2 py-1 rounded">{"{{CLIENTE_REPRESENTANTE}}"}</code>
+                                    <code className="bg-white px-2 py-1 rounded">{"{{PROYECTOS_INICIALES}}"}</code>
+                                    <code className="bg-white px-2 py-1 rounded">{"{{USUARIOS_INICIALES}}"}</code>
                                     <code className="bg-white px-2 py-1 rounded">{"{{PROVEEDOR_NOMBRE}}"}</code>
                                     <code className="bg-white px-2 py-1 rounded">{"{{FECHA_ACTUAL}}"}</code>
                                 </div>

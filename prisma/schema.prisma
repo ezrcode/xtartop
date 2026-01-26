@@ -198,6 +198,8 @@ model Company {
   taxId            String?        // RNC
   legalName        String?        // Razón Social
   fiscalAddress    String?        @db.Text  // Dirección Fiscal
+  initialProjects  Int?           @default(0)  // Proyectos iniciales contratados
+  initialUsers     Int?           @default(0)  // Usuarios iniciales contratados
   country          String?
   city             String?
   phone            String?
