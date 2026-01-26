@@ -202,7 +202,7 @@ export function CompanyActivitiesSection({
                                         <Mail size={16} className="mr-3" />
                                         Correo electrónico
                                     </button>
-                                    {!contractStatus.termsAccepted && companyContacts.length > 0 && (
+                                    {!contractStatus.termsAccepted && (
                                         <button
                                             onClick={handleNewInvitation}
                                             className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -242,36 +242,42 @@ export function CompanyActivitiesSection({
                             <XCircle size={18} />
                         </button>
                     </div>
-                    <div className="flex items-end gap-2">
-                        <div className="flex-1">
-                            <select
-                                value={selectedContactId}
-                                onChange={(e) => setSelectedContactId(e.target.value)}
-                                className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent text-sm"
+                    {companyContacts.length === 0 ? (
+                        <p className="text-sm text-gray-500 italic">
+                            No hay contactos asociados a esta empresa. Crea un contacto primero.
+                        </p>
+                    ) : (
+                        <div className="flex items-end gap-2">
+                            <div className="flex-1">
+                                <select
+                                    value={selectedContactId}
+                                    onChange={(e) => setSelectedContactId(e.target.value)}
+                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent text-sm"
+                                >
+                                    <option value="">Seleccionar contacto...</option>
+                                    {companyContacts.map((contact) => (
+                                        <option key={contact.id} value={contact.id}>
+                                            {contact.fullName} ({contact.email})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <button
+                                onClick={handleSendInvitation}
+                                disabled={loading || !selectedContactId}
+                                className="inline-flex items-center px-3 py-2 bg-nearby-accent text-white rounded-md hover:bg-nearby-dark transition-colors disabled:opacity-50 text-sm"
                             >
-                                <option value="">Seleccionar contacto...</option>
-                                {companyContacts.map((contact) => (
-                                    <option key={contact.id} value={contact.id}>
-                                        {contact.fullName} ({contact.email})
-                                    </option>
-                                ))}
-                            </select>
+                                {loading ? (
+                                    <Loader2 size={16} className="animate-spin" />
+                                ) : (
+                                    <>
+                                        <Send size={14} className="mr-1" />
+                                        Enviar
+                                    </>
+                                )}
+                            </button>
                         </div>
-                        <button
-                            onClick={handleSendInvitation}
-                            disabled={loading || !selectedContactId}
-                            className="inline-flex items-center px-3 py-2 bg-nearby-accent text-white rounded-md hover:bg-nearby-dark transition-colors disabled:opacity-50 text-sm"
-                        >
-                            {loading ? (
-                                <Loader2 size={16} className="animate-spin" />
-                            ) : (
-                                <>
-                                    <Send size={14} className="mr-1" />
-                                    Enviar
-                                </>
-                            )}
-                        </button>
-                    </div>
+                    )}
                 </div>
             )}
 
