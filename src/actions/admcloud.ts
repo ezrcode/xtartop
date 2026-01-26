@@ -11,31 +11,62 @@ import { createAdmCloudClient, type AdmCloudInvoice, type AdmCloudCustomer } fro
 async function getAdmCloudConfig() {
     const session = await auth();
     if (!session?.user?.email) {
+        console.log('[getAdmCloudConfig] No session or email');
         return null;
     }
 
+    // Primero obtener el usuario para conseguir el workspaceId
     const user = await prisma.user.findUnique({
         where: { email: session.user.email },
         include: {
             ownedWorkspaces: {
                 take: 1,
+                select: { id: true }
             },
             memberships: {
                 take: 1,
-                include: {
-                    workspace: true
-                }
+                select: { workspaceId: true }
             }
         }
     });
 
-    const workspace = user?.ownedWorkspaces[0] || user?.memberships[0]?.workspace;
+    const workspaceId = user?.ownedWorkspaces[0]?.id || user?.memberships[0]?.workspaceId;
+    
+    if (!workspaceId) {
+        console.log('[getAdmCloudConfig] No workspaceId found');
+        return null;
+    }
+
+    // Luego obtener el workspace con todos los campos de AdmCloud explícitamente
+    const workspace = await prisma.workspace.findUnique({
+        where: { id: workspaceId },
+        select: {
+            id: true,
+            admCloudEnabled: true,
+            admCloudAppId: true,
+            admCloudUsername: true,
+            admCloudPassword: true,
+            admCloudCompany: true,
+            admCloudRole: true,
+        }
+    });
+
+    console.log('[getAdmCloudConfig] Workspace found:', {
+        id: workspace?.id,
+        enabled: workspace?.admCloudEnabled,
+        hasAppId: !!workspace?.admCloudAppId,
+        hasUsername: !!workspace?.admCloudUsername,
+        hasPassword: !!workspace?.admCloudPassword,
+        hasCompany: !!workspace?.admCloudCompany,
+    });
     
     if (!workspace || !workspace.admCloudEnabled) {
+        console.log('[getAdmCloudConfig] AdmCloud not enabled');
         return null;
     }
 
     if (!workspace.admCloudAppId || !workspace.admCloudUsername || !workspace.admCloudPassword || !workspace.admCloudCompany) {
+        console.log('[getAdmCloudConfig] Missing required fields');
         return null;
     }
 
