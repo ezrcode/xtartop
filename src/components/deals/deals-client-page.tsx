@@ -516,29 +516,33 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table" }: 
                         onDragEnd={handleDragEnd}
                     >
                         {/* Instrucción para móvil */}
-                        <div className="md:hidden mb-3 px-1">
-                            <p className="text-xs text-gray-500 flex items-center gap-1">
+                        <div className="md:hidden mb-3">
+                            <p className="text-xs text-gray-500 flex items-center gap-1.5">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M5 12h14"/>
                                     <path d="m12 5 7 7-7 7"/>
                                 </svg>
-                                Desliza para ver más columnas • Mantén presionado para arrastrar
+                                Desliza horizontalmente • Mantén presionado para mover
                             </p>
                         </div>
                         
                         <div 
-                            className="overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 overscroll-x-contain snap-x snap-mandatory sm:snap-none"
-                            style={{ WebkitOverflowScrolling: 'touch' }}
+                            className="overflow-x-auto pb-4 scrollbar-thin"
+                            style={{ 
+                                WebkitOverflowScrolling: 'touch',
+                                scrollbarWidth: 'thin',
+                            }}
                         >
-                            <div className="inline-flex space-x-3 sm:space-x-4 min-w-full">
+                            <div className="flex gap-3 sm:gap-4 w-max">
                                 {kanbanColumns.map((status) => (
-                                    <div key={status} className="snap-start">
-                                        <KanbanColumn
-                                            status={status as DealStatus}
-                                            deals={dealsByStatus[status] || []}
-                                        />
-                                    </div>
+                                    <KanbanColumn
+                                        key={status}
+                                        status={status as DealStatus}
+                                        deals={dealsByStatus[status] || []}
+                                    />
                                 ))}
+                                {/* Spacer al final para padding derecho */}
+                                <div className="w-1 flex-shrink-0" />
                             </div>
                         </div>
 
