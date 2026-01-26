@@ -1,7 +1,20 @@
 import withPWA from 'next-pwa';
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*.public.blob.vercel-storage.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.blob.vercel-storage.com',
+      },
+    ],
+  },
+};
 
 export default withPWA({
   dest: 'public',
