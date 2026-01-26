@@ -56,11 +56,24 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         }),
     ],
     callbacks: {
-        ...authConfig.callbacks,
-        async jwt({ token, user }) {
+        authorized: authConfig.callbacks.authorized,
+        async jwt({ token, user, trigger }) {
             if (user) {
                 token.userType = (user as User).userType;
                 token.contactId = (user as User).contactId;
+            }
+            // Refresh user data from DB on each request to ensure userType is current
+            if (trigger === "update" || !token.userType) {
+                if (token.email) {
+                    const dbUser = await prisma.user.findUnique({
+                        where: { email: token.email as string },
+                        select: { userType: true, contactId: true },
+                    });
+                    if (dbUser) {
+                        token.userType = dbUser.userType;
+                        token.contactId = dbUser.contactId;
+                    }
+                }
             }
             return token;
         },
