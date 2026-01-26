@@ -3,6 +3,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { getCurrentWorkspace } from "./workspace";
 
 export async function getProjects(companyId: string) {
     const session = await auth();
@@ -24,15 +25,14 @@ export async function createProject(companyId: string, name: string) {
 
     const user = await prisma.user.findUnique({
         where: { email: session.user.email },
-        include: { memberships: true },
     });
 
     if (!user) {
         return { error: "Usuario no encontrado" };
     }
 
-    const workspaceId = user.memberships[0]?.workspaceId;
-    if (!workspaceId) {
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) {
         return { error: "Workspace no encontrado" };
     }
 
@@ -50,7 +50,7 @@ export async function createProject(companyId: string, name: string) {
             data: {
                 type: "PROJECT",
                 companyId,
-                workspaceId,
+                workspaceId: workspace.id,
                 createdById: user.id,
                 emailSubject: `Proyecto creado: ${name}`,
             },
@@ -76,15 +76,14 @@ export async function updateProjectStatus(
 
     const user = await prisma.user.findUnique({
         where: { email: session.user.email },
-        include: { memberships: true },
     });
 
     if (!user) {
         return { error: "Usuario no encontrado" };
     }
 
-    const workspaceId = user.memberships[0]?.workspaceId;
-    if (!workspaceId) {
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) {
         return { error: "Workspace no encontrado" };
     }
 
@@ -100,7 +99,7 @@ export async function updateProjectStatus(
             data: {
                 type: "PROJECT",
                 companyId,
-                workspaceId,
+                workspaceId: workspace.id,
                 createdById: user.id,
                 emailSubject: `Proyecto ${statusText}: ${project.name}`,
             },

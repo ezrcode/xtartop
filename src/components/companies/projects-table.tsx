@@ -163,7 +163,7 @@ export function ProjectsTable({ companyId, projects }: ProjectsTableProps) {
                                     value={projectName}
                                     onChange={(e) => setProjectName(e.target.value)}
                                     className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent text-sm"
-                                    placeholder="Ej: Implementación CRM"
+                                    placeholder="RESIDENCIAL DEMO I"
                                     autoFocus
                                 />
                             </div>
