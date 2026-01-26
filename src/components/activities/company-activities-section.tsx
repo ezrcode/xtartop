@@ -491,6 +491,15 @@ export function CompanyActivitiesSection({
                                                             )}
                                                         </>
                                                     )}
+                                                    {/* User who executed */}
+                                                    {activity.createdBy && (
+                                                        <>
+                                                            <span className="text-gray-300">·</span>
+                                                            <span className="text-[10px] text-gray-400 truncate">
+                                                                {activity.createdBy.name || activity.createdBy.email?.split('@')[0]}
+                                                            </span>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
