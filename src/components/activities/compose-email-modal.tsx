@@ -53,12 +53,12 @@ export function ComposeEmailModal({
 
             if (result.success) {
                 setSuccess(true);
-                router.refresh();
                 setTimeout(() => {
+                    router.refresh();
                     formRef.current?.reset();
                     setAttachments([]);
                     onClose();
-                }, 1000);
+                }, 500);
             } else {
                 setError(result.message || "Failed to send email");
             }

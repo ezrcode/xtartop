@@ -100,16 +100,20 @@ export function CompanyActivitiesSection({
 
             if ("error" in result && result.error) {
                 setError(result.error);
+                setLoading(false);
             } else {
                 setNoteContent("");
                 setShowNoteForm(false);
-                router.refresh();
+                setLoading(false);
+                // Small delay to ensure server has processed the change
+                setTimeout(() => {
+                    router.refresh();
+                }, 100);
             }
         } catch {
             setError("Error al crear la nota");
+            setLoading(false);
         }
-
-        setLoading(false);
     };
 
     const handleNewInvitation = () => {
