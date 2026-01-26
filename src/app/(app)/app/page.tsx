@@ -2,21 +2,228 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentWorkspace } from "@/actions/workspace";
-import Link from "next/link";
+import { Building2, Users, TrendingUp, DollarSign } from "lucide-react";
+import { StatCard } from "@/components/dashboard/stat-card";
+import { QuickActions } from "@/components/dashboard/quick-actions";
+import { RecentActivity } from "@/components/dashboard/recent-activity";
+import { DealsPipeline } from "@/components/dashboard/deals-pipeline";
+import { CompaniesByStatus } from "@/components/dashboard/companies-by-status";
+import { RevenueMetrics } from "@/components/dashboard/revenue-metrics";
+import { PendingActions } from "@/components/dashboard/pending-actions";
 
 export const revalidate = 60;
 
-async function getBasicStats(workspaceId: string) {
+async function getDashboardStats(workspaceId: string) {
     try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Basic counts
         const [companiesCount, contactsCount, dealsCount] = await Promise.all([
             prisma.company.count({ where: { workspaceId } }),
             prisma.contact.count({ where: { workspaceId } }),
             prisma.deal.count({ where: { workspaceId } }),
         ]);
-        return { companiesCount, contactsCount, dealsCount };
+
+        // Recent activities
+        let recentActivities: Array<{
+            id: string;
+            type: string;
+            emailSubject: string | null;
+            createdAt: Date;
+            createdBy: { name: string | null; email: string } | null;
+        }> = [];
+        try {
+            recentActivities = await prisma.activity.findMany({
+                where: { 
+                    workspaceId,
+                    type: { in: ["EMAIL", "PROJECT", "CLIENT_USER", "NOTE"] }
+                },
+                include: {
+                    createdBy: { select: { name: true, email: true } }
+                },
+                orderBy: { createdAt: "desc" },
+                take: 10,
+            });
+        } catch (e) {
+            console.error("Error fetching activities:", e);
+        }
+
+        // Deals by status for pipeline
+        let dealsByStatus: Array<{ status: string; _count: { id: number }; _sum: { value: any } }> = [];
+        try {
+            dealsByStatus = await prisma.deal.groupBy({
+                by: ["status"],
+                where: { workspaceId },
+                _count: { id: true },
+                _sum: { value: true },
+            }) as any;
+        } catch (e) {
+            console.error("Error fetching deals by status:", e);
+        }
+
+        // Companies by status
+        let companiesByStatus: Array<{ status: string; _count: { id: number } }> = [];
+        try {
+            companiesByStatus = await prisma.company.groupBy({
+                by: ["status"],
+                where: { workspaceId },
+                _count: { id: true },
+            }) as any;
+        } catch (e) {
+            console.error("Error fetching companies by status:", e);
+        }
+
+        // Revenue data
+        let revenueData: { _sum: { mrr: any; arr: any; value: any } } = { _sum: { mrr: null, arr: null, value: null } };
+        try {
+            revenueData = await prisma.deal.aggregate({
+                where: { 
+                    workspaceId,
+                    status: { in: ["NEGOCIACION", "FORMALIZACION", "CIERRE_GANADO"] }
+                },
+                _sum: { mrr: true, arr: true, value: true },
+            });
+        } catch (e) {
+            console.error("Error fetching revenue:", e);
+        }
+
+        // Pending counts
+        let pendingInvitations = 0, draftQuotes = 0, pendingOnboarding = 0, todayActivities = 0;
+        try {
+            [pendingInvitations, draftQuotes, pendingOnboarding, todayActivities] = await Promise.all([
+                prisma.clientInvitation.count({
+                    where: { 
+                        company: { workspaceId },
+                        status: "PENDING"
+                    }
+                }),
+                prisma.quote.count({
+                    where: {
+                        deal: { workspaceId },
+                        status: "BORRADOR"
+                    }
+                }),
+                prisma.company.count({
+                    where: {
+                        workspaceId,
+                        termsAccepted: false,
+                        clientInvitations: { some: { status: "PENDING" } }
+                    }
+                }),
+                prisma.activity.count({
+                    where: {
+                        workspaceId,
+                        createdAt: { gte: today }
+                    }
+                }),
+            ]);
+        } catch (e) {
+            console.error("Error fetching pending counts:", e);
+        }
+
+        // Transform deals by status for pipeline chart
+        const stageLabels: Record<string, string> = {
+            PROSPECCION: "Prospección",
+            CALIFICACION: "Calificación",
+            NEGOCIACION: "Negociación",
+            FORMALIZACION: "Formalización",
+            CIERRE_GANADO: "Ganado",
+            CIERRE_PERDIDO: "Perdido",
+            NO_CALIFICADOS: "No calif.",
+        };
+
+        const pipelineData = Object.keys(stageLabels).map(stage => {
+            const stageData = dealsByStatus.find(d => d.status === stage);
+            return {
+                stage,
+                label: stageLabels[stage],
+                count: stageData?._count?.id || 0,
+                value: Number(stageData?._sum?.value || 0),
+            };
+        });
+
+        // Transform companies by status
+        const statusLabels: Record<string, string> = {
+            PROSPECTO: "Prospecto",
+            POTENCIAL: "Potencial",
+            CLIENTE: "Cliente",
+            ALIADO: "Aliado",
+            INACTIVO: "Inactivo",
+        };
+
+        const companiesData = Object.keys(statusLabels).map(status => {
+            const statusData = companiesByStatus.find(c => c.status === status);
+            return {
+                status,
+                label: statusLabels[status],
+                count: statusData?._count?.id || 0,
+            };
+        });
+
+        // Calculate pipeline and won values
+        let pipelineValue = 0, wonValue = 0;
+        try {
+            const [pipelineDeals, wonDeals] = await Promise.all([
+                prisma.deal.aggregate({
+                    where: {
+                        workspaceId,
+                        status: { in: ["NEGOCIACION", "FORMALIZACION"] }
+                    },
+                    _sum: { value: true }
+                }),
+                prisma.deal.aggregate({
+                    where: {
+                        workspaceId,
+                        status: "CIERRE_GANADO"
+                    },
+                    _sum: { value: true }
+                }),
+            ]);
+            pipelineValue = Number(pipelineDeals._sum.value || 0);
+            wonValue = Number(wonDeals._sum.value || 0);
+        } catch (e) {
+            console.error("Error fetching deal values:", e);
+        }
+
+        return {
+            companiesCount,
+            contactsCount,
+            dealsCount,
+            recentActivities: recentActivities.map(a => ({
+                id: a.id,
+                type: a.type,
+                subject: a.emailSubject || "Actividad",
+                createdAt: a.createdAt,
+                userName: a.createdBy?.name || a.createdBy?.email?.split("@")[0] || "Usuario",
+            })),
+            pipelineData,
+            companiesData,
+            revenue: {
+                mrr: Number(revenueData._sum.mrr || 0),
+                arr: Number(revenueData._sum.arr || 0),
+                pipelineValue,
+                wonValue,
+            },
+            pending: {
+                invitations: pendingInvitations,
+                quotes: draftQuotes,
+                onboarding: pendingOnboarding,
+                todayActivities,
+            }
+        };
     } catch (error) {
-        console.error("Error fetching stats:", error);
-        return { companiesCount: 0, contactsCount: 0, dealsCount: 0 };
+        console.error("Dashboard stats error:", error);
+        return {
+            companiesCount: 0,
+            contactsCount: 0,
+            dealsCount: 0,
+            recentActivities: [],
+            pipelineData: [],
+            companiesData: [],
+            revenue: { mrr: 0, arr: 0, pipelineValue: 0, wonValue: 0 },
+            pending: { invitations: 0, quotes: 0, onboarding: 0, todayActivities: 0 },
+        };
     }
 }
 
@@ -28,90 +235,91 @@ export default async function DashboardPage() {
     }
 
     const workspace = await getCurrentWorkspace();
-    const stats = workspace ? await getBasicStats(workspace.id) : null;
+    const stats = workspace ? await getDashboardStats(workspace.id) : null;
 
     const firstName = session.user.name?.split(" ")[0] || session.user.email?.split("@")[0] || "Usuario";
 
     return (
-        <div className="min-h-screen bg-soft-gray py-6 md:py-8">
+        <div className="min-h-screen bg-soft-gray py-4 sm:py-6 md:py-8 safe-top">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
-                <div className="mb-6 md:mb-8">
-                    <h1 className="text-2xl md:text-3xl font-bold text-nearby-dark">
+                <div className="mb-4 sm:mb-6 md:mb-8">
+                    <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-nearby-dark">
                         Hola, {firstName} 👋
                     </h1>
-                    <p className="text-dark-slate mt-1 text-sm md:text-base">
+                    <p className="text-dark-slate mt-1 text-xs sm:text-sm md:text-base">
                         Aquí tienes un resumen de tu CRM
                     </p>
                 </div>
 
-                {/* Stats Grid - Simple version */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <div className="bg-white rounded-xl border border-graphite-gray p-4">
-                        <p className="text-xs text-gray-500 uppercase mb-1">Empresas</p>
-                        <p className="text-2xl font-bold text-nearby-dark">{stats?.companiesCount || 0}</p>
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+                    <StatCard
+                        title="Empresas"
+                        value={stats?.companiesCount || 0}
+                        icon={Building2}
+                        color="accent"
+                        description="Total de empresas"
+                    />
+                    <StatCard
+                        title="Contactos"
+                        value={stats?.contactsCount || 0}
+                        icon={Users}
+                        color="info"
+                        description="Total de contactos"
+                    />
+                    <StatCard
+                        title="Negocios"
+                        value={stats?.dealsCount || 0}
+                        icon={TrendingUp}
+                        color="success"
+                        description="Negocios activos"
+                    />
+                    <StatCard
+                        title="Pipeline"
+                        value={`$${((stats?.revenue?.pipelineValue || 0) / 1000).toFixed(0)}K`}
+                        icon={DollarSign}
+                        color="warning"
+                        description="En negociación"
+                    />
+                </div>
+
+                {/* Pending Actions */}
+                <div className="mb-4 sm:mb-6">
+                    <PendingActions
+                        pendingInvitations={stats?.pending?.invitations || 0}
+                        draftQuotes={stats?.pending?.quotes || 0}
+                        pendingOnboarding={stats?.pending?.onboarding || 0}
+                        todayActivities={stats?.pending?.todayActivities || 0}
+                    />
+                </div>
+
+                {/* Charts Row */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
+                    <div className="lg:col-span-1">
+                        <DealsPipeline data={stats?.pipelineData || []} />
                     </div>
-                    <div className="bg-white rounded-xl border border-graphite-gray p-4">
-                        <p className="text-xs text-gray-500 uppercase mb-1">Contactos</p>
-                        <p className="text-2xl font-bold text-nearby-dark">{stats?.contactsCount || 0}</p>
+                    <div className="lg:col-span-1">
+                        <CompaniesByStatus data={stats?.companiesData || []} />
                     </div>
-                    <div className="bg-white rounded-xl border border-graphite-gray p-4">
-                        <p className="text-xs text-gray-500 uppercase mb-1">Negocios</p>
-                        <p className="text-2xl font-bold text-nearby-dark">{stats?.dealsCount || 0}</p>
-                    </div>
-                    <div className="bg-white rounded-xl border border-graphite-gray p-4">
-                        <p className="text-xs text-gray-500 uppercase mb-1">Pipeline</p>
-                        <p className="text-2xl font-bold text-nearby-dark">$0</p>
+                    <div className="lg:col-span-1">
+                        <RevenueMetrics
+                            mrr={stats?.revenue?.mrr || 0}
+                            arr={stats?.revenue?.arr || 0}
+                            pipelineValue={stats?.revenue?.pipelineValue || 0}
+                            wonValue={stats?.revenue?.wonValue || 0}
+                        />
                     </div>
                 </div>
 
-                {/* Quick Actions */}
-                <div className="bg-white rounded-xl border border-graphite-gray p-5 mb-6">
-                    <h3 className="text-sm font-semibold text-nearby-dark mb-4">Acciones Rápidas</h3>
-                    <div className="grid grid-cols-3 gap-3">
-                        <Link 
-                            href="/app/companies/new"
-                            className="flex flex-col items-center p-4 rounded-xl bg-soft-gray hover:bg-gray-100 transition-colors"
-                        >
-                            <div className="w-12 h-12 rounded-full bg-nearby-accent flex items-center justify-center mb-2">
-                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
-                            </div>
-                            <span className="text-xs font-medium text-dark-slate">Nueva Empresa</span>
-                        </Link>
-                        <Link 
-                            href="/app/contacts/new"
-                            className="flex flex-col items-center p-4 rounded-xl bg-soft-gray hover:bg-gray-100 transition-colors"
-                        >
-                            <div className="w-12 h-12 rounded-full bg-ocean-blue flex items-center justify-center mb-2">
-                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                                </svg>
-                            </div>
-                            <span className="text-xs font-medium text-dark-slate">Nuevo Contacto</span>
-                        </Link>
-                        <Link 
-                            href="/app/deals/new"
-                            className="flex flex-col items-center p-4 rounded-xl bg-soft-gray hover:bg-gray-100 transition-colors"
-                        >
-                            <div className="w-12 h-12 rounded-full bg-success-green flex items-center justify-center mb-2">
-                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                                </svg>
-                            </div>
-                            <span className="text-xs font-medium text-dark-slate">Nuevo Negocio</span>
-                        </Link>
+                {/* Quick Actions & Recent Activity */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+                    <div className="lg:col-span-1">
+                        <QuickActions />
                     </div>
-                </div>
-
-                {/* Simple message */}
-                <div className="bg-white rounded-xl border border-graphite-gray p-5">
-                    <h3 className="text-sm font-semibold text-nearby-dark mb-4">Resumen</h3>
-                    <p className="text-gray-500 text-sm">
-                        Tienes {stats?.companiesCount || 0} empresas, {stats?.contactsCount || 0} contactos 
-                        y {stats?.dealsCount || 0} negocios en tu CRM.
-                    </p>
+                    <div className="lg:col-span-2">
+                        <RecentActivity activities={stats?.recentActivities || []} />
+                    </div>
                 </div>
             </div>
         </div>

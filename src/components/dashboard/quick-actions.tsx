@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Building2, Users, TrendingUp, Plus } from "lucide-react";
-import { motion } from "framer-motion";
+import { Building2, Users, TrendingUp } from "lucide-react";
 
 const actions = [
     {
@@ -32,25 +31,19 @@ export function QuickActions() {
                 Acciones Rápidas
             </h3>
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                {actions.map((action, index) => (
-                    <motion.div
+                {actions.map((action) => (
+                    <Link
                         key={action.name}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.1 }}
+                        href={action.href}
+                        className="flex flex-col items-center p-3 sm:p-4 rounded-xl bg-soft-gray active:bg-gray-200 hover:bg-gray-100 transition-colors group"
                     >
-                        <Link
-                            href={action.href}
-                            className="flex flex-col items-center p-3 sm:p-4 rounded-xl bg-soft-gray active:bg-gray-200 transition-colors group"
-                        >
-                            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full ${action.color} flex items-center justify-center mb-1.5 sm:mb-2 group-active:scale-95 transition-transform`}>
-                                <action.icon size={20} className="text-white sm:w-[22px] sm:h-[22px]" />
-                            </div>
-                            <span className="text-[10px] sm:text-xs font-medium text-dark-slate text-center leading-tight">
-                                {action.name}
-                            </span>
-                        </Link>
-                    </motion.div>
+                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full ${action.color} flex items-center justify-center mb-1.5 sm:mb-2 group-active:scale-95 transition-transform`}>
+                            <action.icon size={20} className="text-white" />
+                        </div>
+                        <span className="text-[10px] sm:text-xs font-medium text-dark-slate text-center leading-tight">
+                            {action.name}
+                        </span>
+                    </Link>
                 ))}
             </div>
         </div>

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { Send, FileText, UserCheck, Activity } from "lucide-react";
-import { motion } from "framer-motion";
 
 interface PendingActionsProps {
     pendingInvitations: number;
@@ -61,27 +60,21 @@ export function PendingActions({
             <h3 className="text-sm font-semibold text-nearby-dark mb-3 sm:mb-4">Acciones Pendientes</h3>
             
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-                {actions.map((action, index) => (
-                    <motion.div
+                {actions.map((action) => (
+                    <Link
                         key={action.label}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
+                        href={action.href}
+                        className={`block p-3 rounded-xl ${action.bgColor} hover:opacity-90 active:scale-[0.98] transition-all`}
                     >
-                        <Link
-                            href={action.href}
-                            className={`block p-3 sm:p-3 rounded-xl ${action.bgColor} active:scale-[0.98] transition-transform`}
-                        >
-                            <div className="flex items-center justify-between mb-1.5 sm:mb-2">
-                                <action.icon size={18} className={action.color} />
-                                <span className={`text-lg sm:text-xl font-bold ${action.color}`}>
-                                    {action.count}
-                                </span>
-                            </div>
-                            <div className="text-xs font-medium text-gray-700">{action.label}</div>
-                            <div className="text-[10px] text-gray-500">{action.sublabel}</div>
-                        </Link>
-                    </motion.div>
+                        <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                            <action.icon size={18} className={action.color} />
+                            <span className={`text-lg sm:text-xl font-bold ${action.color}`}>
+                                {action.count}
+                            </span>
+                        </div>
+                        <div className="text-xs font-medium text-gray-700">{action.label}</div>
+                        <div className="text-[10px] text-gray-500">{action.sublabel}</div>
+                    </Link>
                 ))}
             </div>
         </div>

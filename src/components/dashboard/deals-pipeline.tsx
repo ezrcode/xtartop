@@ -1,7 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { TrendingUp } from "lucide-react";
 import Link from "next/link";
 
@@ -17,13 +15,13 @@ interface DealsPipelineProps {
 }
 
 const stageColors: Record<string, string> = {
-    PROSPECCION: "#94a3b8",
-    CALIFICACION: "#60a5fa",
-    NEGOCIACION: "#fbbf24",
-    FORMALIZACION: "#a78bfa",
-    CIERRE_GANADO: "#22c55e",
-    CIERRE_PERDIDO: "#ef4444",
-    NO_CALIFICADOS: "#6b7280",
+    PROSPECCION: "bg-slate-400",
+    CALIFICACION: "bg-blue-400",
+    NEGOCIACION: "bg-amber-400",
+    FORMALIZACION: "bg-purple-400",
+    CIERRE_GANADO: "bg-green-500",
+    CIERRE_PERDIDO: "bg-red-400",
+    NO_CALIFICADOS: "bg-gray-400",
 };
 
 const formatCurrency = (value: number) => {
@@ -33,10 +31,9 @@ const formatCurrency = (value: number) => {
 };
 
 export function DealsPipeline({ data }: DealsPipelineProps) {
-    const totalValue = useMemo(() => data.reduce((acc, d) => acc + d.value, 0), [data]);
-    const totalDeals = useMemo(() => data.reduce((acc, d) => acc + d.count, 0), [data]);
-
-    // Filter out stages with 0 deals for cleaner visualization
+    const totalValue = data.reduce((acc, d) => acc + d.value, 0);
+    const totalDeals = data.reduce((acc, d) => acc + d.count, 0);
+    const maxCount = Math.max(...data.map(d => d.count), 1);
     const filteredData = data.filter(d => d.count > 0);
 
     if (filteredData.length === 0) {
@@ -70,37 +67,19 @@ export function DealsPipeline({ data }: DealsPipelineProps) {
                 <span className="text-xs sm:text-sm text-gray-500">negocios · {formatCurrency(totalValue)}</span>
             </div>
 
-            <div className="h-40 sm:h-48">
-                <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={filteredData} layout="vertical" margin={{ left: 0, right: 10 }}>
-                        <XAxis type="number" hide />
-                        <YAxis 
-                            type="category" 
-                            dataKey="label" 
-                            width={75}
-                            tick={{ fontSize: 10, fill: "#6b7280" }}
-                            axisLine={false}
-                            tickLine={false}
-                        />
-                        <Tooltip
-                            formatter={(value, name, props) => [
-                                `${(props.payload as any).count} negocios · ${formatCurrency((props.payload as any).value)}`,
-                                (props.payload as any).label
-                            ]}
-                            contentStyle={{
-                                backgroundColor: "#fff",
-                                border: "1px solid #e5e7eb",
-                                borderRadius: "8px",
-                                fontSize: "12px",
-                            }}
-                        />
-                        <Bar dataKey="count" radius={[0, 4, 4, 0]}>
-                            {filteredData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={stageColors[entry.stage] || "#94a3b8"} />
-                            ))}
-                        </Bar>
-                    </BarChart>
-                </ResponsiveContainer>
+            <div className="space-y-2">
+                {filteredData.map((stage) => (
+                    <div key={stage.stage} className="flex items-center gap-2">
+                        <span className="text-[10px] sm:text-xs text-gray-600 w-20 truncate">{stage.label}</span>
+                        <div className="flex-1 h-5 bg-gray-100 rounded overflow-hidden">
+                            <div 
+                                className={`h-full ${stageColors[stage.stage] || 'bg-gray-400'} transition-all duration-500`}
+                                style={{ width: `${(stage.count / maxCount) * 100}%` }}
+                            />
+                        </div>
+                        <span className="text-xs font-medium text-gray-700 w-6 text-right">{stage.count}</span>
+                    </div>
+                ))}
             </div>
         </div>
     );

@@ -1,6 +1,6 @@
 "use client";
 
-import { DollarSign, TrendingUp, Calendar } from "lucide-react";
+import { DollarSign, Calendar, TrendingUp } from "lucide-react";
 
 interface RevenueMetricsProps {
     mrr: number;
@@ -10,9 +10,9 @@ interface RevenueMetricsProps {
 }
 
 const formatCurrency = (value: number) => {
-    if (value >= 1000000) return `$${(value / 1000000).toFixed(2)}M`;
-    if (value >= 1000) return `$${(value / 1000).toFixed(1)}K`;
-    return `$${value.toFixed(0)}`;
+    if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`;
+    return `$${value.toLocaleString()}`;
 };
 
 export function RevenueMetrics({ mrr, arr, pipelineValue, wonValue }: RevenueMetricsProps) {

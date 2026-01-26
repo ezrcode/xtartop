@@ -3,7 +3,6 @@
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { Mail, FolderOpen, Users, StickyNote, FileText } from "lucide-react";
-import { motion } from "framer-motion";
 
 interface Activity {
     id: string;
@@ -45,20 +44,17 @@ export function RecentActivity({ activities }: RecentActivityProps) {
                 Actividad Reciente
             </h3>
             <div className="space-y-2 sm:space-y-3 max-h-[250px] sm:max-h-[300px] overflow-y-auto">
-                {activities.map((activity, index) => {
+                {activities.map((activity) => {
                     const config = typeIcons[activity.type] || typeIcons.EMAIL;
                     const Icon = config.icon;
 
                     return (
-                        <motion.div
+                        <div
                             key={activity.id}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                            className="flex items-start gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-lg active:bg-soft-gray transition-colors"
+                            className="flex items-start gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-lg hover:bg-soft-gray transition-colors"
                         >
                             <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full ${config.bg} flex items-center justify-center flex-shrink-0`}>
-                                <Icon size={13} className={`${config.color} sm:w-3.5 sm:h-3.5`} />
+                                <Icon size={13} className={config.color} />
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-xs sm:text-sm text-dark-slate font-medium truncate">
@@ -71,7 +67,7 @@ export function RecentActivity({ activities }: RecentActivityProps) {
                                     })}
                                 </p>
                             </div>
-                        </motion.div>
+                        </div>
                     );
                 })}
             </div>
