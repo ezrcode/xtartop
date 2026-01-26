@@ -57,12 +57,17 @@ export async function POST(request: NextRequest) {
         const timestamp = Date.now();
         const extension = file.name.split('.').pop()?.toLowerCase() || 'bin';
         const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_').substring(0, 50);
-        const filename = `${folder}/${category}-${timestamp}-${sanitizedName}`;
+        const filename = `${folder}/${category}-${timestamp}-${sanitizedName}.${extension}`;
+
+        // Convertir File a ArrayBuffer para Vercel Blob
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
 
         // Subir a Vercel Blob
-        const blob = await put(filename, file, {
+        const blob = await put(filename, buffer, {
             access: 'public',
             addRandomSuffix: false,
+            contentType: file.type,
         });
 
         return NextResponse.json({ 
@@ -74,8 +79,9 @@ export async function POST(request: NextRequest) {
 
     } catch (error) {
         console.error('Upload error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
         return NextResponse.json({ 
-            error: 'Error al subir archivo' 
+            error: `Error al subir archivo: ${errorMessage}` 
         }, { status: 500 });
     }
 }
