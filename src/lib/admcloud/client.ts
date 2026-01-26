@@ -125,12 +125,12 @@ class AdmCloudClient {
 
             console.log('[AdmCloud] Request URL:', url.replace(/appid=[^&]+/, 'appid=***'));
 
-            // Intentar primero solo con query params (como muestra la documentación)
-            // Si falla, se puede agregar Basic Auth header
+            // Usar Basic Authentication como requiere la API
             const response = await fetch(url, {
                 ...options,
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': this.getBasicAuthHeader(),
                     ...options.headers,
                 },
             });
