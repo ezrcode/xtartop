@@ -15,7 +15,8 @@ import {
     AlertCircle,
     UserPlus,
     FolderOpen,
-    User as UserIcon
+    User as UserIcon,
+    ChevronDown
 } from "lucide-react";
 import { ComposeEmailModal } from "./compose-email-modal";
 import { sendClientInvitation, revokeInvitation } from "@/actions/client-invitation";
@@ -69,17 +70,6 @@ export function CompanyActivitiesSection({
     const [cancelingId, setCancelingId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
-
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case "SENT":
-                return <CheckCircle size={14} className="text-success-green" />;
-            case "FAILED":
-                return <XCircle size={14} className="text-error-red" />;
-            default:
-                return <Clock size={14} className="text-gray-400" />;
-        }
-    };
 
     const handleNewEmail = () => {
         setShowMenu(false);
@@ -138,6 +128,21 @@ export function CompanyActivitiesSection({
         setCancelingId(null);
     };
 
+    // Format relative time
+    const formatRelativeTime = (date: Date) => {
+        const now = new Date();
+        const diffMs = now.getTime() - date.getTime();
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+
+        if (diffMins < 1) return "Ahora";
+        if (diffMins < 60) return `Hace ${diffMins}m`;
+        if (diffHours < 24) return `Hace ${diffHours}h`;
+        if (diffDays < 7) return `Hace ${diffDays}d`;
+        return date.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
+    };
+
     // Combine and sort all timeline items
     const timelineItems: Array<{
         type: "activity" | "invitation" | "contract";
@@ -175,18 +180,28 @@ export function CompanyActivitiesSection({
     // Sort by date descending (newest first)
     timelineItems.sort((a, b) => b.date.getTime() - a.date.getTime());
 
+    // Get activity icon config
+    const getActivityConfig = (activity: ActivityWithUser) => {
+        const typeMap: Record<string, { icon: typeof Mail; color: string; bgColor: string; label: string }> = {
+            EMAIL: { icon: Mail, color: "text-nearby-dark", bgColor: "bg-nearby-dark/10", label: "Correo" },
+            PROJECT: { icon: FolderOpen, color: "text-nearby-accent", bgColor: "bg-nearby-accent/10", label: "Proyecto" },
+            CLIENT_USER: { icon: UserIcon, color: "text-ocean-blue", bgColor: "bg-ocean-blue/10", label: "Usuario" },
+        };
+        return typeMap[activity.type] || typeMap.EMAIL;
+    };
+
     return (
-        <div className="space-y-4">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-nearby-dark">Actividades</h3>
+        <div className="flex flex-col h-full">
+            {/* Header - Fixed */}
+            <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-nearby-dark uppercase tracking-wide">Actividades</h3>
                 <div className="relative">
                     <button
                         type="button"
                         onClick={() => setShowMenu(!showMenu)}
-                        className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-nearby-accent text-white hover:bg-ocean-blue transition-colors"
+                        className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-nearby-accent text-white hover:bg-nearby-dark transition-colors"
                     >
-                        <Plus size={18} />
+                        <Plus size={14} />
                     </button>
 
                     {/* Dropdown Menu */}
@@ -196,23 +211,23 @@ export function CompanyActivitiesSection({
                                 className="fixed inset-0 z-10"
                                 onClick={() => setShowMenu(false)}
                             />
-                            <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20">
+                            <div className="absolute right-0 mt-1 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20">
                                 <div className="py-1">
                                     <button
                                         type="button"
                                         onClick={handleNewEmail}
-                                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
                                     >
-                                        <Mail size={16} className="mr-3" />
+                                        <Mail size={14} className="mr-2 text-gray-400" />
                                         Correo electrónico
                                     </button>
                                     {!contractStatus.termsAccepted && (
                                         <button
                                             type="button"
                                             onClick={handleNewInvitation}
-                                            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                            className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
                                         >
-                                            <UserPlus size={16} className="mr-3" />
+                                            <UserPlus size={14} className="mr-2 text-gray-400" />
                                             Invitación al portal
                                         </button>
                                     )}
@@ -223,274 +238,253 @@ export function CompanyActivitiesSection({
                 </div>
             </div>
 
-            {/* Error/Success messages */}
+            {/* Error/Success messages - Compact */}
             {error && (
-                <div className="bg-error-red/10 border border-error-red text-error-red px-3 py-2 rounded-md text-sm">
+                <div className="bg-error-red/10 text-error-red px-2 py-1.5 rounded text-xs mb-2 flex items-center gap-1">
+                    <XCircle size={12} />
                     {error}
                 </div>
             )}
             {success && (
-                <div className="bg-success-green/10 border border-success-green text-success-green px-3 py-2 rounded-md text-sm">
+                <div className="bg-success-green/10 text-success-green px-2 py-1.5 rounded text-xs mb-2 flex items-center gap-1">
+                    <CheckCircle size={12} />
                     {success}
                 </div>
             )}
 
-            {/* Invite Form (inline) */}
+            {/* Invite Form (inline) - Compact */}
             {showInviteForm && (
-                <div className="bg-soft-gray border border-graphite-gray rounded-lg p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                        <h4 className="font-medium text-dark-slate text-sm">Nueva Invitación</h4>
+                <div className="bg-soft-gray border border-graphite-gray rounded-lg p-3 mb-3">
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium text-dark-slate text-xs">Nueva Invitación</span>
                         <button
                             type="button"
                             onClick={() => setShowInviteForm(false)}
                             className="text-gray-400 hover:text-gray-600"
                         >
-                            <XCircle size={18} />
+                            <XCircle size={14} />
                         </button>
                     </div>
                     {companyContacts.length === 0 ? (
-                        <p className="text-sm text-gray-500 italic">
-                            No hay contactos asociados a esta empresa. Crea un contacto primero.
+                        <p className="text-xs text-gray-500 italic">
+                            No hay contactos. Crea uno primero.
                         </p>
                     ) : (
-                        <div className="flex items-end gap-2">
-                            <div className="flex-1">
-                                <select
-                                    value={selectedContactId}
-                                    onChange={(e) => setSelectedContactId(e.target.value)}
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent text-sm"
-                                >
-                                    <option value="">Seleccionar contacto...</option>
-                                    {companyContacts.map((contact) => (
-                                        <option key={contact.id} value={contact.id}>
-                                            {contact.fullName} ({contact.email})
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                        <div className="flex items-center gap-2">
+                            <select
+                                value={selectedContactId}
+                                onChange={(e) => setSelectedContactId(e.target.value)}
+                                className="flex-1 px-2 py-1.5 border border-graphite-gray rounded text-xs focus:ring-nearby-accent focus:border-nearby-accent"
+                            >
+                                <option value="">Seleccionar...</option>
+                                {companyContacts.map((contact) => (
+                                    <option key={contact.id} value={contact.id}>
+                                        {contact.fullName}
+                                    </option>
+                                ))}
+                            </select>
                             <button
                                 type="button"
                                 onClick={handleSendInvitation}
                                 disabled={loading || !selectedContactId}
-                                className="inline-flex items-center px-3 py-2 bg-nearby-accent text-white rounded-md hover:bg-nearby-dark transition-colors disabled:opacity-50 text-sm"
+                                className="inline-flex items-center px-2 py-1.5 bg-nearby-accent text-white rounded hover:bg-nearby-dark transition-colors disabled:opacity-50 text-xs"
                             >
-                                {loading ? (
-                                    <Loader2 size={16} className="animate-spin" />
-                                ) : (
-                                    <>
-                                        <Send size={14} className="mr-1" />
-                                        Enviar
-                                    </>
-                                )}
+                                {loading ? <Loader2 size={12} className="animate-spin" /> : <Send size={12} />}
                             </button>
                         </div>
                     )}
                 </div>
             )}
 
-            {/* Contract Status Banner (if not accepted) */}
+            {/* Contract Status Banner - Compact */}
             {!contractStatus.termsAccepted && (
-                <div className="bg-warning-amber/10 border border-warning-amber rounded-lg p-3 flex items-center gap-3">
-                    <AlertCircle size={20} className="text-warning-amber flex-shrink-0" />
-                    <div>
-                        <p className="text-sm font-medium text-warning-amber">Contrato pendiente</p>
-                        <p className="text-xs text-dark-slate">
-                            El cliente aún no ha aceptado los Términos y Condiciones
-                        </p>
-                    </div>
+                <div className="bg-warning-amber/10 rounded-lg px-3 py-2 flex items-center gap-2 mb-3">
+                    <AlertCircle size={14} className="text-warning-amber flex-shrink-0" />
+                    <span className="text-xs text-warning-amber font-medium">Contrato pendiente de aceptación</span>
                 </div>
             )}
 
-            {/* Timeline */}
-            <div className="space-y-3">
+            {/* Timeline - Scrollable */}
+            <div className="flex-1 overflow-y-auto max-h-[600px] pr-1 -mr-1">
                 {timelineItems.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500 text-sm">
-                        No hay actividades registradas
+                    <div className="text-center py-8 text-gray-400 text-xs">
+                        Sin actividades
                     </div>
                 ) : (
-                    timelineItems.map((item, index) => {
-                        if (item.type === "activity") {
-                            const activity = item.data as ActivityWithUser;
-                            const isProject = activity.type === "PROJECT";
-                            const isClientUser = activity.type === "CLIENT_USER";
-                            
-                            // Determine icon and label based on activity type
-                            let ActivityIcon = Mail;
-                            let activityLabel: string = activity.type;
-                            let borderClass = "border-graphite-gray";
-                            let iconClass = "text-dark-slate";
-                            
-                            if (isProject) {
-                                ActivityIcon = FolderOpen;
-                                activityLabel = "Proyecto";
-                                borderClass = "border-nearby-accent/30";
-                                iconClass = "text-nearby-accent";
-                            } else if (isClientUser) {
-                                ActivityIcon = UserIcon;
-                                activityLabel = "Usuario";
-                                borderClass = "border-ocean-blue/30";
-                                iconClass = "text-ocean-blue";
-                            }
-                            
-                            return (
-                                <div
-                                    key={`activity-${activity.id}`}
-                                    className={`bg-white border rounded-lg p-4 hover:shadow-sm transition-shadow ${borderClass}`}
-                                >
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <ActivityIcon size={14} className={iconClass} />
-                                                <span className="text-xs font-medium text-gray-500 uppercase">
-                                                    {activityLabel}
-                                                </span>
-                                                {activity.emailStatus && getStatusIcon(activity.emailStatus)}
+                    <div className="relative">
+                        {/* Timeline line */}
+                        <div className="absolute left-[11px] top-2 bottom-2 w-px bg-graphite-gray/50" />
+                        
+                        <div className="space-y-0">
+                            {timelineItems.map((item, index) => {
+                                if (item.type === "activity") {
+                                    const activity = item.data as ActivityWithUser;
+                                    const config = getActivityConfig(activity);
+                                    const Icon = config.icon;
+                                    
+                                    return (
+                                        <div
+                                            key={`activity-${activity.id}`}
+                                            className="relative flex items-start gap-3 py-2 group"
+                                        >
+                                            {/* Icon */}
+                                            <div className={`relative z-10 flex-shrink-0 w-6 h-6 rounded-full ${config.bgColor} flex items-center justify-center`}>
+                                                <Icon size={12} className={config.color} />
                                             </div>
-                                            <h4 className="font-medium text-dark-slate">
-                                                {activity.emailSubject}
-                                            </h4>
-                                            {activity.emailTo && (
-                                                <p className="text-sm text-gray-600 mt-1">
-                                                    Para: {activity.emailTo}
-                                                </p>
-                                            )}
-                                            {activity.errorMsg && (
-                                                <p className="text-sm text-error-red mt-1">
-                                                    {activity.errorMsg}
-                                                </p>
-                                            )}
-                                        </div>
-                                        <div className="text-xs text-gray-500 whitespace-nowrap ml-4">
-                                            {item.date.toLocaleDateString("es-ES", {
-                                                day: "numeric",
-                                                month: "short",
-                                                year: "numeric",
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                            })}
-                                        </div>
-                                    </div>
-                                    <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
-                                        <span>Por {activity.createdBy.name || activity.createdBy.email}</span>
-                                    </div>
-                                </div>
-                            );
-                        }
-
-                        if (item.type === "invitation") {
-                            const invitation = item.data as ClientInvitationData;
-                            const isPending = invitation.status === "PENDING" && new Date() < new Date(invitation.expiresAt);
-                            
-                            return (
-                                <div
-                                    key={`invitation-${invitation.id}`}
-                                    className="bg-white border border-graphite-gray rounded-lg p-4 hover:shadow-sm transition-shadow"
-                                >
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <UserPlus size={14} className="text-nearby-accent" />
-                                                <span className="text-xs font-medium text-gray-500 uppercase">
-                                                    Invitación al Portal
-                                                </span>
-                                            </div>
-                                            <h4 className="font-medium text-dark-slate">
-                                                {invitation.contact.fullName}
-                                            </h4>
-                                            <p className="text-sm text-gray-600 mt-1">
-                                                {invitation.contact.email}
-                                            </p>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            {isPending ? (
-                                                <>
-                                                    <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-warning-amber/10 text-warning-amber rounded">
-                                                        <Clock size={12} className="mr-1" />
-                                                        Pendiente
+                                            
+                                            {/* Content */}
+                                            <div className="flex-1 min-w-0 pt-0.5">
+                                                <div className="flex items-baseline justify-between gap-2">
+                                                    <p className="text-sm text-dark-slate font-medium truncate">
+                                                        {activity.emailSubject}
+                                                    </p>
+                                                    <span className="text-[10px] text-gray-400 whitespace-nowrap flex-shrink-0">
+                                                        {formatRelativeTime(item.date)}
                                                     </span>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleCancelInvitation(invitation.id)}
-                                                        disabled={cancelingId === invitation.id}
-                                                        className="inline-flex items-center px-2 py-1 text-xs font-medium text-error-red hover:bg-error-red/10 rounded transition-colors disabled:opacity-50"
-                                                        title="Cancelar invitación"
-                                                    >
-                                                        {cancelingId === invitation.id ? (
-                                                            <Loader2 size={14} className="animate-spin" />
-                                                        ) : (
-                                                            <Trash2 size={14} />
-                                                        )}
-                                                    </button>
-                                                </>
-                                            ) : invitation.status === "ACCEPTED" ? (
-                                                <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-success-green/10 text-success-green rounded">
-                                                    <CheckCircle size={12} className="mr-1" />
-                                                    Aceptada
-                                                </span>
-                                            ) : (
-                                                <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-gray-100 text-gray-500 rounded">
-                                                    <XCircle size={12} className="mr-1" />
-                                                    {invitation.status === "REVOKED" ? "Cancelada" : "Expirada"}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className="mt-2 text-xs text-gray-500">
-                                        {item.date.toLocaleDateString("es-ES", {
-                                            day: "numeric",
-                                            month: "short",
-                                            year: "numeric",
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                        })}
-                                    </div>
-                                </div>
-                            );
-                        }
-
-                        if (item.type === "contract") {
-                            const contract = item.data as ContractStatus;
-                            return (
-                                <div
-                                    key={`contract-${index}`}
-                                    className="bg-success-green/5 border border-success-green rounded-lg p-4"
-                                >
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <FileText size={14} className="text-success-green" />
-                                                <span className="text-xs font-medium text-success-green uppercase">
-                                                    Contrato Aceptado
-                                                </span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5 mt-0.5">
+                                                    <span className={`text-[10px] font-medium ${config.color} uppercase`}>
+                                                        {config.label}
+                                                    </span>
+                                                    {activity.emailTo && (
+                                                        <>
+                                                            <span className="text-gray-300">·</span>
+                                                            <span className="text-[10px] text-gray-400 truncate">
+                                                                {activity.emailTo}
+                                                            </span>
+                                                        </>
+                                                    )}
+                                                    {activity.emailStatus && (
+                                                        <>
+                                                            <span className="text-gray-300">·</span>
+                                                            {activity.emailStatus === "SENT" ? (
+                                                                <CheckCircle size={10} className="text-success-green" />
+                                                            ) : activity.emailStatus === "FAILED" ? (
+                                                                <XCircle size={10} className="text-error-red" />
+                                                            ) : (
+                                                                <Clock size={10} className="text-gray-400" />
+                                                            )}
+                                                        </>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <h4 className="font-medium text-dark-slate">
-                                                Términos y Condiciones
-                                            </h4>
-                                            <p className="text-sm text-gray-600 mt-1">
-                                                Aceptado por <strong>{contract.termsAcceptedByName}</strong>
-                                            </p>
-                                            {contract.termsVersion && (
-                                                <p className="text-xs text-gray-500 mt-1">
-                                                    Versión: {contract.termsVersion}
-                                                </p>
-                                            )}
                                         </div>
-                                        <div className="text-xs text-gray-500 whitespace-nowrap ml-4">
-                                            {item.date.toLocaleDateString("es-ES", {
-                                                day: "numeric",
-                                                month: "short",
-                                                year: "numeric",
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                            })}
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        }
+                                    );
+                                }
 
-                        return null;
-                    })
+                                if (item.type === "invitation") {
+                                    const invitation = item.data as ClientInvitationData;
+                                    const isPending = invitation.status === "PENDING" && new Date() < new Date(invitation.expiresAt);
+                                    const isAccepted = invitation.status === "ACCEPTED";
+                                    
+                                    return (
+                                        <div
+                                            key={`invitation-${invitation.id}`}
+                                            className="relative flex items-start gap-3 py-2 group"
+                                        >
+                                            {/* Icon */}
+                                            <div className={`relative z-10 flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${
+                                                isPending ? "bg-warning-amber/10" : isAccepted ? "bg-success-green/10" : "bg-gray-100"
+                                            }`}>
+                                                <UserPlus size={12} className={
+                                                    isPending ? "text-warning-amber" : isAccepted ? "text-success-green" : "text-gray-400"
+                                                } />
+                                            </div>
+                                            
+                                            {/* Content */}
+                                            <div className="flex-1 min-w-0 pt-0.5">
+                                                <div className="flex items-baseline justify-between gap-2">
+                                                    <p className="text-sm text-dark-slate font-medium truncate">
+                                                        {invitation.contact.fullName}
+                                                    </p>
+                                                    <div className="flex items-center gap-1 flex-shrink-0">
+                                                        {isPending && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleCancelInvitation(invitation.id)}
+                                                                disabled={cancelingId === invitation.id}
+                                                                className="p-0.5 text-gray-400 hover:text-error-red transition-colors opacity-0 group-hover:opacity-100"
+                                                                title="Cancelar"
+                                                            >
+                                                                {cancelingId === invitation.id ? (
+                                                                    <Loader2 size={10} className="animate-spin" />
+                                                                ) : (
+                                                                    <Trash2 size={10} />
+                                                                )}
+                                                            </button>
+                                                        )}
+                                                        <span className="text-[10px] text-gray-400">
+                                                            {formatRelativeTime(item.date)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-1.5 mt-0.5">
+                                                    <span className="text-[10px] font-medium text-nearby-accent uppercase">
+                                                        Invitación
+                                                    </span>
+                                                    <span className="text-gray-300">·</span>
+                                                    {isPending ? (
+                                                        <span className="inline-flex items-center gap-0.5 text-[10px] text-warning-amber">
+                                                            <Clock size={9} />
+                                                            Pendiente
+                                                        </span>
+                                                    ) : isAccepted ? (
+                                                        <span className="inline-flex items-center gap-0.5 text-[10px] text-success-green">
+                                                            <CheckCircle size={9} />
+                                                            Aceptada
+                                                        </span>
+                                                    ) : (
+                                                        <span className="inline-flex items-center gap-0.5 text-[10px] text-gray-400">
+                                                            <XCircle size={9} />
+                                                            {invitation.status === "REVOKED" ? "Cancelada" : "Expirada"}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                }
+
+                                if (item.type === "contract") {
+                                    const contract = item.data as ContractStatus;
+                                    return (
+                                        <div
+                                            key={`contract-${index}`}
+                                            className="relative flex items-start gap-3 py-2"
+                                        >
+                                            {/* Icon */}
+                                            <div className="relative z-10 flex-shrink-0 w-6 h-6 rounded-full bg-success-green/10 flex items-center justify-center">
+                                                <FileText size={12} className="text-success-green" />
+                                            </div>
+                                            
+                                            {/* Content */}
+                                            <div className="flex-1 min-w-0 pt-0.5">
+                                                <div className="flex items-baseline justify-between gap-2">
+                                                    <p className="text-sm text-dark-slate font-medium">
+                                                        Contrato aceptado
+                                                    </p>
+                                                    <span className="text-[10px] text-gray-400 whitespace-nowrap flex-shrink-0">
+                                                        {formatRelativeTime(item.date)}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5 mt-0.5">
+                                                    <span className="text-[10px] font-medium text-success-green uppercase">
+                                                        T&C
+                                                    </span>
+                                                    <span className="text-gray-300">·</span>
+                                                    <span className="text-[10px] text-gray-400 truncate">
+                                                        Por {contract.termsAcceptedByName}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                }
+
+                                return null;
+                            })}
+                        </div>
+                    </div>
                 )}
             </div>
 
