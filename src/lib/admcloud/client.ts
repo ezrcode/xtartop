@@ -99,7 +99,8 @@ class AdmCloudClient {
         if (!this.config) {
             throw new Error('AdmCloud client not configured');
         }
-        const credentials = btoa(`${this.config.username}:${this.config.password}`);
+        // Usar Buffer.from() para Node.js en lugar de btoa()
+        const credentials = Buffer.from(`${this.config.username}:${this.config.password}`).toString('base64');
         return `Basic ${credentials}`;
     }
 
