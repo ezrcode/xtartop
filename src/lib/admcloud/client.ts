@@ -40,19 +40,35 @@ export interface AdmCloudCustomer {
 
 export interface AdmCloudInvoice {
     ID: string;
-    TransactionNumber: string;
-    TransactionDate: string;
-    RelationshipID: string;
-    SubTotal: number;
-    TotalTaxes: number;
-    Total: number;
-    CurrencyCode: string;
-    Status: string;
+    TransactionNumber?: string;
+    TransactionDate?: string;
+    RelationshipID?: string;
+    SubTotal?: number;
+    TotalTaxes?: number;
+    Total?: number;
+    CurrencyCode?: string;
+    Status?: string;
     Notes?: string;
     DueDate?: string;
     PaymentTerms?: string;
     Balance?: number;
     Items?: AdmCloudInvoiceItem[];
+
+    // Campos alternos usados por CreditInvoices
+    DocID?: string;
+    DocDate?: string;
+    DocDateString?: string;
+    TotalAmount?: number | string;
+    SubtotalAmount?: number | string;
+    TotalLocal?: number | string;
+    SubtotalAmountLocal?: number | string;
+    CurrencyID?: string;
+    PaymentTermName?: string;
+    Reference?: string;
+    CreationDate?: string;
+    NCF?: string;
+    DocumentTypeName?: string;
+    Mailed?: boolean;
 }
 
 export interface AdmCloudInvoiceItem {

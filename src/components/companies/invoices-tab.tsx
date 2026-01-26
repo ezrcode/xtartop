@@ -27,15 +27,21 @@ interface InvoicesTabProps {
 }
 
 function formatCurrency(amount: number, currency: string = "DOP"): string {
-    return new Intl.NumberFormat("es-DO", {
-        style: "currency",
-        currency: currency,
-        minimumFractionDigits: 2,
-    }).format(amount);
+    try {
+        return new Intl.NumberFormat("es-DO", {
+            style: "currency",
+            currency,
+            minimumFractionDigits: 2,
+        }).format(amount);
+    } catch {
+        return `${currency} ${amount.toFixed(2)}`;
+    }
 }
 
-function formatDate(dateString: string): string {
-    const date = new Date(dateString);
+function formatDate(value?: string | Date | null): string {
+    if (!value) return "N/A";
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) return "N/A";
     return date.toLocaleDateString("es-DO", {
         day: "2-digit",
         month: "short",
@@ -43,7 +49,52 @@ function formatDate(dateString: string): string {
     });
 }
 
-function getStatusBadge(status: string) {
+function getInvoiceDate(invoice: AdmCloudInvoice): string | undefined {
+    return (
+        invoice.TransactionDate ||
+        invoice.DocDate ||
+        invoice.DocDateString ||
+        invoice.CreationDate ||
+        undefined
+    );
+}
+
+function getInvoiceNumber(invoice: AdmCloudInvoice): string | undefined {
+    return (
+        invoice.TransactionNumber ||
+        invoice.DocID ||
+        invoice.NCF ||
+        invoice.ID ||
+        undefined
+    );
+}
+
+function getInvoiceCurrency(invoice: AdmCloudInvoice): string {
+    return invoice.CurrencyCode || invoice.CurrencyID || "DOP";
+}
+
+function getInvoiceTotal(invoice: AdmCloudInvoice): number {
+    const raw =
+        invoice.Total ??
+        invoice.TotalAmount ??
+        invoice.SubTotal ??
+        invoice.SubtotalAmount ??
+        invoice.TotalLocal ??
+        invoice.SubtotalAmountLocal ??
+        0;
+    const asNumber = typeof raw === "number" ? raw : Number(raw);
+    return Number.isFinite(asNumber) ? asNumber : 0;
+}
+
+function getInvoiceStatus(invoice: AdmCloudInvoice): string | undefined {
+    return invoice.Status || invoice.PaymentTermName || undefined;
+}
+
+function getInvoiceNotes(invoice: AdmCloudInvoice): string | undefined {
+    return invoice.Notes || invoice.Reference || invoice.DocumentTypeName || undefined;
+}
+
+function getStatusBadge(status?: string) {
     const statusLower = status?.toLowerCase() || "";
     if (statusLower.includes("paid") || statusLower.includes("pagad")) {
         return (
@@ -173,7 +224,7 @@ export function InvoicesTab({
                         </h3>
                         {admCloudLastSync && (
                             <p className="text-xs text-gray-500">
-                                Última sincronización: {formatDate(new Date(admCloudLastSync).toISOString())}
+                                Última sincronización: {formatDate(admCloudLastSync)}
                             </p>
                         )}
                     </div>
@@ -270,19 +321,19 @@ export function InvoicesTab({
                                     <div className="flex items-center gap-2">
                                         <FileText className="text-gray-400" size={18} />
                                         <span className="font-medium text-dark-slate">
-                                            #{invoice.TransactionNumber}
+                                            #{getInvoiceNumber(invoice) || "N/A"}
                                         </span>
                                     </div>
-                                    {getStatusBadge(invoice.Status)}
+                                    {getStatusBadge(getInvoiceStatus(invoice))}
                                 </div>
                                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
                                     <div className="flex items-center gap-1.5 text-gray-600">
                                         <Calendar size={14} className="text-gray-400" />
-                                        {formatDate(invoice.TransactionDate)}
+                                        {formatDate(getInvoiceDate(invoice))}
                                     </div>
                                     <div className="flex items-center gap-1.5 text-gray-600">
                                         <DollarSign size={14} className="text-gray-400" />
-                                        {formatCurrency(invoice.Total ?? 0, invoice.CurrencyCode || "DOP")}
+                                        {formatCurrency(getInvoiceTotal(invoice), getInvoiceCurrency(invoice))}
                                     </div>
                                     {invoice.DueDate && (
                                         <div className="flex items-center gap-1.5 text-gray-600">
@@ -291,9 +342,9 @@ export function InvoicesTab({
                                         </div>
                                     )}
                                 </div>
-                                {invoice.Notes && (
+                                {getInvoiceNotes(invoice) && (
                                     <p className="mt-2 text-xs text-gray-500 truncate">
-                                        {invoice.Notes}
+                                        {getInvoiceNotes(invoice)}
                                     </p>
                                 )}
                             </div>
