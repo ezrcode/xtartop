@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useFormState } from "react-dom";
-import { Save, UserPlus, Mail, Trash2, X, Building2, Users2, Upload, FileText, Loader2 } from "lucide-react";
+import { Save, UserPlus, Mail, Trash2, X, Building2, Users2, Upload, FileText, Loader2, Cloud } from "lucide-react";
 import {
     updateWorkspace,
     sendInvitation,
@@ -13,6 +13,7 @@ import {
     InvitationState
 } from "@/actions/workspace";
 import type { Workspace, WorkspaceMember, Invitation, User, Subscription } from "@prisma/client";
+import { AdmCloudConfigTab } from "./admcloud-config-tab";
 
 type WorkspaceWithDetails = Workspace & {
     owner: Pick<User, 'id' | 'name' | 'email' | 'photoUrl'>;
@@ -25,6 +26,12 @@ type WorkspaceWithDetails = Workspace & {
     subscription: Subscription | null;
     contractTemplate?: string | null;
     contractVersion?: string | null;
+    // AdmCloud config
+    admCloudEnabled?: boolean;
+    admCloudAppId?: string | null;
+    admCloudToken?: string | null;
+    admCloudCompany?: string | null;
+    admCloudRole?: string | null;
     _count: {
         contacts: number;
         companies: number;
@@ -76,7 +83,7 @@ Representado por: {{CLIENTE_REPRESENTANTE}}</p>
 <p>Cualquier disputa que surja de este contrato será resuelta mediante arbitraje en la jurisdicción correspondiente.</p>`;
 }
 
-type Tab = 'workspace' | 'team' | 'contract';
+type Tab = 'workspace' | 'team' | 'contract' | 'integrations';
 
 export function SettingsPage({ workspace }: SettingsPageProps) {
     const [activeTab, setActiveTab] = useState<Tab>('workspace');
@@ -176,6 +183,7 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
         { id: 'workspace' as Tab, name: 'Espacio de trabajo', icon: Building2 },
         { id: 'team' as Tab, name: 'Equipo', icon: Users2 },
         { id: 'contract' as Tab, name: 'Contrato', icon: FileText },
+        { id: 'integrations' as Tab, name: 'Integraciones', icon: Cloud },
     ];
 
     return (
@@ -663,6 +671,18 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                             )}
                         </div>
                     </div>
+                )}
+
+                {activeTab === 'integrations' && (
+                    <AdmCloudConfigTab 
+                        currentConfig={{
+                            enabled: workspace.admCloudEnabled || false,
+                            appId: workspace.admCloudAppId || null,
+                            token: workspace.admCloudToken || null,
+                            company: workspace.admCloudCompany || null,
+                            role: workspace.admCloudRole || null,
+                        }}
+                    />
                 )}
             </div>
         </div>

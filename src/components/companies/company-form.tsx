@@ -11,12 +11,15 @@ import { ProjectsTable } from "./projects-table";
 import { ClientUsersTable } from "./client-users-table";
 import { CompanyContactsTab } from "./company-contacts-tab";
 import { ImageUpload } from "../ui/image-upload";
+import { InvoicesTab } from "./invoices-tab";
 
 type CompanyWithTerms = Company & { 
     primaryContact?: Contact | null;
     clientInvitations?: (ClientInvitation & { contact: Contact })[];
     projects?: Project[];
     clientUsers?: ClientUser[];
+    admCloudRelationshipId?: string | null;
+    admCloudLastSync?: Date | null;
 };
 
 interface CompanyFormProps {
@@ -86,7 +89,7 @@ function DeleteButton() {
 
 export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFormProps) {
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState<"general" | "contacts" | "subscription">("general");
+    const [activeTab, setActiveTab] = useState<"general" | "contacts" | "subscription" | "invoices">("general");
     const [logoUrl, setLogoUrl] = useState<string | null>(company?.logoUrl || null);
 
     const updateAction = company ? updateCompanyAction.bind(null, company.id) : () => Promise.resolve({ message: "Error" });
@@ -186,6 +189,17 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                         }`}
                                     >
                                         Suscripción
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setActiveTab("invoices")}
+                                        className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
+                                            activeTab === "invoices"
+                                                ? "border-nearby-accent text-nearby-accent"
+                                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                        }`}
+                                    >
+                                        Facturación
                                     </button>
                                 </nav>
                             </div>
@@ -519,6 +533,17 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                             />
                                         </div>
                                     </div>
+                                )}
+
+                                {/* Tab Content: Invoices */}
+                                {activeTab === "invoices" && company && (
+                                    <InvoicesTab
+                                        companyId={company.id}
+                                        companyName={company.name}
+                                        taxId={company.taxId}
+                                        admCloudRelationshipId={company.admCloudRelationshipId || null}
+                                        admCloudLastSync={company.admCloudLastSync || null}
+                                    />
                                 )}
                             </div>
                         </div>
