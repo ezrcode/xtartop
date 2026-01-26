@@ -196,7 +196,13 @@ export function CompanyActivitiesSection({
         if (diffMins < 60) return `Hace ${diffMins}m`;
         if (diffHours < 24) return `Hace ${diffHours}h`;
         if (diffDays < 7) return `Hace ${diffDays}d`;
-        return date.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
+        
+        // Incluir año si no es el año actual
+        const isCurrentYear = date.getFullYear() === now.getFullYear();
+        if (isCurrentYear) {
+            return date.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
+        }
+        return date.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" });
     };
 
     // Combine and sort all timeline items

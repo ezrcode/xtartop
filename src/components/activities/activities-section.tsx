@@ -51,7 +51,13 @@ function formatRelativeTime(date: Date): string {
     if (minutes < 60) return `${minutes}m`;
     if (hours < 24) return `${hours}h`;
     if (days < 7) return `${days}d`;
-    return date.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
+    
+    // Incluir año si no es el año actual
+    const isCurrentYear = date.getFullYear() === now.getFullYear();
+    if (isCurrentYear) {
+        return date.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
+    }
+    return date.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" });
 }
 
 // Helper to get file icon
