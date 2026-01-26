@@ -6,6 +6,7 @@ import { User, Lock, Settings, Save, Mail } from "lucide-react";
 import { updateProfile, updatePassword, updatePreferences, ProfileState, PasswordState, PreferencesState } from "@/actions/profile";
 import { DealViewPreference } from "@prisma/client";
 import { EmailConfigTab } from "../settings/email-config-tab";
+import { ImageUpload } from "../ui/image-upload";
 
 interface ProfileFormProps {
     user: {
@@ -28,6 +29,7 @@ interface ProfileFormProps {
 function ProfileTab({ user }: { user: ProfileFormProps['user'] }) {
     const initialProfileState: ProfileState = { message: "", errors: {} };
     const [profileState, profileAction] = useFormState(updateProfile, initialProfileState);
+    const [photoUrl, setPhotoUrl] = useState<string | null>(user.photoUrl);
 
     return (
         <form action={profileAction} className="space-y-6">
@@ -36,6 +38,18 @@ function ProfileTab({ user }: { user: ProfileFormProps['user'] }) {
                     {profileState.message}
                 </div>
             )}
+
+            {/* Foto de perfil */}
+            <ImageUpload
+                currentImage={user.photoUrl}
+                onImageChange={(url) => setPhotoUrl(url)}
+                category="profile"
+                folder="profiles"
+                size="lg"
+                shape="circle"
+                label="Foto de Perfil"
+            />
+            <input type="hidden" name="photoUrl" value={photoUrl || ""} />
 
             <div>
                 <label htmlFor="name" className="block text-sm font-medium text-dark-slate mb-2">
@@ -66,23 +80,6 @@ function ProfileTab({ user }: { user: ProfileFormProps['user'] }) {
                 />
                 {profileState?.errors?.email && (
                     <p className="mt-1 text-sm text-error-red">{profileState.errors.email}</p>
-                )}
-            </div>
-
-            <div>
-                <label htmlFor="photoUrl" className="block text-sm font-medium text-dark-slate mb-2">
-                    URL de Foto de Perfil
-                </label>
-                <input
-                    type="url"
-                    name="photoUrl"
-                    id="photoUrl"
-                    defaultValue={user.photoUrl || ""}
-                    placeholder="https://ejemplo.com/foto.jpg"
-                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
-                />
-                {profileState?.errors?.photoUrl && (
-                    <p className="mt-1 text-sm text-error-red">{profileState.errors.photoUrl}</p>
                 )}
             </div>
 

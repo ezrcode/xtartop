@@ -17,12 +17,21 @@ import {
     FolderOpen,
     User as UserIcon,
     StickyNote,
-    Filter
+    Filter,
+    Paperclip
 } from "lucide-react";
 import { ComposeEmailModal } from "./compose-email-modal";
 import { sendClientInvitation, revokeInvitation } from "@/actions/client-invitation";
 import { createNote } from "@/actions/notes";
+import { FileUpload } from "@/components/ui/file-upload";
 import type { Activity, User, Contact } from "@prisma/client";
+
+interface UploadedFile {
+    url: string;
+    filename: string;
+    type: string;
+    size: number;
+}
 
 type ActivityWithUser = Activity & {
     createdBy: Pick<User, 'name' | 'email' | 'photoUrl'>;
@@ -67,6 +76,7 @@ export function CompanyActivitiesSection({
     const [showInviteForm, setShowInviteForm] = useState(false);
     const [showNoteForm, setShowNoteForm] = useState(false);
     const [noteContent, setNoteContent] = useState("");
+    const [noteAttachments, setNoteAttachments] = useState<UploadedFile[]>([]);
     const [filter, setFilter] = useState<"all" | "EMAIL" | "PROJECT" | "CLIENT_USER" | "NOTE">("all");
     
     // Invitation state
@@ -87,8 +97,8 @@ export function CompanyActivitiesSection({
     };
 
     const handleSaveNote = async () => {
-        if (!noteContent.trim()) {
-            setError("Escribe una nota");
+        if (!noteContent.trim() && noteAttachments.length === 0) {
+            setError("Escribe una nota o adjunta un archivo");
             return;
         }
 
@@ -96,13 +106,19 @@ export function CompanyActivitiesSection({
         setError(null);
 
         try {
-            const result = await createNote(companyId, noteContent.trim());
+            // Preparar los adjuntos como JSON
+            const attachmentsJson = noteAttachments.length > 0 
+                ? JSON.stringify(noteAttachments) 
+                : undefined;
+
+            const result = await createNote(companyId, noteContent.trim() || "Archivo adjunto", attachmentsJson);
 
             if ("error" in result && result.error) {
                 setError(result.error);
                 setLoading(false);
             } else {
                 setNoteContent("");
+                setNoteAttachments([]);
                 setShowNoteForm(false);
                 setLoading(false);
                 // Small delay to ensure server has processed the change
@@ -377,7 +393,7 @@ export function CompanyActivitiesSection({
                 </div>
             )}
 
-            {/* Note Form (inline) - Compact */}
+            {/* Note Form (inline) - Compact with Attachments */}
             {showNoteForm && (
                 <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-3">
                     <div className="flex items-center justify-between mb-2">
@@ -387,6 +403,7 @@ export function CompanyActivitiesSection({
                             onClick={() => {
                                 setShowNoteForm(false);
                                 setNoteContent("");
+                                setNoteAttachments([]);
                             }}
                             className="text-gray-400 hover:text-gray-600"
                         >
@@ -401,11 +418,28 @@ export function CompanyActivitiesSection({
                             placeholder="Escribe tu nota aquí..."
                             className="w-full px-2 py-1.5 border border-purple-200 rounded text-xs focus:ring-purple-400 focus:border-purple-400 resize-none"
                         />
-                        <div className="flex justify-end">
+                        
+                        {/* Attachments */}
+                        <FileUpload
+                            files={noteAttachments}
+                            onFilesChange={setNoteAttachments}
+                            folder={`notes/${companyId}`}
+                            maxFiles={5}
+                        />
+
+                        <div className="flex justify-between items-center">
+                            <span className="text-[10px] text-gray-500">
+                                {noteAttachments.length > 0 && (
+                                    <span className="flex items-center gap-1">
+                                        <Paperclip size={10} />
+                                        {noteAttachments.length} archivo{noteAttachments.length > 1 ? 's' : ''}
+                                    </span>
+                                )}
+                            </span>
                             <button
                                 type="button"
                                 onClick={handleSaveNote}
-                                disabled={loading || !noteContent.trim()}
+                                disabled={loading || (!noteContent.trim() && noteAttachments.length === 0)}
                                 className="inline-flex items-center px-2 py-1.5 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors disabled:opacity-50 text-xs"
                             >
                                 {loading ? <Loader2 size={12} className="animate-spin" /> : "Guardar"}

@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentWorkspace } from "./workspace";
 
-export async function createNote(companyId: string, content: string) {
+export async function createNote(companyId: string, content: string, attachmentsJson?: string) {
     const session = await auth();
     if (!session?.user?.email) {
         return { error: "No autorizado" };
@@ -32,6 +32,7 @@ export async function createNote(companyId: string, content: string) {
                 createdById: user.id,
                 emailSubject: content.length > 100 ? content.substring(0, 100) + "..." : content,
                 emailBody: content,
+                attachments: attachmentsJson || null,
             },
             include: {
                 createdBy: {

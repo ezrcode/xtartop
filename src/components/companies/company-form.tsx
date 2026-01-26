@@ -10,6 +10,7 @@ import { CompanyActivitiesWithSuspense } from "../activities/company-activities-
 import { ProjectsTable } from "./projects-table";
 import { ClientUsersTable } from "./client-users-table";
 import { CompanyContactsTab } from "./company-contacts-tab";
+import { ImageUpload } from "../ui/image-upload";
 
 type CompanyWithTerms = Company & { 
     primaryContact?: Contact | null;
@@ -86,6 +87,7 @@ function DeleteButton() {
 export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFormProps) {
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<"general" | "contacts" | "subscription">("general");
+    const [logoUrl, setLogoUrl] = useState<string | null>(company?.logoUrl || null);
 
     const updateAction = company ? updateCompanyAction.bind(null, company.id) : () => Promise.resolve({ message: "Error" });
 
@@ -203,17 +205,17 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                 {/* Tab Content: General Info */}
                                 {activeTab === "general" && (
                                     <div className="space-y-5">
-                                        {/* Logo Placeholder */}
-                                        <div className="flex items-center space-x-3 sm:space-x-4">
-                                            <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-xl bg-soft-gray flex items-center justify-center text-gray-400 border border-graphite-gray flex-shrink-0">
-                                                <span className="text-xl sm:text-2xl font-bold">
-                                                    {company?.name ? company.name.charAt(0).toUpperCase() : "P"}
-                                                </span>
-                                            </div>
-                                            <div className="text-xs sm:text-sm text-gray-500">
-                                                Logo de la empresa (Próximamente)
-                                            </div>
-                                        </div>
+                                        {/* Logo Upload */}
+                                        <ImageUpload
+                                            currentImage={company?.logoUrl}
+                                            onImageChange={(url) => setLogoUrl(url)}
+                                            category="logo"
+                                            folder="logos"
+                                            size="lg"
+                                            shape="square"
+                                            label="Logo de la empresa"
+                                        />
+                                        <input type="hidden" name="logoUrl" value={logoUrl || ""} />
 
                                         <div className="grid grid-cols-1 gap-4 sm:gap-y-5 sm:gap-x-4 sm:grid-cols-6">
                                             <div className="sm:col-span-6">

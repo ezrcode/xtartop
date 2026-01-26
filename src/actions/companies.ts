@@ -10,6 +10,7 @@ import { getCurrentWorkspace } from "./workspace";
 
 const CompanySchema = z.object({
     name: z.string().min(1, "Company name is required"),
+    logoUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
     taxId: z.string().optional(),
     country: z.string().optional(),
     city: z.string().optional(),
@@ -139,6 +140,7 @@ export async function createCompanyAction(prevState: CompanyState | undefined, f
 
     const rawData = {
         name: formData.get("name"),
+        logoUrl: formData.get("logoUrl") || "",
         taxId: formData.get("taxId"),
         country: formData.get("country"),
         city: formData.get("city"),
@@ -190,6 +192,7 @@ export async function updateCompanyAction(id: string, prevState: CompanyState | 
 
     const rawData = {
         name: formData.get("name"),
+        logoUrl: formData.get("logoUrl") || "",
         taxId: formData.get("taxId"),
         country: formData.get("country"),
         city: formData.get("city"),
