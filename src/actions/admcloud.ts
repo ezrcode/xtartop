@@ -19,30 +19,11 @@ async function getAdmCloudConfig() {
         include: {
             ownedWorkspaces: {
                 take: 1,
-                select: {
-                    id: true,
-                    admCloudEnabled: true,
-                    admCloudAppId: true,
-                    admCloudUsername: true,
-                    admCloudPassword: true,
-                    admCloudCompany: true,
-                    admCloudRole: true,
-                }
             },
             memberships: {
                 take: 1,
                 include: {
-                    workspace: {
-                        select: {
-                            id: true,
-                            admCloudEnabled: true,
-                            admCloudAppId: true,
-                            admCloudUsername: true,
-                            admCloudPassword: true,
-                            admCloudCompany: true,
-                            admCloudRole: true,
-                        }
-                    }
+                    workspace: true
                 }
             }
         }
@@ -299,26 +280,11 @@ export async function checkAdmCloudStatus(): Promise<{
         include: {
             ownedWorkspaces: {
                 take: 1,
-                select: {
-                    admCloudEnabled: true,
-                    admCloudAppId: true,
-                    admCloudUsername: true,
-                    admCloudPassword: true,
-                    admCloudCompany: true,
-                }
             },
             memberships: {
                 take: 1,
                 include: {
-                    workspace: {
-                        select: {
-                            admCloudEnabled: true,
-                            admCloudAppId: true,
-                            admCloudUsername: true,
-                            admCloudPassword: true,
-                            admCloudCompany: true,
-                        }
-                    }
+                    workspace: true
                 }
             }
         }
