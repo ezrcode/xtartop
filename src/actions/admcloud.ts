@@ -147,65 +147,74 @@ export async function getCompanyInvoices(companyId: string): Promise<{
     error?: string;
     isConfigured?: boolean;
 }> {
-    const admCloudConfig = await getAdmCloudConfig();
-    
-    if (!admCloudConfig) {
-        return { 
-            success: false, 
-            error: "AdmCloud no está configurado",
-            isConfigured: false 
-        };
-    }
-
-    const company = await prisma.company.findUnique({
-        where: { id: companyId },
-        select: { admCloudRelationshipId: true, taxId: true, name: true }
-    });
-
-    if (!company) {
-        return { success: false, error: "Empresa no encontrada" };
-    }
-
-    const client = createAdmCloudClient(admCloudConfig.config);
-
-    // Si no tiene RelationshipId, intentar buscar por RNC
-    let relationshipId = company.admCloudRelationshipId;
-    
-    if (!relationshipId && company.taxId) {
-        const customerResult = await client.findCustomerByTaxId(company.taxId);
-        if (customerResult.success && customerResult.data) {
-            relationshipId = customerResult.data.ID;
-            
-            // Guardar el RelationshipId para futuras consultas
-            await prisma.company.update({
-                where: { id: companyId },
-                data: { 
-                    admCloudRelationshipId: relationshipId,
-                    admCloudLastSync: new Date()
-                }
-            });
+    try {
+        const admCloudConfig = await getAdmCloudConfig();
+        
+        if (!admCloudConfig) {
+            return { 
+                success: false, 
+                error: "AdmCloud no está configurado",
+                isConfigured: false 
+            };
         }
-    }
 
-    if (!relationshipId) {
+        const company = await prisma.company.findUnique({
+            where: { id: companyId },
+            select: { admCloudRelationshipId: true, taxId: true, name: true }
+        });
+
+        if (!company) {
+            return { success: false, error: "Empresa no encontrada", isConfigured: true };
+        }
+
+        const client = createAdmCloudClient(admCloudConfig.config);
+
+        // Si no tiene RelationshipId, intentar buscar por RNC
+        let relationshipId = company.admCloudRelationshipId;
+        
+        if (!relationshipId && company.taxId) {
+            const customerResult = await client.findCustomerByTaxId(company.taxId);
+            if (customerResult.success && customerResult.data) {
+                relationshipId = customerResult.data.ID;
+                
+                // Guardar el RelationshipId para futuras consultas
+                await prisma.company.update({
+                    where: { id: companyId },
+                    data: { 
+                        admCloudRelationshipId: relationshipId,
+                        admCloudLastSync: new Date()
+                    }
+                });
+            }
+        }
+
+        if (!relationshipId) {
+            return { 
+                success: false, 
+                error: "Esta empresa no está vinculada a un cliente en AdmCloud. Verifique que el RNC coincida.",
+                isConfigured: true
+            };
+        }
+
+        const invoicesResult = await client.getAllInvoices(relationshipId);
+        
+        if (!invoicesResult.success) {
+            return { success: false, error: invoicesResult.error, isConfigured: true };
+        }
+
+        return { 
+            success: true, 
+            invoices: invoicesResult.data || [],
+            isConfigured: true
+        };
+    } catch (error) {
+        console.error("Error in getCompanyInvoices:", error);
         return { 
             success: false, 
-            error: "Esta empresa no está vinculada a un cliente en AdmCloud. Verifique que el RNC coincida.",
+            error: "Error interno al obtener facturas",
             isConfigured: true
         };
     }
-
-    const invoicesResult = await client.getAllInvoices(relationshipId);
-    
-    if (!invoicesResult.success) {
-        return { success: false, error: invoicesResult.error, isConfigured: true };
-    }
-
-    return { 
-        success: true, 
-        invoices: invoicesResult.data || [],
-        isConfigured: true
-    };
 }
 
 /**
@@ -216,51 +225,56 @@ export async function syncCompanyWithAdmCloud(companyId: string): Promise<{
     customer?: AdmCloudCustomer;
     error?: string;
 }> {
-    const admCloudConfig = await getAdmCloudConfig();
-    
-    if (!admCloudConfig) {
-        return { success: false, error: "AdmCloud no está configurado" };
-    }
-
-    const company = await prisma.company.findUnique({
-        where: { id: companyId },
-        select: { taxId: true, name: true }
-    });
-
-    if (!company) {
-        return { success: false, error: "Empresa no encontrada" };
-    }
-
-    if (!company.taxId) {
-        return { success: false, error: "La empresa debe tener un RNC para sincronizar con AdmCloud" };
-    }
-
-    const client = createAdmCloudClient(admCloudConfig.config);
-    const customerResult = await client.findCustomerByTaxId(company.taxId);
-
-    if (!customerResult.success) {
-        return { success: false, error: customerResult.error };
-    }
-
-    if (!customerResult.data) {
-        return { 
-            success: false, 
-            error: `No se encontró un cliente en AdmCloud con el RNC: ${company.taxId}` 
-        };
-    }
-
-    // Actualizar la empresa con el RelationshipId
-    await prisma.company.update({
-        where: { id: companyId },
-        data: {
-            admCloudRelationshipId: customerResult.data.ID,
-            admCloudLastSync: new Date()
+    try {
+        const admCloudConfig = await getAdmCloudConfig();
+        
+        if (!admCloudConfig) {
+            return { success: false, error: "AdmCloud no está configurado" };
         }
-    });
 
-    revalidatePath(`/app/companies/${companyId}`);
+        const company = await prisma.company.findUnique({
+            where: { id: companyId },
+            select: { taxId: true, name: true }
+        });
 
-    return { success: true, customer: customerResult.data };
+        if (!company) {
+            return { success: false, error: "Empresa no encontrada" };
+        }
+
+        if (!company.taxId) {
+            return { success: false, error: "La empresa debe tener un RNC para sincronizar con AdmCloud" };
+        }
+
+        const client = createAdmCloudClient(admCloudConfig.config);
+        const customerResult = await client.findCustomerByTaxId(company.taxId);
+
+        if (!customerResult.success) {
+            return { success: false, error: customerResult.error };
+        }
+
+        if (!customerResult.data) {
+            return { 
+                success: false, 
+                error: `No se encontró un cliente en AdmCloud con el RNC: ${company.taxId}` 
+            };
+        }
+
+        // Actualizar la empresa con el RelationshipId
+        await prisma.company.update({
+            where: { id: companyId },
+            data: {
+                admCloudRelationshipId: customerResult.data.ID,
+                admCloudLastSync: new Date()
+            }
+        });
+
+        revalidatePath(`/app/companies/${companyId}`);
+
+        return { success: true, customer: customerResult.data };
+    } catch (error) {
+        console.error("Error in syncCompanyWithAdmCloud:", error);
+        return { success: false, error: "Error interno al sincronizar con AdmCloud" };
+    }
 }
 
 /**

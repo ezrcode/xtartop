@@ -89,14 +89,20 @@ export function InvoicesTab({
         setLoading(true);
         setError(null);
         
-        const result = await getCompanyInvoices(companyId);
-        
-        if (result.success && result.invoices) {
-            setInvoices(result.invoices);
+        try {
+            const result = await getCompanyInvoices(companyId);
+            
+            if (result.success && result.invoices) {
+                setInvoices(result.invoices);
+                setIsConfigured(true);
+            } else {
+                setError(result.error || "Error al cargar facturas");
+                setIsConfigured(result.isConfigured !== false);
+            }
+        } catch (err) {
+            console.error("Error loading invoices:", err);
+            setError("Error de conexión al cargar facturas");
             setIsConfigured(true);
-        } else {
-            setError(result.error || "Error al cargar facturas");
-            setIsConfigured(result.isConfigured !== false);
         }
         
         setLoading(false);
@@ -109,13 +115,18 @@ export function InvoicesTab({
     const handleSync = () => {
         setSyncMessage(null);
         startTransition(async () => {
-            const result = await syncCompanyWithAdmCloud(companyId);
-            if (result.success) {
-                setSyncMessage({ type: 'success', text: `Cliente vinculado: ${result.customer?.Name}` });
-                // Recargar facturas después de sincronizar
-                await loadInvoices();
-            } else {
-                setSyncMessage({ type: 'error', text: result.error || 'Error al sincronizar' });
+            try {
+                const result = await syncCompanyWithAdmCloud(companyId);
+                if (result.success) {
+                    setSyncMessage({ type: 'success', text: `Cliente vinculado: ${result.customer?.Name}` });
+                    // Recargar facturas después de sincronizar
+                    await loadInvoices();
+                } else {
+                    setSyncMessage({ type: 'error', text: result.error || 'Error al sincronizar' });
+                }
+            } catch (err) {
+                console.error("Error syncing with AdmCloud:", err);
+                setSyncMessage({ type: 'error', text: 'Error de conexión con AdmCloud' });
             }
         });
     };
