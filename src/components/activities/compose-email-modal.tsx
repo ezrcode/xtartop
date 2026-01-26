@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { X, Paperclip, Send, Loader2 } from "lucide-react";
 import { sendEmail } from "@/actions/email";
 
@@ -21,6 +22,7 @@ export function ComposeEmailModal({
     contactId,
     dealId,
 }: ComposeEmailModalProps) {
+    const router = useRouter();
     const [attachments, setAttachments] = useState<File[]>([]);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
@@ -51,6 +53,7 @@ export function ComposeEmailModal({
 
             if (result.success) {
                 setSuccess(true);
+                router.refresh();
                 setTimeout(() => {
                     formRef.current?.reset();
                     setAttachments([]);
