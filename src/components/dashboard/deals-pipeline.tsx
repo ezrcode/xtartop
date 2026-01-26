@@ -41,12 +41,12 @@ export function DealsPipeline({ data }: DealsPipelineProps) {
 
     if (filteredData.length === 0) {
         return (
-            <div className="bg-white rounded-xl border border-graphite-gray p-5">
+            <div className="bg-white rounded-xl border border-graphite-gray p-4 sm:p-5">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-sm font-semibold text-nearby-dark">Pipeline de Negocios</h3>
                     <TrendingUp size={18} className="text-gray-400" />
                 </div>
-                <div className="flex items-center justify-center h-48 text-gray-400 text-sm">
+                <div className="flex items-center justify-center h-40 sm:h-48 text-gray-400 text-sm">
                     No hay negocios registrados
                 </div>
             </div>
@@ -54,28 +54,31 @@ export function DealsPipeline({ data }: DealsPipelineProps) {
     }
 
     return (
-        <div className="bg-white rounded-xl border border-graphite-gray p-5">
+        <div className="bg-white rounded-xl border border-graphite-gray p-4 sm:p-5">
             <div className="flex items-center justify-between mb-2">
                 <h3 className="text-sm font-semibold text-nearby-dark">Pipeline de Negocios</h3>
-                <Link href="/app/deals" className="text-xs text-nearby-accent hover:underline">
+                <Link 
+                    href="/app/deals" 
+                    className="text-xs text-nearby-accent hover:underline py-1 px-2 -mr-2 rounded-lg active:bg-nearby-accent/10"
+                >
                     Ver todos
                 </Link>
             </div>
             
-            <div className="flex items-baseline gap-2 mb-4">
-                <span className="text-2xl font-bold text-nearby-dark">{totalDeals}</span>
-                <span className="text-sm text-gray-500">negocios · {formatCurrency(totalValue)}</span>
+            <div className="flex items-baseline gap-2 mb-3 sm:mb-4">
+                <span className="text-xl sm:text-2xl font-bold text-nearby-dark">{totalDeals}</span>
+                <span className="text-xs sm:text-sm text-gray-500">negocios · {formatCurrency(totalValue)}</span>
             </div>
 
-            <div className="h-48">
+            <div className="h-40 sm:h-48">
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={filteredData} layout="vertical" margin={{ left: 0, right: 10 }}>
                         <XAxis type="number" hide />
                         <YAxis 
                             type="category" 
                             dataKey="label" 
-                            width={90}
-                            tick={{ fontSize: 11, fill: "#6b7280" }}
+                            width={75}
+                            tick={{ fontSize: 10, fill: "#6b7280" }}
                             axisLine={false}
                             tickLine={false}
                         />

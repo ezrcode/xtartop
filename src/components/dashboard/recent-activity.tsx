@@ -28,11 +28,11 @@ const typeIcons: Record<string, { icon: typeof Mail; color: string; bg: string }
 export function RecentActivity({ activities }: RecentActivityProps) {
     if (activities.length === 0) {
         return (
-            <div className="bg-white rounded-xl border border-graphite-gray p-5">
+            <div className="bg-white rounded-xl border border-graphite-gray p-4 sm:p-5">
                 <h3 className="text-sm font-semibold text-nearby-dark mb-4">
                     Actividad Reciente
                 </h3>
-                <div className="text-center py-8 text-gray-400 text-sm">
+                <div className="text-center py-6 sm:py-8 text-gray-400 text-sm">
                     No hay actividad reciente
                 </div>
             </div>
@@ -40,11 +40,11 @@ export function RecentActivity({ activities }: RecentActivityProps) {
     }
 
     return (
-        <div className="bg-white rounded-xl border border-graphite-gray p-5">
-            <h3 className="text-sm font-semibold text-nearby-dark mb-4">
+        <div className="bg-white rounded-xl border border-graphite-gray p-4 sm:p-5">
+            <h3 className="text-sm font-semibold text-nearby-dark mb-3 sm:mb-4">
                 Actividad Reciente
             </h3>
-            <div className="space-y-3 max-h-[300px] overflow-y-auto">
+            <div className="space-y-2 sm:space-y-3 max-h-[250px] sm:max-h-[300px] overflow-y-auto">
                 {activities.map((activity, index) => {
                     const config = typeIcons[activity.type] || typeIcons.EMAIL;
                     const Icon = config.icon;
@@ -55,16 +55,16 @@ export function RecentActivity({ activities }: RecentActivityProps) {
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.05 }}
-                            className="flex items-start gap-3 p-3 rounded-lg hover:bg-soft-gray transition-colors"
+                            className="flex items-start gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-lg active:bg-soft-gray transition-colors"
                         >
-                            <div className={`w-8 h-8 rounded-full ${config.bg} flex items-center justify-center flex-shrink-0`}>
-                                <Icon size={14} className={config.color} />
+                            <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full ${config.bg} flex items-center justify-center flex-shrink-0`}>
+                                <Icon size={13} className={`${config.color} sm:w-3.5 sm:h-3.5`} />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-sm text-dark-slate font-medium truncate">
+                                <p className="text-xs sm:text-sm text-dark-slate font-medium truncate">
                                     {activity.subject}
                                 </p>
-                                <p className="text-xs text-gray-400 mt-0.5">
+                                <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5">
                                     {activity.userName} · {formatDistanceToNow(new Date(activity.createdAt), { 
                                         addSuffix: true, 
                                         locale: es 

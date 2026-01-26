@@ -57,10 +57,10 @@ export function PendingActions({
     ];
 
     return (
-        <div className="bg-white rounded-xl border border-graphite-gray p-5">
-            <h3 className="text-sm font-semibold text-nearby-dark mb-4">Acciones Pendientes</h3>
+        <div className="bg-white rounded-xl border border-graphite-gray p-4 sm:p-5">
+            <h3 className="text-sm font-semibold text-nearby-dark mb-3 sm:mb-4">Acciones Pendientes</h3>
             
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
                 {actions.map((action, index) => (
                     <motion.div
                         key={action.label}
@@ -70,11 +70,11 @@ export function PendingActions({
                     >
                         <Link
                             href={action.href}
-                            className={`block p-3 rounded-lg ${action.bgColor} hover:scale-[1.02] transition-transform`}
+                            className={`block p-3 sm:p-3 rounded-xl ${action.bgColor} active:scale-[0.98] transition-transform`}
                         >
-                            <div className="flex items-center justify-between mb-2">
-                                <action.icon size={16} className={action.color} />
-                                <span className={`text-xl font-bold ${action.color}`}>
+                            <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                                <action.icon size={18} className={action.color} />
+                                <span className={`text-lg sm:text-xl font-bold ${action.color}`}>
                                     {action.count}
                                 </span>
                             </div>

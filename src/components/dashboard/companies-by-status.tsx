@@ -37,12 +37,12 @@ export function CompaniesByStatus({ data }: CompaniesByStatusProps) {
 
     if (total === 0) {
         return (
-            <div className="bg-white rounded-xl border border-graphite-gray p-5">
+            <div className="bg-white rounded-xl border border-graphite-gray p-4 sm:p-5">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-sm font-semibold text-nearby-dark">Empresas por Estado</h3>
                     <Building2 size={18} className="text-gray-400" />
                 </div>
-                <div className="flex items-center justify-center h-48 text-gray-400 text-sm">
+                <div className="flex items-center justify-center h-40 sm:h-48 text-gray-400 text-sm">
                     No hay empresas registradas
                 </div>
             </div>
@@ -50,24 +50,27 @@ export function CompaniesByStatus({ data }: CompaniesByStatusProps) {
     }
 
     return (
-        <div className="bg-white rounded-xl border border-graphite-gray p-5">
-            <div className="flex items-center justify-between mb-4">
+        <div className="bg-white rounded-xl border border-graphite-gray p-4 sm:p-5">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <h3 className="text-sm font-semibold text-nearby-dark">Empresas por Estado</h3>
-                <Link href="/app/companies" className="text-xs text-nearby-accent hover:underline">
+                <Link 
+                    href="/app/companies" 
+                    className="text-xs text-nearby-accent hover:underline py-1 px-2 -mr-2 rounded-lg active:bg-nearby-accent/10"
+                >
                     Ver todas
                 </Link>
             </div>
 
-            <div className="flex items-center gap-4">
-                <div className="relative w-32 h-32 flex-shrink-0">
+            <div className="flex items-center gap-3 sm:gap-4">
+                <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0">
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                             <Pie
                                 data={filteredData}
                                 cx="50%"
                                 cy="50%"
-                                innerRadius={35}
-                                outerRadius={55}
+                                innerRadius={30}
+                                outerRadius={48}
                                 paddingAngle={2}
                                 dataKey="count"
                             >
@@ -91,18 +94,18 @@ export function CompaniesByStatus({ data }: CompaniesByStatusProps) {
                     </ResponsiveContainer>
                     {/* Center text */}
                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                        <span className="text-xl font-bold text-nearby-dark">{total}</span>
+                        <span className="text-lg sm:text-xl font-bold text-nearby-dark">{total}</span>
                         <span className="text-[10px] text-gray-500">total</span>
                     </div>
                 </div>
 
                 {/* Legend */}
-                <div className="flex-1 space-y-1.5">
+                <div className="flex-1 space-y-1 sm:space-y-1.5">
                     {filteredData.map((item) => (
-                        <div key={item.status} className="flex items-center justify-between text-xs">
+                        <div key={item.status} className="flex items-center justify-between text-xs py-0.5">
                             <div className="flex items-center gap-2">
                                 <div 
-                                    className="w-2.5 h-2.5 rounded-full" 
+                                    className="w-2.5 h-2.5 rounded-full flex-shrink-0" 
                                     style={{ backgroundColor: statusColors[item.status] || "#94a3b8" }}
                                 />
                                 <span className="text-gray-600">{statusLabels[item.status] || item.status}</span>

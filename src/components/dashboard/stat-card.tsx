@@ -54,20 +54,20 @@ export function StatCard({
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ y: -2 }}
             transition={{ duration: 0.3 }}
-            className="bg-white rounded-xl border border-graphite-gray p-5 hover:shadow-lg transition-shadow"
+            className="bg-white rounded-xl border border-graphite-gray p-3 sm:p-5 hover:shadow-lg transition-shadow active:scale-[0.98]"
         >
-            <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+                <span className="text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wide">
                     {title}
                 </span>
-                <div className={`w-10 h-10 rounded-lg ${styles.bg} flex items-center justify-center`}>
-                    <Icon size={20} className={styles.icon} />
+                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg ${styles.bg} flex items-center justify-center`}>
+                    <Icon size={18} className={`${styles.icon} sm:w-5 sm:h-5`} />
                 </div>
             </div>
             
-            <div className="flex items-baseline gap-2">
+            <div className="flex items-baseline gap-1.5 sm:gap-2">
                 <motion.span 
-                    className="text-2xl font-bold text-nearby-dark"
+                    className="text-xl sm:text-2xl font-bold text-nearby-dark"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2 }}
@@ -76,13 +76,13 @@ export function StatCard({
                 </motion.span>
                 
                 {trend && (
-                    <span className={`flex items-center text-xs font-medium ${
+                    <span className={`flex items-center text-[10px] sm:text-xs font-medium ${
                         trend.isPositive ? "text-success-green" : "text-error-red"
                     }`}>
                         {trend.isPositive ? (
-                            <TrendingUp size={14} className="mr-0.5" />
+                            <TrendingUp size={12} className="mr-0.5" />
                         ) : (
-                            <TrendingDown size={14} className="mr-0.5" />
+                            <TrendingDown size={12} className="mr-0.5" />
                         )}
                         {trend.value}%
                     </span>
@@ -90,7 +90,7 @@ export function StatCard({
             </div>
             
             {description && (
-                <p className="text-xs text-gray-500 mt-2">{description}</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 mt-1.5 sm:mt-2">{description}</p>
             )}
         </motion.div>
     );
