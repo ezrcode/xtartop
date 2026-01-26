@@ -9,6 +9,7 @@ import { Company, Contact, CompanyStatus, ClientInvitation, Project, ClientUser 
 import { CompanyActivitiesWithSuspense } from "../activities/company-activities-with-suspense";
 import { ProjectsTable } from "./projects-table";
 import { ClientUsersTable } from "./client-users-table";
+import { CompanyContactsTab } from "./company-contacts-tab";
 
 type CompanyWithTerms = Company & { 
     primaryContact?: Contact | null;
@@ -82,7 +83,7 @@ function DeleteButton() {
 
 export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFormProps) {
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState<"general" | "subscription">("general");
+    const [activeTab, setActiveTab] = useState<"general" | "contacts" | "subscription">("general");
 
     const updateAction = company ? updateCompanyAction.bind(null, company.id) : () => Promise.resolve({ message: "Error" });
 
@@ -157,6 +158,17 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                         }`}
                                     >
                                         Información General
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setActiveTab("contacts")}
+                                        className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                                            activeTab === "contacts"
+                                                ? "border-nearby-accent text-nearby-accent"
+                                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                        }`}
+                                    >
+                                        Contactos
                                     </button>
                                     <button
                                         type="button"
@@ -398,6 +410,14 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                             </div>
                                         </div>
                                     </div>
+                                )}
+
+                                {/* Tab Content: Contacts */}
+                                {activeTab === "contacts" && company && (
+                                    <CompanyContactsTab 
+                                        companyId={company.id} 
+                                        contacts={contacts.filter(c => c.companyId === company.id)} 
+                                    />
                                 )}
 
                                 {/* Tab Content: Subscription - Contract Data + Projects */}

@@ -264,3 +264,112 @@ export async function deleteContact(id: string) {
 
     redirect("/app/contacts");
 }
+
+// ============================================
+// Company Contacts Actions (for modal CRUD)
+// ============================================
+
+export async function createCompanyContact(
+    companyId: string,
+    data: {
+        fullName: string;
+        email: string;
+        title?: string;
+        mobile?: string;
+        instagramUrl?: string;
+        linkedinUrl?: string;
+    }
+) {
+    const session = await auth();
+    if (!session?.user?.email) {
+        return { error: "No autorizado" };
+    }
+
+    const user = await prisma.user.findUnique({ where: { email: session.user.email } });
+    if (!user) {
+        return { error: "Usuario no encontrado" };
+    }
+
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) {
+        return { error: "Workspace no encontrado" };
+    }
+
+    try {
+        const contact = await prisma.contact.create({
+            data: {
+                fullName: data.fullName,
+                email: data.email,
+                title: data.title || null,
+                mobile: data.mobile || null,
+                instagramUrl: data.instagramUrl || null,
+                linkedinUrl: data.linkedinUrl || null,
+                companyId,
+                workspaceId: workspace.id,
+                createdById: user.id,
+                status: ContactStatus.PROSPECTO,
+            },
+        });
+
+        return { success: true, contact };
+    } catch (error) {
+        console.error("Error creating contact:", error);
+        return { error: "Error al crear el contacto" };
+    }
+}
+
+export async function updateCompanyContact(
+    contactId: string,
+    data: {
+        fullName: string;
+        email: string;
+        title?: string;
+        mobile?: string;
+        instagramUrl?: string;
+        linkedinUrl?: string;
+        status?: ContactStatus;
+    }
+) {
+    const session = await auth();
+    if (!session?.user?.email) {
+        return { error: "No autorizado" };
+    }
+
+    try {
+        const contact = await prisma.contact.update({
+            where: { id: contactId },
+            data: {
+                fullName: data.fullName,
+                email: data.email,
+                title: data.title || null,
+                mobile: data.mobile || null,
+                instagramUrl: data.instagramUrl || null,
+                linkedinUrl: data.linkedinUrl || null,
+                status: data.status,
+            },
+        });
+
+        return { success: true, contact };
+    } catch (error) {
+        console.error("Error updating contact:", error);
+        return { error: "Error al actualizar el contacto" };
+    }
+}
+
+export async function deleteCompanyContact(contactId: string) {
+    const session = await auth();
+    if (!session?.user?.email) {
+        return { error: "No autorizado" };
+    }
+
+    try {
+        await prisma.contact.delete({
+            where: { id: contactId },
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error deleting contact:", error);
+        return { error: "Error al eliminar el contacto" };
+    }
+}
