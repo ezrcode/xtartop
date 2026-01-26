@@ -9,27 +9,37 @@ export const revalidate = 60;
 async function getBasicStats(workspaceId: string) {
     try {
         const [
-            companiesCount, 
+            allCompaniesCount,
+            clientCompaniesCount, 
             contactsCount, 
             dealsCount,
             activeProjects,
             activeClientUsers,
             pipelineValue
         ] = await Promise.all([
+            // Total de empresas (todas)
             prisma.company.count({ where: { workspaceId } }),
+            // Empresas con status CLIENTE
+            prisma.company.count({ where: { workspaceId, status: "CLIENTE" } }),
             prisma.contact.count({ where: { workspaceId } }),
             prisma.deal.count({ where: { workspaceId } }),
-            // Total proyectos activos
+            // Total proyectos activos (solo de empresas CLIENTE)
             prisma.project.count({ 
                 where: { 
-                    company: { workspaceId },
+                    company: { 
+                        workspaceId,
+                        status: "CLIENTE"
+                    },
                     status: "ACTIVE" 
                 } 
             }),
-            // Total usuarios cliente activos
+            // Total usuarios cliente activos (solo de empresas CLIENTE)
             prisma.clientUser.count({ 
                 where: { 
-                    company: { workspaceId },
+                    company: { 
+                        workspaceId,
+                        status: "CLIENTE"
+                    },
                     status: "ACTIVE" 
                 } 
             }),
@@ -43,13 +53,14 @@ async function getBasicStats(workspaceId: string) {
             })
         ]);
 
-        // Calcular MRR y ARR
+        // Calcular MRR y ARR (basado solo en empresas CLIENTE)
         const mrr = (activeClientUsers * 50) + (activeProjects * 100);
         const arr = mrr * 12;
         const pipeline = Number(pipelineValue._sum.value || 0);
 
         return { 
-            companiesCount, 
+            allCompaniesCount,
+            clientCompaniesCount, 
             contactsCount, 
             dealsCount,
             activeProjects,
@@ -61,7 +72,8 @@ async function getBasicStats(workspaceId: string) {
     } catch (error) {
         console.error("Error fetching stats:", error);
         return { 
-            companiesCount: 0, 
+            allCompaniesCount: 0,
+            clientCompaniesCount: 0, 
             contactsCount: 0, 
             dealsCount: 0,
             activeProjects: 0,
@@ -101,8 +113,9 @@ export default async function DashboardPage() {
                 {/* Stats Grid - Row 1: CRM básico */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4">
                     <div className="bg-white rounded-xl border border-graphite-gray p-3 sm:p-4">
-                        <p className="text-[10px] sm:text-xs text-gray-500 uppercase mb-1">Empresas</p>
-                        <p className="text-xl sm:text-2xl font-bold text-nearby-dark">{stats?.companiesCount || 0}</p>
+                        <p className="text-[10px] sm:text-xs text-gray-500 uppercase mb-1">Clientes</p>
+                        <p className="text-xl sm:text-2xl font-bold text-nearby-dark">{stats?.clientCompaniesCount || 0}</p>
+                        <p className="text-[10px] text-gray-400 mt-1">{stats?.allCompaniesCount || 0} empresas total</p>
                     </div>
                     <div className="bg-white rounded-xl border border-graphite-gray p-3 sm:p-4">
                         <p className="text-[10px] sm:text-xs text-gray-500 uppercase mb-1">Contactos</p>
@@ -198,7 +211,7 @@ export default async function DashboardPage() {
                 <div className="bg-white rounded-xl border border-graphite-gray p-5">
                     <h3 className="text-sm font-semibold text-nearby-dark mb-4">Resumen</h3>
                     <p className="text-gray-500 text-sm">
-                        Tienes {stats?.companiesCount || 0} empresas, {stats?.contactsCount || 0} contactos 
+                        Tienes {stats?.clientCompaniesCount || 0} clientes activos de {stats?.allCompaniesCount || 0} empresas, {stats?.contactsCount || 0} contactos 
                         y {stats?.dealsCount || 0} negocios en tu CRM.
                     </p>
                 </div>
