@@ -1,6 +1,7 @@
 import { getCompanies } from "@/actions/companies";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import Image from "next/image";
+import { Plus, Building2 } from "lucide-react";
 
 // Cache for 30 seconds - good balance for list pages
 export const revalidate = 30;
@@ -48,6 +49,9 @@ export default async function CompaniesPage() {
                                 <table className="min-w-full divide-y divide-graphite-gray">
                                     <thead className="bg-soft-gray">
                                         <tr>
+                                            <th scope="col" className="w-14 px-3 py-3">
+                                                <span className="sr-only">Logo</span>
+                                            </th>
                                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
                                                 Nombre o Razón Social
                                             </th>
@@ -68,6 +72,23 @@ export default async function CompaniesPage() {
                                     <tbody className="bg-white divide-y divide-graphite-gray">
                                         {companies.map((company) => (
                                             <tr key={company.id} className="hover:bg-soft-gray transition-colors">
+                                                <td className="px-3 py-3 whitespace-nowrap">
+                                                    <Link href={`/app/companies/${company.id}`}>
+                                                        <div className="w-10 h-10 rounded-lg bg-gray-100 border border-graphite-gray overflow-hidden flex items-center justify-center">
+                                                            {company.logoUrl ? (
+                                                                <Image
+                                                                    src={company.logoUrl}
+                                                                    alt={company.name}
+                                                                    width={40}
+                                                                    height={40}
+                                                                    className="object-contain"
+                                                                />
+                                                            ) : (
+                                                                <Building2 size={20} className="text-gray-400" />
+                                                            )}
+                                                        </div>
+                                                    </Link>
+                                                </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <Link
                                                         href={`/app/companies/${company.id}`}
@@ -126,34 +147,51 @@ export default async function CompaniesPage() {
                                         href={`/app/companies/${company.id}`}
                                         className="block p-4 hover:bg-soft-gray transition-colors"
                                     >
-                                        <div className="flex items-start justify-between mb-2">
-                                            <h3 className="text-base font-semibold text-nearby-accent">
-                                                {company.name}
-                                            </h3>
-                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${company.status === "CLIENTE"
-                                                ? "bg-success-green/10 text-success-green"
-                                                : company.status === "POTENCIAL"
-                                                    ? "bg-nearby-accent/10 text-nearby-accent"
-                                                    : company.status === "PROSPECTO"
-                                                        ? "bg-gray-100 text-gray-800"
-                                                        : company.status === "DESCARTADA"
-                                                            ? "bg-error-red/10 text-error-red"
-                                                            : "bg-gray-100 text-gray-600"
-                                                }`}>
-                                                {company.status}
-                                            </span>
-                                        </div>
-                                        <div className="space-y-1 text-sm text-dark-slate">
-                                            {(company.city || company.country) && (
-                                                <p>
-                                                    <span className="font-medium">Ubicación:</span> {[company.city, company.country].filter(Boolean).join(", ") || "-"}
-                                                </p>
-                                            )}
-                                            {company.primaryContact && (
-                                                <p>
-                                                    <span className="font-medium">Contacto:</span> {company.primaryContact.fullName}
-                                                </p>
-                                            )}
+                                        <div className="flex items-start gap-3 mb-2">
+                                            <div className="w-10 h-10 rounded-lg bg-gray-100 border border-graphite-gray overflow-hidden flex items-center justify-center flex-shrink-0">
+                                                {company.logoUrl ? (
+                                                    <Image
+                                                        src={company.logoUrl}
+                                                        alt={company.name}
+                                                        width={40}
+                                                        height={40}
+                                                        className="object-contain"
+                                                    />
+                                                ) : (
+                                                    <Building2 size={20} className="text-gray-400" />
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-start justify-between">
+                                                    <h3 className="text-base font-semibold text-nearby-accent truncate">
+                                                        {company.name}
+                                                    </h3>
+                                                    <span className={`ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full flex-shrink-0 ${company.status === "CLIENTE"
+                                                        ? "bg-success-green/10 text-success-green"
+                                                        : company.status === "POTENCIAL"
+                                                            ? "bg-nearby-accent/10 text-nearby-accent"
+                                                            : company.status === "PROSPECTO"
+                                                                ? "bg-gray-100 text-gray-800"
+                                                                : company.status === "DESCARTADA"
+                                                                    ? "bg-error-red/10 text-error-red"
+                                                                    : "bg-gray-100 text-gray-600"
+                                                    }`}>
+                                                        {company.status}
+                                                    </span>
+                                                </div>
+                                                <div className="space-y-1 text-sm text-dark-slate mt-1">
+                                                    {(company.city || company.country) && (
+                                                        <p>
+                                                            <span className="font-medium">Ubicación:</span> {[company.city, company.country].filter(Boolean).join(", ") || "-"}
+                                                        </p>
+                                                    )}
+                                                    {company.primaryContact && (
+                                                        <p>
+                                                            <span className="font-medium">Contacto:</span> {company.primaryContact.fullName}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
                                     </Link>
                                 ))}
