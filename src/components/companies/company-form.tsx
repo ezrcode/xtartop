@@ -5,9 +5,8 @@ import { useFormState, useFormStatus } from "react-dom";
 import Link from "next/link";
 import { Save, Trash2, ArrowLeft, Loader2 } from "lucide-react";
 import { createCompanyAction, updateCompanyAction, deleteCompany, CompanyState } from "@/actions/companies";
-import { Company, Contact, CompanyStatus, CompanyOrigin, ClientInvitation } from "@prisma/client";
-import { ActivitiesWithSuspense } from "../activities/activities-with-suspense";
-import { SubscriptionTab } from "./subscription-tab";
+import { Company, Contact, CompanyStatus, ClientInvitation } from "@prisma/client";
+import { CompanyActivitiesWithSuspense } from "../activities/company-activities-with-suspense";
 
 type CompanyWithTerms = Company & { 
     primaryContact?: Contact | null;
@@ -397,22 +396,57 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                     </div>
                                 )}
 
-                                {/* Tab Content: Subscription */}
+                                {/* Tab Content: Subscription - Contract Data Only */}
                                 {activeTab === "subscription" && company && (
-                                    <SubscriptionTab
-                                        company={{
-                                            id: company.id,
-                                            name: company.name,
-                                            legalName: company.legalName,
-                                            taxId: company.taxId,
-                                            fiscalAddress: company.fiscalAddress,
-                                            termsAccepted: company.termsAccepted,
-                                            termsAcceptedAt: company.termsAcceptedAt,
-                                            termsAcceptedByName: company.termsAcceptedByName,
-                                            termsVersion: company.termsVersion,
-                                        }}
-                                        contacts={contacts}
-                                        pendingInvitations={company.clientInvitations?.map(inv => ({
+                                    <div className="space-y-6">
+                                        {/* Company Data for Contract */}
+                                        <div>
+                                            <h3 className="text-md font-semibold text-nearby-dark mb-3">
+                                                Datos para el Contrato
+                                            </h3>
+                                            <p className="text-sm text-dark-slate mb-4">
+                                                Estos datos son completados por el cliente a través del portal de onboarding.
+                                            </p>
+                                            <div className="grid grid-cols-1 gap-4">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-dark-slate mb-1">
+                                                        Razón Social
+                                                    </label>
+                                                    <div className="px-3 py-2 border border-graphite-gray rounded-md bg-white text-sm">
+                                                        {company.legalName || <span className="text-gray-400 italic">Pendiente</span>}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-dark-slate mb-1">
+                                                        RNC
+                                                    </label>
+                                                    <div className="px-3 py-2 border border-graphite-gray rounded-md bg-white text-sm">
+                                                        {company.taxId || <span className="text-gray-400 italic">Pendiente</span>}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-dark-slate mb-1">
+                                                        Dirección Fiscal
+                                                    </label>
+                                                    <div className="px-3 py-2 border border-graphite-gray rounded-md bg-white text-sm">
+                                                        {company.fiscalAddress || <span className="text-gray-400 italic">Pendiente</span>}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Right Column: Activities */}
+                        <div className="lg:col-span-5">
+                            <div className="bg-white shadow-sm rounded-lg border border-graphite-gray p-6 h-full min-h-[400px]">
+                                {isEditMode && company ? (
+                                    <CompanyActivitiesWithSuspense
+                                        companyId={company.id}
+                                        defaultEmail={company.primaryContact?.email || ""}
+                                        clientInvitations={company.clientInvitations?.map(inv => ({
                                             id: inv.id,
                                             contactId: inv.contactId,
                                             status: inv.status,
@@ -423,19 +457,13 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                 email: inv.contact.email,
                                             },
                                         })) || []}
-                                    />
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Right Column: Activities */}
-                        <div className="lg:col-span-5">
-                            <div className="bg-white shadow-sm rounded-lg border border-graphite-gray p-6 h-full min-h-[400px]">
-                                {isEditMode && company ? (
-                                    <ActivitiesWithSuspense
-                                        entityType="company"
-                                        entityId={company.id}
-                                        defaultEmail={company.primaryContact?.email || ""}
+                                        contractStatus={{
+                                            termsAccepted: company.termsAccepted,
+                                            termsAcceptedAt: company.termsAcceptedAt,
+                                            termsAcceptedByName: company.termsAcceptedByName,
+                                            termsVersion: company.termsVersion,
+                                        }}
+                                        companyContacts={contacts.filter(c => c.companyId === company.id)}
                                     />
                                 ) : (
                                     <div className="flex flex-col items-center justify-center h-64 text-center border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
