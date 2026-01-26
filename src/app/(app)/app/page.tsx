@@ -8,15 +8,68 @@ export const revalidate = 60;
 
 async function getBasicStats(workspaceId: string) {
     try {
-        const [companiesCount, contactsCount, dealsCount] = await Promise.all([
+        const [
+            companiesCount, 
+            contactsCount, 
+            dealsCount,
+            activeProjects,
+            activeClientUsers,
+            pipelineValue
+        ] = await Promise.all([
             prisma.company.count({ where: { workspaceId } }),
             prisma.contact.count({ where: { workspaceId } }),
             prisma.deal.count({ where: { workspaceId } }),
+            // Total proyectos activos
+            prisma.project.count({ 
+                where: { 
+                    company: { workspaceId },
+                    status: "ACTIVE" 
+                } 
+            }),
+            // Total usuarios cliente activos
+            prisma.clientUser.count({ 
+                where: { 
+                    company: { workspaceId },
+                    status: "ACTIVE" 
+                } 
+            }),
+            // Pipeline: suma del valor de negocios que no están cerrados
+            prisma.deal.aggregate({
+                where: {
+                    workspaceId,
+                    status: { notIn: ["CIERRE_GANADO", "CIERRE_PERDIDO"] }
+                },
+                _sum: { value: true }
+            })
         ]);
-        return { companiesCount, contactsCount, dealsCount };
+
+        // Calcular MRR y ARR
+        const mrr = (activeClientUsers * 50) + (activeProjects * 100);
+        const arr = mrr * 12;
+        const pipeline = Number(pipelineValue._sum.value || 0);
+
+        return { 
+            companiesCount, 
+            contactsCount, 
+            dealsCount,
+            activeProjects,
+            activeClientUsers,
+            mrr,
+            arr,
+            pipeline
+        };
     } catch (error) {
         console.error("Error fetching stats:", error);
-        return { companiesCount: 0, contactsCount: 0, dealsCount: 0 };
+        return { 
+            companiesCount: 0, 
+            contactsCount: 0, 
+            dealsCount: 0,
+            activeProjects: 0,
+            activeClientUsers: 0,
+            mrr: 0,
+            arr: 0,
+            pipeline: 0
+        };
     }
 }
 
@@ -45,23 +98,59 @@ export default async function DashboardPage() {
                     </p>
                 </div>
 
-                {/* Stats Grid - Simple version */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <div className="bg-white rounded-xl border border-graphite-gray p-4">
-                        <p className="text-xs text-gray-500 uppercase mb-1">Empresas</p>
-                        <p className="text-2xl font-bold text-nearby-dark">{stats?.companiesCount || 0}</p>
+                {/* Stats Grid - Row 1: CRM básico */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4">
+                    <div className="bg-white rounded-xl border border-graphite-gray p-3 sm:p-4">
+                        <p className="text-[10px] sm:text-xs text-gray-500 uppercase mb-1">Empresas</p>
+                        <p className="text-xl sm:text-2xl font-bold text-nearby-dark">{stats?.companiesCount || 0}</p>
                     </div>
-                    <div className="bg-white rounded-xl border border-graphite-gray p-4">
-                        <p className="text-xs text-gray-500 uppercase mb-1">Contactos</p>
-                        <p className="text-2xl font-bold text-nearby-dark">{stats?.contactsCount || 0}</p>
+                    <div className="bg-white rounded-xl border border-graphite-gray p-3 sm:p-4">
+                        <p className="text-[10px] sm:text-xs text-gray-500 uppercase mb-1">Contactos</p>
+                        <p className="text-xl sm:text-2xl font-bold text-nearby-dark">{stats?.contactsCount || 0}</p>
                     </div>
-                    <div className="bg-white rounded-xl border border-graphite-gray p-4">
-                        <p className="text-xs text-gray-500 uppercase mb-1">Negocios</p>
-                        <p className="text-2xl font-bold text-nearby-dark">{stats?.dealsCount || 0}</p>
+                    <div className="bg-white rounded-xl border border-graphite-gray p-3 sm:p-4">
+                        <p className="text-[10px] sm:text-xs text-gray-500 uppercase mb-1">Negocios</p>
+                        <p className="text-xl sm:text-2xl font-bold text-nearby-dark">{stats?.dealsCount || 0}</p>
                     </div>
-                    <div className="bg-white rounded-xl border border-graphite-gray p-4">
-                        <p className="text-xs text-gray-500 uppercase mb-1">Pipeline</p>
-                        <p className="text-2xl font-bold text-nearby-dark">$0</p>
+                    <div className="bg-white rounded-xl border border-graphite-gray p-3 sm:p-4">
+                        <p className="text-[10px] sm:text-xs text-gray-500 uppercase mb-1">Pipeline</p>
+                        <p className="text-xl sm:text-2xl font-bold text-nearby-accent">
+                            ${((stats?.pipeline || 0) >= 1000000 
+                                ? ((stats?.pipeline || 0) / 1000000).toFixed(1) + 'M' 
+                                : (stats?.pipeline || 0) >= 1000 
+                                    ? ((stats?.pipeline || 0) / 1000).toFixed(0) + 'K' 
+                                    : (stats?.pipeline || 0).toLocaleString())}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Stats Grid - Row 2: Suscripciones y Revenue */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+                    <div className="bg-white rounded-xl border border-graphite-gray p-3 sm:p-4">
+                        <p className="text-[10px] sm:text-xs text-gray-500 uppercase mb-1">Proyectos Activos</p>
+                        <p className="text-xl sm:text-2xl font-bold text-nearby-dark">{stats?.activeProjects || 0}</p>
+                        <p className="text-[10px] text-gray-400 mt-1">$100 USD c/u</p>
+                    </div>
+                    <div className="bg-white rounded-xl border border-graphite-gray p-3 sm:p-4">
+                        <p className="text-[10px] sm:text-xs text-gray-500 uppercase mb-1">Usuarios Activos</p>
+                        <p className="text-xl sm:text-2xl font-bold text-nearby-dark">{stats?.activeClientUsers || 0}</p>
+                        <p className="text-[10px] text-gray-400 mt-1">$50 USD c/u</p>
+                    </div>
+                    <div className="bg-white rounded-xl border border-graphite-gray p-3 sm:p-4 bg-gradient-to-br from-blue-50 to-white">
+                        <p className="text-[10px] sm:text-xs text-blue-600 uppercase mb-1 font-medium">MRR</p>
+                        <p className="text-xl sm:text-2xl font-bold text-blue-700">
+                            ${(stats?.mrr || 0).toLocaleString()}
+                        </p>
+                        <p className="text-[10px] text-blue-500 mt-1">Mensual recurrente</p>
+                    </div>
+                    <div className="bg-white rounded-xl border border-graphite-gray p-3 sm:p-4 bg-gradient-to-br from-green-50 to-white">
+                        <p className="text-[10px] sm:text-xs text-green-600 uppercase mb-1 font-medium">ARR</p>
+                        <p className="text-xl sm:text-2xl font-bold text-green-700">
+                            ${((stats?.arr || 0) >= 1000 
+                                ? ((stats?.arr || 0) / 1000).toFixed(1) + 'K' 
+                                : (stats?.arr || 0).toLocaleString())}
+                        </p>
+                        <p className="text-[10px] text-green-500 mt-1">Anual recurrente</p>
                     </div>
                 </div>
 
