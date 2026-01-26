@@ -227,7 +227,8 @@ export async function getCompanyInvoices(companyId: string): Promise<{
             };
         }
 
-        const invoicesResult = await client.getAllInvoices(relationshipId);
+        // Por ahora, consultar solo facturas a crédito
+        const invoicesResult = await client.getCreditInvoices(relationshipId);
         
         if (!invoicesResult.success) {
             return { success: false, error: invoicesResult.error, isConfigured: true };
@@ -239,10 +240,11 @@ export async function getCompanyInvoices(companyId: string): Promise<{
             isConfigured: true
         };
     } catch (error) {
-        console.error("Error in getCompanyInvoices:", error);
+        const message = error instanceof Error ? error.message : String(error);
+        console.error("Error in getCompanyInvoices:", message, error);
         return { 
             success: false, 
-            error: "Error interno al obtener facturas",
+            error: `Error interno al obtener facturas: ${message}`,
             isConfigured: true
         };
     }
@@ -312,8 +314,9 @@ export async function syncCompanyWithAdmCloud(companyId: string): Promise<{
 
         return { success: true, customer: customerResult.data };
     } catch (error) {
-        console.error("Error in syncCompanyWithAdmCloud:", error);
-        return { success: false, error: "Error interno al sincronizar con AdmCloud" };
+        const message = error instanceof Error ? error.message : String(error);
+        console.error("Error in syncCompanyWithAdmCloud:", message, error);
+        return { success: false, error: `Error interno al sincronizar con AdmCloud: ${message}` };
     }
 }
 

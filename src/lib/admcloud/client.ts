@@ -146,8 +146,17 @@ class AdmCloudClient {
                 };
             }
 
-            const data = await response.json();
-            return { success: true, data };
+            const payload = await response.json();
+            if (payload && typeof payload === 'object' && 'success' in payload && 'data' in payload) {
+                if (!payload.success) {
+                    return {
+                        success: false,
+                        error: payload.message || 'Error desconocido en respuesta de AdmCloud',
+                    };
+                }
+                return { success: true, data: payload.data };
+            }
+            return { success: true, data: payload };
         } catch (error) {
             console.error('[AdmCloud] Exception:', error);
             return {
@@ -155,6 +164,11 @@ class AdmCloudClient {
                 error: error instanceof Error ? error.message : 'Error desconocido',
             };
         }
+    }
+
+    private normalizeList<T>(data: T | T[] | null | undefined): T[] {
+        if (!data) return [];
+        return Array.isArray(data) ? data : [data];
     }
 
     /**
@@ -175,17 +189,24 @@ class AdmCloudClient {
      * Buscar cliente por RNC (FiscalID)
      */
     async findCustomerByTaxId(taxId: string): Promise<AdmCloudApiResponse<AdmCloudCustomer | null>> {
-        const customers = await this.getCustomers();
-        if (!customers.success || !customers.data) {
-            return { success: false, error: customers.error };
-        }
-        
         // Normalizar el taxId removiendo guiones y espacios
         const normalizedTaxId = taxId.replace(/[-\s]/g, '');
-        const customer = customers.data.find(c => 
+
+        // La API permite filtrar por FiscalID directamente
+        const response = await this.request<AdmCloudCustomer | AdmCloudCustomer[]>('/Customers', {}, {
+            FiscalID: normalizedTaxId,
+        });
+
+        if (!response.success) {
+            return { success: false, error: response.error };
+        }
+
+        const customerList = this.normalizeList(response.data);
+
+        const customer = customerList.find(c =>
             c.FiscalID?.replace(/[-\s]/g, '') === normalizedTaxId
         );
-        
+
         return { success: true, data: customer || null };
     }
 
@@ -193,14 +214,22 @@ class AdmCloudClient {
      * Obtener facturas de contado de un cliente
      */
     async getCashInvoices(relationshipId: string): Promise<AdmCloudApiResponse<AdmCloudInvoice[]>> {
-        return this.request<AdmCloudInvoice[]>('/CashInvoices', {}, { RelationshipID: relationshipId });
+        const response = await this.request<AdmCloudInvoice[] | AdmCloudInvoice>('/CashInvoices', {}, { RelationshipID: relationshipId });
+        if (!response.success) {
+            return { success: false, error: response.error };
+        }
+        return { success: true, data: this.normalizeList(response.data) };
     }
 
     /**
      * Obtener facturas a crédito de un cliente
      */
     async getCreditInvoices(relationshipId: string): Promise<AdmCloudApiResponse<AdmCloudInvoice[]>> {
-        return this.request<AdmCloudInvoice[]>('/CreditInvoices', {}, { RelationshipID: relationshipId });
+        const response = await this.request<AdmCloudInvoice[] | AdmCloudInvoice>('/CreditInvoices', {}, { RelationshipID: relationshipId });
+        if (!response.success) {
+            return { success: false, error: response.error };
+        }
+        return { success: true, data: this.normalizeList(response.data) };
     }
 
     /**
@@ -217,8 +246,8 @@ class AdmCloudClient {
         }
 
         const allInvoices = [
-            ...(cashResult.data || []),
-            ...(creditResult.data || []),
+            ...this.normalizeList(cashResult.data),
+            ...this.normalizeList(creditResult.data),
         ];
 
         // Ordenar por fecha (más reciente primero)
