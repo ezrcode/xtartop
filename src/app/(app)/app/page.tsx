@@ -6,15 +6,37 @@ import { Building2, Users, TrendingUp, DollarSign } from "lucide-react";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { QuickActions } from "@/components/dashboard/quick-actions";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
+import { DealsPipeline } from "@/components/dashboard/deals-pipeline";
+import { CompaniesByStatus } from "@/components/dashboard/companies-by-status";
+import { RevenueMetrics } from "@/components/dashboard/revenue-metrics";
+import { PendingActions } from "@/components/dashboard/pending-actions";
 
 // Cache for 60 seconds - dashboard doesn't need real-time updates
 export const revalidate = 60;
 
 async function getDashboardStats(workspaceId: string) {
-    const [companiesCount, contactsCount, dealsCount, recentActivities] = await Promise.all([
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const [
+        companiesCount, 
+        contactsCount, 
+        dealsCount, 
+        recentActivities,
+        dealsByStatus,
+        companiesByStatus,
+        revenueData,
+        pendingInvitations,
+        draftQuotes,
+        pendingOnboarding,
+        todayActivities,
+    ] = await Promise.all([
+        // Basic counts
         prisma.company.count({ where: { workspaceId } }),
         prisma.contact.count({ where: { workspaceId } }),
         prisma.deal.count({ where: { workspaceId } }),
+        
+        // Recent activities
         prisma.activity.findMany({
             where: { 
                 workspaceId,
@@ -26,7 +48,121 @@ async function getDashboardStats(workspaceId: string) {
             orderBy: { createdAt: "desc" },
             take: 10,
         }),
+
+        // Deals by status for pipeline
+        prisma.deal.groupBy({
+            by: ["status"],
+            where: { workspaceId },
+            _count: { id: true },
+            _sum: { value: true },
+        }),
+
+        // Companies by status
+        prisma.company.groupBy({
+            by: ["status"],
+            where: { workspaceId },
+            _count: { id: true },
+        }),
+
+        // Revenue data - sum MRR and ARR from deals
+        prisma.deal.aggregate({
+            where: { 
+                workspaceId,
+                status: { in: ["NEGOCIACION", "FORMALIZACION", "CIERRE_GANADO"] }
+            },
+            _sum: { mrr: true, arr: true, value: true },
+        }),
+
+        // Pending invitations
+        prisma.clientInvitation.count({
+            where: { 
+                company: { workspaceId },
+                status: "PENDING"
+            }
+        }),
+
+        // Draft quotes
+        prisma.quote.count({
+            where: {
+                deal: { workspaceId },
+                status: "BORRADOR"
+            }
+        }),
+
+        // Pending onboarding (companies with pending invitation but no T&C accepted)
+        prisma.company.count({
+            where: {
+                workspaceId,
+                termsAccepted: false,
+                clientInvitations: { some: { status: "PENDING" } }
+            }
+        }),
+
+        // Today's activities
+        prisma.activity.count({
+            where: {
+                workspaceId,
+                createdAt: { gte: today }
+            }
+        }),
     ]);
+
+    // Transform deals by status for pipeline chart
+    const stageLabels: Record<string, string> = {
+        PROSPECCION: "Prospección",
+        CALIFICACION: "Calificación",
+        NEGOCIACION: "Negociación",
+        FORMALIZACION: "Formalización",
+        CIERRE_GANADO: "Ganado",
+        CIERRE_PERDIDO: "Perdido",
+        NO_CALIFICADOS: "No calif.",
+    };
+
+    const pipelineData = Object.keys(stageLabels).map(stage => {
+        const stageData = dealsByStatus.find(d => d.status === stage);
+        return {
+            stage,
+            label: stageLabels[stage],
+            count: stageData?._count.id || 0,
+            value: Number(stageData?._sum.value || 0),
+        };
+    });
+
+    // Transform companies by status
+    const statusLabels: Record<string, string> = {
+        PROSPECTO: "Prospecto",
+        POTENCIAL: "Potencial",
+        CLIENTE: "Cliente",
+        ALIADO: "Aliado",
+        INACTIVO: "Inactivo",
+    };
+
+    const companiesData = Object.keys(statusLabels).map(status => {
+        const statusData = companiesByStatus.find(c => c.status === status);
+        return {
+            status,
+            label: statusLabels[status],
+            count: statusData?._count.id || 0,
+        };
+    });
+
+    // Calculate pipeline value (deals in negotiation/formalization)
+    const pipelineDeals = await prisma.deal.aggregate({
+        where: {
+            workspaceId,
+            status: { in: ["NEGOCIACION", "FORMALIZACION"] }
+        },
+        _sum: { value: true }
+    });
+
+    // Calculate won value
+    const wonDeals = await prisma.deal.aggregate({
+        where: {
+            workspaceId,
+            status: "CIERRE_GANADO"
+        },
+        _sum: { value: true }
+    });
 
     return {
         companiesCount,
@@ -39,6 +175,20 @@ async function getDashboardStats(workspaceId: string) {
             createdAt: a.createdAt,
             userName: a.createdBy?.name || a.createdBy?.email?.split("@")[0] || "Usuario",
         })),
+        pipelineData,
+        companiesData,
+        revenue: {
+            mrr: Number(revenueData._sum.mrr || 0),
+            arr: Number(revenueData._sum.arr || 0),
+            pipelineValue: Number(pipelineDeals._sum.value || 0),
+            wonValue: Number(wonDeals._sum.value || 0),
+        },
+        pending: {
+            invitations: pendingInvitations,
+            quotes: draftQuotes,
+            onboarding: pendingOnboarding,
+            todayActivities,
+        }
     };
 }
 
@@ -92,11 +242,39 @@ export default async function DashboardPage() {
                     />
                     <StatCard
                         title="Este mes"
-                        value="$0"
+                        value={`$${((stats?.revenue?.pipelineValue || 0) / 1000).toFixed(0)}K`}
                         icon={DollarSign}
                         color="warning"
-                        description="Ingresos proyectados"
+                        description="Pipeline activo"
                     />
+                </div>
+
+                {/* Pending Actions */}
+                <div className="mb-6">
+                    <PendingActions
+                        pendingInvitations={stats?.pending.invitations || 0}
+                        draftQuotes={stats?.pending.quotes || 0}
+                        pendingOnboarding={stats?.pending.onboarding || 0}
+                        todayActivities={stats?.pending.todayActivities || 0}
+                    />
+                </div>
+
+                {/* Charts Row */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <div className="lg:col-span-1">
+                        <DealsPipeline data={stats?.pipelineData || []} />
+                    </div>
+                    <div className="lg:col-span-1">
+                        <CompaniesByStatus data={stats?.companiesData || []} />
+                    </div>
+                    <div className="lg:col-span-1">
+                        <RevenueMetrics
+                            mrr={stats?.revenue?.mrr || 0}
+                            arr={stats?.revenue?.arr || 0}
+                            pipelineValue={stats?.revenue?.pipelineValue || 0}
+                            wonValue={stats?.revenue?.wonValue || 0}
+                        />
+                    </div>
                 </div>
 
                 {/* Quick Actions & Recent Activity */}
