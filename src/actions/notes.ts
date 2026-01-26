@@ -4,7 +4,23 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentWorkspace } from "./workspace";
 
+interface CreateNoteParams {
+    entityType: "company" | "contact" | "deal";
+    entityId: string;
+    content: string;
+    attachmentsJson?: string;
+}
+
 export async function createNote(companyId: string, content: string, attachmentsJson?: string) {
+    return createNoteGeneric({
+        entityType: "company",
+        entityId: companyId,
+        content,
+        attachmentsJson,
+    });
+}
+
+export async function createNoteGeneric({ entityType, entityId, content, attachmentsJson }: CreateNoteParams) {
     const session = await auth();
     if (!session?.user?.email) {
         return { error: "No autorizado" };
@@ -27,7 +43,9 @@ export async function createNote(companyId: string, content: string, attachments
         const activity = await prisma.activity.create({
             data: {
                 type: "NOTE",
-                companyId,
+                companyId: entityType === "company" ? entityId : null,
+                contactId: entityType === "contact" ? entityId : null,
+                dealId: entityType === "deal" ? entityId : null,
                 workspaceId: workspace.id,
                 createdById: user.id,
                 emailSubject: content.length > 100 ? content.substring(0, 100) + "..." : content,
