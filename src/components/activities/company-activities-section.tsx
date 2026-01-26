@@ -13,7 +13,8 @@ import {
     Trash2,
     Loader2,
     AlertCircle,
-    UserPlus
+    UserPlus,
+    FolderOpen
 } from "lucide-react";
 import { ComposeEmailModal } from "./compose-email-modal";
 import { sendClientInvitation, revokeInvitation } from "@/actions/client-invitation";
@@ -309,17 +310,23 @@ export function CompanyActivitiesSection({
                     timelineItems.map((item, index) => {
                         if (item.type === "activity") {
                             const activity = item.data as ActivityWithUser;
+                            const isProject = activity.type === "PROJECT";
+                            const ActivityIcon = isProject ? FolderOpen : Mail;
+                            const activityLabel = isProject ? "Proyecto" : activity.type;
+                            
                             return (
                                 <div
                                     key={`activity-${activity.id}`}
-                                    className="bg-white border border-graphite-gray rounded-lg p-4 hover:shadow-sm transition-shadow"
+                                    className={`bg-white border rounded-lg p-4 hover:shadow-sm transition-shadow ${
+                                        isProject ? "border-nearby-accent/30" : "border-graphite-gray"
+                                    }`}
                                 >
                                     <div className="flex items-start justify-between">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-1">
-                                                <Mail size={14} className="text-dark-slate" />
+                                                <ActivityIcon size={14} className={isProject ? "text-nearby-accent" : "text-dark-slate"} />
                                                 <span className="text-xs font-medium text-gray-500 uppercase">
-                                                    {activity.type}
+                                                    {activityLabel}
                                                 </span>
                                                 {activity.emailStatus && getStatusIcon(activity.emailStatus)}
                                             </div>

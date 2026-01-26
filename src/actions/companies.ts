@@ -98,6 +98,11 @@ export async function getCompany(id: string) {
                     createdAt: "desc",
                 },
             },
+            projects: {
+                orderBy: {
+                    createdAt: "desc",
+                },
+            },
         },
     });
 }

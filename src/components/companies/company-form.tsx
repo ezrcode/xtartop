@@ -5,12 +5,14 @@ import { useFormState, useFormStatus } from "react-dom";
 import Link from "next/link";
 import { Save, Trash2, ArrowLeft, Loader2 } from "lucide-react";
 import { createCompanyAction, updateCompanyAction, deleteCompany, CompanyState } from "@/actions/companies";
-import { Company, Contact, CompanyStatus, ClientInvitation } from "@prisma/client";
+import { Company, Contact, CompanyStatus, ClientInvitation, Project } from "@prisma/client";
 import { CompanyActivitiesWithSuspense } from "../activities/company-activities-with-suspense";
+import { ProjectsTable } from "./projects-table";
 
 type CompanyWithTerms = Company & { 
     primaryContact?: Contact | null;
     clientInvitations?: (ClientInvitation & { contact: Contact })[];
+    projects?: Project[];
 };
 
 interface CompanyFormProps {
@@ -396,7 +398,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                     </div>
                                 )}
 
-                                {/* Tab Content: Subscription - Contract Data Only */}
+                                {/* Tab Content: Subscription - Contract Data + Projects */}
                                 {activeTab === "subscription" && company && (
                                     <div className="space-y-6">
                                         {/* Company Data for Contract */}
@@ -433,6 +435,14 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                     </div>
                                                 </div>
                                             </div>
+                                        </div>
+
+                                        {/* Projects Table */}
+                                        <div className="border-t border-graphite-gray pt-6">
+                                            <ProjectsTable 
+                                                companyId={company.id} 
+                                                projects={company.projects || []} 
+                                            />
                                         </div>
                                     </div>
                                 )}

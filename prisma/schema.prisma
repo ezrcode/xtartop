@@ -79,6 +79,12 @@ enum ActivityType {
   NOTE
   CALL
   MEETING
+  PROJECT
+}
+
+enum ProjectStatus {
+  ACTIVE
+  INACTIVE
 }
 
 enum EmailStatus {
@@ -223,6 +229,7 @@ model Company {
   activities        Activity[]
   quotes            Quote[]
   clientInvitations ClientInvitation[]
+  projects          Project[]
 }
 
 enum ContactStatus {
@@ -412,4 +419,18 @@ model Activity {
   @@index([companyId])
   @@index([contactId])
   @@index([dealId])
+}
+
+model Project {
+  id        String        @id @default(cuid())
+  name      String
+  status    ProjectStatus @default(ACTIVE)
+  
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([companyId])
 }
