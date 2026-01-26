@@ -242,7 +242,8 @@ export async function getActivities(entityType: "company" | "contact" | "deal", 
 
     const where: any = {
         workspaceId: workspace.id,
-        type: "EMAIL", // For now, only emails
+        // Include EMAIL and PROJECT activities
+        type: { in: ["EMAIL", "PROJECT"] },
     };
 
     if (entityType === "company") where.companyId = entityId;

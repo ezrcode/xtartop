@@ -46,7 +46,7 @@ export async function createProject(companyId: string, name: string) {
         });
 
         // Create activity record
-        await prisma.activity.create({
+        const activity = await prisma.activity.create({
             data: {
                 type: "PROJECT",
                 companyId,
@@ -54,10 +54,15 @@ export async function createProject(companyId: string, name: string) {
                 createdById: user.id,
                 emailSubject: `Proyecto creado: ${name}`,
             },
+            include: {
+                createdBy: {
+                    select: { name: true, email: true, photoUrl: true },
+                },
+            },
         });
 
         revalidatePath(`/app/companies/${companyId}`);
-        return { success: true, project };
+        return { success: true, project, activity };
     } catch (error) {
         console.error("Error creating project:", error);
         return { error: "Error al crear el proyecto" };
@@ -95,7 +100,7 @@ export async function updateProjectStatus(
 
         // Create activity record
         const statusText = newStatus === "ACTIVE" ? "activado" : "inactivado";
-        await prisma.activity.create({
+        const activity = await prisma.activity.create({
             data: {
                 type: "PROJECT",
                 companyId,
@@ -103,10 +108,15 @@ export async function updateProjectStatus(
                 createdById: user.id,
                 emailSubject: `Proyecto ${statusText}: ${project.name}`,
             },
+            include: {
+                createdBy: {
+                    select: { name: true, email: true, photoUrl: true },
+                },
+            },
         });
 
         revalidatePath(`/app/companies/${companyId}`);
-        return { success: true, project };
+        return { success: true, project, activity };
     } catch (error) {
         console.error("Error updating project:", error);
         return { error: "Error al actualizar el proyecto" };
