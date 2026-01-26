@@ -196,6 +196,7 @@ export function DealForm({ deal, companies, contacts, isEditMode = false, worksp
                                 {activeTab === "general" && (
                                     <div className="space-y-5">
                                         <div className="grid grid-cols-1 gap-4 sm:gap-y-5 sm:gap-x-4 sm:grid-cols-6">
+                                            {/* Nombre del Negocio */}
                                             <div className="sm:col-span-6">
                                                 <label htmlFor="name" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     Nombre del Negocio <span className="text-error-red">*</span>
@@ -213,6 +214,84 @@ export function DealForm({ deal, companies, contacts, isEditMode = false, worksp
                                                 )}
                                             </div>
 
+                                            {/* Empresa y Contacto */}
+                                            <div className="sm:col-span-3">
+                                                <label htmlFor="companyId" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                    Empresa
+                                                </label>
+                                                <select
+                                                    id="companyId"
+                                                    name="companyId"
+                                                    defaultValue={deal?.companyId || "null"}
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
+                                                >
+                                                    <option value="null">Sin empresa</option>
+                                                    {companies.map((company) => (
+                                                        <option key={company.id} value={company.id}>
+                                                            {company.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            <div className="sm:col-span-3">
+                                                <label htmlFor="contactId" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                    Contacto
+                                                </label>
+                                                <select
+                                                    id="contactId"
+                                                    name="contactId"
+                                                    defaultValue={deal?.contactId || "null"}
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
+                                                >
+                                                    <option value="null">Sin contacto</option>
+                                                    {contacts.map((contact) => (
+                                                        <option key={contact.id} value={contact.id}>
+                                                            {contact.fullName}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            {/* Tipo de Negocio y Estado */}
+                                            <div className="sm:col-span-3">
+                                                <label htmlFor="type" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                    Tipo de Negocio
+                                                </label>
+                                                <select
+                                                    id="type"
+                                                    name="type"
+                                                    defaultValue={deal?.type || "null"}
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
+                                                >
+                                                    <option value="null">Seleccionar tipo</option>
+                                                    <option value="CLIENTE_NUEVO">Cliente nuevo</option>
+                                                    <option value="UPSELLING">Upselling</option>
+                                                </select>
+                                            </div>
+
+                                            <div className="sm:col-span-3">
+                                                <label htmlFor="status" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                    Estado <span className="text-error-red">*</span>
+                                                </label>
+                                                <select
+                                                    id="status"
+                                                    name="status"
+                                                    defaultValue={deal?.status || "PROSPECCION"}
+                                                    required
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
+                                                >
+                                                    <option value="PROSPECCION">Prospección</option>
+                                                    <option value="CALIFICACION">Calificación</option>
+                                                    <option value="NEGOCIACION">Negociación</option>
+                                                    <option value="FORMALIZACION">Formalización</option>
+                                                    <option value="CIERRE_GANADO">Cierre ganado</option>
+                                                    <option value="CIERRE_PERDIDO">Cierre perdido</option>
+                                                    <option value="NO_CALIFICADOS">No calificados</option>
+                                                </select>
+                                            </div>
+
+                                            {/* Valor, MRR, ARR - debajo de Tipo */}
                                             <div className="sm:col-span-2">
                                                 <label htmlFor="value" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     Valor del Negocio
@@ -268,81 +347,6 @@ export function DealForm({ deal, companies, contacts, isEditMode = false, worksp
                                                         className="block w-full pl-7 pr-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                     />
                                                 </div>
-                                            </div>
-
-                                            <div className="sm:col-span-3">
-                                                <label htmlFor="companyId" className="block text-sm font-medium text-dark-slate mb-1.5">
-                                                    Empresa
-                                                </label>
-                                                <select
-                                                    id="companyId"
-                                                    name="companyId"
-                                                    defaultValue={deal?.companyId || "null"}
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
-                                                >
-                                                    <option value="null">Sin empresa</option>
-                                                    {companies.map((company) => (
-                                                        <option key={company.id} value={company.id}>
-                                                            {company.name}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </div>
-
-                                            <div className="sm:col-span-3">
-                                                <label htmlFor="contactId" className="block text-sm font-medium text-dark-slate mb-1.5">
-                                                    Contacto
-                                                </label>
-                                                <select
-                                                    id="contactId"
-                                                    name="contactId"
-                                                    defaultValue={deal?.contactId || "null"}
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
-                                                >
-                                                    <option value="null">Sin contacto</option>
-                                                    {contacts.map((contact) => (
-                                                        <option key={contact.id} value={contact.id}>
-                                                            {contact.fullName}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </div>
-
-                                            <div className="sm:col-span-3">
-                                                <label htmlFor="type" className="block text-sm font-medium text-dark-slate mb-1.5">
-                                                    Tipo de Negocio
-                                                </label>
-                                                <select
-                                                    id="type"
-                                                    name="type"
-                                                    defaultValue={deal?.type || "null"}
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
-                                                >
-                                                    <option value="null">Seleccionar tipo</option>
-                                                    <option value="CLIENTE_NUEVO">Cliente nuevo</option>
-                                                    <option value="UPSELLING">Upselling</option>
-                                                </select>
-                                            </div>
-
-                                            <div className="sm:col-span-3">
-                                                <label htmlFor="status" className="block text-sm font-medium text-dark-slate mb-1.5">
-                                                    Estado <span className="text-error-red">*</span>
-                                                </label>
-                                                <select
-                                                    id="status"
-                                                    name="status"
-                                                    defaultValue={deal?.status || "PROSPECCION"}
-                                                    required
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
-                                                >
-                                                    <option value="PROSPECCION">Prospección</option>
-                                                    <option value="CALIFICACION">Calificación</option>
-                                                    <option value="NEGOCIACION">Negociación</option>
-                                                    <option value="FORMALIZACION">Formalización</option>
-                                                    <option value="CIERRE_GANADO">Cierre ganado</option>
-                                                    <option value="CIERRE_PERDIDO">Cierre perdido</option>
-                                                    <option value="NO_CALIFICADOS">No calificados</option>
-                                                </select>
                                             </div>
                                         </div>
 

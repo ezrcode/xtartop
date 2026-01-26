@@ -10,6 +10,7 @@ import {
     DragOverlay,
     DragStartEvent,
     PointerSensor,
+    TouchSensor,
     useSensor,
     useSensors,
     closestCorners,
@@ -73,29 +74,29 @@ function DealCard({ deal, isDragging = false }: { deal: DealWithRelations, isDra
         <div
             ref={setNodeRef}
             style={style}
-            className={`bg-white border border-graphite-gray rounded-lg p-3 hover:shadow-md transition-shadow ${isDragging ? 'opacity-50' : ''}`}
+            className={`bg-white border border-graphite-gray rounded-lg p-3 hover:shadow-md transition-shadow touch-manipulation ${isDragging ? 'opacity-50 shadow-lg' : ''}`}
         >
             {/* Drag Handle & Title */}
             <div className="flex items-start justify-between gap-2 mb-2">
                 <div className="flex-1 min-w-0">
                     <Link 
                         href={`/app/deals/${deal.id}`}
-                        className="text-sm font-semibold text-nearby-accent hover:text-nearby-dark hover:underline line-clamp-2 block"
+                        className="text-sm font-semibold text-nearby-accent hover:text-nearby-dark active:text-nearby-dark line-clamp-2 block"
                     >
                         {deal.name}
                     </Link>
                 </div>
-                {/* Drag Handle */}
+                {/* Drag Handle - más grande para touch */}
                 <div 
-                    className="flex-shrink-0 cursor-grab active:cursor-grabbing p-0.5 hover:bg-gray-100 rounded"
+                    className="flex-shrink-0 cursor-grab active:cursor-grabbing p-1.5 -m-1 hover:bg-gray-100 active:bg-gray-200 rounded-lg touch-manipulation"
                     {...attributes}
                     {...listeners}
                     title="Arrastra para mover"
                 >
                     <svg 
                         xmlns="http://www.w3.org/2000/svg" 
-                        width="14" 
-                        height="14" 
+                        width="16" 
+                        height="16" 
                         viewBox="0 0 24 24" 
                         fill="none" 
                         stroke="currentColor" 
@@ -151,12 +152,12 @@ function DealCard({ deal, isDragging = false }: { deal: DealWithRelations, isDra
                             </span>
                         </div>
                     )}
-                    <span className="text-xs text-gray-500 truncate">
+                    <span className="text-xs text-gray-500 truncate max-w-[80px]">
                         {deal.createdBy?.name || deal.createdBy?.email || "Usuario"}
                     </span>
                 </div>
                 <span className="text-[10px] text-gray-400">
-                    {new Date(deal.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                    {new Date(deal.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })}
                 </span>
             </div>
         </div>
@@ -169,32 +170,49 @@ function KanbanColumn({ status, deals }: { status: DealStatus, deals: DealWithRe
         id: status,
     });
 
+    // Calcular total del valor de los deals en la columna
+    const totalValue = deals.reduce((sum, deal) => sum + Number(deal.value || 0), 0);
+    const formatCurrency = (value: number) => {
+        return new Intl.NumberFormat('es-ES', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        }).format(value);
+    };
+
     return (
-        <div className="flex-shrink-0 w-72">
-            <div className={`bg-white rounded-lg border shadow-sm transition-colors ${isOver ? 'border-nearby-accent border-2' : 'border-graphite-gray'}`}>
+        <div className="flex-shrink-0 w-64 sm:w-72">
+            <div className={`bg-white rounded-lg border shadow-sm transition-all ${isOver ? 'border-nearby-accent border-2 shadow-md' : 'border-graphite-gray'}`}>
                 {/* Column Header */}
-                <div className="px-3 py-2.5 border-b border-graphite-gray">
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-semibold text-dark-slate">
+                <div className="px-3 py-2.5 border-b border-graphite-gray sticky top-0 bg-white rounded-t-lg z-10">
+                    <div className="flex items-center justify-between mb-1">
+                        <h3 className="text-xs sm:text-sm font-semibold text-dark-slate truncate">
                             {dealStatusConfig[status].label}
                         </h3>
-                        <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-medium text-gray-600 bg-gray-100 rounded-full">
+                        <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] sm:text-xs font-medium text-gray-600 bg-gray-100 rounded-full">
                             {deals.length}
                         </span>
                     </div>
+                    {deals.length > 0 && (
+                        <p className="text-[10px] sm:text-xs text-gray-500 font-medium">
+                            {formatCurrency(totalValue)}
+                        </p>
+                    )}
                 </div>
 
-                {/* Cards Container */}
+                {/* Cards Container - optimizado para touch scroll */}
                 <div
                     ref={setNodeRef}
-                    className={`p-3 space-y-2.5 min-h-[200px] max-h-[calc(100vh-300px)] overflow-y-auto transition-colors ${isOver ? 'bg-nearby-accent/5' : ''}`}
+                    className={`p-2 sm:p-3 space-y-2 min-h-[150px] sm:min-h-[200px] max-h-[calc(100vh-280px)] sm:max-h-[calc(100vh-300px)] overflow-y-auto overscroll-contain transition-colors ${isOver ? 'bg-nearby-accent/5' : ''}`}
+                    style={{ WebkitOverflowScrolling: 'touch' }}
                 >
                     {deals.length > 0 ? (
                         deals.map((deal) => (
                             <DealCard key={deal.id} deal={deal} />
                         ))
                     ) : (
-                        <div className="text-center py-8 text-sm text-gray-400">
+                        <div className="text-center py-6 sm:py-8 text-xs sm:text-sm text-gray-400">
                             Sin negocios
                         </div>
                     )}
@@ -213,6 +231,12 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table" }: 
         useSensor(PointerSensor, {
             activationConstraint: {
                 distance: 8, // Permite clicks normales, solo activa drag después de 8px
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 200, // Delay para diferenciar scroll de drag en móvil
+                tolerance: 5,
             },
         })
     );
@@ -420,39 +444,60 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table" }: 
                                     </table>
                                 </div>
 
-                                {/* Mobile Card View */}
+                                {/* Mobile Card View - Optimizado para iOS */}
                                 <div className="md:hidden divide-y divide-graphite-gray">
                                     {deals.map((deal) => (
                                         <Link
                                             key={deal.id}
                                             href={`/app/deals/${deal.id}`}
-                                            className="block p-4 hover:bg-soft-gray transition-colors"
+                                            className="block p-3 sm:p-4 hover:bg-soft-gray active:bg-gray-100 transition-colors touch-manipulation"
                                         >
-                                            <div className="flex items-start justify-between mb-2">
-                                                <h3 className="text-base font-semibold text-nearby-accent flex-1">
-                                                    {deal.name}
-                                                </h3>
-                                                <span className={`ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full whitespace-nowrap ${dealStatusConfig[deal.status].color}`}>
-                                                    {dealStatusConfig[deal.status].label}
-                                                </span>
-                                            </div>
-                                            <p className="text-lg font-bold text-nearby-dark mb-2">
-                                                {formatCurrency(Number(deal.value))}
-                                            </p>
-                                            <div className="space-y-1 text-sm text-dark-slate">
-                                                {deal.company && (
-                                                    <p>
-                                                        <span className="font-medium">Empresa:</span> {deal.company.name}
-                                                    </p>
-                                                )}
-                                                {deal.contact && (
-                                                    <p>
-                                                        <span className="font-medium">Contacto:</span> {deal.contact.fullName}
-                                                    </p>
-                                                )}
-                                                <p>
-                                                    <span className="font-medium">Tipo:</span> {deal.type === "CLIENTE_NUEVO" ? "Cliente nuevo" : "Upselling"}
-                                                </p>
+                                            <div className="flex items-start gap-3">
+                                                {/* Value Badge */}
+                                                <div className="flex-shrink-0 w-16 h-16 rounded-xl bg-gradient-to-br from-nearby-accent/10 to-nearby-accent/5 flex flex-col items-center justify-center border border-nearby-accent/20">
+                                                    <span className="text-[10px] text-nearby-accent font-medium">VALOR</span>
+                                                    <span className="text-sm font-bold text-nearby-dark">
+                                                        {Number(deal.value) >= 1000000
+                                                            ? `${(Number(deal.value) / 1000000).toFixed(1)}M`
+                                                            : Number(deal.value) >= 1000
+                                                                ? `${(Number(deal.value) / 1000).toFixed(0)}K`
+                                                                : formatCurrency(Number(deal.value))}
+                                                    </span>
+                                                </div>
+                                                
+                                                {/* Content */}
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-start justify-between gap-2 mb-1">
+                                                        <h3 className="text-sm font-semibold text-nearby-dark truncate">
+                                                            {deal.name}
+                                                        </h3>
+                                                        <span className={`flex-shrink-0 px-2 py-0.5 text-[10px] font-semibold rounded-full ${dealStatusConfig[deal.status].color}`}>
+                                                            {dealStatusConfig[deal.status].label}
+                                                        </span>
+                                                    </div>
+                                                    
+                                                    <div className="space-y-0.5 text-xs text-gray-600">
+                                                        {deal.company && (
+                                                            <p className="truncate">
+                                                                <span className="text-gray-500">Empresa:</span> {deal.company.name}
+                                                            </p>
+                                                        )}
+                                                        {deal.contact && (
+                                                            <p className="truncate">
+                                                                <span className="text-gray-500">Contacto:</span> {deal.contact.fullName}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                    
+                                                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
+                                                        <span className="text-[10px] text-gray-500">
+                                                            {deal.type === "CLIENTE_NUEVO" ? "Cliente nuevo" : deal.type === "UPSELLING" ? "Upselling" : "—"}
+                                                        </span>
+                                                        <span className="text-[10px] text-gray-400">
+                                                            {new Date(deal.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })}
+                                                        </span>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </Link>
                                     ))}
@@ -462,7 +507,7 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table" }: 
                     </div>
                 )}
 
-                {/* Kanban View */}
+                {/* Kanban View - Optimizado para móvil */}
                 {viewMode === "kanban" && (
                     <DndContext
                         sensors={sensors}
@@ -470,20 +515,38 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table" }: 
                         onDragStart={handleDragStart}
                         onDragEnd={handleDragEnd}
                     >
-                        <div className="overflow-x-auto pb-4">
-                            <div className="inline-flex space-x-4 min-w-full">
+                        {/* Instrucción para móvil */}
+                        <div className="md:hidden mb-3 px-1">
+                            <p className="text-xs text-gray-500 flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M5 12h14"/>
+                                    <path d="m12 5 7 7-7 7"/>
+                                </svg>
+                                Desliza para ver más columnas • Mantén presionado para arrastrar
+                            </p>
+                        </div>
+                        
+                        <div 
+                            className="overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 overscroll-x-contain snap-x snap-mandatory sm:snap-none"
+                            style={{ WebkitOverflowScrolling: 'touch' }}
+                        >
+                            <div className="inline-flex space-x-3 sm:space-x-4 min-w-full">
                                 {kanbanColumns.map((status) => (
-                                    <KanbanColumn
-                                        key={status}
-                                        status={status as DealStatus}
-                                        deals={dealsByStatus[status] || []}
-                                    />
+                                    <div key={status} className="snap-start">
+                                        <KanbanColumn
+                                            status={status as DealStatus}
+                                            deals={dealsByStatus[status] || []}
+                                        />
+                                    </div>
                                 ))}
                             </div>
                         </div>
 
                         {/* Drag Overlay */}
-                        <DragOverlay>
+                        <DragOverlay dropAnimation={{
+                            duration: 200,
+                            easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+                        }}>
                             {activeDeal && <DealCard deal={activeDeal} isDragging />}
                         </DragOverlay>
                     </DndContext>
