@@ -8,6 +8,38 @@ import { AlertCircle, CheckCircle } from "lucide-react";
 // Force dynamic rendering
 export const dynamic = "force-dynamic";
 
+// Default contract template
+const DEFAULT_CONTRACT_TEMPLATE = `<h3>CONTRATO DE SERVICIOS</h3>
+
+<p>Entre las partes:</p>
+
+<p><strong>PROVEEDOR:</strong> {{PROVEEDOR_NOMBRE}}</p>
+
+<p><strong>CLIENTE:</strong><br/>
+Razón Social: {{CLIENTE_RAZON_SOCIAL}}<br/>
+RNC: {{CLIENTE_RNC}}<br/>
+Dirección: {{CLIENTE_DIRECCION}}<br/>
+Representado por: {{CLIENTE_REPRESENTANTE}}</p>
+
+<hr/>
+
+<h4>CLÁUSULA PRIMERA: OBJETO</h4>
+<p>El presente contrato tiene por objeto establecer los términos y condiciones bajo los cuales el PROVEEDOR prestará servicios al CLIENTE.</p>
+
+<h4>CLÁUSULA SEGUNDA: OBLIGACIONES DEL CLIENTE</h4>
+<p>El CLIENTE se compromete a:</p>
+<ul>
+<li>Proporcionar información veraz y actualizada</li>
+<li>Cumplir con los pagos acordados en tiempo y forma</li>
+<li>Notificar cualquier cambio en sus datos de contacto</li>
+</ul>
+
+<h4>CLÁUSULA TERCERA: CONFIDENCIALIDAD</h4>
+<p>Ambas partes se comprometen a mantener la confidencialidad de toda información compartida durante la vigencia de este contrato.</p>
+
+<h4>CLÁUSULA CUARTA: VIGENCIA</h4>
+<p>Este contrato entrará en vigor a partir de la fecha de aceptación ({{FECHA_ACTUAL}}) y tendrá una duración indefinida hasta que alguna de las partes decida terminarlo con previo aviso de 30 días.</p>`;
+
 interface OnboardingPageProps {
     params: Promise<{ token: string }>;
 }
@@ -18,11 +50,30 @@ export default async function OnboardingPage({ params }: OnboardingPageProps) {
 
     // Check if user already exists for this contact
     let userExists = false;
+    let contractTemplate = DEFAULT_CONTRACT_TEMPLATE;
+    let providerName = "NEARBY";
+    
     if (invitation?.contact?.email) {
         const existingUser = await prisma.user.findUnique({
             where: { email: invitation.contact.email },
         });
         userExists = !!existingUser;
+    }
+
+    // Get workspace contract template
+    if (invitation?.company?.workspaceId) {
+        const workspace = await prisma.workspace.findUnique({
+            where: { id: invitation.company.workspaceId },
+            select: {
+                contractTemplate: true,
+                legalName: true,
+                name: true,
+            },
+        });
+        if (workspace?.contractTemplate) {
+            contractTemplate = workspace.contractTemplate;
+        }
+        providerName = workspace?.legalName || workspace?.name || "NEARBY";
     }
 
     return (
@@ -95,6 +146,8 @@ export default async function OnboardingPage({ params }: OnboardingPageProps) {
                         company={invitation.company}
                         contact={invitation.contact}
                         userExists={userExists}
+                        contractTemplate={contractTemplate}
+                        providerName={providerName}
                     />
                 )}
             </div>

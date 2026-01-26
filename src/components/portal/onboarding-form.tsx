@@ -22,11 +22,39 @@ interface OnboardingFormProps {
         email: string;
     };
     userExists?: boolean;
+    contractTemplate: string;
+    providerName: string;
 }
 
 type Step = "account" | "company" | "terms" | "complete";
 
-export function OnboardingForm({ token, company, contact, userExists = false }: OnboardingFormProps) {
+// Function to replace contract variables
+function replaceContractVariables(
+    template: string,
+    data: {
+        clientLegalName: string;
+        clientRnc: string;
+        clientAddress: string;
+        clientRepresentative: string;
+        providerName: string;
+    }
+): string {
+    const today = new Date().toLocaleDateString("es-DO", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    });
+
+    return template
+        .replace(/\{\{CLIENTE_RAZON_SOCIAL\}\}/g, data.clientLegalName || "—")
+        .replace(/\{\{CLIENTE_RNC\}\}/g, data.clientRnc || "—")
+        .replace(/\{\{CLIENTE_DIRECCION\}\}/g, data.clientAddress || "—")
+        .replace(/\{\{CLIENTE_REPRESENTANTE\}\}/g, data.clientRepresentative || "—")
+        .replace(/\{\{PROVEEDOR_NOMBRE\}\}/g, data.providerName || "—")
+        .replace(/\{\{FECHA_ACTUAL\}\}/g, today);
+}
+
+export function OnboardingForm({ token, company, contact, userExists = false, contractTemplate, providerName }: OnboardingFormProps) {
     const router = useRouter();
     // If user already exists, skip to company step
     const [step, setStep] = useState<Step>(userExists ? "company" : "account");
@@ -339,60 +367,20 @@ export function OnboardingForm({ token, company, contact, userExists = false }: 
                             </h2>
                         </div>
 
-                        {/* Contract Preview */}
+                        {/* Contract Preview with dynamic template */}
                         <div className="bg-soft-gray border border-graphite-gray rounded-md p-6 max-h-96 overflow-y-auto">
-                            <h3 className="font-semibold text-nearby-dark mb-4">
-                                CONTRATO DE SERVICIOS
-                            </h3>
-                            <p className="text-sm text-dark-slate mb-4">
-                                Entre las partes:
-                            </p>
-                            <p className="text-sm text-dark-slate mb-2">
-                                <strong>PROVEEDOR:</strong> NEARBY, S.R.L.
-                            </p>
-                            <p className="text-sm text-dark-slate mb-4">
-                                <strong>CLIENTE:</strong> {legalName || company.legalName}<br />
-                                <strong>RNC:</strong> {taxId || company.taxId}<br />
-                                <strong>Dirección:</strong> {fiscalAddress || company.fiscalAddress}
-                            </p>
-                            <p className="text-sm text-dark-slate mb-4">
-                                <strong>Representado por:</strong> {name}
-                            </p>
-                            
-                            <hr className="my-4" />
-                            
-                            <h4 className="font-semibold text-nearby-dark mb-2">
-                                CLÁUSULA PRIMERA: OBJETO
-                            </h4>
-                            <p className="text-sm text-dark-slate mb-4">
-                                El presente contrato tiene por objeto establecer los términos y condiciones 
-                                bajo los cuales NEARBY prestará servicios al CLIENTE.
-                            </p>
-
-                            <h4 className="font-semibold text-nearby-dark mb-2">
-                                CLÁUSULA SEGUNDA: OBLIGACIONES
-                            </h4>
-                            <p className="text-sm text-dark-slate mb-4">
-                                El CLIENTE se compromete a proporcionar información veraz y actualizada,
-                                así como a cumplir con los pagos acordados en tiempo y forma.
-                            </p>
-
-                            <h4 className="font-semibold text-nearby-dark mb-2">
-                                CLÁUSULA TERCERA: CONFIDENCIALIDAD
-                            </h4>
-                            <p className="text-sm text-dark-slate mb-4">
-                                Ambas partes se comprometen a mantener la confidencialidad de toda
-                                información compartida durante la vigencia de este contrato.
-                            </p>
-
-                            <h4 className="font-semibold text-nearby-dark mb-2">
-                                CLÁUSULA CUARTA: VIGENCIA
-                            </h4>
-                            <p className="text-sm text-dark-slate">
-                                Este contrato entrará en vigor a partir de la fecha de aceptación
-                                y tendrá una duración indefinida hasta que alguna de las partes
-                                decida terminarlo con previo aviso de 30 días.
-                            </p>
+                            <div 
+                                className="prose prose-sm max-w-none text-dark-slate"
+                                dangerouslySetInnerHTML={{ 
+                                    __html: replaceContractVariables(contractTemplate, {
+                                        clientLegalName: legalName || company.legalName || "",
+                                        clientRnc: taxId || company.taxId || "",
+                                        clientAddress: fiscalAddress || company.fiscalAddress || "",
+                                        clientRepresentative: name,
+                                        providerName: providerName,
+                                    })
+                                }}
+                            />
                         </div>
 
                         <div className="flex items-start space-x-3">
