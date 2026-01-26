@@ -14,7 +14,8 @@ import {
     Loader2,
     AlertCircle,
     UserPlus,
-    FolderOpen
+    FolderOpen,
+    User as UserIcon
 } from "lucide-react";
 import { ComposeEmailModal } from "./compose-email-modal";
 import { sendClientInvitation, revokeInvitation } from "@/actions/client-invitation";
@@ -311,20 +312,35 @@ export function CompanyActivitiesSection({
                         if (item.type === "activity") {
                             const activity = item.data as ActivityWithUser;
                             const isProject = activity.type === "PROJECT";
-                            const ActivityIcon = isProject ? FolderOpen : Mail;
-                            const activityLabel = isProject ? "Proyecto" : activity.type;
+                            const isClientUser = activity.type === "CLIENT_USER";
+                            
+                            // Determine icon and label based on activity type
+                            let ActivityIcon = Mail;
+                            let activityLabel: string = activity.type;
+                            let borderClass = "border-graphite-gray";
+                            let iconClass = "text-dark-slate";
+                            
+                            if (isProject) {
+                                ActivityIcon = FolderOpen;
+                                activityLabel = "Proyecto";
+                                borderClass = "border-nearby-accent/30";
+                                iconClass = "text-nearby-accent";
+                            } else if (isClientUser) {
+                                ActivityIcon = UserIcon;
+                                activityLabel = "Usuario";
+                                borderClass = "border-ocean-blue/30";
+                                iconClass = "text-ocean-blue";
+                            }
                             
                             return (
                                 <div
                                     key={`activity-${activity.id}`}
-                                    className={`bg-white border rounded-lg p-4 hover:shadow-sm transition-shadow ${
-                                        isProject ? "border-nearby-accent/30" : "border-graphite-gray"
-                                    }`}
+                                    className={`bg-white border rounded-lg p-4 hover:shadow-sm transition-shadow ${borderClass}`}
                                 >
                                     <div className="flex items-start justify-between">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-1">
-                                                <ActivityIcon size={14} className={isProject ? "text-nearby-accent" : "text-dark-slate"} />
+                                                <ActivityIcon size={14} className={iconClass} />
                                                 <span className="text-xs font-medium text-gray-500 uppercase">
                                                     {activityLabel}
                                                 </span>

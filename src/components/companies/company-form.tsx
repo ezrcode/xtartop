@@ -5,14 +5,16 @@ import { useFormState, useFormStatus } from "react-dom";
 import Link from "next/link";
 import { Save, Trash2, ArrowLeft, Loader2 } from "lucide-react";
 import { createCompanyAction, updateCompanyAction, deleteCompany, CompanyState } from "@/actions/companies";
-import { Company, Contact, CompanyStatus, ClientInvitation, Project } from "@prisma/client";
+import { Company, Contact, CompanyStatus, ClientInvitation, Project, ClientUser } from "@prisma/client";
 import { CompanyActivitiesWithSuspense } from "../activities/company-activities-with-suspense";
 import { ProjectsTable } from "./projects-table";
+import { ClientUsersTable } from "./client-users-table";
 
 type CompanyWithTerms = Company & { 
     primaryContact?: Contact | null;
     clientInvitations?: (ClientInvitation & { contact: Contact })[];
     projects?: Project[];
+    clientUsers?: ClientUser[];
 };
 
 interface CompanyFormProps {
@@ -442,6 +444,14 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                             <ProjectsTable 
                                                 companyId={company.id} 
                                                 projects={company.projects || []} 
+                                            />
+                                        </div>
+
+                                        {/* Client Users Table */}
+                                        <div className="border-t border-graphite-gray pt-6">
+                                            <ClientUsersTable 
+                                                companyId={company.id} 
+                                                clientUsers={company.clientUsers || []} 
                                             />
                                         </div>
                                     </div>

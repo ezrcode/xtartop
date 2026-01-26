@@ -103,6 +103,11 @@ export async function getCompany(id: string) {
                     createdAt: "desc",
                 },
             },
+            clientUsers: {
+                orderBy: {
+                    createdAt: "desc",
+                },
+            },
         },
     });
 }

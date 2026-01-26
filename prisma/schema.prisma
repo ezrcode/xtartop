@@ -80,6 +80,7 @@ enum ActivityType {
   CALL
   MEETING
   PROJECT
+  CLIENT_USER
 }
 
 enum ProjectStatus {
@@ -230,6 +231,7 @@ model Company {
   quotes            Quote[]
   clientInvitations ClientInvitation[]
   projects          Project[]
+  clientUsers       ClientUser[]
 }
 
 enum ContactStatus {
@@ -424,6 +426,21 @@ model Activity {
 model Project {
   id        String        @id @default(cuid())
   name      String
+  status    ProjectStatus @default(ACTIVE)
+  
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([companyId])
+}
+
+model ClientUser {
+  id        String        @id @default(cuid())
+  fullName  String
+  email     String
   status    ProjectStatus @default(ACTIVE)
   
   companyId String
