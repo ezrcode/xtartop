@@ -3,13 +3,37 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentWorkspace } from "@/actions/workspace";
 import { Building2, Users, TrendingUp, DollarSign } from "lucide-react";
-import { StatCard } from "@/components/dashboard/stat-card";
-import { QuickActions } from "@/components/dashboard/quick-actions";
-import { RecentActivity } from "@/components/dashboard/recent-activity";
-import { DealsPipeline } from "@/components/dashboard/deals-pipeline";
-import { CompaniesByStatus } from "@/components/dashboard/companies-by-status";
-import { RevenueMetrics } from "@/components/dashboard/revenue-metrics";
-import { PendingActions } from "@/components/dashboard/pending-actions";
+import dynamic from "next/dynamic";
+
+// Import client components dynamically to avoid SSR issues with recharts
+const StatCard = dynamic(() => import("@/components/dashboard/stat-card").then(mod => ({ default: mod.StatCard })), {
+    ssr: false,
+    loading: () => <div className="bg-white rounded-xl border border-graphite-gray p-5 h-32 skeleton" />
+});
+const QuickActions = dynamic(() => import("@/components/dashboard/quick-actions").then(mod => ({ default: mod.QuickActions })), {
+    ssr: false,
+    loading: () => <div className="bg-white rounded-xl border border-graphite-gray p-5 h-40 skeleton" />
+});
+const RecentActivity = dynamic(() => import("@/components/dashboard/recent-activity").then(mod => ({ default: mod.RecentActivity })), {
+    ssr: false,
+    loading: () => <div className="bg-white rounded-xl border border-graphite-gray p-5 h-80 skeleton" />
+});
+const DealsPipeline = dynamic(() => import("@/components/dashboard/deals-pipeline").then(mod => ({ default: mod.DealsPipeline })), {
+    ssr: false,
+    loading: () => <div className="bg-white rounded-xl border border-graphite-gray p-5 h-64 skeleton" />
+});
+const CompaniesByStatus = dynamic(() => import("@/components/dashboard/companies-by-status").then(mod => ({ default: mod.CompaniesByStatus })), {
+    ssr: false,
+    loading: () => <div className="bg-white rounded-xl border border-graphite-gray p-5 h-64 skeleton" />
+});
+const RevenueMetrics = dynamic(() => import("@/components/dashboard/revenue-metrics").then(mod => ({ default: mod.RevenueMetrics })), {
+    ssr: false,
+    loading: () => <div className="bg-white rounded-xl border border-graphite-gray p-5 h-64 skeleton" />
+});
+const PendingActions = dynamic(() => import("@/components/dashboard/pending-actions").then(mod => ({ default: mod.PendingActions })), {
+    ssr: false,
+    loading: () => <div className="bg-white rounded-xl border border-graphite-gray p-5 h-32 skeleton" />
+});
 
 // Cache for 60 seconds - dashboard doesn't need real-time updates
 export const revalidate = 60;
