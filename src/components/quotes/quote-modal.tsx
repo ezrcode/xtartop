@@ -244,22 +244,22 @@ export function QuoteModal({
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div className="flex min-h-full items-start justify-center p-2 sm:p-4 pt-4 sm:pt-10">
+            <div className="flex min-h-full items-end sm:items-start justify-center p-0 sm:p-4 sm:pt-10">
                 {/* Overlay */}
                 <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={onClose} />
 
                 {/* Modal */}
-                <div className="relative bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+                <div className="relative bg-white rounded-t-2xl sm:rounded-xl shadow-xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto safe-bottom">
                     {/* Header */}
-                    <div className="sticky top-0 bg-white z-10 flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
-                        <h2 className="text-lg sm:text-xl font-semibold text-nearby-dark">
+                    <div className="sticky top-0 bg-white z-10 flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 safe-top">
+                        <h2 className="text-base sm:text-xl font-semibold text-nearby-dark">
                             {isEditMode ? `Editar Cotización #${String(quote.number).padStart(3, "0")}` : "Nueva Cotización"}
                         </h2>
                         <button
                             onClick={onClose}
-                            className="text-gray-400 hover:text-gray-600 transition-colors"
+                            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
                         >
-                            <X size={20} className="sm:w-6 sm:h-6" />
+                            <X size={20} />
                         </button>
                     </div>
 
@@ -280,25 +280,25 @@ export function QuoteModal({
                         {/* Company & Contact (Read-only) */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-dark-slate mb-2">
+                                <label className="block text-sm font-medium text-dark-slate mb-1.5">
                                     Empresa
                                 </label>
                                 <input
                                     type="text"
                                     value={companyName}
                                     readOnly
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md bg-gray-50 text-gray-600 text-sm"
+                                    className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg bg-gray-50 text-gray-600"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-dark-slate mb-2">
+                                <label className="block text-sm font-medium text-dark-slate mb-1.5">
                                     Contacto
                                 </label>
                                 <input
                                     type="text"
                                     value={contactName}
                                     readOnly
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md bg-gray-50 text-gray-600 text-sm"
+                                    className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg bg-gray-50 text-gray-600"
                                 />
                             </div>
                         </div>
@@ -306,7 +306,7 @@ export function QuoteModal({
                         {/* Date, Validity, Currency */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
-                                <label htmlFor="date" className="block text-sm font-medium text-dark-slate mb-2">
+                                <label htmlFor="date" className="block text-sm font-medium text-dark-slate mb-1.5">
                                     Fecha *
                                 </label>
                                 <input
@@ -315,11 +315,11 @@ export function QuoteModal({
                                     id="date"
                                     defaultValue={quote?.date ? new Date(quote.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]}
                                     required
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md text-sm"
+                                    className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                 />
                             </div>
                             <div>
-                                <label htmlFor="validity" className="block text-sm font-medium text-dark-slate mb-2">
+                                <label htmlFor="validity" className="block text-sm font-medium text-dark-slate mb-1.5">
                                     Validez *
                                 </label>
                                 <select
@@ -327,7 +327,7 @@ export function QuoteModal({
                                     id="validity"
                                     defaultValue={quote?.validity || "30 días"}
                                     required
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md text-sm"
+                                    className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
                                 >
                                     <option value="10 días">10 días</option>
                                     <option value="20 días">20 días</option>
@@ -335,7 +335,7 @@ export function QuoteModal({
                                 </select>
                             </div>
                             <div>
-                                <label htmlFor="currency" className="block text-sm font-medium text-dark-slate mb-2">
+                                <label htmlFor="currency" className="block text-sm font-medium text-dark-slate mb-1.5">
                                     Moneda *
                                 </label>
                                 <select
@@ -343,7 +343,7 @@ export function QuoteModal({
                                     id="currency"
                                     defaultValue={quote?.currency || "USD"}
                                     required
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md text-sm"
+                                    className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
                                 >
                                     <option value="USD">USD</option>
                                     <option value="DOP">DOP</option>
@@ -465,23 +465,23 @@ export function QuoteModal({
 
                         {/* Proposal Description */}
                         <div>
-                            <label htmlFor="proposalDescription" className="block text-sm font-medium text-dark-slate mb-2">
+                            <label htmlFor="proposalDescription" className="block text-sm font-medium text-dark-slate mb-1.5">
                                 Descripción de la Propuesta
                             </label>
                             <textarea
                                 name="proposalDescription"
                                 id="proposalDescription"
-                                rows={8}
+                                rows={6}
                                 defaultValue={quote?.proposalDescription || ""}
                                 placeholder="Describa los detalles de la propuesta..."
-                                className="w-full px-3 py-2 border border-graphite-gray rounded-md"
+                                className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                             />
                         </div>
 
                         {/* Payment Conditions, Delivery Time */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label htmlFor="paymentConditions" className="block text-sm font-medium text-dark-slate mb-2">
+                                <label htmlFor="paymentConditions" className="block text-sm font-medium text-dark-slate mb-1.5">
                                     Condiciones de Pago
                                 </label>
                                 <textarea
@@ -490,11 +490,11 @@ export function QuoteModal({
                                     rows={2}
                                     defaultValue={quote?.paymentConditions || ""}
                                     placeholder="Ej: 50% adelanto, 50% contra entrega"
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md"
+                                    className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                 />
                             </div>
                             <div>
-                                <label htmlFor="deliveryTime" className="block text-sm font-medium text-dark-slate mb-2">
+                                <label htmlFor="deliveryTime" className="block text-sm font-medium text-dark-slate mb-1.5">
                                     Tiempo de Entrega
                                 </label>
                                 <input
@@ -503,7 +503,7 @@ export function QuoteModal({
                                     id="deliveryTime"
                                     defaultValue={quote?.deliveryTime || ""}
                                     placeholder="Ej: 15 días hábiles"
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md"
+                                    className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                 />
                             </div>
                         </div>
@@ -511,7 +511,7 @@ export function QuoteModal({
                         {/* Tax Type & Status */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label htmlFor="taxType" className="block text-sm font-medium text-dark-slate mb-2">
+                                <label htmlFor="taxType" className="block text-sm font-medium text-dark-slate mb-1.5">
                                     Impuestos *
                                 </label>
                                 <select
@@ -519,14 +519,14 @@ export function QuoteModal({
                                     id="taxType"
                                     defaultValue={quote?.taxType || "INCLUIDOS"}
                                     required
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md"
+                                    className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
                                 >
                                     <option value="INCLUIDOS">Incluidos</option>
                                     <option value="NO_INCLUIDOS">No incluidos</option>
                                 </select>
                             </div>
                             <div>
-                                <label htmlFor="status" className="block text-sm font-medium text-dark-slate mb-2">
+                                <label htmlFor="status" className="block text-sm font-medium text-dark-slate mb-1.5">
                                     Estado *
                                 </label>
                                 <select
@@ -534,7 +534,7 @@ export function QuoteModal({
                                     id="status"
                                     defaultValue={quote?.status || "BORRADOR"}
                                     required
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md"
+                                    className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
                                 >
                                     <option value="BORRADOR">Borrador</option>
                                     <option value="ACTIVA">Activa</option>
@@ -545,24 +545,24 @@ export function QuoteModal({
                         </div>
 
                         {/* Actions */}
-                        <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-gray-200">
                             <div>
                                 {isEditMode && (
                                     <button
                                         type="button"
                                         onClick={generatePDF}
-                                        className="inline-flex items-center px-4 py-2 border border-graphite-gray rounded-md shadow-sm text-sm font-medium text-dark-slate bg-white hover:bg-gray-50 transition-colors"
+                                        className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-3 sm:py-2 border border-graphite-gray rounded-lg shadow-sm text-sm font-medium text-dark-slate bg-white hover:bg-gray-50 transition-colors"
                                     >
                                         <Printer size={16} className="mr-2" />
                                         Imprimir PDF
                                     </button>
                                 )}
                             </div>
-                            <div className="flex items-center gap-3">
+                            <div className="flex flex-col-reverse sm:flex-row items-center gap-2 sm:gap-3">
                                 <button
                                     type="button"
                                     onClick={onClose}
-                                    className="px-4 py-2 border border-graphite-gray rounded-md shadow-sm text-sm font-medium text-dark-slate bg-white hover:bg-gray-50 transition-colors"
+                                    className="w-full sm:w-auto px-4 py-3 sm:py-2 border border-graphite-gray rounded-lg shadow-sm text-sm font-medium text-dark-slate bg-white hover:bg-gray-50 transition-colors"
                                 >
                                     Cancelar
                                 </button>
@@ -570,7 +570,7 @@ export function QuoteModal({
                                     type="button"
                                     onClick={handleSave}
                                     disabled={isPending}
-                                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-accent hover:bg-nearby-dark transition-colors disabled:opacity-50"
+                                    className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-3 sm:py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-nearby-accent hover:bg-nearby-dark transition-all active:scale-95 disabled:opacity-50"
                                 >
                                     {isPending ? (
                                         <>Guardando...</>
