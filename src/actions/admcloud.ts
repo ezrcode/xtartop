@@ -23,7 +23,8 @@ async function getAdmCloudConfig() {
                     id: true,
                     admCloudEnabled: true,
                     admCloudAppId: true,
-                    admCloudToken: true,
+                    admCloudUsername: true,
+                    admCloudPassword: true,
                     admCloudCompany: true,
                     admCloudRole: true,
                 }
@@ -36,7 +37,8 @@ async function getAdmCloudConfig() {
                             id: true,
                             admCloudEnabled: true,
                             admCloudAppId: true,
-                            admCloudToken: true,
+                            admCloudUsername: true,
+                            admCloudPassword: true,
                             admCloudCompany: true,
                             admCloudRole: true,
                         }
@@ -52,7 +54,7 @@ async function getAdmCloudConfig() {
         return null;
     }
 
-    if (!workspace.admCloudAppId || !workspace.admCloudToken || !workspace.admCloudCompany) {
+    if (!workspace.admCloudAppId || !workspace.admCloudUsername || !workspace.admCloudPassword || !workspace.admCloudCompany) {
         return null;
     }
 
@@ -60,9 +62,10 @@ async function getAdmCloudConfig() {
         workspaceId: workspace.id,
         config: {
             appId: workspace.admCloudAppId,
-            token: workspace.admCloudToken,
+            username: workspace.admCloudUsername,
+            password: workspace.admCloudPassword,
             company: workspace.admCloudCompany,
-            role: workspace.admCloudRole || "1",
+            role: workspace.admCloudRole || "Administradores",
         }
     };
 }
@@ -72,7 +75,8 @@ export interface AdmCloudSettingsState {
     success?: boolean;
     errors?: {
         appId?: string;
-        token?: string;
+        username?: string;
+        password?: string;
         company?: string;
     };
 }
@@ -101,15 +105,17 @@ export async function saveAdmCloudSettings(
 
     const enabled = formData.get("enabled") === "true";
     const appId = formData.get("appId")?.toString().trim() || "";
-    const token = formData.get("token")?.toString().trim() || "";
+    const username = formData.get("username")?.toString().trim() || "";
+    const password = formData.get("password")?.toString().trim() || "";
     const company = formData.get("company")?.toString().trim() || "";
-    const role = formData.get("role")?.toString().trim() || "1";
+    const role = formData.get("role")?.toString().trim() || "Administradores";
 
     // Validar campos si está habilitado
     if (enabled) {
         const errors: AdmCloudSettingsState["errors"] = {};
         if (!appId) errors.appId = "El App ID es requerido";
-        if (!token) errors.token = "El Token es requerido";
+        if (!username) errors.username = "El usuario es requerido";
+        if (!password) errors.password = "La contraseña es requerida";
         if (!company) errors.company = "El ID de Compañía es requerido";
 
         if (Object.keys(errors).length > 0) {
@@ -117,7 +123,7 @@ export async function saveAdmCloudSettings(
         }
 
         // Probar la conexión
-        const client = createAdmCloudClient({ appId, token, company, role });
+        const client = createAdmCloudClient({ appId, username, password, company, role });
         const testResult = await client.testConnection();
         
         if (!testResult.success) {
@@ -134,7 +140,8 @@ export async function saveAdmCloudSettings(
         data: {
             admCloudEnabled: enabled,
             admCloudAppId: enabled ? appId : null,
-            admCloudToken: enabled ? token : null,
+            admCloudUsername: enabled ? username : null,
+            admCloudPassword: enabled ? password : null,
             admCloudCompany: enabled ? company : null,
             admCloudRole: enabled ? role : null,
         }
@@ -295,7 +302,8 @@ export async function checkAdmCloudStatus(): Promise<{
                 select: {
                     admCloudEnabled: true,
                     admCloudAppId: true,
-                    admCloudToken: true,
+                    admCloudUsername: true,
+                    admCloudPassword: true,
                     admCloudCompany: true,
                 }
             },
@@ -306,7 +314,8 @@ export async function checkAdmCloudStatus(): Promise<{
                         select: {
                             admCloudEnabled: true,
                             admCloudAppId: true,
-                            admCloudToken: true,
+                            admCloudUsername: true,
+                            admCloudPassword: true,
                             admCloudCompany: true,
                         }
                     }
@@ -323,7 +332,8 @@ export async function checkAdmCloudStatus(): Promise<{
 
     const isConfigured = !!(
         workspace.admCloudAppId && 
-        workspace.admCloudToken && 
+        workspace.admCloudUsername && 
+        workspace.admCloudPassword &&
         workspace.admCloudCompany
     );
 

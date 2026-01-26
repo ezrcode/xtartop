@@ -3,13 +3,19 @@
  * 
  * Cliente para interactuar con la API de AdmCloud (sistema contable)
  * Documentación: https://api.admcloud.net/swagger/docs/v1
+ * 
+ * La API usa Basic Authentication con los parámetros como query strings:
+ * - appid: ID de la aplicación
+ * - company: ID de la compañía
+ * - role: Rol del usuario
  */
 
 const ADMCLOUD_BASE_URL = 'https://api.admcloud.net/api';
 
 export interface AdmCloudConfig {
     appId: string;
-    token: string;
+    username: string;  // Usuario para Basic Auth
+    password: string;  // Contraseña para Basic Auth
     company: string;
     role: string;
 }
@@ -71,32 +77,56 @@ class AdmCloudClient {
         this.config = config;
     }
 
-    private getHeaders(): HeadersInit {
+    /**
+     * Construye los query params de autenticación
+     */
+    private getAuthParams(): string {
         if (!this.config) {
             throw new Error('AdmCloud client not configured');
         }
-        return {
-            'Content-Type': 'application/json',
-            'appid': this.config.appId,
-            'token': this.config.token,
-            'company': this.config.company,
-            'role': this.config.role,
-        };
+        const params = new URLSearchParams({
+            appid: this.config.appId,
+            company: this.config.company,
+            role: this.config.role,
+        });
+        return params.toString();
+    }
+
+    /**
+     * Obtiene el header de Basic Authentication
+     */
+    private getBasicAuthHeader(): string {
+        if (!this.config) {
+            throw new Error('AdmCloud client not configured');
+        }
+        const credentials = btoa(`${this.config.username}:${this.config.password}`);
+        return `Basic ${credentials}`;
     }
 
     private async request<T>(
         endpoint: string,
-        options: RequestInit = {}
+        options: RequestInit = {},
+        extraParams: Record<string, string> = {}
     ): Promise<AdmCloudApiResponse<T>> {
         if (!this.config) {
             return { success: false, error: 'Cliente AdmCloud no configurado' };
         }
 
         try {
-            const response = await fetch(`${ADMCLOUD_BASE_URL}${endpoint}`, {
+            // Construir URL con query params de autenticación
+            const authParams = this.getAuthParams();
+            const extraParamsStr = new URLSearchParams(extraParams).toString();
+            const allParams = extraParamsStr ? `${authParams}&${extraParamsStr}` : authParams;
+            
+            // Determinar si el endpoint ya tiene query params
+            const separator = endpoint.includes('?') ? '&' : '?';
+            const url = `${ADMCLOUD_BASE_URL}${endpoint}${separator}${allParams}`;
+
+            const response = await fetch(url, {
                 ...options,
                 headers: {
-                    ...this.getHeaders(),
+                    'Content-Type': 'application/json',
+                    'Authorization': this.getBasicAuthHeader(),
                     ...options.headers,
                 },
             });
@@ -155,14 +185,14 @@ class AdmCloudClient {
      * Obtener facturas de contado de un cliente
      */
     async getCashInvoices(relationshipId: string): Promise<AdmCloudApiResponse<AdmCloudInvoice[]>> {
-        return this.request<AdmCloudInvoice[]>(`/CashInvoices?RelationshipID=${relationshipId}`);
+        return this.request<AdmCloudInvoice[]>('/CashInvoices', {}, { RelationshipID: relationshipId });
     }
 
     /**
      * Obtener facturas a crédito de un cliente
      */
     async getCreditInvoices(relationshipId: string): Promise<AdmCloudApiResponse<AdmCloudInvoice[]>> {
-        return this.request<AdmCloudInvoice[]>(`/CreditInvoices?RelationshipID=${relationshipId}`);
+        return this.request<AdmCloudInvoice[]>('/CreditInvoices', {}, { RelationshipID: relationshipId });
     }
 
     /**

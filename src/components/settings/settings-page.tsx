@@ -29,7 +29,8 @@ type WorkspaceWithDetails = Workspace & {
     // AdmCloud config
     admCloudEnabled?: boolean;
     admCloudAppId?: string | null;
-    admCloudToken?: string | null;
+    admCloudUsername?: string | null;
+    admCloudPassword?: string | null;
     admCloudCompany?: string | null;
     admCloudRole?: string | null;
     _count: {
@@ -678,7 +679,8 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                         currentConfig={{
                             enabled: workspace.admCloudEnabled || false,
                             appId: workspace.admCloudAppId || null,
-                            token: workspace.admCloudToken || null,
+                            username: workspace.admCloudUsername || null,
+                            password: workspace.admCloudPassword || null,
                             company: workspace.admCloudCompany || null,
                             role: workspace.admCloudRole || null,
                         }}

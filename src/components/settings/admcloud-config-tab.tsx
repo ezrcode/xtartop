@@ -9,7 +9,8 @@ interface AdmCloudConfigTabProps {
     currentConfig: {
         enabled: boolean;
         appId: string | null;
-        token: string | null;
+        username: string | null;
+        password: string | null;
         company: string | null;
         role: string | null;
     };
@@ -106,8 +107,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                     {enabled && (
                         <div className="space-y-4 pt-4 border-t border-graphite-gray">
                             <p className="text-sm text-gray-600">
-                                Ingresa las credenciales de tu cuenta de AdmCloud. Puedes obtenerlas 
-                                contactando a soporte de AdmCloud.
+                                Ingresa las credenciales de tu cuenta de AdmCloud. La API usa autenticación básica (Basic Auth).
                             </p>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -120,8 +120,8 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                         name="appId"
                                         id="appId"
                                         defaultValue={currentConfig.appId || ""}
-                                        placeholder="Tu App ID de AdmCloud"
-                                        className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                        placeholder="ej: f9218618-ee43-4ca0-52f9-..."
+                                        className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm font-mono text-xs"
                                     />
                                     {state?.errors?.appId && (
                                         <p className="mt-1 text-sm text-error-red">{state.errors.appId}</p>
@@ -137,45 +137,62 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                         name="company"
                                         id="company"
                                         defaultValue={currentConfig.company || ""}
-                                        placeholder="ID de tu compañía en AdmCloud"
-                                        className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                        placeholder="ej: 030c4f39-3188-4485-b557-..."
+                                        className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm font-mono text-xs"
                                     />
                                     {state?.errors?.company && (
                                         <p className="mt-1 text-sm text-error-red">{state.errors.company}</p>
                                     )}
                                 </div>
 
-                                <div className="md:col-span-2">
-                                    <label htmlFor="token" className="block text-sm font-medium text-dark-slate mb-2">
-                                        Token de Autenticación <span className="text-error-red">*</span>
+                                <div>
+                                    <label htmlFor="username" className="block text-sm font-medium text-dark-slate mb-2">
+                                        Usuario <span className="text-error-red">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="username"
+                                        id="username"
+                                        defaultValue={currentConfig.username || ""}
+                                        placeholder="Tu usuario de AdmCloud"
+                                        className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                    />
+                                    {state?.errors?.username && (
+                                        <p className="mt-1 text-sm text-error-red">{state.errors.username}</p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label htmlFor="password" className="block text-sm font-medium text-dark-slate mb-2">
+                                        Contraseña <span className="text-error-red">*</span>
                                     </label>
                                     <input
                                         type="password"
-                                        name="token"
-                                        id="token"
-                                        defaultValue={currentConfig.token || ""}
-                                        placeholder="Tu token de autenticación"
-                                        className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm font-mono"
+                                        name="password"
+                                        id="password"
+                                        defaultValue={currentConfig.password || ""}
+                                        placeholder="Tu contraseña de AdmCloud"
+                                        className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                     />
-                                    {state?.errors?.token && (
-                                        <p className="mt-1 text-sm text-error-red">{state.errors.token}</p>
+                                    {state?.errors?.password && (
+                                        <p className="mt-1 text-sm text-error-red">{state.errors.password}</p>
                                     )}
                                 </div>
 
                                 <div>
                                     <label htmlFor="role" className="block text-sm font-medium text-dark-slate mb-2">
-                                        Rol (opcional)
+                                        Rol
                                     </label>
                                     <input
                                         type="text"
                                         name="role"
                                         id="role"
-                                        defaultValue={currentConfig.role || "1"}
-                                        placeholder="1"
+                                        defaultValue={currentConfig.role || "Administradores"}
+                                        placeholder="Administradores"
                                         className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                     />
                                     <p className="mt-1 text-xs text-gray-500">
-                                        Normalmente es "1" por defecto
+                                        Normalmente es "Administradores"
                                     </p>
                                 </div>
                             </div>

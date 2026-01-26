@@ -143,12 +143,13 @@ model Workspace {
   contractTemplate String?  @db.Text // Plantilla del contrato en HTML
   contractVersion  String?  // Versión del contrato (ej: "v1.0")
   
-  // AdmCloud Integration Settings
+  // AdmCloud Integration Settings (Basic Auth)
   admCloudEnabled  Boolean  @default(false)
   admCloudAppId    String?  // App ID de AdmCloud
-  admCloudToken    String?  // Token de autenticación
+  admCloudUsername String?  // Usuario para Basic Auth
+  admCloudPassword String?  // Contraseña para Basic Auth
   admCloudCompany  String?  // ID de la compañía en AdmCloud
-  admCloudRole     String?  // Rol (puede ser "1" por defecto)
+  admCloudRole     String?  // Rol (ej: "Administradores")
   
   createdAt        DateTime @default(now())
   ownerId     String
