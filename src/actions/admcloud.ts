@@ -226,11 +226,16 @@ export async function syncCompanyWithAdmCloud(companyId: string): Promise<{
     error?: string;
 }> {
     try {
+        console.log('[syncCompanyWithAdmCloud] Starting sync for company:', companyId);
+        
         const admCloudConfig = await getAdmCloudConfig();
         
         if (!admCloudConfig) {
+            console.log('[syncCompanyWithAdmCloud] AdmCloud not configured');
             return { success: false, error: "AdmCloud no está configurado" };
         }
+        
+        console.log('[syncCompanyWithAdmCloud] Config found, appId:', admCloudConfig.config.appId?.substring(0, 8) + '...');
 
         const company = await prisma.company.findUnique({
             where: { id: companyId },
@@ -244,9 +249,13 @@ export async function syncCompanyWithAdmCloud(companyId: string): Promise<{
         if (!company.taxId) {
             return { success: false, error: "La empresa debe tener un RNC para sincronizar con AdmCloud" };
         }
+        
+        console.log('[syncCompanyWithAdmCloud] Looking for customer with taxId:', company.taxId);
 
         const client = createAdmCloudClient(admCloudConfig.config);
         const customerResult = await client.findCustomerByTaxId(company.taxId);
+        
+        console.log('[syncCompanyWithAdmCloud] Customer search result:', customerResult.success, customerResult.error);
 
         if (!customerResult.success) {
             return { success: false, error: customerResult.error };
