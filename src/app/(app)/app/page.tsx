@@ -11,6 +11,7 @@ import { CompaniesByStatus } from "@/components/dashboard/companies-by-status";
 import { RevenueMetrics } from "@/components/dashboard/revenue-metrics";
 import { PendingActions } from "@/components/dashboard/pending-actions";
 
+// Force rebuild - v2
 export const revalidate = 60;
 
 async function getDashboardStats(workspaceId: string) {
