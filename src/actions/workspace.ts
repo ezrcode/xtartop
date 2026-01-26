@@ -386,3 +386,44 @@ export async function acceptInvitation(token: string) {
     }
 }
 
+export async function updateContractTemplate(content: string, version: string) {
+    const session = await auth();
+    if (!session?.user?.email) {
+        return { error: "No autorizado" };
+    }
+
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) {
+        return { error: "Workspace no encontrado" };
+    }
+
+    try {
+        await prisma.workspace.update({
+            where: { id: workspace.id },
+            data: {
+                contractTemplate: content,
+                contractVersion: version,
+            },
+        });
+
+        revalidatePath("/app/settings");
+        return { success: true };
+    } catch (error) {
+        console.error("Database Error:", error);
+        return { error: "Error al guardar el contrato" };
+    }
+}
+
+export async function getContractTemplate() {
+    const session = await auth();
+    if (!session?.user?.email) return null;
+
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) return null;
+
+    return {
+        template: workspace.contractTemplate,
+        version: workspace.contractVersion,
+    };
+}
+

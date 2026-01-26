@@ -127,13 +127,15 @@ model User {
 model Workspace {
   id          String   @id @default(cuid())
   name        String
-  slug        String?  @unique
-  legalName   String?  // Nombre o Razón social
-  rnc         String?  // RNC
-  address     String?  @db.Text
-  phone       String?
-  logoUrl     String?  // Logo path
-  createdAt   DateTime @default(now())
+  slug             String?  @unique
+  legalName        String?  // Nombre o Razón social
+  rnc              String?  // RNC
+  address          String?  @db.Text
+  phone            String?
+  logoUrl          String?  // Logo path
+  contractTemplate String?  @db.Text // Plantilla del contrato en HTML
+  contractVersion  String?  // Versión del contrato (ej: "v1.0")
+  createdAt        DateTime @default(now())
   ownerId     String
   owner       User     @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
 
