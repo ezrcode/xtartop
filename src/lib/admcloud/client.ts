@@ -123,17 +123,23 @@ class AdmCloudClient {
             const separator = endpoint.includes('?') ? '&' : '?';
             const url = `${ADMCLOUD_BASE_URL}${endpoint}${separator}${allParams}`;
 
+            console.log('[AdmCloud] Request URL:', url.replace(/appid=[^&]+/, 'appid=***'));
+
+            // Intentar primero solo con query params (como muestra la documentación)
+            // Si falla, se puede agregar Basic Auth header
             const response = await fetch(url, {
                 ...options,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': this.getBasicAuthHeader(),
                     ...options.headers,
                 },
             });
 
+            console.log('[AdmCloud] Response status:', response.status);
+
             if (!response.ok) {
                 const errorText = await response.text();
+                console.log('[AdmCloud] Error response:', errorText.substring(0, 500));
                 return {
                     success: false,
                     error: `Error ${response.status}: ${errorText || response.statusText}`,
@@ -143,6 +149,7 @@ class AdmCloudClient {
             const data = await response.json();
             return { success: true, data };
         } catch (error) {
+            console.error('[AdmCloud] Exception:', error);
             return {
                 success: false,
                 error: error instanceof Error ? error.message : 'Error desconocido',
