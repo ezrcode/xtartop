@@ -23,7 +23,7 @@ interface InvoicesTabProps {
     companyName: string;
     taxId: string | null;
     admCloudRelationshipId: string | null;
-    admCloudLastSync: Date | null;
+    admCloudLastSync: Date | string | null;
 }
 
 function formatCurrency(amount: number, currency: string = "DOP"): string {
@@ -173,7 +173,7 @@ export function InvoicesTab({
                         </h3>
                         {admCloudLastSync && (
                             <p className="text-xs text-gray-500">
-                                Última sincronización: {formatDate(admCloudLastSync.toISOString())}
+                                Última sincronización: {formatDate(new Date(admCloudLastSync).toISOString())}
                             </p>
                         )}
                     </div>
@@ -282,7 +282,7 @@ export function InvoicesTab({
                                     </div>
                                     <div className="flex items-center gap-1.5 text-gray-600">
                                         <DollarSign size={14} className="text-gray-400" />
-                                        {formatCurrency(invoice.Total, invoice.CurrencyCode)}
+                                        {formatCurrency(invoice.Total ?? 0, invoice.CurrencyCode || "DOP")}
                                     </div>
                                     {invoice.DueDate && (
                                         <div className="flex items-center gap-1.5 text-gray-600">
