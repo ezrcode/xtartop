@@ -2,7 +2,6 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
 import { getCurrentWorkspace } from "./workspace";
 
 export async function getProjects(companyId: string) {
@@ -61,7 +60,6 @@ export async function createProject(companyId: string, name: string) {
             },
         });
 
-        revalidatePath(`/app/companies/${companyId}`);
         return { success: true, project, activity };
     } catch (error) {
         console.error("Error creating project:", error);
@@ -115,7 +113,6 @@ export async function updateProjectStatus(
             },
         });
 
-        revalidatePath(`/app/companies/${companyId}`);
         return { success: true, project, activity };
     } catch (error) {
         console.error("Error updating project:", error);

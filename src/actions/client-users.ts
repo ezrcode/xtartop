@@ -2,7 +2,6 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
 import { getCurrentWorkspace } from "./workspace";
 
 export async function getClientUsers(companyId: string) {
@@ -62,7 +61,6 @@ export async function createClientUser(companyId: string, fullName: string, emai
             },
         });
 
-        revalidatePath(`/app/companies/${companyId}`);
         return { success: true, clientUser, activity };
     } catch (error) {
         console.error("Error creating client user:", error);
@@ -116,7 +114,6 @@ export async function updateClientUserStatus(
             },
         });
 
-        revalidatePath(`/app/companies/${companyId}`);
         return { success: true, clientUser, activity };
     } catch (error) {
         console.error("Error updating client user:", error);
