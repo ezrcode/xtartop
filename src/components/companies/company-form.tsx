@@ -24,20 +24,21 @@ interface CompanyFormProps {
     isEditMode?: boolean;
 }
 
-function SubmitButton({ actionName, label, loadingLabel, icon: Icon, variant = "primary" }: {
+function SubmitButton({ actionName, label, mobileLabel, loadingLabel, icon: Icon, variant = "primary" }: {
     actionName: string;
     label: string;
+    mobileLabel?: string;
     loadingLabel?: string;
     icon?: React.ElementType;
     variant?: "primary" | "secondary" | "danger";
 }) {
     const { pending } = useFormStatus();
 
-    const baseClasses = "inline-flex items-center px-4 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors";
+    const baseClasses = "inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95";
     const variants = {
-        primary: "text-white bg-nearby-dark hover:bg-gray-900 focus:ring-nearby-dark",
+        primary: "text-white bg-nearby-dark hover:bg-gray-900 focus:ring-nearby-dark shadow-sm",
         secondary: "text-dark-slate bg-white border border-graphite-gray hover:bg-gray-50 focus:ring-nearby-accent",
-        danger: "text-white bg-error-red hover:bg-red-700 focus:ring-error-red",
+        danger: "text-white bg-error-red hover:bg-red-700 focus:ring-error-red shadow-sm",
     };
 
     return (
@@ -50,13 +51,14 @@ function SubmitButton({ actionName, label, loadingLabel, icon: Icon, variant = "
         >
             {pending ? (
                 <>
-                    <Loader2 size={16} className="mr-2 animate-spin" />
-                    {loadingLabel || "Guardando..."}
+                    <Loader2 size={16} className="animate-spin" />
+                    <span className="hidden sm:inline ml-2">{loadingLabel || "Guardando..."}</span>
                 </>
             ) : (
                 <>
-                    {Icon && <Icon size={16} className="mr-2" />}
-                    {label}
+                    {Icon && <Icon size={16} />}
+                    <span className="hidden sm:inline ml-2">{label}</span>
+                    {mobileLabel && <span className="sm:hidden ml-1.5 text-xs">{mobileLabel}</span>}
                 </>
             )}
         </button>
@@ -69,10 +71,10 @@ function DeleteButton() {
         <button
             type="submit"
             disabled={pending}
-            className="px-4 py-2 text-sm font-medium text-white bg-error-red rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full sm:w-auto px-4 py-3 sm:py-2 text-sm font-medium text-white bg-error-red rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
             {pending ? (
-                <span className="flex items-center">
+                <span className="flex items-center justify-center">
                     <Loader2 size={16} className="mr-2 animate-spin" />
                     Eliminando...
                 </span>
@@ -93,25 +95,26 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
     return (
         <div className="flex flex-col h-full">
             <form action={action} className="flex flex-col h-full">
-                {/* Command Bar */}
-                <div className="sticky top-0 z-10 bg-white border-b border-graphite-gray shadow-sm">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex items-center justify-between h-16">
-                            <div className="flex items-center space-x-4">
+                {/* Command Bar - Mobile Optimized */}
+                <div className="sticky top-0 z-10 bg-white border-b border-graphite-gray shadow-sm safe-top">
+                    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+                        <div className="flex items-center justify-between h-14 sm:h-16">
+                            <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
                                 <Link
                                     href="/app/companies"
-                                    className="p-2 text-gray-400 hover:text-dark-slate rounded-full hover:bg-gray-100"
+                                    className="p-2 text-gray-400 hover:text-dark-slate rounded-full hover:bg-gray-100 flex-shrink-0"
                                 >
                                     <ArrowLeft size={20} />
                                 </Link>
-                                <h1 className="text-xl font-bold text-nearby-dark">
+                                <h1 className="text-base sm:text-xl font-bold text-nearby-dark truncate">
                                     {isEditMode ? company?.name : "Nueva Empresa"}
                                 </h1>
                             </div>
-                            <div className="flex items-center space-x-3">
+                            <div className="flex items-center space-x-2 flex-shrink-0">
                                 <SubmitButton
                                     actionName="save"
                                     label="Guardar"
+                                    mobileLabel=""
                                     loadingLabel="Guardando..."
                                     icon={Save}
                                     variant="primary"
@@ -119,6 +122,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                 <SubmitButton
                                     actionName="saveAndClose"
                                     label="Guardar y cerrar"
+                                    mobileLabel="Cerrar"
                                     loadingLabel="Guardando..."
                                     icon={Save}
                                     variant="secondary"
@@ -128,10 +132,10 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                     <button
                                         type="button"
                                         onClick={() => setDeleteConfirmOpen(true)}
-                                        className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-error-red rounded-md hover:bg-red-700 transition-colors"
+                                        className="inline-flex items-center justify-center p-2 sm:px-3 sm:py-2 text-sm font-medium text-white bg-error-red rounded-lg hover:bg-red-700 transition-all active:scale-95 shadow-sm"
                                     >
-                                        <Trash2 size={16} className="mr-2" />
-                                        Eliminar
+                                        <Trash2 size={16} />
+                                        <span className="hidden sm:inline ml-2">Eliminar</span>
                                     </button>
                                 )}
                             </div>
@@ -140,18 +144,18 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                 </div>
 
                 {/* Main Content */}
-                <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div className="flex-1 max-w-7xl mx-auto w-full px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8">
 
                         {/* Left Column: Form */}
-                        <div className="lg:col-span-7 space-y-6">
-                            {/* Tabs */}
-                            <div className="border-b border-graphite-gray">
-                                <nav className="-mb-px flex space-x-8">
+                        <div className="lg:col-span-7 space-y-4 sm:space-y-6">
+                            {/* Tabs - Mobile Optimized */}
+                            <div className="border-b border-graphite-gray overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0">
+                                <nav className="-mb-px flex space-x-1 sm:space-x-6 min-w-max">
                                     <button
                                         type="button"
                                         onClick={() => setActiveTab("general")}
-                                        className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                                        className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
                                             activeTab === "general"
                                                 ? "border-nearby-accent text-nearby-accent"
                                                 : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
@@ -162,7 +166,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                     <button
                                         type="button"
                                         onClick={() => setActiveTab("contacts")}
-                                        className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                                        className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
                                             activeTab === "contacts"
                                                 ? "border-nearby-accent text-nearby-accent"
                                                 : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
@@ -173,7 +177,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                     <button
                                         type="button"
                                         onClick={() => setActiveTab("subscription")}
-                                        className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                                        className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
                                             activeTab === "subscription"
                                                 ? "border-nearby-accent text-nearby-accent"
                                                 : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
@@ -184,7 +188,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                 </nav>
                             </div>
 
-                            <div className="bg-white shadow-sm rounded-lg border border-graphite-gray p-6 space-y-6">
+                            <div className="bg-white shadow-sm rounded-xl border border-graphite-gray p-4 sm:p-6 space-y-4 sm:space-y-6">
                                 
                                 {state?.message && (
                                     <div className={`p-4 rounded-md ${
@@ -198,22 +202,22 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
 
                                 {/* Tab Content: General Info */}
                                 {activeTab === "general" && (
-                                    <div className="space-y-6">
+                                    <div className="space-y-5">
                                         {/* Logo Placeholder */}
-                                        <div className="flex items-center space-x-4">
-                                            <div className="h-16 w-16 rounded-lg bg-soft-gray flex items-center justify-center text-gray-400 border border-graphite-gray">
-                                                <span className="text-2xl font-bold">
-                                                    {company?.name ? company.name.charAt(0).toUpperCase() : "?"}
+                                        <div className="flex items-center space-x-3 sm:space-x-4">
+                                            <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-xl bg-soft-gray flex items-center justify-center text-gray-400 border border-graphite-gray flex-shrink-0">
+                                                <span className="text-xl sm:text-2xl font-bold">
+                                                    {company?.name ? company.name.charAt(0).toUpperCase() : "P"}
                                                 </span>
                                             </div>
-                                            <div className="text-sm text-gray-500">
+                                            <div className="text-xs sm:text-sm text-gray-500">
                                                 Logo de la empresa (Próximamente)
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                                        <div className="grid grid-cols-1 gap-4 sm:gap-y-5 sm:gap-x-4 sm:grid-cols-6">
                                             <div className="sm:col-span-6">
-                                                <label htmlFor="name" className="block text-sm font-medium text-dark-slate">
+                                                <label htmlFor="name" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     Nombre o Razón Social <span className="text-error-red">*</span>
                                                 </label>
                                                 <input
@@ -222,15 +226,15 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                     id="name"
                                                     defaultValue={company?.name}
                                                     required
-                                                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 />
                                                 {state?.errors?.name && (
-                                                    <p className="mt-1 text-sm text-error-red">{state.errors.name}</p>
+                                                    <p className="mt-1.5 text-xs text-error-red">{state.errors.name}</p>
                                                 )}
                                             </div>
 
                                             <div className="sm:col-span-3">
-                                                <label htmlFor="taxId" className="block text-sm font-medium text-dark-slate">
+                                                <label htmlFor="taxId" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     RNC / Tax ID
                                                 </label>
                                                 <input
@@ -238,12 +242,12 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                     name="taxId"
                                                     id="taxId"
                                                     defaultValue={company?.taxId || ""}
-                                                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 />
                                             </div>
 
                                             <div className="sm:col-span-3">
-                                                <label htmlFor="phone" className="block text-sm font-medium text-dark-slate">
+                                                <label htmlFor="phone" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     Teléfono
                                                 </label>
                                                 <input
@@ -251,12 +255,12 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                     name="phone"
                                                     id="phone"
                                                     defaultValue={company?.phone || ""}
-                                                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 />
                                             </div>
 
                                             <div className="sm:col-span-3">
-                                                <label htmlFor="country" className="block text-sm font-medium text-dark-slate">
+                                                <label htmlFor="country" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     País
                                                 </label>
                                                 <input
@@ -264,12 +268,12 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                     name="country"
                                                     id="country"
                                                     defaultValue={company?.country || ""}
-                                                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 />
                                             </div>
 
                                             <div className="sm:col-span-3">
-                                                <label htmlFor="city" className="block text-sm font-medium text-dark-slate">
+                                                <label htmlFor="city" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     Ciudad
                                                 </label>
                                                 <input
@@ -277,12 +281,12 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                     name="city"
                                                     id="city"
                                                     defaultValue={company?.city || ""}
-                                                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 />
                                             </div>
 
                                             <div className="sm:col-span-6">
-                                                <label htmlFor="website" className="block text-sm font-medium text-dark-slate">
+                                                <label htmlFor="website" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     Sitio Web
                                                 </label>
                                                 <input
@@ -291,15 +295,15 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                     id="website"
                                                     defaultValue={company?.website || ""}
                                                     placeholder="https://example.com"
-                                                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 />
                                                 {state?.errors?.website && (
-                                                    <p className="mt-1 text-sm text-error-red">{state.errors.website}</p>
+                                                    <p className="mt-1.5 text-xs text-error-red">{state.errors.website}</p>
                                                 )}
                                             </div>
 
                                             <div className="sm:col-span-3">
-                                                <label htmlFor="instagramUrl" className="block text-sm font-medium text-dark-slate">
+                                                <label htmlFor="instagramUrl" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     Instagram (URL)
                                                 </label>
                                                 <input
@@ -308,15 +312,15 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                     id="instagramUrl"
                                                     defaultValue={company?.instagramUrl || ""}
                                                     placeholder="https://instagram.com/..."
-                                                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 />
                                                 {state?.errors?.instagramUrl && (
-                                                    <p className="mt-1 text-sm text-error-red">{state.errors.instagramUrl}</p>
+                                                    <p className="mt-1.5 text-xs text-error-red">{state.errors.instagramUrl}</p>
                                                 )}
                                             </div>
 
                                             <div className="sm:col-span-3">
-                                                <label htmlFor="linkedinUrl" className="block text-sm font-medium text-dark-slate">
+                                                <label htmlFor="linkedinUrl" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     LinkedIn (URL)
                                                 </label>
                                                 <input
@@ -325,22 +329,22 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                     id="linkedinUrl"
                                                     defaultValue={company?.linkedinUrl || ""}
                                                     placeholder="https://linkedin.com/company/..."
-                                                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 />
                                                 {state?.errors?.linkedinUrl && (
-                                                    <p className="mt-1 text-sm text-error-red">{state.errors.linkedinUrl}</p>
+                                                    <p className="mt-1.5 text-xs text-error-red">{state.errors.linkedinUrl}</p>
                                                 )}
                                             </div>
 
                                             <div className="sm:col-span-6">
-                                                <label htmlFor="primaryContactId" className="block text-sm font-medium text-dark-slate">
+                                                <label htmlFor="primaryContactId" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     Contacto Principal
                                                 </label>
                                                 <select
                                                     id="primaryContactId"
                                                     name="primaryContactId"
                                                     defaultValue={company?.primaryContactId || "null"}
-                                                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
                                                 >
                                                     <option value="null">Sin contacto principal</option>
                                                     {contacts.map((contact) => (
@@ -352,14 +356,14 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                             </div>
 
                                             <div className="sm:col-span-6">
-                                                <label htmlFor="origin" className="block text-sm font-medium text-dark-slate">
+                                                <label htmlFor="origin" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     Origen
                                                 </label>
                                                 <select
                                                     id="origin"
                                                     name="origin"
                                                     defaultValue={company?.origin || "null"}
-                                                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
                                                 >
                                                     <option value="null">Seleccionar origen</option>
                                                     <option value="PROSPECCION_MANUAL">Prospección manual</option>
@@ -372,18 +376,18 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                             </div>
                                         </div>
 
-                                        <div className="border-t border-graphite-gray pt-6">
-                                            <h3 className="text-lg font-medium text-dark-slate mb-4">Estado y Metadatos</h3>
-                                            <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                                        <div className="border-t border-graphite-gray pt-5">
+                                            <h3 className="text-base sm:text-lg font-medium text-dark-slate mb-4">Estado y Metadatos</h3>
+                                            <div className="grid grid-cols-1 gap-4 sm:gap-y-5 sm:gap-x-4 sm:grid-cols-6">
                                                 <div className="sm:col-span-3">
-                                                    <label htmlFor="status" className="block text-sm font-medium text-dark-slate">
+                                                    <label htmlFor="status" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                         Estado
                                                     </label>
                                                     <select
                                                         id="status"
                                                         name="status"
                                                         defaultValue={company?.status || "PROSPECTO"}
-                                                        className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                                        className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
                                                     >
                                                         {Object.values(CompanyStatus).map((status) => (
                                                             <option key={status} value={status}>
@@ -395,10 +399,10 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
 
                                                 {isEditMode && (
                                                     <div className="sm:col-span-3">
-                                                        <label className="block text-sm font-medium text-gray-500">
+                                                        <label className="block text-sm font-medium text-gray-500 mb-1.5">
                                                             Creado el
                                                         </label>
-                                                        <div className="mt-2 text-sm text-dark-slate">
+                                                        <div className="py-3 sm:py-2.5 text-base sm:text-sm text-dark-slate">
                                                             {company?.createdAt ? new Date(company.createdAt).toLocaleDateString('es-ES', { 
                                                                 year: 'numeric', 
                                                                 month: '2-digit', 
@@ -481,7 +485,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
 
                         {/* Right Column: Activities */}
                         <div className="lg:col-span-5 flex flex-col">
-                            <div className="bg-white shadow-sm rounded-lg border border-graphite-gray p-6 flex-1 flex flex-col min-h-[400px] max-h-[calc(100vh-200px)]">
+                            <div className="bg-white shadow-sm rounded-xl border border-graphite-gray p-4 sm:p-6 flex-1 flex flex-col min-h-[300px] sm:min-h-[400px] max-h-[500px] lg:max-h-[calc(100vh-200px)]">
                                 {isEditMode && company ? (
                                     <CompanyActivitiesWithSuspense
                                         companyId={company.id}
@@ -521,20 +525,20 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
 
             {/* Delete Confirmation Modal */}
             {deleteConfirmOpen && company && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4">
+                    <div className="bg-white rounded-t-2xl sm:rounded-xl shadow-lg p-5 sm:p-6 w-full sm:max-w-md safe-bottom">
                         <h3 className="text-lg font-bold text-dark-slate mb-2">Eliminar Empresa</h3>
-                        <p className="text-gray-600 mb-6">
+                        <p className="text-gray-600 mb-6 text-sm sm:text-base">
                             ¿Estás seguro de que deseas eliminar <strong>{company.name}</strong>? Esta acción no se puede deshacer.
                         </p>
-                        <div className="flex justify-end space-x-3">
+                        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3">
                             <button
                                 onClick={() => setDeleteConfirmOpen(false)}
-                                className="px-4 py-2 text-sm font-medium text-dark-slate bg-white border border-graphite-gray rounded-md hover:bg-gray-50"
+                                className="w-full sm:w-auto px-4 py-3 sm:py-2 text-sm font-medium text-dark-slate bg-white border border-graphite-gray rounded-lg hover:bg-gray-50 transition-colors"
                             >
                                 Cancelar
                             </button>
-                            <form action={deleteCompany.bind(null, company.id)}>
+                            <form action={deleteCompany.bind(null, company.id)} className="w-full sm:w-auto">
                                 <DeleteButton />
                             </form>
                         </div>

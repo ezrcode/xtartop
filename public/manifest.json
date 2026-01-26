@@ -1,8 +1,9 @@
 {
-  "name": "NEARBY",
+  "name": "NEARBY CRM",
   "short_name": "NEARBY",
   "description": "Sistema de gestión de relaciones con clientes de NEARBY",
   "start_url": "/app",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2d3e50",
@@ -58,12 +59,30 @@
     }
   ],
   "categories": ["business", "productivity"],
-  "screenshots": [
+  "shortcuts": [
     {
-      "src": "/screenshots/screenshot1.png",
-      "sizes": "540x720",
-      "type": "image/png"
+      "name": "Nueva Empresa",
+      "short_name": "Empresa",
+      "description": "Crear una nueva empresa",
+      "url": "/app/companies/new",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Nuevo Contacto",
+      "short_name": "Contacto",
+      "description": "Crear un nuevo contacto",
+      "url": "/app/contacts/new",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Nuevo Negocio",
+      "short_name": "Negocio",
+      "description": "Crear un nuevo negocio",
+      "url": "/app/deals/new",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
     }
-  ]
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
 }
 

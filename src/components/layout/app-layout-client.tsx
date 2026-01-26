@@ -3,6 +3,8 @@
 import { useState, Suspense, useEffect } from "react";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
+import { BottomNav } from "@/components/layout/bottom-nav";
+import { OfflineBanner } from "@/components/ui/offline-banner";
 
 // Loading fallback para el topbar
 function TopbarSkeleton() {
@@ -46,11 +48,16 @@ export function AppLayoutClient({ user, userRole, children }: AppLayoutClientPro
 
     return (
         <div className="flex min-h-screen bg-soft-gray">
+            {/* Offline Banner */}
+            <OfflineBanner />
+            
+            {/* Desktop Sidebar */}
             <Sidebar 
                 userRole={userRole} 
                 isMobileOpen={isMobileMenuOpen}
                 setIsMobileOpen={setIsMobileMenuOpen}
             />
+            
             <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
                 <Suspense fallback={<TopbarSkeleton />}>
                     <Topbar 
@@ -58,10 +65,13 @@ export function AppLayoutClient({ user, userRole, children }: AppLayoutClientPro
                         onMenuClick={() => setIsMobileMenuOpen(true)}
                     />
                 </Suspense>
-                <main>
+                <main className="pb-20 md:pb-0">
                     {children}
                 </main>
             </div>
+            
+            {/* Mobile Bottom Navigation */}
+            <BottomNav userRole={userRole} />
         </div>
     );
 }
