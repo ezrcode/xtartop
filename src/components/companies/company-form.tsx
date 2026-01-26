@@ -460,8 +460,8 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                         </div>
 
                         {/* Right Column: Activities */}
-                        <div className="lg:col-span-5">
-                            <div className="bg-white shadow-sm rounded-lg border border-graphite-gray p-6 h-full min-h-[400px]">
+                        <div className="lg:col-span-5 flex flex-col">
+                            <div className="bg-white shadow-sm rounded-lg border border-graphite-gray p-6 flex-1 flex flex-col min-h-[400px] max-h-[calc(100vh-200px)]">
                                 {isEditMode && company ? (
                                     <CompanyActivitiesWithSuspense
                                         companyId={company.id}

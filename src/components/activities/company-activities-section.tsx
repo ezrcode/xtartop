@@ -304,8 +304,8 @@ export function CompanyActivitiesSection({
                 </div>
             )}
 
-            {/* Timeline - Scrollable */}
-            <div className="flex-1 overflow-y-auto max-h-[600px] pr-1 -mr-1">
+            {/* Timeline - Scrollable (fills remaining space) */}
+            <div className="flex-1 overflow-y-auto pr-1 -mr-1">
                 {timelineItems.length === 0 ? (
                     <div className="text-center py-8 text-gray-400 text-xs">
                         Sin actividades
