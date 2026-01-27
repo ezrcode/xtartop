@@ -93,8 +93,30 @@ function DeleteButton() {
 export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFormProps) {
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<"general" | "contacts" | "subscription" | "invoices">("general");
-    const [logoUrl, setLogoUrl] = useState<string | null>(company?.logoUrl || null);
-    const [quoteFileUrl, setQuoteFileUrl] = useState<string | null>(company?.quoteFileUrl || null);
+    
+    // Controlled form fields - persist values across tab switches
+    const [formData, setFormData] = useState({
+        name: company?.name || "",
+        taxId: company?.taxId || "",
+        phone: company?.phone || "",
+        country: company?.country || "",
+        city: company?.city || "",
+        website: company?.website || "",
+        instagramUrl: company?.instagramUrl || "",
+        linkedinUrl: company?.linkedinUrl || "",
+        primaryContactId: company?.primaryContactId || "null",
+        origin: company?.origin || "null",
+        status: company?.status || "PROSPECTO",
+        logoUrl: company?.logoUrl || "",
+        quoteId: company?.quoteId || "",
+        quoteFileUrl: company?.quoteFileUrl || "",
+        initialProjects: company?.initialProjects?.toString() || "0",
+        initialUsers: company?.initialUsers?.toString() || "0",
+    });
+
+    const updateField = (field: keyof typeof formData, value: string) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+    };
 
     const updateAction = company ? updateCompanyAction.bind(null, company.id) : () => Promise.resolve({ message: "Error" });
 
@@ -213,6 +235,23 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                         </div>
 
                         <form id="company-form" action={action} className="bg-white shadow-sm rounded-xl border border-graphite-gray p-4 sm:p-6 space-y-4 sm:space-y-6">
+                                {/* Hidden fields - always send all form values regardless of active tab */}
+                                <input type="hidden" name="name" value={formData.name} />
+                                <input type="hidden" name="taxId" value={formData.taxId} />
+                                <input type="hidden" name="phone" value={formData.phone} />
+                                <input type="hidden" name="country" value={formData.country} />
+                                <input type="hidden" name="city" value={formData.city} />
+                                <input type="hidden" name="website" value={formData.website} />
+                                <input type="hidden" name="instagramUrl" value={formData.instagramUrl} />
+                                <input type="hidden" name="linkedinUrl" value={formData.linkedinUrl} />
+                                <input type="hidden" name="primaryContactId" value={formData.primaryContactId} />
+                                <input type="hidden" name="origin" value={formData.origin} />
+                                <input type="hidden" name="status" value={formData.status} />
+                                <input type="hidden" name="logoUrl" value={formData.logoUrl} />
+                                <input type="hidden" name="quoteId" value={formData.quoteId} />
+                                <input type="hidden" name="quoteFileUrl" value={formData.quoteFileUrl} />
+                                <input type="hidden" name="initialProjects" value={formData.initialProjects} />
+                                <input type="hidden" name="initialUsers" value={formData.initialUsers} />
                                 
                                 {state?.message && (
                                     <div className={`p-4 rounded-md ${
@@ -229,26 +268,25 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                     <div className="space-y-5">
                                         {/* Logo Upload */}
                                         <ImageUpload
-                                            currentImage={company?.logoUrl}
-                                            onImageChange={(url) => setLogoUrl(url)}
+                                            currentImage={formData.logoUrl || null}
+                                            onImageChange={(url) => updateField("logoUrl", url || "")}
                                             category="logo"
                                             folder="logos"
                                             size="lg"
                                             shape="square"
                                             label="Logo de la empresa"
                                         />
-                                        <input type="hidden" name="logoUrl" value={logoUrl || ""} />
 
                                         <div className="grid grid-cols-1 gap-4 sm:gap-y-5 sm:gap-x-4 sm:grid-cols-6">
                                             <div className="sm:col-span-6">
-                                                <label htmlFor="name" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="name-input" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     Nombre o Razón Social <span className="text-error-red">*</span>
                                                 </label>
                                                 <input
                                                     type="text"
-                                                    name="name"
-                                                    id="name"
-                                                    defaultValue={company?.name}
+                                                    id="name-input"
+                                                    value={formData.name}
+                                                    onChange={(e) => updateField("name", e.target.value)}
                                                     required
                                                     className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 />
@@ -258,66 +296,66 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                             </div>
 
                                             <div className="sm:col-span-3">
-                                                <label htmlFor="taxId" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="taxId-input" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     RNC / Tax ID
                                                 </label>
                                                 <input
                                                     type="text"
-                                                    name="taxId"
-                                                    id="taxId"
-                                                    defaultValue={company?.taxId || ""}
+                                                    id="taxId-input"
+                                                    value={formData.taxId}
+                                                    onChange={(e) => updateField("taxId", e.target.value)}
                                                     className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 />
                                             </div>
 
                                             <div className="sm:col-span-3">
-                                                <label htmlFor="phone" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="phone-input" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     Teléfono
                                                 </label>
                                                 <input
                                                     type="tel"
-                                                    name="phone"
-                                                    id="phone"
-                                                    defaultValue={company?.phone || ""}
+                                                    id="phone-input"
+                                                    value={formData.phone}
+                                                    onChange={(e) => updateField("phone", e.target.value)}
                                                     className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 />
                                             </div>
 
                                             <div className="sm:col-span-3">
-                                                <label htmlFor="country" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="country-input" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     País
                                                 </label>
                                                 <input
                                                     type="text"
-                                                    name="country"
-                                                    id="country"
-                                                    defaultValue={company?.country || ""}
+                                                    id="country-input"
+                                                    value={formData.country}
+                                                    onChange={(e) => updateField("country", e.target.value)}
                                                     className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 />
                                             </div>
 
                                             <div className="sm:col-span-3">
-                                                <label htmlFor="city" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="city-input" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     Ciudad
                                                 </label>
                                                 <input
                                                     type="text"
-                                                    name="city"
-                                                    id="city"
-                                                    defaultValue={company?.city || ""}
+                                                    id="city-input"
+                                                    value={formData.city}
+                                                    onChange={(e) => updateField("city", e.target.value)}
                                                     className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 />
                                             </div>
 
                                             <div className="sm:col-span-6">
-                                                <label htmlFor="website" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="website-input" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     Sitio Web
                                                 </label>
                                                 <input
                                                     type="url"
-                                                    name="website"
-                                                    id="website"
-                                                    defaultValue={company?.website || ""}
+                                                    id="website-input"
+                                                    value={formData.website}
+                                                    onChange={(e) => updateField("website", e.target.value)}
                                                     placeholder="https://example.com"
                                                     className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 />
@@ -327,14 +365,14 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                             </div>
 
                                             <div className="sm:col-span-3">
-                                                <label htmlFor="instagramUrl" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="instagramUrl-input" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     Instagram (URL)
                                                 </label>
                                                 <input
                                                     type="url"
-                                                    name="instagramUrl"
-                                                    id="instagramUrl"
-                                                    defaultValue={company?.instagramUrl || ""}
+                                                    id="instagramUrl-input"
+                                                    value={formData.instagramUrl}
+                                                    onChange={(e) => updateField("instagramUrl", e.target.value)}
                                                     placeholder="https://instagram.com/..."
                                                     className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 />
@@ -344,14 +382,14 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                             </div>
 
                                             <div className="sm:col-span-3">
-                                                <label htmlFor="linkedinUrl" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="linkedinUrl-input" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     LinkedIn (URL)
                                                 </label>
                                                 <input
                                                     type="url"
-                                                    name="linkedinUrl"
-                                                    id="linkedinUrl"
-                                                    defaultValue={company?.linkedinUrl || ""}
+                                                    id="linkedinUrl-input"
+                                                    value={formData.linkedinUrl}
+                                                    onChange={(e) => updateField("linkedinUrl", e.target.value)}
                                                     placeholder="https://linkedin.com/company/..."
                                                     className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 />
@@ -361,13 +399,13 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                             </div>
 
                                             <div className="sm:col-span-6">
-                                                <label htmlFor="primaryContactId" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="primaryContactId-input" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     Contacto Principal
                                                 </label>
                                                 <select
-                                                    id="primaryContactId"
-                                                    name="primaryContactId"
-                                                    defaultValue={company?.primaryContactId || "null"}
+                                                    id="primaryContactId-input"
+                                                    value={formData.primaryContactId}
+                                                    onChange={(e) => updateField("primaryContactId", e.target.value)}
                                                     className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
                                                 >
                                                     <option value="null">Sin contacto principal</option>
@@ -380,13 +418,13 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                             </div>
 
                                             <div className="sm:col-span-6">
-                                                <label htmlFor="origin" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="origin-input" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     Origen
                                                 </label>
                                                 <select
-                                                    id="origin"
-                                                    name="origin"
-                                                    defaultValue={company?.origin || "null"}
+                                                    id="origin-input"
+                                                    value={formData.origin}
+                                                    onChange={(e) => updateField("origin", e.target.value)}
                                                     className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
                                                 >
                                                     <option value="null">Seleccionar origen</option>
@@ -404,13 +442,13 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                             <h3 className="text-base sm:text-lg font-medium text-dark-slate mb-4">Estado y Metadatos</h3>
                                             <div className="grid grid-cols-1 gap-4 sm:gap-y-5 sm:gap-x-4 sm:grid-cols-6">
                                                 <div className="sm:col-span-3">
-                                                    <label htmlFor="status" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                    <label htmlFor="status-input" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                         Estado
                                                     </label>
                                                     <select
-                                                        id="status"
-                                                        name="status"
-                                                        defaultValue={company?.status || "PROSPECTO"}
+                                                        id="status-input"
+                                                        value={formData.status}
+                                                        onChange={(e) => updateField("status", e.target.value)}
                                                         className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
                                                     >
                                                         {Object.values(CompanyStatus).map((status) => (
@@ -488,15 +526,15 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                 {/* Cotización - Editables solo por admin antes de aceptar contrato */}
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                     <div>
-                                                        <label htmlFor="quoteId" className="block text-sm font-medium text-dark-slate mb-1">
+                                                        <label htmlFor="quoteId-input" className="block text-sm font-medium text-dark-slate mb-1">
                                                             Id. Cotización
                                                         </label>
                                                         <input
                                                             type="text"
-                                                            name="quoteId"
-                                                            id="quoteId"
+                                                            id="quoteId-input"
                                                             placeholder="Ej: COT-001"
-                                                            defaultValue={company.quoteId || ""}
+                                                            value={formData.quoteId}
+                                                            onChange={(e) => updateField("quoteId", e.target.value)}
                                                             disabled={company.termsAccepted}
                                                             className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:bg-gray-100 disabled:cursor-not-allowed"
                                                         />
@@ -506,14 +544,13 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                     </div>
                                                     <div>
                                                         <PdfUpload
-                                                            currentFile={company.quoteFileUrl}
-                                                            onFileChange={(url) => setQuoteFileUrl(url)}
+                                                            currentFile={formData.quoteFileUrl || null}
+                                                            onFileChange={(url) => updateField("quoteFileUrl", url || "")}
                                                             category="quote"
                                                             folder="quotes"
                                                             label="Cotización (PDF)"
                                                             disabled={company.termsAccepted}
                                                         />
-                                                        <input type="hidden" name="quoteFileUrl" value={quoteFileUrl || ""} />
                                                         {company.termsAccepted && (
                                                             <p className="text-xs text-gray-500 mt-1">No editable después de aceptar contrato</p>
                                                         )}
@@ -523,15 +560,15 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                 {/* Proyectos y Usuarios Iniciales - Editables antes de enviar invitación */}
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div>
-                                                        <label htmlFor="initialProjects" className="block text-sm font-medium text-dark-slate mb-1">
+                                                        <label htmlFor="initialProjects-input" className="block text-sm font-medium text-dark-slate mb-1">
                                                             Proyectos iniciales
                                                         </label>
                                                         <input
                                                             type="number"
-                                                            name="initialProjects"
-                                                            id="initialProjects"
+                                                            id="initialProjects-input"
                                                             min={0}
-                                                            defaultValue={company.initialProjects || 0}
+                                                            value={formData.initialProjects}
+                                                            onChange={(e) => updateField("initialProjects", e.target.value)}
                                                             disabled={company.termsAccepted}
                                                             className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:bg-gray-100 disabled:cursor-not-allowed"
                                                         />
@@ -540,15 +577,15 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <label htmlFor="initialUsers" className="block text-sm font-medium text-dark-slate mb-1">
+                                                        <label htmlFor="initialUsers-input" className="block text-sm font-medium text-dark-slate mb-1">
                                                             Usuarios iniciales
                                                         </label>
                                                         <input
                                                             type="number"
-                                                            name="initialUsers"
-                                                            id="initialUsers"
+                                                            id="initialUsers-input"
                                                             min={0}
-                                                            defaultValue={company.initialUsers || 0}
+                                                            value={formData.initialUsers}
+                                                            onChange={(e) => updateField("initialUsers", e.target.value)}
                                                             disabled={company.termsAccepted}
                                                             className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:bg-gray-100 disabled:cursor-not-allowed"
                                                         />
@@ -568,6 +605,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                             />
                                         </div>
 
+                                        {/* Client Users Table */}
                                         {/* Client Users Table */}
                                         <div className="border-t border-graphite-gray pt-6">
                                             <ClientUsersTable 
