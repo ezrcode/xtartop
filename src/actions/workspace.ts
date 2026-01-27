@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { randomBytes } from "crypto";
 import { sendEmailWithGmail } from "@/lib/email/sender";
+import bcrypt from "bcryptjs";
 
 // Helper to get current workspace
 export async function getCurrentWorkspace() {
@@ -211,6 +212,15 @@ export type InvitationState = {
     message?: string;
 };
 
+export type AcceptInvitationState = {
+    errors?: {
+        password?: string[];
+        confirmPassword?: string[];
+    };
+    message?: string;
+    success?: boolean;
+};
+
 export async function sendInvitation(prevState: InvitationState | undefined, formData: FormData): Promise<InvitationState> {
     const session = await auth();
     if (!session?.user?.email) redirect("/login");
@@ -291,7 +301,7 @@ export async function sendInvitation(prevState: InvitationState | undefined, for
         let emailNotice = "";
         if (user.emailConfigured && user.emailFromAddress && user.emailPassword) {
             const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
-            const invitationLink = `${baseUrl}/app/invitations/${token}`;
+            const invitationLink = `${baseUrl}/invitations/${token}`;
             const emailResult = await sendEmailWithGmail({
                 userId: user.id,
                 to: validatedFields.data.email,
@@ -300,7 +310,7 @@ export async function sendInvitation(prevState: InvitationState | undefined, for
                     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                         <h2 style="color: #2d3e50;">¡Hola!</h2>
                         <p>Has sido invitado a unirte al equipo interno de NEARBY.</p>
-                        <p>Haz clic en el siguiente enlace para aceptar la invitación:</p>
+                        <p>Haz clic en el siguiente enlace para crear tu contraseña y aceptar la invitación:</p>
                         <p style="margin: 30px 0;">
                             <a href="${invitationLink}" 
                                style="background-color: #fc5a34; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
@@ -322,11 +332,98 @@ export async function sendInvitation(prevState: InvitationState | undefined, for
         }
 
         revalidatePath("/app/settings");
-        return { message: `Invitation sent successfully to ${validatedFields.data.email}${emailNotice}` };
+        return { message: `Invitación enviada a ${validatedFields.data.email}${emailNotice}` };
     } catch (error) {
         console.error("Database Error:", error);
         return { message: "Database Error: Failed to send invitation." };
     }
+}
+
+const AcceptInvitationSchema = z.object({
+    token: z.string().min(1, "Token inválido"),
+    password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
+    confirmPassword: z.string().min(6, "Confirma tu contraseña"),
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "Las contraseñas no coinciden",
+    path: ["confirmPassword"],
+});
+
+export async function acceptInternalInvitation(
+    prevState: AcceptInvitationState | undefined,
+    formData: FormData
+): Promise<AcceptInvitationState> {
+    const validatedFields = AcceptInvitationSchema.safeParse({
+        token: formData.get("token"),
+        password: formData.get("password"),
+        confirmPassword: formData.get("confirmPassword"),
+    });
+
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: "Datos inválidos. Revisa los campos.",
+            success: false,
+        };
+    }
+
+    const { token, password } = validatedFields.data;
+
+    const invitation = await prisma.invitation.findUnique({
+        where: { token },
+    });
+
+    if (!invitation) {
+        return { message: "Invitación no encontrada.", success: false };
+    }
+
+    if (invitation.status !== "PENDING") {
+        return { message: "Esta invitación ya fue utilizada o revocada.", success: false };
+    }
+
+    if (invitation.expiresAt < new Date()) {
+        await prisma.invitation.update({
+            where: { id: invitation.id },
+            data: { status: "EXPIRED" },
+        });
+        return { message: "Esta invitación ha expirado.", success: false };
+    }
+
+    const existingUser = await prisma.user.findUnique({
+        where: { email: invitation.email },
+    });
+    if (existingUser) {
+        return { message: "Este usuario ya existe. Inicia sesión.", success: false };
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const defaultName = invitation.email.split("@")[0] || "Usuario";
+
+    await prisma.$transaction(async (tx) => {
+        const user = await tx.user.create({
+            data: {
+                name: defaultName,
+                email: invitation.email,
+                passwordHash: hashedPassword,
+                userType: "INTERNAL",
+            },
+        });
+
+        await tx.workspaceMember.create({
+            data: {
+                workspaceId: invitation.workspaceId,
+                userId: user.id,
+                role: invitation.role,
+            },
+        });
+
+        await tx.invitation.update({
+            where: { id: invitation.id },
+            data: { status: "ACCEPTED" },
+        });
+    });
+
+    revalidatePath("/app/settings");
+    redirect("/login");
 }
 
 export async function revokeInvitation(invitationId: string) {
