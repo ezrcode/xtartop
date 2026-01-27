@@ -267,9 +267,13 @@ class AdmCloudClient {
         ];
 
         // Ordenar por fecha (más reciente primero)
-        allInvoices.sort((a, b) => 
-            new Date(b.TransactionDate).getTime() - new Date(a.TransactionDate).getTime()
-        );
+        const getSortTime = (invoice: AdmCloudInvoice) => {
+            const value = invoice.TransactionDate || invoice.DocDate || invoice.DocDateString || invoice.CreationDate;
+            if (!value) return 0;
+            const time = new Date(value).getTime();
+            return Number.isNaN(time) ? 0 : time;
+        };
+        allInvoices.sort((a, b) => getSortTime(b) - getSortTime(a));
 
         return { success: true, data: allInvoices };
     }
