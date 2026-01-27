@@ -627,8 +627,9 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                             </span>
                                             <button
                                                 onClick={() => handleRemoveMember(member.id)}
-                                                disabled={removingId === member.id}
+                                                disabled={removingId === member.id || member.user.id === workspace.owner.id}
                                                 className="text-error-red hover:text-red-700 disabled:opacity-50"
+                                                title={member.user.id === workspace.owner.id ? "No se puede eliminar al Owner" : "Eliminar"}
                                             >
                                                 <Trash2 size={16} />
                                             </button>

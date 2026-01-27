@@ -448,7 +448,37 @@ export async function removeMember(memberId: string) {
     const session = await auth();
     if (!session?.user?.email) redirect("/login");
 
+    const userRole = await getUserWorkspaceRole();
+    if (userRole?.role !== "OWNER" && userRole?.role !== "ADMIN") {
+        return { success: false, message: "No autorizado." };
+    }
+
     try {
+        const membership = await prisma.workspaceMember.findUnique({
+            where: { id: memberId },
+            select: {
+                userId: true,
+                workspaceId: true,
+            },
+        });
+
+        if (!membership) {
+            return { success: false, message: "Miembro no encontrado." };
+        }
+
+        if (userRole.workspaceId !== membership.workspaceId) {
+            return { success: false, message: "No autorizado." };
+        }
+
+        const workspace = await prisma.workspace.findUnique({
+            where: { id: membership.workspaceId },
+            select: { ownerId: true },
+        });
+
+        if (workspace?.ownerId === membership.userId) {
+            return { success: false, message: "No se puede eliminar al Owner." };
+        }
+
         await prisma.workspaceMember.delete({
             where: { id: memberId },
         });
