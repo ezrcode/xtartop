@@ -191,7 +191,7 @@ class AdmCloudClient {
      * Obtener lista de clientes de AdmCloud
      */
     async getCustomers(): Promise<AdmCloudApiResponse<AdmCloudCustomer[]>> {
-        return this.request<AdmCloudCustomer[]>('/Customers');
+        return this.request<AdmCloudCustomer[]>('/Customers', {}, { skip: "0" });
     }
 
     /**
@@ -230,7 +230,11 @@ class AdmCloudClient {
      * Obtener facturas de contado de un cliente
      */
     async getCashInvoices(relationshipId: string): Promise<AdmCloudApiResponse<AdmCloudInvoice[]>> {
-        const response = await this.request<AdmCloudInvoice[] | AdmCloudInvoice>('/CashInvoices', {}, { RelationshipID: relationshipId });
+        const response = await this.request<AdmCloudInvoice[] | AdmCloudInvoice>(
+            '/CashInvoices',
+            {},
+            { RelationshipID: relationshipId, skip: "0" }
+        );
         if (!response.success) {
             return { success: false, error: response.error };
         }
@@ -241,7 +245,11 @@ class AdmCloudClient {
      * Obtener facturas a crédito de un cliente
      */
     async getCreditInvoices(relationshipId: string): Promise<AdmCloudApiResponse<AdmCloudInvoice[]>> {
-        const response = await this.request<AdmCloudInvoice[] | AdmCloudInvoice>('/CreditInvoices', {}, { RelationshipID: relationshipId });
+        const response = await this.request<AdmCloudInvoice[] | AdmCloudInvoice>(
+            '/CreditInvoices',
+            {},
+            { RelationshipID: relationshipId, skip: "0" }
+        );
         if (!response.success) {
             return { success: false, error: response.error };
         }
