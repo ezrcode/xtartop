@@ -11,6 +11,7 @@ import { ProjectsTable } from "./projects-table";
 import { ClientUsersTable } from "./client-users-table";
 import { CompanyContactsTab } from "./company-contacts-tab";
 import { ImageUpload } from "../ui/image-upload";
+import { PdfUpload } from "../ui/pdf-upload";
 import { InvoicesTab } from "./invoices-tab";
 
 type CompanyWithTerms = Company & { 
@@ -20,6 +21,8 @@ type CompanyWithTerms = Company & {
     clientUsers?: ClientUser[];
     admCloudRelationshipId?: string | null;
     admCloudLastSync?: Date | null;
+    quoteId?: string | null;
+    quoteFileUrl?: string | null;
 };
 
 interface CompanyFormProps {
@@ -91,6 +94,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<"general" | "contacts" | "subscription" | "invoices">("general");
     const [logoUrl, setLogoUrl] = useState<string | null>(company?.logoUrl || null);
+    const [quoteFileUrl, setQuoteFileUrl] = useState<string | null>(company?.quoteFileUrl || null);
 
     const updateAction = company ? updateCompanyAction.bind(null, company.id) : () => Promise.resolve({ message: "Error" });
 
@@ -477,6 +481,41 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                     </div>
                                                 </div>
                                                 
+                                                {/* Cotización - Editables solo por admin antes de aceptar contrato */}
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label htmlFor="quoteId" className="block text-sm font-medium text-dark-slate mb-1">
+                                                            Id. Cotización
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            name="quoteId"
+                                                            id="quoteId"
+                                                            placeholder="Ej: COT-001"
+                                                            defaultValue={company.quoteId || ""}
+                                                            disabled={company.termsAccepted}
+                                                            className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                                        />
+                                                        {company.termsAccepted && (
+                                                            <p className="text-xs text-gray-500 mt-1">No editable después de aceptar contrato</p>
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <PdfUpload
+                                                            currentFile={company.quoteFileUrl}
+                                                            onFileChange={(url) => setQuoteFileUrl(url)}
+                                                            category="quote"
+                                                            folder="quotes"
+                                                            label="Cotización (PDF)"
+                                                            disabled={company.termsAccepted}
+                                                        />
+                                                        <input type="hidden" name="quoteFileUrl" value={quoteFileUrl || ""} />
+                                                        {company.termsAccepted && (
+                                                            <p className="text-xs text-gray-500 mt-1">No editable después de aceptar contrato</p>
+                                                        )}
+                                                    </div>
+                                                </div>
+
                                                 {/* Proyectos y Usuarios Iniciales - Editables antes de enviar invitación */}
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div>

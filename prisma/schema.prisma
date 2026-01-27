@@ -209,6 +209,8 @@ model Company {
   fiscalAddress    String?        @db.Text  // Dirección Fiscal
   initialProjects  Int?           @default(0)  // Proyectos iniciales contratados
   initialUsers     Int?           @default(0)  // Usuarios iniciales contratados
+  quoteId          String?        // Id. Cotización (ej: "COT-001")
+  quoteFileUrl     String?        // URL del PDF de la cotización (Vercel Blob)
   country          String?
   city             String?
   phone            String?

@@ -17,6 +17,8 @@ interface OnboardingFormProps {
         termsAccepted: boolean;
         initialProjects: number | null;
         initialUsers: number | null;
+        quoteId: string | null;
+        quoteFileUrl: string | null;
     };
     contact: {
         id: string;
@@ -41,6 +43,7 @@ function replaceContractVariables(
         providerName: string;
         initialProjects: number;
         initialUsers: number;
+        quoteId: string;
     }
 ): string {
     const today = new Date().toLocaleDateString("es-DO", {
@@ -56,6 +59,7 @@ function replaceContractVariables(
         .replace(/\{\{CLIENTE_REPRESENTANTE\}\}/g, data.clientRepresentative || "—")
         .replace(/\{\{PROYECTOS_INICIALES\}\}/g, String(data.initialProjects || 0))
         .replace(/\{\{USUARIOS_INICIALES\}\}/g, String(data.initialUsers || 0))
+        .replace(/\{\{ID_COTIZACION\}\}/g, data.quoteId || "—")
         .replace(/\{\{PROVEEDOR_NOMBRE\}\}/g, data.providerName || "—")
         .replace(/\{\{FECHA_ACTUAL\}\}/g, today);
 }
@@ -386,10 +390,36 @@ export function OnboardingForm({ token, company, contact, userExists = false, co
                                         providerName: providerName,
                                         initialProjects: company.initialProjects || 0,
                                         initialUsers: company.initialUsers || 0,
+                                        quoteId: company.quoteId || "",
                                     })
                                 }}
                             />
                         </div>
+
+                        {/* Quote PDF Link if available */}
+                        {company.quoteFileUrl && (
+                            <div className="bg-blue-50 border border-blue-200 rounded-md p-4 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <FileText className="text-nearby-accent" size={24} />
+                                    <div>
+                                        <p className="text-sm font-medium text-dark-slate">
+                                            Cotización N° {company.quoteId || "—"}
+                                        </p>
+                                        <p className="text-xs text-gray-500">
+                                            Documento de cotización adjunto
+                                        </p>
+                                    </div>
+                                </div>
+                                <a
+                                    href={company.quoteFileUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-4 py-2 bg-nearby-accent text-white text-sm rounded-md hover:bg-nearby-dark transition-colors"
+                                >
+                                    Ver PDF
+                                </a>
+                            </div>
+                        )}
 
                         <div className="flex items-start space-x-3">
                             <input
