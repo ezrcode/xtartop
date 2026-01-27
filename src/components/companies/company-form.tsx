@@ -103,112 +103,116 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
 
     return (
         <div className="flex flex-col h-full">
-            <form action={action} className="flex flex-col h-full">
-                {/* Command Bar - Mobile Optimized */}
-                <div className="sticky top-0 z-10 bg-white border-b border-graphite-gray shadow-sm safe-top">
-                    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-                        <div className="flex items-center justify-between h-14 sm:h-16">
-                            <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
-                                <Link
-                                    href="/app/companies"
-                                    className="p-2 text-gray-400 hover:text-dark-slate rounded-full hover:bg-gray-100 flex-shrink-0"
-                                >
-                                    <ArrowLeft size={20} />
-                                </Link>
-                                <h1 className="text-base sm:text-xl font-bold text-nearby-dark truncate">
-                                    {isEditMode ? company?.name : "Nueva Empresa"}
-                                </h1>
-                            </div>
-                            <div className="flex items-center space-x-2 flex-shrink-0">
-                                <SubmitButton
-                                    actionName="save"
-                                    label="Guardar"
-                                    mobileLabel=""
-                                    loadingLabel="Guardando..."
-                                    icon={Save}
-                                    variant="primary"
-                                />
-                                <SubmitButton
-                                    actionName="saveAndClose"
-                                    label="Guardar y cerrar"
-                                    mobileLabel="Cerrar"
-                                    loadingLabel="Guardando..."
-                                    icon={Save}
-                                    variant="secondary"
-                                />
+            {/* Command Bar - Mobile Optimized */}
+            <div className="sticky top-0 z-10 bg-white border-b border-graphite-gray shadow-sm safe-top">
+                <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+                    <div className="flex items-center justify-between h-14 sm:h-16">
+                        <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
+                            <Link
+                                href="/app/companies"
+                                className="p-2 text-gray-400 hover:text-dark-slate rounded-full hover:bg-gray-100 flex-shrink-0"
+                            >
+                                <ArrowLeft size={20} />
+                            </Link>
+                            <h1 className="text-base sm:text-xl font-bold text-nearby-dark truncate">
+                                {isEditMode ? company?.name : "Nueva Empresa"}
+                            </h1>
+                        </div>
+                        <div className="flex items-center space-x-2 flex-shrink-0">
+                            <button
+                                type="submit"
+                                form="company-form"
+                                name="action"
+                                value="save"
+                                className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all active:scale-95 text-white bg-nearby-dark hover:bg-gray-900 focus:ring-nearby-dark shadow-sm"
+                            >
+                                <Save size={16} />
+                                <span className="hidden sm:inline ml-2">Guardar</span>
+                            </button>
+                            <button
+                                type="submit"
+                                form="company-form"
+                                name="action"
+                                value="saveAndClose"
+                                className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all active:scale-95 text-dark-slate bg-white border border-graphite-gray hover:bg-gray-50 focus:ring-nearby-accent"
+                            >
+                                <Save size={16} />
+                                <span className="hidden sm:inline ml-2">Guardar y cerrar</span>
+                                <span className="sm:hidden ml-1.5 text-xs">Cerrar</span>
+                            </button>
 
-                                {isEditMode && (
-                                    <button
-                                        type="button"
-                                        onClick={() => setDeleteConfirmOpen(true)}
-                                        className="inline-flex items-center justify-center p-2 sm:px-3 sm:py-2 text-sm font-medium text-white bg-error-red rounded-lg hover:bg-red-700 transition-all active:scale-95 shadow-sm"
-                                    >
-                                        <Trash2 size={16} />
-                                        <span className="hidden sm:inline ml-2">Eliminar</span>
-                                    </button>
-                                )}
-                            </div>
+                            {isEditMode && (
+                                <button
+                                    type="button"
+                                    onClick={() => setDeleteConfirmOpen(true)}
+                                    className="inline-flex items-center justify-center p-2 sm:px-3 sm:py-2 text-sm font-medium text-white bg-error-red rounded-lg hover:bg-red-700 transition-all active:scale-95 shadow-sm"
+                                >
+                                    <Trash2 size={16} />
+                                    <span className="hidden sm:inline ml-2">Eliminar</span>
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
+            </div>
 
-                {/* Main Content */}
-                <div className="flex-1 max-w-7xl mx-auto w-full px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8">
+            {/* Main Content */}
+            <div className="flex-1 max-w-7xl mx-auto w-full px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-8">
 
-                        {/* Left Column: Form */}
-                        <div className="lg:col-span-7 space-y-4 sm:space-y-6">
-                            {/* Tabs - Mobile Optimized */}
-                            <div className="border-b border-graphite-gray overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0">
-                                <nav className="-mb-px flex space-x-1 sm:space-x-6 min-w-max">
-                                    <button
-                                        type="button"
-                                        onClick={() => setActiveTab("general")}
-                                        className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
-                                            activeTab === "general"
-                                                ? "border-nearby-accent text-nearby-accent"
-                                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                                        }`}
-                                    >
-                                        Información General
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setActiveTab("contacts")}
-                                        className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
-                                            activeTab === "contacts"
-                                                ? "border-nearby-accent text-nearby-accent"
-                                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                                        }`}
-                                    >
-                                        Contactos
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setActiveTab("subscription")}
-                                        className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
-                                            activeTab === "subscription"
-                                                ? "border-nearby-accent text-nearby-accent"
-                                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                                        }`}
-                                    >
-                                        Suscripción
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setActiveTab("invoices")}
-                                        className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
-                                            activeTab === "invoices"
-                                                ? "border-nearby-accent text-nearby-accent"
-                                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                                        }`}
-                                    >
-                                        Facturación
-                                    </button>
-                                </nav>
-                            </div>
+                    {/* Left Column: Form */}
+                    <div className="lg:col-span-7 space-y-4 sm:space-y-6">
+                        {/* Tabs - Mobile Optimized - Outside the form */}
+                        <div className="border-b border-graphite-gray overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0">
+                            <nav className="-mb-px flex space-x-1 sm:space-x-6 min-w-max">
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTab("general")}
+                                    className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
+                                        activeTab === "general"
+                                            ? "border-nearby-accent text-nearby-accent"
+                                            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                    }`}
+                                >
+                                    Información General
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTab("contacts")}
+                                    className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
+                                        activeTab === "contacts"
+                                            ? "border-nearby-accent text-nearby-accent"
+                                            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                    }`}
+                                >
+                                    Contactos
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTab("subscription")}
+                                    className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
+                                        activeTab === "subscription"
+                                            ? "border-nearby-accent text-nearby-accent"
+                                            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                    }`}
+                                >
+                                    Suscripción
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTab("invoices")}
+                                    className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
+                                        activeTab === "invoices"
+                                            ? "border-nearby-accent text-nearby-accent"
+                                            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                    }`}
+                                >
+                                    Facturación
+                                </button>
+                            </nav>
+                        </div>
 
-                            <div className="bg-white shadow-sm rounded-xl border border-graphite-gray p-4 sm:p-6 space-y-4 sm:space-y-6">
+                        <form id="company-form" action={action} className="bg-white shadow-sm rounded-xl border border-graphite-gray p-4 sm:p-6 space-y-4 sm:space-y-6">
                                 
                                 {state?.message && (
                                     <div className={`p-4 rounded-md ${
@@ -574,58 +578,57 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                     </div>
                                 )}
 
-                                {/* Tab Content: Invoices */}
-                                {activeTab === "invoices" && company && (
-                                    <InvoicesTab
-                                        companyId={company.id}
-                                        companyName={company.name}
-                                        taxId={company.taxId}
-                                        admCloudRelationshipId={company.admCloudRelationshipId || null}
-                                        admCloudLastSync={company.admCloudLastSync || null}
-                                    />
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Right Column: Activities */}
-                        <div className="lg:col-span-5 flex flex-col">
-                            <div className="bg-white shadow-sm rounded-xl border border-graphite-gray p-4 sm:p-6 flex-1 flex flex-col min-h-[300px] sm:min-h-[400px] max-h-[500px] lg:max-h-[calc(100vh-200px)]">
-                                {isEditMode && company ? (
-                                    <CompanyActivitiesWithSuspense
-                                        companyId={company.id}
-                                        defaultEmail={company.primaryContact?.email || ""}
-                                        clientInvitations={company.clientInvitations?.map(inv => ({
-                                            id: inv.id,
-                                            contactId: inv.contactId,
-                                            status: inv.status,
-                                            createdAt: inv.createdAt,
-                                            expiresAt: inv.expiresAt,
-                                            contact: {
-                                                fullName: inv.contact.fullName,
-                                                email: inv.contact.email,
-                                            },
-                                        })) || []}
-                                        contractStatus={{
-                                            termsAccepted: company.termsAccepted,
-                                            termsAcceptedAt: company.termsAcceptedAt,
-                                            termsAcceptedByName: company.termsAcceptedByName,
-                                            termsVersion: company.termsVersion,
-                                        }}
-                                        companyContacts={contacts.filter(c => c.companyId === company.id)}
-                                    />
-                                ) : (
-                                    <div className="flex flex-col items-center justify-center h-64 text-center border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
-                                        <p className="text-gray-500">
-                                            Guarda la empresa primero para registrar actividades
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
+                            {/* Tab Content: Invoices */}
+                            {activeTab === "invoices" && company && (
+                                <InvoicesTab
+                                    companyId={company.id}
+                                    companyName={company.name}
+                                    taxId={company.taxId}
+                                    admCloudRelationshipId={company.admCloudRelationshipId || null}
+                                    admCloudLastSync={company.admCloudLastSync || null}
+                                />
+                            )}
+                        </form>
                     </div>
+
+                    {/* Right Column: Activities - Outside the form */}
+                    <div className="lg:col-span-5 flex flex-col">
+                        <div className="bg-white shadow-sm rounded-xl border border-graphite-gray p-4 sm:p-6 flex-1 flex flex-col min-h-[300px] sm:min-h-[400px] max-h-[500px] lg:max-h-[calc(100vh-200px)]">
+                            {isEditMode && company ? (
+                                <CompanyActivitiesWithSuspense
+                                    companyId={company.id}
+                                    defaultEmail={company.primaryContact?.email || ""}
+                                    clientInvitations={company.clientInvitations?.map(inv => ({
+                                        id: inv.id,
+                                        contactId: inv.contactId,
+                                        status: inv.status,
+                                        createdAt: inv.createdAt,
+                                        expiresAt: inv.expiresAt,
+                                        contact: {
+                                            fullName: inv.contact.fullName,
+                                            email: inv.contact.email,
+                                        },
+                                    })) || []}
+                                    contractStatus={{
+                                        termsAccepted: company.termsAccepted,
+                                        termsAcceptedAt: company.termsAcceptedAt,
+                                        termsAcceptedByName: company.termsAcceptedByName,
+                                        termsVersion: company.termsVersion,
+                                    }}
+                                    companyContacts={contacts.filter(c => c.companyId === company.id)}
+                                />
+                            ) : (
+                                <div className="flex flex-col items-center justify-center h-64 text-center border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
+                                    <p className="text-gray-500">
+                                        Guarda la empresa primero para registrar actividades
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
                 </div>
-            </form>
+            </div>
 
             {/* Delete Confirmation Modal */}
             {deleteConfirmOpen && company && (
