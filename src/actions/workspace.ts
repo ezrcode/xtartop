@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { randomBytes } from "crypto";
+import { sendEmailWithGmail } from "@/lib/email/sender";
 
 // Helper to get current workspace
 export async function getCurrentWorkspace() {
@@ -286,8 +287,42 @@ export async function sendInvitation(prevState: InvitationState | undefined, for
             },
         });
 
+        // Enviar correo si el usuario tiene email configurado
+        let emailNotice = "";
+        if (user.emailConfigured && user.emailFromAddress && user.emailPassword) {
+            const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+            const invitationLink = `${baseUrl}/app/invitations/${token}`;
+            const emailResult = await sendEmailWithGmail({
+                userId: user.id,
+                to: validatedFields.data.email,
+                subject: "Invitación a NEARBY (equipo interno)",
+                body: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                        <h2 style="color: #2d3e50;">¡Hola!</h2>
+                        <p>Has sido invitado a unirte al equipo interno de NEARBY.</p>
+                        <p>Haz clic en el siguiente enlace para aceptar la invitación:</p>
+                        <p style="margin: 30px 0;">
+                            <a href="${invitationLink}" 
+                               style="background-color: #fc5a34; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                                Aceptar invitación
+                            </a>
+                        </p>
+                        <p style="color: #666; font-size: 14px;">Este enlace expira en 7 días.</p>
+                        <p style="color: #666; font-size: 14px;">Si no esperabas este email, puedes ignorarlo.</p>
+                        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+                        <p style="color: #999; font-size: 12px;">NEARBY</p>
+                    </div>
+                `,
+            });
+            if (!emailResult.success) {
+                emailNotice = " (la invitación se creó, pero el correo no pudo enviarse)";
+            }
+        } else {
+            emailNotice = " (la invitación se creó, pero el correo no está configurado)";
+        }
+
         revalidatePath("/app/settings");
-        return { message: `Invitation sent successfully to ${validatedFields.data.email}` };
+        return { message: `Invitation sent successfully to ${validatedFields.data.email}${emailNotice}` };
     } catch (error) {
         console.error("Database Error:", error);
         return { message: "Database Error: Failed to send invitation." };
