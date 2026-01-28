@@ -253,6 +253,23 @@ export async function deleteContact(id: string) {
     if (!session?.user?.email) redirect("/login");
 
     try {
+        // First, get the contact to find the email
+        const contact = await prisma.contact.findUnique({
+            where: { id },
+            select: { email: true },
+        });
+
+        if (contact) {
+            // Delete any User account associated with this contact's email (if CLIENT type)
+            await prisma.user.deleteMany({
+                where: {
+                    email: contact.email,
+                    userType: "CLIENT",
+                },
+            });
+        }
+
+        // Delete the contact
         await prisma.contact.delete({
             where: { id },
         });
@@ -363,6 +380,23 @@ export async function deleteCompanyContact(contactId: string) {
     }
 
     try {
+        // First, get the contact to find the email
+        const contact = await prisma.contact.findUnique({
+            where: { id: contactId },
+            select: { email: true },
+        });
+
+        if (contact) {
+            // Delete any User account associated with this contact's email (if CLIENT type)
+            await prisma.user.deleteMany({
+                where: {
+                    email: contact.email,
+                    userType: "CLIENT",
+                },
+            });
+        }
+
+        // Delete the contact
         await prisma.contact.delete({
             where: { id: contactId },
         });
