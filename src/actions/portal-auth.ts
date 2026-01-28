@@ -105,18 +105,23 @@ export async function registerClientUser(
     // Create new user
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const user = await prisma.user.create({
-        data: {
-            name,
-            email: invitation.contact.email,
-            passwordHash,
-            userType: "CLIENT",
-            contactId: invitation.contactId,
-        },
-    });
+    try {
+        const user = await prisma.user.create({
+            data: {
+                name,
+                email: invitation.contact.email,
+                passwordHash,
+                userType: "CLIENT",
+                contactId: invitation.contactId,
+            },
+        });
 
-    // Don't mark as ACCEPTED yet - wait for T&C acceptance
-    return { success: true, userId: user.id };
+        // Don't mark as ACCEPTED yet - wait for T&C acceptance
+        return { success: true, userId: user.id };
+    } catch (error) {
+        console.error("Error creating user:", error);
+        return { error: "Error al crear la cuenta. Por favor intenta de nuevo." };
+    }
 }
 
 export async function updateCompanyData(

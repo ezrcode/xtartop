@@ -110,15 +110,21 @@ export function OnboardingForm({ token, company, contact, userExists = false, co
             }
 
             // Auto-login after registration
-            await signIn("credentials", {
-                email: contact.email,
-                password,
-                redirect: false,
-            });
+            try {
+                await signIn("credentials", {
+                    email: contact.email,
+                    password,
+                    redirect: false,
+                });
+            } catch (signInError) {
+                console.error("Sign in error after registration:", signInError);
+                // Continue anyway - user was created
+            }
 
             setStep("company");
         } catch (err) {
-            setError("Ocurrió un error. Intenta de nuevo.");
+            console.error("Registration error:", err);
+            setError(err instanceof Error ? err.message : "Ocurrió un error. Intenta de nuevo.");
         }
 
         setLoading(false);
