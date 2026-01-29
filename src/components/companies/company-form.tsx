@@ -13,6 +13,7 @@ import { CompanyContactsTab } from "./company-contacts-tab";
 import { ImageUpload } from "../ui/image-upload";
 import { PdfUpload } from "../ui/pdf-upload";
 import { InvoicesTab } from "./invoices-tab";
+import { SubscriptionBillingSection } from "./subscription-billing-section";
 
 type CompanyWithTerms = Company & { 
     primaryContact?: Contact | null;
@@ -606,12 +607,16 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                         </div>
 
                                         {/* Client Users Table */}
-                                        {/* Client Users Table */}
                                         <div className="border-t border-graphite-gray pt-6">
                                             <ClientUsersTable 
                                                 companyId={company.id} 
                                                 clientUsers={company.clientUsers || []} 
                                             />
+                                        </div>
+
+                                        {/* Subscription Billing Section */}
+                                        <div className="border-t border-graphite-gray pt-6">
+                                            <SubscriptionBillingSection companyId={company.id} />
                                         </div>
                                     </div>
                                 )}

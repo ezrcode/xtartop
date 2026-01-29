@@ -242,13 +242,14 @@ model Company {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  contacts          Contact[]          @relation("CompanyContacts")
-  deals             Deal[]
-  activities        Activity[]
-  quotes            Quote[]
-  clientInvitations ClientInvitation[]
-  projects          Project[]
-  clientUsers       ClientUser[]
+  contacts             Contact[]          @relation("CompanyContacts")
+  deals                Deal[]
+  activities           Activity[]
+  quotes               Quote[]
+  clientInvitations    ClientInvitation[]
+  projects             Project[]
+  clientUsers          ClientUser[]
+  subscriptionBilling  SubscriptionBilling?
 }
 
 enum ContactStatus {
@@ -467,4 +468,49 @@ model ClientUser {
   updatedAt DateTime @updatedAt
   
   @@index([companyId])
+}
+
+enum BillingType {
+  STANDARD      // Cobro estándar basado en items
+  CUSTOM        // Cobro personalizado (futuro)
+}
+
+enum CountType {
+  MANUAL            // Cantidad manual
+  ACTIVE_PROJECTS   // Totaliza proyectos activos
+  ACTIVE_USERS      // Totaliza usuarios activos
+}
+
+model SubscriptionBilling {
+  id           String      @id @default(cuid())
+  companyId    String      @unique
+  company      Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  billingType  BillingType @default(STANDARD)
+  billingDay   Int         @default(1) // Día del mes para generar factura (1-31)
+  
+  items        SubscriptionItem[]
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model SubscriptionItem {
+  id                    String       @id @default(cuid())
+  subscriptionBillingId String
+  subscriptionBilling   SubscriptionBilling @relation(fields: [subscriptionBillingId], references: [id], onDelete: Cascade)
+  
+  // ADMCloud item reference
+  admCloudItemId        String       // ID del artículo en ADMCloud
+  code                  String       // Código del artículo
+  description           String       // Descripción del artículo
+  price                 Decimal      // Precio del artículo
+  
+  // Quantity configuration
+  countType             CountType    @default(MANUAL)
+  manualQuantity        Int?         // Cantidad manual (si countType es MANUAL)
+  
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+  
+  @@index([subscriptionBillingId])
 }
