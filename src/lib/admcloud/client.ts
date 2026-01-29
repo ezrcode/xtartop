@@ -82,17 +82,25 @@ export interface AdmCloudInvoiceItem {
 
 export interface AdmCloudItem {
     ID?: string;
+    Id?: string;
+    id?: string;
     ItemID?: string;
     Code?: string;
+    code?: string;
+    ItemCode?: string;
     Name?: string;
+    name?: string;
     Description?: string;
+    description?: string;
     Price?: number;
+    price?: number;
     SalesPrice?: number;
     UnitPrice?: number;
     Cost?: number;
     IsActive?: boolean;
     CategoryID?: string;
     CategoryName?: string;
+    [key: string]: unknown; // Allow additional fields
 }
 
 export interface AdmCloudApiResponse<T> {
