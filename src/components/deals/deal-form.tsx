@@ -99,7 +99,7 @@ export function DealForm({ deal, companies, contacts, isEditMode = false, worksp
         <div className="flex flex-col h-full">
             <form action={action} className="flex flex-col h-full">
                 {/* Command Bar - Mobile Optimized */}
-                <div className="sticky top-0 z-30 bg-white border-b border-graphite-gray shadow-sm safe-top">
+                <div className="sticky top-16 z-30 bg-white border-b border-graphite-gray shadow-sm">
                     <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
                         <div className="flex items-center justify-between h-14 sm:h-16">
                             <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
