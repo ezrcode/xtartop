@@ -88,7 +88,23 @@ export async function register(prevState: any, formData: FormData) {
 
 export async function authenticate(prevState: string | undefined, formData: FormData) {
     try {
-        await signIn("credentials", formData);
+        const email = formData.get("email") as string | null;
+        let redirectTo = "/app";
+
+        if (email) {
+            const user = await prisma.user.findUnique({
+                where: { email },
+                select: { userType: true },
+            });
+            if (user?.userType === "CLIENT") {
+                redirectTo = "/portal";
+            }
+        }
+
+        await signIn("credentials", {
+            ...Object.fromEntries(formData.entries()),
+            redirectTo,
+        });
     } catch (error) {
         if (error instanceof AuthError) {
             switch (error.type) {
