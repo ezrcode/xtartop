@@ -77,11 +77,24 @@ export async function GET(request: NextRequest) {
         // Transform the data to a simpler format
         // ADMCloud puede usar diferentes campos según la versión de la API
         const items = (response.data || []).map((item) => {
+            // Log cada item para debug (solo los primeros 3)
+            const itemKeys = Object.keys(item);
+            
             // Buscar ID en múltiples campos posibles
             const id = item.ID || item.ItemID || item.Id || item.id || "";
-            const code = item.Code || item.code || item.ItemCode || "";
+            // Buscar Code en múltiples campos posibles - ADMCloud usa 'SKU' o 'Sku' a veces
+            const code = item.Code || item.code || item.ItemCode || item.SKU || item.Sku || item.sku || item.ProductCode || "";
             const name = item.Name || item.name || item.Description || item.description || "";
             const price = item.SalesPrice || item.Price || item.UnitPrice || item.price || 0;
+            
+            // Log para debug
+            if (!code) {
+                console.log("[ADMCloud Items] Item without code, keys:", itemKeys, "values sample:", {
+                    ID: item.ID,
+                    Name: item.Name,
+                    allKeys: itemKeys.join(", ")
+                });
+            }
             
             return { id, code, name, price };
         });

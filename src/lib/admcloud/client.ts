@@ -88,6 +88,10 @@ export interface AdmCloudItem {
     Code?: string;
     code?: string;
     ItemCode?: string;
+    SKU?: string;
+    Sku?: string;
+    sku?: string;
+    ProductCode?: string;
     Name?: string;
     name?: string;
     Description?: string;
