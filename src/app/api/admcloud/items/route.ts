@@ -55,6 +55,11 @@ export async function GET(request: NextRequest) {
         // Fetch items from ADMCloud
         const response = await client.getItems();
 
+        console.log("[ADMCloud Items] Response success:", response.success);
+        console.log("[ADMCloud Items] Response error:", response.error);
+        console.log("[ADMCloud Items] Data type:", typeof response.data, Array.isArray(response.data));
+        console.log("[ADMCloud Items] Data length:", response.data?.length);
+
         if (!response.success) {
             console.error("ADMCloud API error:", response.error);
             return NextResponse.json({ 
@@ -63,19 +68,28 @@ export async function GET(request: NextRequest) {
             }, { status: 500 });
         }
 
-        // Log the raw response for debugging
-        console.log("[ADMCloud Items] Raw response sample:", JSON.stringify(response.data?.slice(0, 2), null, 2));
+        // Log the raw response for debugging - log ALL keys from first item
+        if (response.data && response.data.length > 0) {
+            console.log("[ADMCloud Items] First item keys:", Object.keys(response.data[0]));
+            console.log("[ADMCloud Items] First item full:", JSON.stringify(response.data[0], null, 2));
+        }
 
         // Transform the data to a simpler format
         // ADMCloud puede usar diferentes campos según la versión de la API
-        const items = (response.data || []).map((item) => ({
-            id: item.ID || item.ItemID || "",
-            code: item.Code || "",
-            name: item.Name || item.Description || "",
-            price: item.SalesPrice || item.Price || item.UnitPrice || 0,
-        })).filter(item => item.id); // Solo items con ID válido
+        const items = (response.data || []).map((item) => {
+            // Buscar ID en múltiples campos posibles
+            const id = item.ID || item.ItemID || item.Id || item.id || "";
+            const code = item.Code || item.code || item.ItemCode || "";
+            const name = item.Name || item.name || item.Description || item.description || "";
+            const price = item.SalesPrice || item.Price || item.UnitPrice || item.price || 0;
+            
+            return { id, code, name, price };
+        });
 
-        return NextResponse.json({ items });
+        console.log("[ADMCloud Items] Mapped items count:", items.length);
+        console.log("[ADMCloud Items] Items with ID:", items.filter(i => i.id).length);
+
+        return NextResponse.json({ items: items.filter(item => item.id) });
     } catch (error) {
         console.error("Error fetching ADMCloud items:", error);
         return NextResponse.json({ 
