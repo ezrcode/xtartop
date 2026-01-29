@@ -25,13 +25,34 @@ export async function getCurrentWorkspace() {
                     }
                 }
             },
+            memberships: {
+                include: {
+                    workspace: {
+                        include: {
+                            subscription: true,
+                            _count: {
+                                select: { members: true }
+                            }
+                        }
+                    }
+                }
+            },
         },
     });
 
     if (!user) return null;
 
-    // For now, we only support single workspace, so return the first (and only) workspace
-    return user.ownedWorkspaces[0] || null;
+    // If user owns a workspace, return it
+    if (user.ownedWorkspaces.length > 0) {
+        return user.ownedWorkspaces[0];
+    }
+
+    // Otherwise, return the workspace they are a member of
+    if (user.memberships.length > 0) {
+        return user.memberships[0].workspace;
+    }
+
+    return null;
 }
 
 // Helper to get user's role in their workspace
