@@ -428,14 +428,22 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
     }, [selectedItemId, admCloudItems]);
 
     const handleSubmit = async (e: React.FormEvent) => {
+        console.log("[SubscriptionItemModal] handleSubmit called");
         e.preventDefault();
+        e.stopPropagation();
+        
+        console.log("[SubscriptionItemModal] selectedItem:", selectedItem);
+        console.log("[SubscriptionItemModal] countType:", countType);
+        console.log("[SubscriptionItemModal] manualQuantity:", manualQuantity);
         
         if (!selectedItem) {
+            console.log("[SubscriptionItemModal] No selectedItem, showing error");
             setError("Selecciona un artículo");
             return;
         }
 
         if (countType === "MANUAL" && (!manualQuantity || parseInt(manualQuantity) < 0)) {
+            console.log("[SubscriptionItemModal] Invalid quantity, showing error");
             setError("Ingresa una cantidad válida");
             return;
         }
@@ -452,16 +460,21 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                 countType,
                 manualQuantity: countType === "MANUAL" ? parseInt(manualQuantity) : undefined,
             };
+            
+            console.log("[SubscriptionItemModal] Saving data:", data);
 
             if (item) {
+                console.log("[SubscriptionItemModal] Updating item:", item.id);
                 await updateSubscriptionItem(item.id, data);
             } else {
+                console.log("[SubscriptionItemModal] Adding new item for company:", companyId);
                 await addSubscriptionItem(companyId, data);
             }
 
+            console.log("[SubscriptionItemModal] Save successful, calling onSaved");
             onSaved();
         } catch (err) {
-            console.error("Error saving item:", err);
+            console.error("[SubscriptionItemModal] Error saving item:", err);
             setError("Error al guardar el artículo");
         } finally {
             setSaving(false);
