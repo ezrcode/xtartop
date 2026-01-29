@@ -100,8 +100,10 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
     };
 
     const handleAddItem = () => {
+        console.log("[SubscriptionBillingSection] handleAddItem clicked");
         setEditingItem(null);
         setModalOpen(true);
+        console.log("[SubscriptionBillingSection] modalOpen set to true");
     };
 
     const handleEditItem = (item: SubscriptionItemWithQuantity) => {
@@ -339,6 +341,8 @@ interface SubscriptionItemModalProps {
 }
 
 function SubscriptionItemModal({ companyId, item, onClose, onSaved }: SubscriptionItemModalProps) {
+    console.log("[SubscriptionItemModal] Modal mounted, companyId:", companyId);
+    
     const [admCloudItems, setAdmCloudItems] = useState<AdmCloudItem[]>([]);
     const [loadingItems, setLoadingItems] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -351,11 +355,14 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
 
     // Load ADMCloud items
     useEffect(() => {
+        console.log("[SubscriptionItemModal] useEffect triggered, starting fetch...");
         async function loadItems() {
             try {
                 setLoadingItems(true);
                 setError(null);
+                console.log("[SubscriptionItemModal] Fetching /api/admcloud/items...");
                 const response = await fetch("/api/admcloud/items");
+                console.log("[SubscriptionItemModal] Response status:", response.status);
                 const data = await response.json();
                 
                 console.log("[SubscriptionItemModal] ADMCloud items response:", data);
