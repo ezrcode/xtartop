@@ -80,6 +80,21 @@ export interface AdmCloudInvoiceItem {
     TaxAmount?: number;
 }
 
+export interface AdmCloudItem {
+    ID?: string;
+    ItemID?: string;
+    Code?: string;
+    Name?: string;
+    Description?: string;
+    Price?: number;
+    SalesPrice?: number;
+    UnitPrice?: number;
+    Cost?: number;
+    IsActive?: boolean;
+    CategoryID?: string;
+    CategoryName?: string;
+}
+
 export interface AdmCloudApiResponse<T> {
     success: boolean;
     data?: T;
@@ -296,6 +311,21 @@ class AdmCloudClient {
             data: result.success,
             error: result.error,
         };
+    }
+
+    /**
+     * Obtener lista de artículos/items de AdmCloud
+     */
+    async getItems(): Promise<AdmCloudApiResponse<AdmCloudItem[]>> {
+        const response = await this.request<AdmCloudItem[] | AdmCloudItem>(
+            '/Items',
+            {},
+            { skip: "0" }
+        );
+        if (!response.success) {
+            return { success: false, error: response.error };
+        }
+        return { success: true, data: this.normalizeList(response.data) };
     }
 }
 

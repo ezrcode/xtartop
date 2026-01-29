@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentWorkspace } from "@/actions/workspace";
+import { createAdmCloudClient } from "@/lib/admcloud/client";
 
 export async function GET(request: NextRequest) {
     try {
@@ -29,59 +30,57 @@ export async function GET(request: NextRequest) {
         });
 
         if (!workspaceData?.admCloudEnabled || !workspaceData.admCloudAppId || !workspaceData.admCloudCompany) {
-            // Return mock data for testing when ADMCloud is not configured
             return NextResponse.json({
                 items: [],
                 message: "ADMCloud no está configurado en este workspace",
             });
         }
 
-        // Fetch items from ADMCloud
-        const admCloudUrl = `https://api.admcloud.net/api/Items?skip=0&appid=${workspaceData.admCloudAppId}&company=${workspaceData.admCloudCompany}&role=${workspaceData.admCloudRole || "Administradores"}`;
-
-        const headers: HeadersInit = {
-            "Content-Type": "application/json",
-        };
-
-        // Add Basic Auth if credentials are available
-        if (workspaceData.admCloudUsername && workspaceData.admCloudPassword) {
-            const credentials = Buffer.from(`${workspaceData.admCloudUsername}:${workspaceData.admCloudPassword}`).toString("base64");
-            headers["Authorization"] = `Basic ${credentials}`;
+        if (!workspaceData.admCloudUsername || !workspaceData.admCloudPassword) {
+            return NextResponse.json({
+                items: [],
+                message: "Credenciales de ADMCloud no configuradas",
+            });
         }
 
-        const response = await fetch(admCloudUrl, {
-            method: "GET",
-            headers,
-            cache: "no-store",
+        // Create ADMCloud client with workspace config
+        const client = createAdmCloudClient({
+            appId: workspaceData.admCloudAppId,
+            username: workspaceData.admCloudUsername,
+            password: workspaceData.admCloudPassword,
+            company: workspaceData.admCloudCompany,
+            role: workspaceData.admCloudRole || "Administradores",
         });
 
-        if (!response.ok) {
-            console.error("ADMCloud API error:", response.status, await response.text());
+        // Fetch items from ADMCloud
+        const response = await client.getItems();
+
+        if (!response.success) {
+            console.error("ADMCloud API error:", response.error);
             return NextResponse.json({ 
-                error: "Error al obtener artículos de ADMCloud",
-                status: response.status 
+                error: response.error || "Error al obtener artículos de ADMCloud",
+                items: [],
             }, { status: 500 });
         }
 
-        const data = await response.json();
+        // Log the raw response for debugging
+        console.log("[ADMCloud Items] Raw response sample:", JSON.stringify(response.data?.slice(0, 2), null, 2));
 
         // Transform the data to a simpler format
-        const items = Array.isArray(data) ? data.map((item: {
-            Id?: string;
-            Code?: string;
-            Name?: string;
-            Price?: number;
-            Description?: string;
-        }) => ({
-            id: item.Id || "",
+        // ADMCloud puede usar diferentes campos según la versión de la API
+        const items = (response.data || []).map((item) => ({
+            id: item.ID || item.ItemID || "",
             code: item.Code || "",
             name: item.Name || item.Description || "",
-            price: item.Price || 0,
-        })) : [];
+            price: item.SalesPrice || item.Price || item.UnitPrice || 0,
+        })).filter(item => item.id); // Solo items con ID válido
 
         return NextResponse.json({ items });
     } catch (error) {
         console.error("Error fetching ADMCloud items:", error);
-        return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
+        return NextResponse.json({ 
+            error: "Error interno del servidor",
+            items: [],
+        }, { status: 500 });
     }
 }
