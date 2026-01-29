@@ -62,15 +62,19 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
                 token.userType = (user as User).userType;
                 token.contactId = (user as User).contactId;
             }
-            // Always refresh user data from DB to avoid stale userType
-            if (token.email) {
-                const dbUser = await prisma.user.findUnique({
-                    where: { email: token.email as string },
-                    select: { userType: true, contactId: true },
-                });
-                if (dbUser) {
-                    token.userType = dbUser.userType;
-                    token.contactId = dbUser.contactId;
+            // Refresh user data from DB only if userType is missing or stale
+            if (token.email && !token.userType) {
+                try {
+                    const dbUser = await prisma.user.findUnique({
+                        where: { email: token.email as string },
+                        select: { userType: true, contactId: true },
+                    });
+                    if (dbUser) {
+                        token.userType = dbUser.userType;
+                        token.contactId = dbUser.contactId;
+                    }
+                } catch (error) {
+                    console.error("Error refreshing user data in JWT:", error);
                 }
             }
             return token;
