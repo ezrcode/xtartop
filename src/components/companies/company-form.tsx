@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import Link from "next/link";
 import { Save, Trash2, ArrowLeft, Loader2 } from "lucide-react";
@@ -92,8 +92,10 @@ function DeleteButton() {
 }
 
 export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFormProps) {
+    const formRef = useRef<HTMLFormElement>(null);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<"general" | "contacts" | "subscription" | "invoices">("general");
+    const [pendingAction, setPendingAction] = useState<string | null>(null);
     
     // Controlled form fields - persist values across tab switches
     const [formData, setFormData] = useState({
@@ -143,23 +145,35 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                         </div>
                         <div className="flex items-center space-x-2 flex-shrink-0">
                             <button
-                                type="submit"
-                                form="company-form"
-                                name="action"
-                                value="save"
-                                className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all active:scale-95 text-white bg-nearby-dark hover:bg-gray-900 focus:ring-nearby-dark shadow-sm"
+                                type="button"
+                                onClick={() => {
+                                    setPendingAction("save");
+                                    setTimeout(() => formRef.current?.requestSubmit(), 0);
+                                }}
+                                disabled={pendingAction !== null}
+                                className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all active:scale-95 text-white bg-nearby-dark hover:bg-gray-900 focus:ring-nearby-dark shadow-sm disabled:opacity-50"
                             >
-                                <Save size={16} />
+                                {pendingAction === "save" ? (
+                                    <Loader2 size={16} className="animate-spin" />
+                                ) : (
+                                    <Save size={16} />
+                                )}
                                 <span className="hidden sm:inline ml-2">Guardar</span>
                             </button>
                             <button
-                                type="submit"
-                                form="company-form"
-                                name="action"
-                                value="saveAndClose"
-                                className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all active:scale-95 text-dark-slate bg-white border border-graphite-gray hover:bg-gray-50 focus:ring-nearby-accent"
+                                type="button"
+                                onClick={() => {
+                                    setPendingAction("saveAndClose");
+                                    setTimeout(() => formRef.current?.requestSubmit(), 0);
+                                }}
+                                disabled={pendingAction !== null}
+                                className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all active:scale-95 text-dark-slate bg-white border border-graphite-gray hover:bg-gray-50 focus:ring-nearby-accent disabled:opacity-50"
                             >
-                                <Save size={16} />
+                                {pendingAction === "saveAndClose" ? (
+                                    <Loader2 size={16} className="animate-spin" />
+                                ) : (
+                                    <Save size={16} />
+                                )}
                                 <span className="hidden sm:inline ml-2">Guardar y cerrar</span>
                                 <span className="sm:hidden ml-1.5 text-xs">Cerrar</span>
                             </button>
@@ -235,8 +249,9 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                             </nav>
                         </div>
 
-                        <form id="company-form" action={action} className="bg-white shadow-sm rounded-xl border border-graphite-gray p-4 sm:p-6 space-y-4 sm:space-y-6">
+                        <form ref={formRef} id="company-form" action={action} className="bg-white shadow-sm rounded-xl border border-graphite-gray p-4 sm:p-6 space-y-4 sm:space-y-6">
                                 {/* Hidden fields - always send all form values regardless of active tab */}
+                                <input type="hidden" name="action" value={pendingAction || "save"} />
                                 <input type="hidden" name="name" value={formData.name} />
                                 <input type="hidden" name="taxId" value={formData.taxId} />
                                 <input type="hidden" name="phone" value={formData.phone} />
