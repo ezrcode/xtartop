@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import Link from "next/link";
 import { Save, Trash2, ArrowLeft, Loader2 } from "lucide-react";
@@ -126,10 +126,17 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
     const initialState: CompanyState = { message: "", errors: {} };
     const [state, action] = useFormState(isEditMode ? updateAction : createCompanyAction, initialState);
 
+    // Reset pendingAction when form state changes (after submit completes)
+    useEffect(() => {
+        if (state?.message) {
+            setPendingAction(null);
+        }
+    }, [state]);
+
     return (
         <div className="flex flex-col h-full">
-            {/* Command Bar - Mobile Optimized */}
-            <div className="sticky top-0 z-10 bg-white border-b border-graphite-gray shadow-sm safe-top">
+            {/* Command Bar - Fixed at top on scroll */}
+            <div className="sticky top-0 z-30 bg-white border-b border-graphite-gray shadow-sm safe-top">
                 <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-14 sm:h-16">
                         <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
