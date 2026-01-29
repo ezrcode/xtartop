@@ -354,17 +354,36 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
         async function loadItems() {
             try {
                 setLoadingItems(true);
+                setError(null);
                 const response = await fetch("/api/admcloud/items");
                 const data = await response.json();
                 
-                if (data.items) {
+                console.log("[SubscriptionItemModal] ADMCloud items response:", data);
+                
+                if (data.error) {
+                    setError(data.error);
+                    return;
+                }
+                
+                if (data.message && (!data.items || data.items.length === 0)) {
+                    setError(data.message);
+                    return;
+                }
+                
+                if (data.items && Array.isArray(data.items)) {
                     setAdmCloudItems(data.items);
+                    
+                    if (data.items.length === 0) {
+                        setError("No se encontraron artículos en ADMCloud");
+                        return;
+                    }
                     
                     // If editing, find and set the selected item
                     if (item) {
                         const found = data.items.find((i: AdmCloudItem) => i.id === item.admCloudItemId);
                         if (found) {
                             setSelectedItem(found);
+                            setSelectedItemId(found.id);
                         } else {
                             // Item not found in ADMCloud, create a placeholder
                             setSelectedItem({
@@ -373,8 +392,11 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                                 name: item.description,
                                 price: Number(item.price),
                             });
+                            setSelectedItemId(item.admCloudItemId);
                         }
                     }
+                } else {
+                    setError("Respuesta inválida de ADMCloud");
                 }
             } catch (err) {
                 console.error("Error loading ADMCloud items:", err);
@@ -449,6 +471,23 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                 {loadingItems ? (
                     <div className="flex items-center justify-center py-8">
                         <Loader2 className="animate-spin text-nearby-accent" size={24} />
+                        <span className="ml-2 text-sm text-gray-500">Cargando artículos de ADMCloud...</span>
+                    </div>
+                ) : error && admCloudItems.length === 0 ? (
+                    <div className="space-y-4">
+                        <div className="p-4 text-sm text-amber-800 bg-amber-50 rounded-lg">
+                            <p className="font-medium">No se pudieron cargar artículos</p>
+                            <p className="mt-1">{error}</p>
+                        </div>
+                        <div className="flex justify-end">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="px-4 py-2 text-sm font-medium text-dark-slate bg-white border border-graphite-gray rounded-lg hover:bg-gray-50"
+                            >
+                                Cerrar
+                            </button>
+                        </div>
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit} className="space-y-4">
