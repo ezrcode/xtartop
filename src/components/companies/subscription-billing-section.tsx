@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import { BillingType, CountType } from "@prisma/client";
 import {
@@ -291,18 +292,19 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                 )}
             </div>
 
-            {/* Add/Edit Item Modal */}
-            {modalOpen && (
+            {/* Add/Edit Item Modal - Using Portal to render outside parent form */}
+            {modalOpen && typeof document !== 'undefined' && createPortal(
                 <SubscriptionItemModal
                     companyId={companyId}
                     item={editingItem}
                     onClose={handleModalClose}
                     onSaved={handleItemSaved}
-                />
+                />,
+                document.body
             )}
 
-            {/* Delete Confirmation Modal */}
-            {deleteConfirmOpen && (
+            {/* Delete Confirmation Modal - Using Portal */}
+            {deleteConfirmOpen && typeof document !== 'undefined' && createPortal(
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
                     <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm">
                         <h3 className="text-lg font-bold text-dark-slate mb-2">Eliminar artículo</h3>
@@ -326,7 +328,8 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
