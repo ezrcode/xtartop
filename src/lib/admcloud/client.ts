@@ -80,6 +80,19 @@ export interface AdmCloudInvoiceItem {
     TaxAmount?: number;
 }
 
+export interface AdmCloudItemPrice {
+    ID?: string;
+    ItemID?: string;
+    PriceListID?: string;
+    PriceListName?: string;
+    Price?: number;
+    UnitPrice?: number;
+    SalesPrice?: number;
+    CurrencyID?: string;
+    UOMID?: string;
+    [key: string]: unknown;
+}
+
 export interface AdmCloudItem {
     ID?: string;
     Id?: string;
@@ -101,9 +114,12 @@ export interface AdmCloudItem {
     SalesPrice?: number;
     UnitPrice?: number;
     Cost?: number;
+    PurchasePrice?: number;
     IsActive?: boolean;
+    Inactive?: boolean;
     CategoryID?: string;
     CategoryName?: string;
+    Prices?: AdmCloudItemPrice[];
     [key: string]: unknown; // Allow additional fields
 }
 
@@ -338,6 +354,78 @@ class AdmCloudClient {
             return { success: false, error: response.error };
         }
         return { success: true, data: this.normalizeList(response.data) };
+    }
+
+    /**
+     * Obtener precios de items de AdmCloud
+     */
+    async getItemPrices(): Promise<AdmCloudApiResponse<AdmCloudItemPrice[]>> {
+        const response = await this.request<AdmCloudItemPrice[] | AdmCloudItemPrice>(
+            '/ItemPrices',
+            {},
+            { skip: "0" }
+        );
+        if (!response.success) {
+            return { success: false, error: response.error };
+        }
+        return { success: true, data: this.normalizeList(response.data) };
+    }
+
+    /**
+     * Obtener items con sus precios de venta
+     * Combina la lista de items con sus precios
+     */
+    async getItemsWithPrices(): Promise<AdmCloudApiResponse<AdmCloudItem[]>> {
+        // Obtener items y precios en paralelo
+        const [itemsResult, pricesResult] = await Promise.all([
+            this.getItems(),
+            this.getItemPrices(),
+        ]);
+
+        if (!itemsResult.success) {
+            return { success: false, error: itemsResult.error };
+        }
+
+        const items = itemsResult.data || [];
+        const prices = pricesResult.success ? (pricesResult.data || []) : [];
+
+        console.log('[AdmCloud] Items count:', items.length);
+        console.log('[AdmCloud] Prices count:', prices.length);
+        
+        // Log first price record for debugging
+        if (prices.length > 0) {
+            console.log('[AdmCloud] First price record:', JSON.stringify(prices[0]));
+            console.log('[AdmCloud] Price record keys:', Object.keys(prices[0]));
+        }
+
+        // Crear mapa de precios por ItemID
+        const priceMap = new Map<string, number>();
+        for (const price of prices) {
+            const itemId = price.ItemID || price.ID;
+            if (itemId) {
+                // Buscar el precio en varios campos posibles
+                const priceValue = price.Price ?? price.UnitPrice ?? price.SalesPrice ?? 0;
+                // Solo guardar si es mayor que el existente (para tomar el precio más alto si hay varios)
+                const existingPrice = priceMap.get(itemId) || 0;
+                if (Number(priceValue) > existingPrice) {
+                    priceMap.set(itemId, Number(priceValue));
+                }
+            }
+        }
+
+        console.log('[AdmCloud] Price map entries:', priceMap.size);
+
+        // Agregar precios a los items
+        const itemsWithPrices = items.map(item => {
+            const itemId = item.ID || item.Id || item.id || item.ItemID;
+            const price = itemId ? (priceMap.get(itemId) || 0) : 0;
+            return {
+                ...item,
+                SalesPrice: price,
+            };
+        });
+
+        return { success: true, data: itemsWithPrices };
     }
 }
 
