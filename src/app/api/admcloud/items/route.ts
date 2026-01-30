@@ -52,53 +52,37 @@ export async function GET(request: NextRequest) {
             role: workspaceData.admCloudRole || "Administradores",
         });
 
-        // Primero probamos el endpoint PriceList para ver su estructura
+        // Usar PriceList que ya tiene items con sus precios
         const priceListResponse = await client.getPriceLists();
-        const priceListDebug = {
-            success: priceListResponse.success,
-            error: priceListResponse.error,
-            count: priceListResponse.data?.length || 0,
-            sample: priceListResponse.data?.slice(0, 3) || [],
-            keys: priceListResponse.data && priceListResponse.data.length > 0 ? Object.keys(priceListResponse.data[0]) : []
-        };
 
-        // Fetch items from ADMCloud
-        const response = await client.getItems();
-
-        if (!response.success) {
+        if (!priceListResponse.success) {
             return NextResponse.json({ 
-                error: response.error || "Error al obtener artículos de ADMCloud",
+                error: priceListResponse.error || "Error al obtener artículos de ADMCloud",
                 items: [],
-                _debug: { priceListDebug }
             }, { status: 500 });
         }
 
-        // Transform the data to a simpler format
-        const items = (response.data || []).map((item) => {
-            const id = item.ID || item.ItemID || item.Id || item.id || "";
-            const code = item.Code || item.code || item.ItemCode || item.SKU || item.Sku || item.sku || item.ProductCode || "";
-            const name = item.Name || item.name || item.Description || item.description || "";
+        // Transformar PriceList a formato de items
+        // PriceList tiene: ItemID, ItemSKU, ItemName, Price
+        const items = (priceListResponse.data || []).map((item: Record<string, unknown>) => {
+            const id = (item.ItemID || item.ID || "") as string;
+            const code = (item.ItemSKU || item.SKU || "") as string;
+            const name = (item.ItemName || item.SalesDescription || item.Name || "") as string;
+            const price = Number(item.Price) || 0;
             
-            // Buscar precio en el array Prices (si existe)
-            let price = 0;
-            if (item.Prices && Array.isArray(item.Prices) && item.Prices.length > 0) {
-                const priceRecord = item.Prices[0];
-                price = priceRecord.Price ?? priceRecord.UnitPrice ?? priceRecord.SalesPrice ?? 0;
-            }
-            if (price === 0) {
-                price = item.SalesPrice ?? item.Price ?? item.UnitPrice ?? 0;
-            }
-            
-            return { id, code, name, price: Number(price) || 0 };
+            return { id, code, name, price };
         });
 
-        return NextResponse.json({ 
-            items: items.filter(item => item.id),
-            _debug: { 
-                priceListDebug,
-                itemsWithPrice: items.filter(i => i.price > 0).length,
-                totalItems: items.length
+        // Filtrar duplicados (puede haber varios precios por item, tomamos el primero)
+        const uniqueItems = new Map<string, { id: string; code: string; name: string; price: number }>();
+        for (const item of items) {
+            if (item.id && !uniqueItems.has(item.id)) {
+                uniqueItems.set(item.id, item);
             }
+        }
+
+        return NextResponse.json({ 
+            items: Array.from(uniqueItems.values()),
         });
     } catch (error) {
         console.error("Error fetching ADMCloud items:", error);
