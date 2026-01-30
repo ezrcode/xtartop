@@ -52,34 +52,51 @@ export async function GET(request: NextRequest) {
             role: workspaceData.admCloudRole || "Administradores",
         });
 
-        // Primero, obtener los precios directamente para debug
-        const pricesResponse = await client.getItemPrices();
-        const pricesDebug = {
-            success: pricesResponse.success,
-            error: pricesResponse.error,
-            count: pricesResponse.data?.length || 0,
-            sample: pricesResponse.data?.slice(0, 3) || [],
-            keys: pricesResponse.data && pricesResponse.data.length > 0 ? Object.keys(pricesResponse.data[0]) : []
-        };
-
-        // Fetch items WITH prices from ADMCloud (combines Items + ItemPrices endpoints)
-        const response = await client.getItemsWithPrices();
+        // Fetch items from ADMCloud (ahora con expand=Prices para incluir precios)
+        const response = await client.getItems();
 
         if (!response.success) {
             return NextResponse.json({ 
                 error: response.error || "Error al obtener artículos de ADMCloud",
                 items: [],
-                _debug: { pricesDebug }
             }, { status: 500 });
         }
+
+        // Debug: ver si el array Prices tiene datos
+        const firstItemWithPrices = (response.data || []).find(item => 
+            item.Prices && Array.isArray(item.Prices) && item.Prices.length > 0
+        );
+        const pricesDebug = {
+            itemsWithPricesArray: (response.data || []).filter(item => 
+                item.Prices && Array.isArray(item.Prices) && item.Prices.length > 0
+            ).length,
+            firstItemPrices: firstItemWithPrices?.Prices?.slice(0, 3) || [],
+            firstItemPricesKeys: firstItemWithPrices?.Prices?.[0] ? Object.keys(firstItemWithPrices.Prices[0]) : [],
+            // También revisar si hay otros campos de precio directamente en el item
+            sampleItem: response.data?.[0] ? {
+                PurchasePrice: response.data[0].PurchasePrice,
+                Cost: response.data[0].Cost,
+                Prices: response.data[0].Prices,
+            } : null
+        };
 
         // Transform the data to a simpler format
         const items = (response.data || []).map((item) => {
             const id = item.ID || item.ItemID || item.Id || item.id || "";
             const code = item.Code || item.code || item.ItemCode || item.SKU || item.Sku || item.sku || item.ProductCode || "";
             const name = item.Name || item.name || item.Description || item.description || "";
-            // SalesPrice ahora viene del método getItemsWithPrices() que combina Items + ItemPrices
-            const price = item.SalesPrice ?? item.Price ?? item.UnitPrice ?? 0;
+            
+            // Buscar precio en el array Prices (si existe)
+            let price = 0;
+            if (item.Prices && Array.isArray(item.Prices) && item.Prices.length > 0) {
+                // Tomar el primer precio disponible
+                const priceRecord = item.Prices[0];
+                price = priceRecord.Price ?? priceRecord.UnitPrice ?? priceRecord.SalesPrice ?? 0;
+            }
+            // Fallback a campos directos del item
+            if (price === 0) {
+                price = item.SalesPrice ?? item.Price ?? item.UnitPrice ?? 0;
+            }
             
             return { id, code, name, price: Number(price) || 0 };
         });

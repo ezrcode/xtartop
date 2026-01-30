@@ -343,12 +343,13 @@ class AdmCloudClient {
 
     /**
      * Obtener lista de artículos/items de AdmCloud
+     * Incluye Prices expandido para obtener los precios de venta
      */
     async getItems(): Promise<AdmCloudApiResponse<AdmCloudItem[]>> {
         const response = await this.request<AdmCloudItem[] | AdmCloudItem>(
             '/Items',
             {},
-            { skip: "0" }
+            { skip: "0", expand: "Prices" }
         );
         if (!response.success) {
             return { success: false, error: response.error };
