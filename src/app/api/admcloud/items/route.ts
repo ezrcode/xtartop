@@ -70,33 +70,52 @@ export async function GET(request: NextRequest) {
 
         // Log the raw response for debugging - log ALL keys from first item
         if (response.data && response.data.length > 0) {
-            console.log("[ADMCloud Items] First item keys:", Object.keys(response.data[0]));
-            console.log("[ADMCloud Items] First item full:", JSON.stringify(response.data[0], null, 2));
+            const firstItem = response.data[0];
+            console.log("[ADMCloud Items] First item keys:", Object.keys(firstItem));
+            console.log("[ADMCloud Items] First item full:", JSON.stringify(firstItem, null, 2));
+            
+            // Log específico para campos de precio
+            console.log("[ADMCloud Items] Price fields check:", {
+                SalesPrice: firstItem.SalesPrice,
+                Price: firstItem.Price,
+                UnitPrice: firstItem.UnitPrice,
+                price: firstItem.price,
+                Cost: firstItem.Cost,
+                Amount: firstItem.Amount,
+                // Buscar cualquier campo que contenga "price" o "cost"
+                allPriceFields: Object.entries(firstItem)
+                    .filter(([key]) => key.toLowerCase().includes('price') || key.toLowerCase().includes('cost') || key.toLowerCase().includes('amount'))
+                    .reduce((acc, [k, v]) => ({ ...acc, [k]: v }), {})
+            });
         }
 
         // Transform the data to a simpler format
         // ADMCloud puede usar diferentes campos según la versión de la API
         const items = (response.data || []).map((item) => {
-            // Log cada item para debug (solo los primeros 3)
             const itemKeys = Object.keys(item);
             
             // Buscar ID en múltiples campos posibles
             const id = item.ID || item.ItemID || item.Id || item.id || "";
-            // Buscar Code en múltiples campos posibles - ADMCloud usa 'SKU' o 'Sku' a veces
+            // Buscar Code en múltiples campos posibles
             const code = item.Code || item.code || item.ItemCode || item.SKU || item.Sku || item.sku || item.ProductCode || "";
             const name = item.Name || item.name || item.Description || item.description || "";
-            const price = item.SalesPrice || item.Price || item.UnitPrice || item.price || 0;
             
-            // Log para debug
-            if (!code) {
-                console.log("[ADMCloud Items] Item without code, keys:", itemKeys, "values sample:", {
-                    ID: item.ID,
-                    Name: item.Name,
-                    allKeys: itemKeys.join(", ")
-                });
-            }
+            // Buscar precio en múltiples campos posibles (incluyendo variantes de capitalización)
+            const rawItem = item as Record<string, unknown>;
+            const price = 
+                item.SalesPrice ?? 
+                item.Price ?? 
+                item.UnitPrice ?? 
+                item.price ?? 
+                rawItem["salesPrice"] ?? 
+                rawItem["unitPrice"] ?? 
+                rawItem["ListPrice"] ?? 
+                rawItem["listPrice"] ?? 
+                rawItem["BasePrice"] ?? 
+                rawItem["basePrice"] ?? 
+                0;
             
-            return { id, code, name, price };
+            return { id, code, name, price: Number(price) || 0 };
         });
 
         console.log("[ADMCloud Items] Mapped items count:", items.length);
