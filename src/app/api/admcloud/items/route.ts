@@ -121,7 +121,18 @@ export async function GET(request: NextRequest) {
         console.log("[ADMCloud Items] Mapped items count:", items.length);
         console.log("[ADMCloud Items] Items with ID:", items.filter(i => i.id).length);
 
-        return NextResponse.json({ items: items.filter(item => item.id) });
+        // Incluir un sample del raw data para debug (solo en desarrollo o para diagnóstico)
+        const rawSample = response.data && response.data.length > 0 
+            ? response.data.slice(0, 2) 
+            : [];
+
+        return NextResponse.json({ 
+            items: items.filter(item => item.id),
+            _debug: {
+                rawSample,
+                rawKeys: response.data && response.data.length > 0 ? Object.keys(response.data[0]) : []
+            }
+        });
     } catch (error) {
         console.error("Error fetching ADMCloud items:", error);
         return NextResponse.json({ 
