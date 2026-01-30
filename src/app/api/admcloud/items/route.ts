@@ -52,18 +52,24 @@ export async function GET(request: NextRequest) {
             role: workspaceData.admCloudRole || "Administradores",
         });
 
+        // Primero, obtener los precios directamente para debug
+        const pricesResponse = await client.getItemPrices();
+        const pricesDebug = {
+            success: pricesResponse.success,
+            error: pricesResponse.error,
+            count: pricesResponse.data?.length || 0,
+            sample: pricesResponse.data?.slice(0, 3) || [],
+            keys: pricesResponse.data && pricesResponse.data.length > 0 ? Object.keys(pricesResponse.data[0]) : []
+        };
+
         // Fetch items WITH prices from ADMCloud (combines Items + ItemPrices endpoints)
         const response = await client.getItemsWithPrices();
 
-        console.log("[ADMCloud Items] Response success:", response.success);
-        console.log("[ADMCloud Items] Response error:", response.error);
-        console.log("[ADMCloud Items] Data length:", response.data?.length);
-
         if (!response.success) {
-            console.error("ADMCloud API error:", response.error);
             return NextResponse.json({ 
                 error: response.error || "Error al obtener artículos de ADMCloud",
                 items: [],
+                _debug: { pricesDebug }
             }, { status: 500 });
         }
 
@@ -78,11 +84,13 @@ export async function GET(request: NextRequest) {
             return { id, code, name, price: Number(price) || 0 };
         });
 
-        console.log("[ADMCloud Items] Mapped items count:", items.length);
-        console.log("[ADMCloud Items] Items with price > 0:", items.filter(i => i.price > 0).length);
-
         return NextResponse.json({ 
             items: items.filter(item => item.id),
+            _debug: { 
+                pricesDebug,
+                itemsWithPrice: items.filter(i => i.price > 0).length,
+                totalItems: items.length
+            }
         });
     } catch (error) {
         console.error("Error fetching ADMCloud items:", error);
