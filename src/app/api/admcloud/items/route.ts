@@ -52,33 +52,26 @@ export async function GET(request: NextRequest) {
             role: workspaceData.admCloudRole || "Administradores",
         });
 
-        // Fetch items from ADMCloud (ahora con expand=Prices para incluir precios)
+        // Primero probamos el endpoint PriceList para ver su estructura
+        const priceListResponse = await client.getPriceLists();
+        const priceListDebug = {
+            success: priceListResponse.success,
+            error: priceListResponse.error,
+            count: priceListResponse.data?.length || 0,
+            sample: priceListResponse.data?.slice(0, 3) || [],
+            keys: priceListResponse.data && priceListResponse.data.length > 0 ? Object.keys(priceListResponse.data[0]) : []
+        };
+
+        // Fetch items from ADMCloud
         const response = await client.getItems();
 
         if (!response.success) {
             return NextResponse.json({ 
                 error: response.error || "Error al obtener artículos de ADMCloud",
                 items: [],
+                _debug: { priceListDebug }
             }, { status: 500 });
         }
-
-        // Debug: ver si el array Prices tiene datos
-        const firstItemWithPrices = (response.data || []).find(item => 
-            item.Prices && Array.isArray(item.Prices) && item.Prices.length > 0
-        );
-        const pricesDebug = {
-            itemsWithPricesArray: (response.data || []).filter(item => 
-                item.Prices && Array.isArray(item.Prices) && item.Prices.length > 0
-            ).length,
-            firstItemPrices: firstItemWithPrices?.Prices?.slice(0, 3) || [],
-            firstItemPricesKeys: firstItemWithPrices?.Prices?.[0] ? Object.keys(firstItemWithPrices.Prices[0]) : [],
-            // También revisar si hay otros campos de precio directamente en el item
-            sampleItem: response.data?.[0] ? {
-                PurchasePrice: response.data[0].PurchasePrice,
-                Cost: response.data[0].Cost,
-                Prices: response.data[0].Prices,
-            } : null
-        };
 
         // Transform the data to a simpler format
         const items = (response.data || []).map((item) => {
@@ -89,11 +82,9 @@ export async function GET(request: NextRequest) {
             // Buscar precio en el array Prices (si existe)
             let price = 0;
             if (item.Prices && Array.isArray(item.Prices) && item.Prices.length > 0) {
-                // Tomar el primer precio disponible
                 const priceRecord = item.Prices[0];
                 price = priceRecord.Price ?? priceRecord.UnitPrice ?? priceRecord.SalesPrice ?? 0;
             }
-            // Fallback a campos directos del item
             if (price === 0) {
                 price = item.SalesPrice ?? item.Price ?? item.UnitPrice ?? 0;
             }
@@ -104,7 +95,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ 
             items: items.filter(item => item.id),
             _debug: { 
-                pricesDebug,
+                priceListDebug,
                 itemsWithPrice: items.filter(i => i.price > 0).length,
                 totalItems: items.length
             }

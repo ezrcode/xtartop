@@ -358,11 +358,11 @@ class AdmCloudClient {
     }
 
     /**
-     * Obtener precios de items de AdmCloud
+     * Obtener listas de precios de AdmCloud
      */
-    async getItemPrices(): Promise<AdmCloudApiResponse<AdmCloudItemPrice[]>> {
+    async getPriceLists(): Promise<AdmCloudApiResponse<AdmCloudItemPrice[]>> {
         const response = await this.request<AdmCloudItemPrice[] | AdmCloudItemPrice>(
-            '/ItemPrices',
+            '/PriceList',
             {},
             { skip: "0" }
         );
