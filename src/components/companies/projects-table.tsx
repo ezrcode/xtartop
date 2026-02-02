@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, X, Loader2, FolderOpen, ChevronDown, Pencil, Trash2, Search } from "lucide-react";
+import { Plus, X, Loader2, FolderOpen, ChevronDown, Pencil, Trash2, Search, Download } from "lucide-react";
 import { createProject, updateProject, deleteProject, updateProjectStatus } from "@/actions/projects";
 import type { Project } from "@prisma/client";
 
@@ -179,6 +179,25 @@ export function ProjectsTable({ companyId, projects: initialProjects }: Projects
         setError(null);
     };
 
+    const handleExportExcel = () => {
+        const headers = ["Nombre", "Estado"];
+        const rows = projects.map(project => [
+            `"${project.name.replace(/"/g, '""')}"`,
+            project.status === "ACTIVE" ? "Activo" : "Inactivo"
+        ]);
+
+        const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+        const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `proyectos_${new Date().toISOString().split("T")[0]}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -200,6 +219,15 @@ export function ProjectsTable({ companyId, projects: initialProjects }: Projects
                             className="pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-nearby-accent focus:border-nearby-accent w-40"
                         />
                     </div>
+                    <button
+                        type="button"
+                        onClick={handleExportExcel}
+                        disabled={projects.length === 0}
+                        className="inline-flex items-center justify-center w-7 h-7 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                        title="Exportar a Excel"
+                    >
+                        <Download size={14} />
+                    </button>
                     <button
                         type="button"
                         onClick={() => setShowModal(true)}
