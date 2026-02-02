@@ -30,18 +30,18 @@ export function EmptyState({
             className="flex flex-col items-center justify-center py-12 px-4"
         >
             <motion.div 
-                className="w-20 h-20 rounded-2xl bg-soft-gray flex items-center justify-center mb-6"
+                className="w-20 h-20 rounded-2xl bg-[var(--hover-bg)] flex items-center justify-center mb-6"
                 initial={{ scale: 0.8 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
             >
-                <Icon size={40} className="text-gray-300" />
+                <Icon size={40} className="text-[var(--muted-text)]" />
             </motion.div>
             
-            <h3 className="text-lg font-semibold text-nearby-dark mb-2 text-center">
+            <h3 className="text-lg font-semibold text-[var(--foreground)] mb-2 text-center">
                 {title}
             </h3>
-            <p className="text-sm text-gray-500 max-w-sm text-center mb-6">
+            <p className="text-sm text-[var(--muted-text)] max-w-sm text-center mb-6">
                 {description}
             </p>
             

@@ -9,7 +9,14 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
     helperText?: string;
     leftIcon?: React.ReactNode;
     rightIcon?: React.ReactNode;
+    inputSize?: "sm" | "md" | "lg";
 }
+
+const sizeStyles = {
+    sm: "py-2 text-sm min-h-[36px]",
+    md: "py-3 sm:py-2.5 text-base sm:text-sm min-h-[44px]",
+    lg: "py-3.5 text-base min-h-[52px]",
+};
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
     ({ 
@@ -21,6 +28,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         type = "text",
         className = "", 
         id,
+        inputSize = "md",
         ...props 
     }, ref) => {
         const [showPassword, setShowPassword] = useState(false);
@@ -32,7 +40,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                 {label && (
                     <label 
                         htmlFor={inputId}
-                        className="block text-sm font-medium text-dark-slate mb-1.5"
+                        className="block text-sm font-medium text-[var(--foreground)] mb-1.5"
                     >
                         {label}
                         {props.required && <span className="text-error-red ml-1">*</span>}
@@ -40,7 +48,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                 )}
                 <div className="relative">
                     {leftIcon && (
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted-text)]">
                             {leftIcon}
                         </div>
                     )}
@@ -49,18 +57,19 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                         id={inputId}
                         type={isPassword && showPassword ? "text" : type}
                         className={`
-                            w-full rounded-lg border bg-white
-                            text-sm text-nearby-dark placeholder:text-gray-400
+                            w-full rounded-lg border 
+                            bg-[var(--input-bg)] text-[var(--foreground)]
+                            placeholder:text-[var(--muted-text)]
                             transition-all duration-200
                             focus:outline-none focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent
-                            disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed
+                            disabled:opacity-50 disabled:cursor-not-allowed
                             ${error 
                                 ? "border-error-red focus:ring-error-red/20 focus:border-error-red" 
-                                : "border-graphite-gray hover:border-nearby-dark-300"
+                                : "border-[var(--input-border)] hover:border-[var(--muted-text)]"
                             }
                             ${leftIcon ? "pl-10" : "pl-3"}
                             ${rightIcon || isPassword ? "pr-10" : "pr-3"}
-                            py-2.5
+                            ${sizeStyles[inputSize]}
                             ${className}
                         `}
                         {...props}
@@ -69,13 +78,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-nearby-dark transition-colors"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted-text)] hover:text-[var(--foreground)] transition-colors p-1"
                         >
                             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                         </button>
                     )}
                     {!isPassword && rightIcon && (
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted-text)]">
                             {rightIcon}
                         </div>
                     )}
@@ -84,7 +93,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                     <p className="mt-1.5 text-xs text-error-red">{error}</p>
                 )}
                 {!error && helperText && (
-                    <p className="mt-1.5 text-xs text-gray-500">{helperText}</p>
+                    <p className="mt-1.5 text-xs text-[var(--muted-text)]">{helperText}</p>
                 )}
             </div>
         );

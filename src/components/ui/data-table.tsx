@@ -245,19 +245,19 @@ export function DataTable<T>({
     const activeFiltersCount = Object.keys(filters).length;
 
     return (
-        <div className="bg-white rounded-xl border border-graphite-gray overflow-hidden">
+        <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] overflow-hidden">
             {/* Toolbar */}
-            <div className="p-4 border-b border-graphite-gray flex flex-wrap items-center gap-3">
+            <div className="p-4 border-b border-[var(--card-border)] flex flex-wrap items-center gap-3">
                 {/* Search */}
                 {searchable && (
                     <div className="relative flex-1 min-w-[200px] max-w-sm">
-                        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted-text)]" />
                         <input
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder={searchPlaceholder}
-                            className="w-full pl-10 pr-4 py-2 text-sm border border-graphite-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                            className="w-full pl-10 pr-4 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] placeholder:text-[var(--muted-text)] border border-[var(--input-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
                         />
                     </div>
                 )}
@@ -269,14 +269,14 @@ export function DataTable<T>({
                             <button
                                 type="button"
                                 onClick={() => setShowFilters(!showFilters)}
-                                className={`flex items-center gap-2 px-3 py-2 text-sm border rounded-lg transition-colors ${
+                                className={`flex items-center gap-2 px-3 py-2.5 min-h-[44px] text-sm border rounded-lg transition-colors ${
                                     activeFiltersCount > 0
                                         ? "bg-nearby-accent text-white border-nearby-accent"
-                                        : "border-graphite-gray hover:bg-gray-50"
+                                        : "border-[var(--card-border)] text-[var(--foreground)] hover:bg-[var(--hover-bg)]"
                                 }`}
                             >
                                 <Filter size={16} />
-                                <span>Filtros</span>
+                                <span className="hidden sm:inline">Filtros</span>
                                 {activeFiltersCount > 0 && (
                                     <span className="bg-white text-nearby-accent text-xs font-bold px-1.5 py-0.5 rounded-full">
                                         {activeFiltersCount}
@@ -285,9 +285,9 @@ export function DataTable<T>({
                             </button>
                             
                             {showFilters && (
-                                <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-lg shadow-lg border border-graphite-gray z-50 p-4">
+                                <div className="absolute right-0 top-full mt-2 w-72 bg-[var(--card-bg)] rounded-lg shadow-lg border border-[var(--card-border)] z-50 p-4">
                                     <div className="flex items-center justify-between mb-3">
-                                        <h4 className="font-semibold text-sm">Filtros</h4>
+                                        <h4 className="font-semibold text-sm text-[var(--foreground)]">Filtros</h4>
                                         {activeFiltersCount > 0 && (
                                             <button
                                                 type="button"
@@ -301,13 +301,13 @@ export function DataTable<T>({
                                     <div className="space-y-3">
                                         {filterableColumns.map(col => (
                                             <div key={String(col.key)}>
-                                                <label className="block text-xs font-medium text-gray-600 mb-1">
+                                                <label className="block text-xs font-medium text-[var(--muted-text)] mb-1">
                                                     {col.header}
                                                 </label>
                                                 <select
                                                     value={filters[String(col.key)] || ""}
                                                     onChange={(e) => handleFilterChange(String(col.key), e.target.value)}
-                                                    className="w-full px-3 py-2 text-sm border border-graphite-gray rounded-lg focus:outline-none focus:ring-2 focus:ring-nearby-accent/20"
+                                                    className="w-full px-3 py-2.5 min-h-[44px] text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-nearby-accent/20"
                                                 >
                                                     <option value="">Todos</option>
                                                     {col.filterOptions?.map(opt => (
@@ -330,15 +330,15 @@ export function DataTable<T>({
                             <button
                                 type="button"
                                 onClick={() => setShowColumnSelector(!showColumnSelector)}
-                                className="flex items-center gap-2 px-3 py-2 text-sm border border-graphite-gray rounded-lg hover:bg-gray-50 transition-colors"
+                                className="flex items-center gap-2 px-3 py-2.5 min-h-[44px] text-sm border border-[var(--card-border)] text-[var(--foreground)] rounded-lg hover:bg-[var(--hover-bg)] transition-colors"
                             >
                                 <Columns size={16} />
-                                <span>Columnas</span>
+                                <span className="hidden sm:inline">Columnas</span>
                             </button>
                             
                             {showColumnSelector && (
-                                <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-lg shadow-lg border border-graphite-gray z-50 p-2">
-                                    <div className="text-xs font-semibold text-gray-500 px-2 py-1 mb-1">
+                                <div className="absolute right-0 top-full mt-2 w-56 bg-[var(--card-bg)] rounded-lg shadow-lg border border-[var(--card-border)] z-50 p-2">
+                                    <div className="text-xs font-semibold text-[var(--muted-text)] px-2 py-1 mb-1">
                                         Mostrar columnas
                                     </div>
                                     {hideableColumns.map(col => (
@@ -346,12 +346,12 @@ export function DataTable<T>({
                                             key={String(col.key)}
                                             type="button"
                                             onClick={() => toggleColumn(String(col.key))}
-                                            className="w-full flex items-center gap-2 px-2 py-1.5 text-sm hover:bg-gray-50 rounded transition-colors"
+                                            className="w-full flex items-center gap-2 px-2 py-2.5 min-h-[44px] text-sm text-[var(--foreground)] hover:bg-[var(--hover-bg)] rounded transition-colors"
                                         >
                                             <div className={`w-4 h-4 rounded border flex items-center justify-center ${
                                                 visibleColumns.includes(String(col.key))
                                                     ? "bg-nearby-accent border-nearby-accent"
-                                                    : "border-gray-300"
+                                                    : "border-[var(--input-border)]"
                                             }`}>
                                                 {visibleColumns.includes(String(col.key)) && (
                                                     <Check size={12} className="text-white" />
@@ -371,10 +371,11 @@ export function DataTable<T>({
                             type="button"
                             onClick={handleSave}
                             disabled={isSaving}
-                            className="flex items-center gap-2 px-3 py-2 text-sm bg-nearby-accent text-white rounded-lg hover:bg-nearby-accent/90 transition-colors disabled:opacity-50"
+                            className="flex items-center gap-2 px-3 py-2.5 min-h-[44px] text-sm bg-nearby-accent text-white rounded-lg hover:bg-nearby-accent/90 transition-colors disabled:opacity-50"
                         >
                             <Save size={16} />
-                            <span>{isSaving ? "Guardando..." : "Guardar vista"}</span>
+                            <span className="hidden sm:inline">{isSaving ? "Guardando..." : "Guardar vista"}</span>
+                            <span className="sm:hidden">{isSaving ? "..." : "Guardar"}</span>
                         </button>
                     )}
                 </div>
@@ -382,22 +383,22 @@ export function DataTable<T>({
             
             {/* Active Filters Display */}
             {activeFiltersCount > 0 && (
-                <div className="px-4 py-2 bg-gray-50 border-b border-graphite-gray flex flex-wrap items-center gap-2">
-                    <span className="text-xs text-gray-500">Filtros activos:</span>
+                <div className="px-4 py-2 bg-[var(--hover-bg)] border-b border-[var(--card-border)] flex flex-wrap items-center gap-2">
+                    <span className="text-xs text-[var(--muted-text)]">Filtros activos:</span>
                     {Object.entries(filters).map(([key, value]) => {
                         const column = columns.find(c => String(c.key) === key);
                         const option = column?.filterOptions?.find(o => o.value === value);
                         return (
                             <span
                                 key={key}
-                                className="inline-flex items-center gap-1 px-2 py-1 bg-white border border-graphite-gray rounded-full text-xs"
+                                className="inline-flex items-center gap-1 px-2 py-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-full text-xs text-[var(--foreground)]"
                             >
                                 <span className="font-medium">{column?.header}:</span>
                                 <span>{option?.label || value}</span>
                                 <button
                                     type="button"
                                     onClick={() => handleFilterChange(key, "")}
-                                    className="ml-1 text-gray-400 hover:text-gray-600"
+                                    className="ml-1 text-[var(--muted-text)] hover:text-[var(--foreground)]"
                                 >
                                     <X size={12} />
                                 </button>
@@ -407,16 +408,71 @@ export function DataTable<T>({
                 </div>
             )}
             
-            {/* Table */}
-            <div className="overflow-x-auto">
+            {/* Mobile Card View */}
+            <div className="block md:hidden">
+                {sortedData.length === 0 ? (
+                    emptyState || (
+                        <div className="py-12 text-center text-[var(--muted-text)] text-sm">
+                            No hay datos disponibles
+                        </div>
+                    )
+                ) : (
+                    <div className="divide-y divide-[var(--card-border)]">
+                        <AnimatePresence>
+                            {sortedData.map((item, index) => (
+                                <motion.div
+                                    key={keyExtractor(item)}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ delay: index * 0.02 }}
+                                    onClick={() => onRowClick?.(item)}
+                                    className={`p-4 ${
+                                        onRowClick 
+                                            ? "cursor-pointer hover:bg-[var(--hover-bg)] active:bg-[var(--hover-bg)] transition-colors" 
+                                            : ""
+                                    }`}
+                                >
+                                    <div className="space-y-2">
+                                        {displayColumns.slice(0, 4).map((column, colIndex) => (
+                                            <div 
+                                                key={`${keyExtractor(item)}-${String(column.key)}`}
+                                                className={colIndex === 0 ? "font-medium text-[var(--foreground)]" : "flex justify-between text-sm"}
+                                            >
+                                                {colIndex === 0 ? (
+                                                    column.render 
+                                                        ? column.render(item) 
+                                                        : String((item as Record<string, unknown>)[String(column.key)] ?? "")
+                                                ) : (
+                                                    <>
+                                                        <span className="text-[var(--muted-text)]">{column.header}</span>
+                                                        <span className="text-[var(--foreground)]">
+                                                            {column.render 
+                                                                ? column.render(item) 
+                                                                : String((item as Record<string, unknown>)[String(column.key)] ?? "")}
+                                                        </span>
+                                                    </>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
+                    </div>
+                )}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
                 <table className="w-full">
-                    <thead className="bg-soft-gray border-b border-graphite-gray">
+                    <thead className="bg-[var(--hover-bg)] border-b border-[var(--card-border)]">
                         <tr>
                             {displayColumns.map((column) => (
                                 <th
                                     key={String(column.key)}
-                                    className={`px-4 py-3 text-left text-xs font-semibold text-dark-slate uppercase tracking-wider ${
-                                        column.sortable ? "cursor-pointer hover:bg-gray-100 transition-colors select-none" : ""
+                                    className={`px-4 py-3 text-left text-xs font-semibold text-[var(--muted-text)] uppercase tracking-wider ${
+                                        column.sortable ? "cursor-pointer hover:bg-[var(--card-border)]/50 transition-colors select-none" : ""
                                     } ${column.className || ""}`}
                                     onClick={() => column.sortable && handleSort(String(column.key))}
                                 >
@@ -432,13 +488,13 @@ export function DataTable<T>({
                             ))}
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-[var(--card-border)]">
                         <AnimatePresence>
                             {sortedData.length === 0 ? (
                                 <tr>
                                     <td colSpan={displayColumns.length}>
                                         {emptyState || (
-                                            <div className="py-12 text-center text-gray-400 text-sm">
+                                            <div className="py-12 text-center text-[var(--muted-text)] text-sm">
                                                 No hay datos disponibles
                                             </div>
                                         )}
@@ -455,14 +511,14 @@ export function DataTable<T>({
                                         onClick={() => onRowClick?.(item)}
                                         className={`${
                                             onRowClick 
-                                                ? "cursor-pointer hover:bg-soft-gray transition-colors" 
+                                                ? "cursor-pointer hover:bg-[var(--hover-bg)] transition-colors" 
                                                 : ""
                                         }`}
                                     >
                                         {displayColumns.map((column) => (
                                             <td
                                                 key={`${keyExtractor(item)}-${String(column.key)}`}
-                                                className={`px-4 py-3 text-sm text-dark-slate ${column.className || ""}`}
+                                                className={`px-4 py-3 text-sm text-[var(--foreground)] ${column.className || ""}`}
                                             >
                                                 {column.render 
                                                     ? column.render(item) 
@@ -479,7 +535,7 @@ export function DataTable<T>({
             </div>
             
             {/* Footer with count */}
-            <div className="px-4 py-2 border-t border-graphite-gray bg-gray-50 text-xs text-gray-500">
+            <div className="px-4 py-2 border-t border-[var(--card-border)] bg-[var(--hover-bg)] text-xs text-[var(--muted-text)]">
                 {sortedData.length} de {data.length} registros
             </div>
         </div>

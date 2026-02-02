@@ -29,7 +29,7 @@ export function BottomNav({ userRole }: BottomNavProps) {
     });
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white border-t border-graphite-gray safe-bottom">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[var(--card-bg)] border-t border-[var(--card-border)] safe-bottom">
             <div className="flex items-center justify-around h-16 px-2">
                 {visibleItems.map((item) => {
                     const isActive = item.href === "/app" 
@@ -40,23 +40,23 @@ export function BottomNav({ userRole }: BottomNavProps) {
                         <Link
                             key={item.name}
                             href={item.href}
-                            className="relative flex flex-col items-center justify-center flex-1 h-full py-1"
+                            className="relative flex flex-col items-center justify-center flex-1 h-full py-1 min-h-[44px]"
                         >
                             {isActive && (
                                 <motion.div
                                     layoutId="bottomNavIndicator"
-                                    className="absolute inset-x-2 top-0 h-0.5 bg-nearby-accent rounded-full"
+                                    className="absolute inset-x-2 top-0 h-0.5 bg-[var(--accent-on-dark)] rounded-full"
                                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                                 />
                             )}
                             <item.icon 
                                 size={22}
                                 className={`mb-1 transition-colors ${
-                                    isActive ? "text-nearby-accent" : "text-gray-400"
+                                    isActive ? "text-[var(--accent-on-dark)]" : "text-[var(--muted-text)]"
                                 }`}
                             />
                             <span className={`text-[10px] font-medium transition-colors ${
-                                isActive ? "text-nearby-accent" : "text-gray-500"
+                                isActive ? "text-[var(--accent-on-dark)]" : "text-[var(--muted-text)]"
                             }`}>
                                 {item.name}
                             </span>

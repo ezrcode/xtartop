@@ -8,3 +8,6 @@ export * from "./data-table";
 export * from "./prefetch-link";
 export * from "./motion";
 export * from "./offline-banner";
+export * from "./modal";
+export * from "./select";
+export * from "./theme-toggle";
