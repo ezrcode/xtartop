@@ -14,7 +14,9 @@ import {
     Download,
     Filter,
     Clock,
-    CheckCircle2
+    CheckCircle2,
+    ChevronDown,
+    ChevronRight
 } from "lucide-react";
 import { getCompanyTickets, updateCompanyClickUpClientName, type ClickUpTicket } from "@/actions/clickup";
 
@@ -33,6 +35,7 @@ export function TicketsTab({ companyId, companyName, clickUpClientName: initialC
     const [saveSuccess, setSaveSuccess] = useState(false);
     const [hasLoaded, setHasLoaded] = useState(false);
     const [statusFilter, setStatusFilter] = useState<string>("all");
+    const [configExpanded, setConfigExpanded] = useState(!initialClientName);
 
     // Get unique statuses from tickets
     const uniqueStatuses = useMemo(() => {
@@ -148,24 +151,49 @@ export function TicketsTab({ companyId, companyName, clickUpClientName: initialC
 
     return (
         <div className="space-y-4">
-            {/* Client Name Configuration */}
-            <div className={`bg-purple-50 border border-purple-200 rounded-lg p-4 ${showConfig ? "" : "hidden md:block"}`}>
-                <div className="flex items-start gap-3">
-                    <Settings className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1">
-                        <h4 className="text-sm font-medium text-purple-800 mb-2">
-                            Nombre del cliente en ClickUp
-                        </h4>
-                        <p className="text-xs text-purple-600 mb-3">
+            {/* Client Name Configuration - Collapsible when configured */}
+            <div className="bg-purple-50 border border-purple-200 rounded-lg overflow-hidden">
+                {/* Header - Always visible, clickable when configured */}
+                <button
+                    type="button"
+                    onClick={() => initialClientName && setConfigExpanded(!configExpanded)}
+                    className={`w-full flex items-center justify-between p-3 text-left ${
+                        initialClientName ? "cursor-pointer hover:bg-purple-100" : "cursor-default"
+                    }`}
+                >
+                    <div className="flex items-center gap-2">
+                        <Settings className="w-4 h-4 text-purple-600" />
+                        <span className="text-sm font-medium text-purple-800">
+                            Cliente en ClickUp
+                        </span>
+                        {initialClientName && !configExpanded && (
+                            <span className="text-sm text-purple-600 font-normal">
+                                : {clientName || initialClientName}
+                            </span>
+                        )}
+                    </div>
+                    {initialClientName && (
+                        configExpanded ? (
+                            <ChevronDown size={16} className="text-purple-600" />
+                        ) : (
+                            <ChevronRight size={16} className="text-purple-600" />
+                        )
+                    )}
+                </button>
+
+                {/* Expandable Content */}
+                {(configExpanded || !initialClientName) && (
+                    <div className="px-3 pb-3 pt-0">
+                        <p className="text-xs text-purple-600 mb-3 ml-6">
                             Ingresa el valor exacto del campo &quot;Cliente&quot; en ClickUp para filtrar los tickets.
                         </p>
-                        <div className="flex flex-col sm:flex-row gap-2">
+                        <div className="flex flex-col sm:flex-row gap-2 ml-6">
                             <input
                                 type="text"
                                 value={clientName}
                                 onChange={(e) => setClientName(e.target.value)}
                                 placeholder={companyName}
-                                className="flex-1 px-3 py-2 border border-purple-300 rounded-md text-sm focus:ring-purple-500 focus:border-purple-500"
+                                className="flex-1 px-3 py-2 border border-purple-300 rounded-md text-sm focus:ring-purple-500 focus:border-purple-500 bg-white"
                             />
                             <div className="flex gap-2">
                                 <button
@@ -194,10 +222,10 @@ export function TicketsTab({ companyId, companyName, clickUpClientName: initialC
                             </div>
                         </div>
                         {saveSuccess && (
-                            <p className="text-xs text-green-600 mt-2">Guardado exitosamente</p>
+                            <p className="text-xs text-green-600 mt-2 ml-6">Guardado exitosamente</p>
                         )}
                     </div>
-                </div>
+                )}
             </div>
 
             {/* Loading state */}
