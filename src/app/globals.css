@@ -31,8 +31,9 @@
   --color-graphite-gray: #D7D9DB;
   --color-dark-slate: #4A4A4A;
   --color-success-green: #1BC47D;
-  --color-warning-amber: #B8860B;
+  --color-warning-amber: #D97706;
   --color-error-red: #FF4E4E;
+  --color-info-blue: #3B82F6;
   --color-ocean-blue: #3B82F6;
 
   /* Modern Shadows */
@@ -58,34 +59,55 @@
   --muted-text: #4A4A4A;
   --skeleton-base: #f0f0f0;
   --skeleton-shine: #e0e0e0;
+  /* Surface levels for depth (light mode) */
+  --surface-0: #F5F6F7;
+  --surface-1: #ffffff;
+  --surface-2: #ffffff;
+  --surface-3: #ffffff;
+  /* Accent color (same in light mode) */
+  --accent-on-dark: #fc5a34;
 }
 
 .dark {
-  --background: #121a21;
+  --background: #0f1419;
   --foreground: #e3e7eb;
   --card-bg: #1b2631;
-  --card-border: #243242;
+  --card-border: #2d3e50;
   --input-bg: #1b2631;
-  --input-border: #243242;
+  --input-border: #2d3e50;
   --hover-bg: #243242;
   --muted-text: #9aa8b8;
   --skeleton-base: #1b2631;
   --skeleton-shine: #243242;
+  /* Surface levels for depth */
+  --surface-0: #0f1419;
+  --surface-1: #1b2631;
+  --surface-2: #243242;
+  --surface-3: #2d3e50;
+  /* Adjusted accent for better contrast on dark */
+  --accent-on-dark: #fc7a5c;
 }
 
 /* System preference detection */
 @media (prefers-color-scheme: dark) {
   .theme-system {
-    --background: #121a21;
+    --background: #0f1419;
     --foreground: #e3e7eb;
     --card-bg: #1b2631;
-    --card-border: #243242;
+    --card-border: #2d3e50;
     --input-bg: #1b2631;
-    --input-border: #243242;
+    --input-border: #2d3e50;
     --hover-bg: #243242;
     --muted-text: #9aa8b8;
     --skeleton-base: #1b2631;
     --skeleton-shine: #243242;
+    /* Surface levels for depth */
+    --surface-0: #0f1419;
+    --surface-1: #1b2631;
+    --surface-2: #243242;
+    --surface-3: #2d3e50;
+    /* Adjusted accent for better contrast on dark */
+    --accent-on-dark: #fc7a5c;
   }
 }
 
@@ -209,4 +231,40 @@ body {
   .safe-top {
     padding-top: env(safe-area-inset-top);
   }
+}
+
+/* Surface Levels for depth hierarchy */
+.surface-0 {
+  background-color: var(--surface-0);
+}
+.surface-1 {
+  background-color: var(--surface-1);
+}
+.surface-2 {
+  background-color: var(--surface-2);
+}
+.surface-3 {
+  background-color: var(--surface-3);
+}
+
+/* Adaptive accent that's brighter in dark mode */
+.text-accent-adaptive {
+  color: var(--accent-on-dark);
+}
+.bg-accent-adaptive {
+  background-color: var(--accent-on-dark);
+}
+.border-accent-adaptive {
+  border-color: var(--accent-on-dark);
+}
+
+/* Info color utilities */
+.text-info {
+  color: var(--color-info-blue);
+}
+.bg-info {
+  background-color: var(--color-info-blue);
+}
+.border-info {
+  border-color: var(--color-info-blue);
 }
