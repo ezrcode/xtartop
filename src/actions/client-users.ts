@@ -68,6 +68,93 @@ export async function createClientUser(companyId: string, fullName: string, emai
     }
 }
 
+export async function updateClientUser(
+    clientUserId: string,
+    companyId: string,
+    fullName: string,
+    email: string
+) {
+    const session = await auth();
+    if (!session?.user?.email) {
+        return { error: "No autorizado" };
+    }
+
+    const user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+    });
+
+    if (!user) {
+        return { error: "Usuario no encontrado" };
+    }
+
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) {
+        return { error: "Workspace no encontrado" };
+    }
+
+    try {
+        const clientUser = await prisma.clientUser.update({
+            where: { id: clientUserId },
+            data: { fullName, email },
+        });
+
+        return { success: true, clientUser };
+    } catch (error) {
+        console.error("Error updating client user:", error);
+        return { error: "Error al actualizar el usuario" };
+    }
+}
+
+export async function deleteClientUser(clientUserId: string, companyId: string) {
+    const session = await auth();
+    if (!session?.user?.email) {
+        return { error: "No autorizado" };
+    }
+
+    const user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+    });
+
+    if (!user) {
+        return { error: "Usuario no encontrado" };
+    }
+
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) {
+        return { error: "Workspace no encontrado" };
+    }
+
+    try {
+        const clientUser = await prisma.clientUser.findUnique({
+            where: { id: clientUserId },
+        });
+
+        if (!clientUser) {
+            return { error: "Usuario no encontrado" };
+        }
+
+        await prisma.clientUser.delete({
+            where: { id: clientUserId },
+        });
+
+        // Create activity record
+        await prisma.activity.create({
+            data: {
+                type: "CLIENT_USER",
+                companyId,
+                workspaceId: workspace.id,
+                createdById: user.id,
+                emailSubject: `Usuario eliminado: ${clientUser.fullName}`,
+            },
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error deleting client user:", error);
+        return { error: "Error al eliminar el usuario" };
+    }
+}
+
 export async function updateClientUserStatus(
     clientUserId: string,
     companyId: string,

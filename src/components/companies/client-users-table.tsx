@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, X, Loader2, Users, ChevronDown } from "lucide-react";
-import { createClientUser, updateClientUserStatus } from "@/actions/client-users";
+import { Plus, X, Loader2, Users, ChevronDown, Pencil, Trash2 } from "lucide-react";
+import { createClientUser, updateClientUser, deleteClientUser, updateClientUserStatus } from "@/actions/client-users";
 import type { ClientUser } from "@prisma/client";
 
 interface ClientUsersTableProps {
@@ -17,10 +17,13 @@ export function ClientUsersTable({ companyId, clientUsers: initialClientUsers }:
     const [clientUsers, setClientUsers] = useState(initialClientUsers);
     const [showModal, setShowModal] = useState(false);
     const [showStatusModal, setShowStatusModal] = useState<ClientUser | null>(null);
+    const [showDeleteModal, setShowDeleteModal] = useState<ClientUser | null>(null);
+    const [editingUser, setEditingUser] = useState<ClientUser | null>(null);
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
     const [updatingId, setUpdatingId] = useState<string | null>(null);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     // Sync with props when they change
@@ -62,6 +65,64 @@ export function ClientUsersTable({ companyId, clientUsers: initialClientUsers }:
         setLoading(false);
     };
 
+    const handleUpdate = async () => {
+        if (!editingUser) return;
+        
+        if (!fullName.trim()) {
+            setError("El nombre es requerido");
+            return;
+        }
+        if (!email.trim()) {
+            setError("El correo es requerido");
+            return;
+        }
+
+        setLoading(true);
+        setError(null);
+
+        try {
+            const result = await updateClientUser(editingUser.id, companyId, fullName.trim(), email.trim());
+
+            if ("error" in result && result.error) {
+                setError(result.error);
+            } else if (result.clientUser) {
+                // Optimistic update
+                setClientUsers(prev => 
+                    prev.map(u => u.id === editingUser.id ? result.clientUser! : u)
+                );
+                setFullName("");
+                setEmail("");
+                setEditingUser(null);
+                router.refresh();
+            }
+        } catch {
+            setError("Error al actualizar el usuario");
+        }
+
+        setLoading(false);
+    };
+
+    const handleDelete = async () => {
+        if (!showDeleteModal) return;
+
+        setDeletingId(showDeleteModal.id);
+        setShowDeleteModal(null);
+
+        try {
+            const result = await deleteClientUser(showDeleteModal.id, companyId);
+
+            if (!("error" in result)) {
+                // Optimistic update - remove from local state
+                setClientUsers(prev => prev.filter(u => u.id !== showDeleteModal.id));
+                router.refresh();
+            }
+        } catch {
+            console.error("Error deleting client user");
+        }
+
+        setDeletingId(null);
+    };
+
     const handleConfirmStatusChange = async () => {
         if (!showStatusModal) return;
         
@@ -93,6 +154,21 @@ export function ClientUsersTable({ companyId, clientUsers: initialClientUsers }:
         setUpdatingId(null);
     };
 
+    const openEditModal = (user: ClientUser) => {
+        setEditingUser(user);
+        setFullName(user.fullName);
+        setEmail(user.email);
+        setError(null);
+    };
+
+    const closeModal = () => {
+        setShowModal(false);
+        setEditingUser(null);
+        setFullName("");
+        setEmail("");
+        setError(null);
+    };
+
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -121,15 +197,18 @@ export function ClientUsersTable({ companyId, clientUsers: initialClientUsers }:
                                 <th className="px-4 py-2 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
                                     Correo
                                 </th>
-                                <th className="px-4 py-2 text-center text-xs font-medium text-dark-slate uppercase tracking-wider w-36">
+                                <th className="px-4 py-2 text-center text-xs font-medium text-dark-slate uppercase tracking-wider w-28">
                                     Estado
+                                </th>
+                                <th className="px-4 py-2 text-center text-xs font-medium text-dark-slate uppercase tracking-wider w-20">
+                                    Acciones
                                 </th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-graphite-gray">
                             {clientUsers.length === 0 ? (
                                 <tr>
-                                    <td colSpan={3} className="px-4 py-8 text-center text-sm text-gray-500">
+                                    <td colSpan={4} className="px-4 py-8 text-center text-sm text-gray-500">
                                         No hay usuarios registrados
                                     </td>
                                 </tr>
@@ -147,21 +226,46 @@ export function ClientUsersTable({ companyId, clientUsers: initialClientUsers }:
                                                 type="button"
                                                 onClick={() => setShowStatusModal(clientUser)}
                                                 disabled={updatingId === clientUser.id}
-                                                className={`inline-flex items-center justify-between gap-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors min-w-[100px] border ${
+                                                className={`inline-flex items-center justify-between gap-1 px-2 py-1 text-xs font-medium rounded-md transition-colors min-w-[85px] border ${
                                                     clientUser.status === "ACTIVE"
                                                         ? "bg-success-green/10 text-success-green border-success-green/30"
                                                         : "bg-gray-50 text-gray-500 border-gray-200"
                                                 }`}
                                             >
                                                 {updatingId === clientUser.id ? (
-                                                    <Loader2 size={14} className="animate-spin mx-auto" />
+                                                    <Loader2 size={12} className="animate-spin mx-auto" />
                                                 ) : (
                                                     <>
                                                         <span>{clientUser.status === "ACTIVE" ? "Activo" : "Inactivo"}</span>
-                                                        <ChevronDown size={14} />
+                                                        <ChevronDown size={12} />
                                                     </>
                                                 )}
                                             </button>
+                                        </td>
+                                        <td className="px-4 py-3 text-center">
+                                            <div className="flex items-center justify-center gap-1">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => openEditModal(clientUser)}
+                                                    className="p-1.5 text-gray-400 hover:text-nearby-accent hover:bg-gray-100 rounded transition-colors"
+                                                    title="Editar"
+                                                >
+                                                    <Pencil size={14} />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowDeleteModal(clientUser)}
+                                                    disabled={deletingId === clientUser.id}
+                                                    className="p-1.5 text-gray-400 hover:text-error-red hover:bg-red-50 rounded transition-colors disabled:opacity-50"
+                                                    title="Eliminar"
+                                                >
+                                                    {deletingId === clientUser.id ? (
+                                                        <Loader2 size={14} className="animate-spin" />
+                                                    ) : (
+                                                        <Trash2 size={14} />
+                                                    )}
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
@@ -171,20 +275,17 @@ export function ClientUsersTable({ companyId, clientUsers: initialClientUsers }:
                 </div>
             </div>
 
-            {/* Create Client User Modal */}
-            {showModal && (
+            {/* Create/Edit Client User Modal */}
+            {(showModal || editingUser) && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
                     <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-bold text-nearby-dark">Nuevo Usuario</h3>
+                            <h3 className="text-lg font-bold text-nearby-dark">
+                                {editingUser ? "Editar Usuario" : "Nuevo Usuario"}
+                            </h3>
                             <button
                                 type="button"
-                                onClick={() => {
-                                    setShowModal(false);
-                                    setFullName("");
-                                    setEmail("");
-                                    setError(null);
-                                }}
+                                onClick={closeModal}
                                 className="text-gray-400 hover:text-gray-600"
                             >
                                 <X size={20} />
@@ -222,7 +323,7 @@ export function ClientUsersTable({ companyId, clientUsers: initialClientUsers }:
                                     onChange={(e) => setEmail(e.target.value)}
                                     onKeyDown={(e) => {
                                         if (e.key === "Enter" && !loading) {
-                                            handleCreate();
+                                            editingUser ? handleUpdate() : handleCreate();
                                         }
                                     }}
                                     className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent text-sm"
@@ -233,19 +334,14 @@ export function ClientUsersTable({ companyId, clientUsers: initialClientUsers }:
                             <div className="flex justify-end gap-3 pt-2">
                                 <button
                                     type="button"
-                                    onClick={() => {
-                                        setShowModal(false);
-                                        setFullName("");
-                                        setEmail("");
-                                        setError(null);
-                                    }}
+                                    onClick={closeModal}
                                     className="px-4 py-2 text-sm font-medium text-dark-slate bg-white border border-graphite-gray rounded-md hover:bg-gray-50"
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={handleCreate}
+                                    onClick={editingUser ? handleUpdate : handleCreate}
                                     disabled={loading}
                                     className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-nearby-accent rounded-md hover:bg-nearby-dark disabled:opacity-50"
                                 >
@@ -296,6 +392,38 @@ export function ClientUsersTable({ companyId, clientUsers: initialClientUsers }:
                                 }`}
                             >
                                 {showStatusModal.status === "ACTIVE" ? "Inactivar" : "Activar"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Confirm Delete Modal */}
+            {showDeleteModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full mx-4">
+                        <h3 className="text-lg font-bold text-nearby-dark mb-2">
+                            Eliminar Usuario
+                        </h3>
+                        <p className="text-sm text-dark-slate mb-4">
+                            ¿Estás seguro que deseas eliminar al usuario{" "}
+                            <strong>&quot;{showDeleteModal.fullName}&quot;</strong>?
+                            Esta acción no se puede deshacer.
+                        </p>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setShowDeleteModal(null)}
+                                className="px-4 py-2 text-sm font-medium text-dark-slate bg-white border border-graphite-gray rounded-md hover:bg-gray-50"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleDelete}
+                                className="px-4 py-2 text-sm font-medium text-white bg-error-red rounded-md hover:bg-red-700"
+                            >
+                                Eliminar
                             </button>
                         </div>
                     </div>
