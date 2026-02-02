@@ -59,17 +59,19 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         authorized: authConfig.callbacks.authorized,
         async jwt({ token, user }) {
             if (user) {
+                token.id = (user as User).id;
                 token.userType = (user as User).userType;
                 token.contactId = (user as User).contactId;
             }
-            // Refresh user data from DB only if userType is missing or stale
-            if (token.email && !token.userType) {
+            // Refresh user data from DB only if userType or id is missing
+            if (token.email && (!token.userType || !token.id)) {
                 try {
                     const dbUser = await prisma.user.findUnique({
                         where: { email: token.email as string },
-                        select: { userType: true, contactId: true },
+                        select: { id: true, userType: true, contactId: true },
                     });
                     if (dbUser) {
+                        token.id = dbUser.id;
                         token.userType = dbUser.userType;
                         token.contactId = dbUser.contactId;
                     }
@@ -81,6 +83,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         },
         async session({ session, token }) {
             if (session.user) {
+                (session.user as { id?: string }).id = token.id as string || token.sub;
                 (session.user as { userType?: string }).userType = token.userType as string;
                 (session.user as { contactId?: string | null }).contactId = token.contactId as string | null;
             }
