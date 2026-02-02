@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useFormState } from "react-dom";
-import { Save, UserPlus, Mail, Trash2, X, Building2, Users2, Upload, FileText, Loader2, Cloud } from "lucide-react";
+import { Save, UserPlus, Mail, Trash2, X, Building2, Users2, FileText, Loader2, Cloud } from "lucide-react";
+import { ImageUpload } from "../ui/image-upload";
 import {
     updateWorkspace,
     sendInvitation,
@@ -144,8 +145,7 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
     const [showInviteForm, setShowInviteForm] = useState(false);
     const [revokingId, setRevokingId] = useState<string | null>(null);
     const [removingId, setRemovingId] = useState<string | null>(null);
-    const [logoPreview, setLogoPreview] = useState<string | null>(workspace.logoUrl || null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [logoUrl, setLogoUrl] = useState<string | null>(workspace.logoUrl || null);
     
     // Contract state
     const [contractContent, setContractContent] = useState(workspace.contractTemplate || getDefaultContractTemplate());
@@ -158,36 +158,6 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
 
     const [workspaceState, workspaceAction] = useFormState(updateWorkspace, initialWorkspaceState);
     const [invitationState, invitationAction] = useFormState(sendInvitation, initialInvitationState);
-
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        // Simple file upload to public/uploads
-        const formData = new FormData();
-        formData.append('file', file);
-
-        try {
-            const response = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (response.ok) {
-                const { filePath } = await response.json();
-                setLogoPreview(filePath);
-                
-                // Update hidden input with the file path
-                const logoInput = document.getElementById('logoUrl') as HTMLInputElement;
-                if (logoInput) {
-                    logoInput.value = filePath;
-                }
-            }
-        } catch (error) {
-            console.error('Error uploading file:', error);
-            alert('Error al subir el logo');
-        }
-    };
 
     const getInitials = (name: string | null, email: string) => {
         if (name) {
@@ -250,24 +220,25 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                     </p>
                 </div>
 
-                {/* Tabs */}
+                {/* Tabs - Optimized for iOS */}
                 <div className="mb-6">
-                    <div className="border-b border-graphite-gray">
-                        <nav className="-mb-px flex space-x-8">
+                    <div className="border-b border-graphite-gray overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+                        <nav className="-mb-px flex space-x-4 sm:space-x-8 min-w-max">
                             {tabs.map((tab) => {
                                 const Icon = tab.icon;
                                 return (
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
-                                        className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                                        className={`flex items-center py-3 sm:py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
                                             activeTab === tab.id
                                                 ? 'border-nearby-accent text-nearby-accent'
                                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                         }`}
                                     >
-                                        <Icon size={18} className="mr-2" />
-                                        {tab.name}
+                                        <Icon size={18} className="mr-1.5 sm:mr-2" />
+                                        <span className="hidden sm:inline">{tab.name}</span>
+                                        <span className="sm:hidden">{tab.id === 'workspace' ? 'Espacio' : tab.id === 'team' ? 'Equipo' : tab.id === 'contract' ? 'Contrato' : 'Integr.'}</span>
                                     </button>
                                 );
                             })}
@@ -290,47 +261,20 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                 )}
 
                                 {/* Logo Upload */}
-                                <div>
-                                    <label className="block text-sm font-medium text-dark-slate mb-2">
-                                        Logo de la Empresa
-                                    </label>
-                                    <div className="flex items-center gap-4">
-                                        {logoPreview && (
-                                            <div className="w-24 h-24 border-2 border-graphite-gray rounded-lg overflow-hidden">
-                                                <img 
-                                                    src={logoPreview} 
-                                                    alt="Logo" 
-                                                    className="w-full h-full object-contain"
-                                                />
-                                            </div>
-                                        )}
-                                        <div>
-                                            <input
-                                                type="file"
-                                                ref={fileInputRef}
-                                                onChange={handleFileChange}
-                                                accept="image/*"
-                                                className="hidden"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => fileInputRef.current?.click()}
-                                                className="inline-flex items-center px-4 py-2 border border-graphite-gray rounded-md shadow-sm text-sm font-medium text-dark-slate bg-white hover:bg-gray-50 transition-colors"
-                                            >
-                                                <Upload size={16} className="mr-2" />
-                                                Subir Logo
-                                            </button>
-                                            <p className="mt-1 text-xs text-gray-500">
-                                                PNG, JPG o SVG. Máximo 2MB.
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <input type="hidden" name="logoUrl" id="logoUrl" defaultValue={workspace.logoUrl || ''} />
-                                </div>
+                                <ImageUpload
+                                    currentImage={workspace.logoUrl}
+                                    onImageChange={(url) => setLogoUrl(url)}
+                                    category="logo"
+                                    folder="logos"
+                                    size="lg"
+                                    shape="square"
+                                    label="Logo de la Empresa"
+                                />
+                                <input type="hidden" name="logoUrl" value={logoUrl || ""} />
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                                     <div>
-                                        <label htmlFor="name" className="block text-sm font-medium text-dark-slate mb-2">
+                                        <label htmlFor="name" className="block text-sm font-medium text-dark-slate mb-1.5 sm:mb-2">
                                             Nombre del Workspace
                                         </label>
                                         <input
@@ -339,7 +283,7 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                             id="name"
                                             defaultValue={workspace.name}
                                             required
-                                            className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                            className="w-full px-3 py-3 sm:py-2 text-base sm:text-sm border border-graphite-gray rounded-lg sm:rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                         />
                                         {workspaceState?.errors?.name && (
                                             <p className="mt-1 text-sm text-error-red">{workspaceState.errors.name}</p>
@@ -347,7 +291,7 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                     </div>
 
                                     <div>
-                                        <label htmlFor="legalName" className="block text-sm font-medium text-dark-slate mb-2">
+                                        <label htmlFor="legalName" className="block text-sm font-medium text-dark-slate mb-1.5 sm:mb-2">
                                             Nombre o Razón Social
                                         </label>
                                         <input
@@ -355,12 +299,12 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                             name="legalName"
                                             id="legalName"
                                             defaultValue={workspace.legalName || ''}
-                                            className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                            className="w-full px-3 py-3 sm:py-2 text-base sm:text-sm border border-graphite-gray rounded-lg sm:rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                         />
                                     </div>
 
                                     <div>
-                                        <label htmlFor="rnc" className="block text-sm font-medium text-dark-slate mb-2">
+                                        <label htmlFor="rnc" className="block text-sm font-medium text-dark-slate mb-1.5 sm:mb-2">
                                             RNC
                                         </label>
                                         <input
@@ -369,12 +313,12 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                             id="rnc"
                                             defaultValue={workspace.rnc || ''}
                                             placeholder="000-0000000-0"
-                                            className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                            className="w-full px-3 py-3 sm:py-2 text-base sm:text-sm border border-graphite-gray rounded-lg sm:rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                         />
                                     </div>
 
                                     <div>
-                                        <label htmlFor="phone" className="block text-sm font-medium text-dark-slate mb-2">
+                                        <label htmlFor="phone" className="block text-sm font-medium text-dark-slate mb-1.5 sm:mb-2">
                                             Teléfono
                                         </label>
                                         <input
@@ -383,13 +327,13 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                             id="phone"
                                             defaultValue={workspace.phone || ''}
                                             placeholder="+1 (809) 000-0000"
-                                            className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                            className="w-full px-3 py-3 sm:py-2 text-base sm:text-sm border border-graphite-gray rounded-lg sm:rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                         />
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label htmlFor="address" className="block text-sm font-medium text-dark-slate mb-2">
+                                    <label htmlFor="address" className="block text-sm font-medium text-dark-slate mb-1.5 sm:mb-2">
                                         Dirección
                                     </label>
                                     <textarea
@@ -398,7 +342,7 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                         rows={3}
                                         defaultValue={workspace.address || ''}
                                         placeholder="Calle, Número, Sector, Ciudad, País"
-                                        className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                        className="w-full px-3 py-3 sm:py-2 text-base sm:text-sm border border-graphite-gray rounded-lg sm:rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                     />
                                 </div>
 

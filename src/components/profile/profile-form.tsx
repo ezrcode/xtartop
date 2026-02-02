@@ -52,7 +52,7 @@ function ProfileTab({ user }: { user: ProfileFormProps['user'] }) {
             <input type="hidden" name="photoUrl" value={photoUrl || ""} />
 
             <div>
-                <label htmlFor="name" className="block text-sm font-medium text-dark-slate mb-2">
+                <label htmlFor="name" className="block text-sm font-medium text-dark-slate mb-1.5 sm:mb-2">
                     Nombre Completo
                 </label>
                 <input
@@ -60,7 +60,7 @@ function ProfileTab({ user }: { user: ProfileFormProps['user'] }) {
                     name="name"
                     id="name"
                     defaultValue={user.name || ""}
-                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                    className="w-full px-3 py-3 sm:py-2 text-base sm:text-sm border border-graphite-gray rounded-lg sm:rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                 />
                 {profileState?.errors?.name && (
                     <p className="mt-1 text-sm text-error-red">{profileState.errors.name}</p>
@@ -68,7 +68,7 @@ function ProfileTab({ user }: { user: ProfileFormProps['user'] }) {
             </div>
 
             <div>
-                <label htmlFor="email" className="block text-sm font-medium text-dark-slate mb-2">
+                <label htmlFor="email" className="block text-sm font-medium text-dark-slate mb-1.5 sm:mb-2">
                     Email
                 </label>
                 <input
@@ -76,7 +76,7 @@ function ProfileTab({ user }: { user: ProfileFormProps['user'] }) {
                     name="email"
                     id="email"
                     defaultValue={user.email}
-                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                    className="w-full px-3 py-3 sm:py-2 text-base sm:text-sm border border-graphite-gray rounded-lg sm:rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                 />
                 {profileState?.errors?.email && (
                     <p className="mt-1 text-sm text-error-red">{profileState.errors.email}</p>
@@ -110,7 +110,7 @@ function PasswordTab() {
             )}
 
             <div>
-                <label htmlFor="currentPassword" className="block text-sm font-medium text-dark-slate mb-2">
+                <label htmlFor="currentPassword" className="block text-sm font-medium text-dark-slate mb-1.5 sm:mb-2">
                     Contraseña Actual
                 </label>
                 <input
@@ -118,7 +118,7 @@ function PasswordTab() {
                     name="currentPassword"
                     id="currentPassword"
                     required
-                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                    className="w-full px-3 py-3 sm:py-2 text-base sm:text-sm border border-graphite-gray rounded-lg sm:rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                 />
                 {passwordState?.errors?.currentPassword && (
                     <p className="mt-1 text-sm text-error-red">{passwordState.errors.currentPassword}</p>
@@ -126,7 +126,7 @@ function PasswordTab() {
             </div>
 
             <div>
-                <label htmlFor="newPassword" className="block text-sm font-medium text-dark-slate mb-2">
+                <label htmlFor="newPassword" className="block text-sm font-medium text-dark-slate mb-1.5 sm:mb-2">
                     Nueva Contraseña
                 </label>
                 <input
@@ -135,7 +135,7 @@ function PasswordTab() {
                     id="newPassword"
                     required
                     minLength={6}
-                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                    className="w-full px-3 py-3 sm:py-2 text-base sm:text-sm border border-graphite-gray rounded-lg sm:rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                 />
                 {passwordState?.errors?.newPassword && (
                     <p className="mt-1 text-sm text-error-red">{passwordState.errors.newPassword}</p>
@@ -143,7 +143,7 @@ function PasswordTab() {
             </div>
 
             <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-dark-slate mb-2">
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-dark-slate mb-1.5 sm:mb-2">
                     Confirmar Nueva Contraseña
                 </label>
                 <input
@@ -152,7 +152,7 @@ function PasswordTab() {
                     id="confirmPassword"
                     required
                     minLength={6}
-                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                    className="w-full px-3 py-3 sm:py-2 text-base sm:text-sm border border-graphite-gray rounded-lg sm:rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                 />
                 {passwordState?.errors?.confirmPassword && (
                     <p className="mt-1 text-sm text-error-red">{passwordState.errors.confirmPassword}</p>
@@ -258,58 +258,60 @@ export function ProfileForm({ user, emailConfig }: ProfileFormProps) {
                 </div>
 
                 <div className="bg-white shadow-sm rounded-lg border border-graphite-gray">
-                    {/* Tabs Navigation */}
-                    <div className="border-b border-graphite-gray">
-                        <nav className="flex space-x-8 px-6">
+                    {/* Tabs Navigation - Optimized for iOS */}
+                    <div className="border-b border-graphite-gray overflow-x-auto">
+                        <nav className="flex space-x-4 sm:space-x-8 px-4 sm:px-6 min-w-max">
                             <button
                                 onClick={() => setActiveTab("profile")}
-                                className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                                className={`flex items-center py-3 sm:py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
                                     activeTab === "profile"
                                         ? "border-nearby-accent text-nearby-accent"
                                         : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                                 }`}
                             >
-                                <User size={16} className="mr-2" />
-                                Información Personal
+                                <User size={16} className="mr-1.5 sm:mr-2" />
+                                <span className="hidden sm:inline">Información Personal</span>
+                                <span className="sm:hidden">Perfil</span>
                             </button>
                             <button
                                 onClick={() => setActiveTab("password")}
-                                className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                                className={`flex items-center py-3 sm:py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
                                     activeTab === "password"
                                         ? "border-nearby-accent text-nearby-accent"
                                         : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                                 }`}
                             >
-                                <Lock size={16} className="mr-2" />
+                                <Lock size={16} className="mr-1.5 sm:mr-2" />
                                 Contraseña
                             </button>
                             <button
                                 onClick={() => setActiveTab("email")}
-                                className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                                className={`flex items-center py-3 sm:py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
                                     activeTab === "email"
                                         ? "border-nearby-accent text-nearby-accent"
                                         : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                                 }`}
                             >
-                                <Mail size={16} className="mr-2" />
+                                <Mail size={16} className="mr-1.5 sm:mr-2" />
                                 Email
                             </button>
                             <button
                                 onClick={() => setActiveTab("preferences")}
-                                className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                                className={`flex items-center py-3 sm:py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
                                     activeTab === "preferences"
                                         ? "border-nearby-accent text-nearby-accent"
                                         : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                                 }`}
                             >
-                                <Settings size={16} className="mr-2" />
-                                Preferencias
+                                <Settings size={16} className="mr-1.5 sm:mr-2" />
+                                <span className="hidden sm:inline">Preferencias</span>
+                                <span className="sm:hidden">Prefs</span>
                             </button>
                         </nav>
                     </div>
 
                     {/* Tab Content */}
-                    <div className="p-6">
+                    <div className="p-4 sm:p-6">
                         {activeTab === "profile" && <ProfileTab user={user} />}
                         {activeTab === "password" && <PasswordTab />}
                         {activeTab === "email" && <EmailConfigTab emailConfig={emailConfig} />}
