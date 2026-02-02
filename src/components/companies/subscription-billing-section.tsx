@@ -201,8 +201,8 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                                         <tr>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Código</th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Descripción</th>
-                                            <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Precio</th>
                                             <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Cantidad</th>
+                                            <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Precio</th>
                                             <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Subtotal</th>
                                             <th className="px-4 py-2 w-20"></th>
                                         </tr>
@@ -213,7 +213,6 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                                                 <tr key={item.id} className="hover:bg-gray-50">
                                                     <td className="px-4 py-3 text-dark-slate font-mono text-xs">{item.code}</td>
                                                     <td className="px-4 py-3 text-dark-slate">{item.description}</td>
-                                                    <td className="px-4 py-3 text-right text-dark-slate">${Number(item.price).toFixed(2)}</td>
                                                     <td className="px-4 py-3 text-center">
                                                         <span className="text-dark-slate">{item.calculatedQuantity}</span>
                                                         {item.countType !== "MANUAL" && (
@@ -222,6 +221,7 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                                                             </span>
                                                         )}
                                                     </td>
+                                                    <td className="px-4 py-3 text-right text-dark-slate">${Number(item.price).toFixed(2)}</td>
                                                     <td className="px-4 py-3 text-right font-medium text-dark-slate">${item.subtotal.toFixed(2)}</td>
                                                     <td className="px-4 py-3">
                                                         <div className="flex items-center justify-end space-x-1">
