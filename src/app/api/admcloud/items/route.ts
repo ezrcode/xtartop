@@ -4,6 +4,20 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentWorkspace } from "@/actions/workspace";
 import { createAdmCloudClient } from "@/lib/admcloud/client";
 
+interface PriceOption {
+    priceListId: string;
+    priceListName: string;
+    price: number;
+    currency: string;
+}
+
+interface ItemWithPrices {
+    id: string;
+    code: string;
+    name: string;
+    prices: PriceOption[];
+}
+
 export async function GET(request: NextRequest) {
     try {
         const session = await auth();
@@ -26,6 +40,7 @@ export async function GET(request: NextRequest) {
                 admCloudPassword: true,
                 admCloudCompany: true,
                 admCloudRole: true,
+                admCloudDefaultPriceListId: true,
             },
         });
 
@@ -62,29 +77,68 @@ export async function GET(request: NextRequest) {
             }, { status: 500 });
         }
 
-        // Filtrar solo servicios (ItemType = "S") y transformar a formato de items
-        // PriceList tiene: ItemID, ItemSKU, ItemName, Price, ItemType
-        const items = (priceListResponse.data || [])
-            .filter((item: Record<string, unknown>) => item.ItemType === "S")
-            .map((item: Record<string, unknown>) => {
-                const id = (item.ItemID || item.ID || "") as string;
-                const code = (item.ItemSKU || item.SKU || "") as string;
-                const name = (item.ItemName || item.SalesDescription || item.Name || "") as string;
-                const price = Number(item.Price) || 0;
-                
-                return { id, code, name, price };
-            });
+        // Filtrar solo servicios (ItemType = "S") y agrupar por artículo con todas sus listas de precios
+        // PriceList tiene: ItemID, ItemSKU, ItemName, Price, ItemType, PriceLevelID, PriceLevelName, CurrencyID
+        const itemsMap = new Map<string, ItemWithPrices>();
+        
+        for (const item of (priceListResponse.data || [])) {
+            const record = item as Record<string, unknown>;
+            
+            // Solo servicios
+            if (record.ItemType !== "S") continue;
+            
+            const id = (record.ItemID || record.ID || "") as string;
+            if (!id) continue;
+            
+            const code = (record.ItemSKU || record.SKU || "") as string;
+            const name = (record.ItemName || record.SalesDescription || record.Name || "") as string;
+            const price = Number(record.Price) || 0;
+            const priceListId = (record.PriceLevelID || "") as string;
+            const priceListName = (record.PriceLevelName || "Precio Lista") as string;
+            const currency = (record.CurrencyID || "USD") as string;
+            
+            const priceOption: PriceOption = {
+                priceListId,
+                priceListName,
+                price,
+                currency,
+            };
+            
+            if (itemsMap.has(id)) {
+                // Agregar precio a item existente (evitar duplicados de misma lista)
+                const existing = itemsMap.get(id)!;
+                const hasPriceList = existing.prices.some(p => p.priceListId === priceListId);
+                if (!hasPriceList) {
+                    existing.prices.push(priceOption);
+                }
+            } else {
+                // Nuevo item
+                itemsMap.set(id, {
+                    id,
+                    code,
+                    name,
+                    prices: [priceOption],
+                });
+            }
+        }
 
-        // Filtrar duplicados (puede haber varios precios por item, tomamos el primero)
-        const uniqueItems = new Map<string, { id: string; code: string; name: string; price: number }>();
-        for (const item of items) {
-            if (item.id && !uniqueItems.has(item.id)) {
-                uniqueItems.set(item.id, item);
+        const items = Array.from(itemsMap.values());
+        
+        // Ordenar precios dentro de cada item (lista predeterminada primero si existe)
+        const defaultPriceListId = workspaceData.admCloudDefaultPriceListId;
+        if (defaultPriceListId) {
+            for (const item of items) {
+                item.prices.sort((a, b) => {
+                    if (a.priceListId === defaultPriceListId) return -1;
+                    if (b.priceListId === defaultPriceListId) return 1;
+                    return 0;
+                });
             }
         }
 
         return NextResponse.json({ 
-            items: Array.from(uniqueItems.values()),
+            items,
+            defaultPriceListId: defaultPriceListId || null,
         });
     } catch (error) {
         console.error("Error fetching ADMCloud items:", error);

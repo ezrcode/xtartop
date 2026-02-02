@@ -35,6 +35,8 @@ type WorkspaceWithDetails = Workspace & {
     admCloudPassword?: string | null;
     admCloudCompany?: string | null;
     admCloudRole?: string | null;
+    admCloudDefaultPriceListId?: string | null;
+    admCloudDefaultPriceListName?: string | null;
     // ClickUp config
     clickUpEnabled?: boolean;
     clickUpApiToken?: string | null;
@@ -683,6 +685,8 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                 password: workspace.admCloudPassword || null,
                                 company: workspace.admCloudCompany || null,
                                 role: workspace.admCloudRole || null,
+                                defaultPriceListId: workspace.admCloudDefaultPriceListId || null,
+                                defaultPriceListName: workspace.admCloudDefaultPriceListName || null,
                             }}
                         />
                         <ClickUpConfigTab 

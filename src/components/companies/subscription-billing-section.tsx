@@ -12,11 +12,18 @@ import {
     deleteSubscriptionItem,
 } from "@/actions/subscription-billing";
 
+interface PriceOption {
+    priceListId: string;
+    priceListName: string;
+    price: number;
+    currency: string;
+}
+
 interface AdmCloudItem {
     id: string;
     code: string;
     name: string;
-    price: number;
+    prices: PriceOption[];
 }
 
 interface SubscriptionItemWithQuantity {
@@ -353,6 +360,8 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
 
     const [selectedItemId, setSelectedItemId] = useState(item?.admCloudItemId || "");
     const [selectedItem, setSelectedItem] = useState<AdmCloudItem | null>(null);
+    const [selectedPriceListId, setSelectedPriceListId] = useState<string>("");
+    const [selectedPrice, setSelectedPrice] = useState<PriceOption | null>(null);
     const [countType, setCountType] = useState<CountType>(item?.countType || "MANUAL");
     const [manualQuantity, setManualQuantity] = useState(item?.manualQuantity?.toString() || "");
 
@@ -394,15 +403,30 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                         if (found) {
                             setSelectedItem(found);
                             setSelectedItemId(found.id);
+                            // Try to find matching price, otherwise use first
+                            const matchingPrice = found.prices.find(
+                                (p: PriceOption) => p.price === Number(item.price)
+                            ) || found.prices[0];
+                            if (matchingPrice) {
+                                setSelectedPriceListId(matchingPrice.priceListId);
+                                setSelectedPrice(matchingPrice);
+                            }
                         } else {
                             // Item not found in ADMCloud, create a placeholder
+                            const placeholderPrice: PriceOption = {
+                                priceListId: "",
+                                priceListName: "Precio guardado",
+                                price: Number(item.price),
+                                currency: "USD",
+                            };
                             setSelectedItem({
                                 id: item.admCloudItemId,
                                 code: item.code,
                                 name: item.description,
-                                price: Number(item.price),
+                                prices: [placeholderPrice],
                             });
                             setSelectedItemId(item.admCloudItemId);
+                            setSelectedPrice(placeholderPrice);
                         }
                     }
                 } else {
@@ -418,17 +442,38 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
         loadItems();
     }, [item]);
 
-    // Update selected item when selection changes
+    // Update selected item and auto-select price when selection changes
     useEffect(() => {
         if (selectedItemId) {
             const found = admCloudItems.find((i) => i.id === selectedItemId);
             if (found) {
                 setSelectedItem(found);
+                // Auto-select price if only one, or keep current selection if valid
+                if (found.prices.length === 1) {
+                    setSelectedPriceListId(found.prices[0].priceListId);
+                    setSelectedPrice(found.prices[0]);
+                } else if (!found.prices.some(p => p.priceListId === selectedPriceListId)) {
+                    // Current selection not valid for new item, select first
+                    setSelectedPriceListId(found.prices[0]?.priceListId || "");
+                    setSelectedPrice(found.prices[0] || null);
+                }
             }
         } else {
             setSelectedItem(null);
+            setSelectedPrice(null);
+            setSelectedPriceListId("");
         }
-    }, [selectedItemId, admCloudItems]);
+    }, [selectedItemId, admCloudItems, selectedPriceListId]);
+
+    // Update selected price when price list changes
+    useEffect(() => {
+        if (selectedItem && selectedPriceListId) {
+            const price = selectedItem.prices.find(p => p.priceListId === selectedPriceListId);
+            if (price) {
+                setSelectedPrice(price);
+            }
+        }
+    }, [selectedPriceListId, selectedItem]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         console.log("[SubscriptionItemModal] handleSubmit called");
@@ -436,12 +481,19 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
         e.stopPropagation();
         
         console.log("[SubscriptionItemModal] selectedItem:", selectedItem);
+        console.log("[SubscriptionItemModal] selectedPrice:", selectedPrice);
         console.log("[SubscriptionItemModal] countType:", countType);
         console.log("[SubscriptionItemModal] manualQuantity:", manualQuantity);
         
         if (!selectedItem) {
             console.log("[SubscriptionItemModal] No selectedItem, showing error");
             setError("Selecciona un artículo");
+            return;
+        }
+
+        if (!selectedPrice) {
+            console.log("[SubscriptionItemModal] No selectedPrice, showing error");
+            setError("Selecciona una lista de precios");
             return;
         }
 
@@ -459,7 +511,7 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                 admCloudItemId: selectedItem.id,
                 code: selectedItem.code,
                 description: selectedItem.name,
-                price: selectedItem.price,
+                price: selectedPrice.price,
                 countType,
                 manualQuantity: countType === "MANUAL" ? parseInt(manualQuantity) : undefined,
             };
@@ -485,20 +537,20 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
-                <h3 className="text-lg font-bold text-dark-slate mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl shadow-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+                <h3 className="text-lg font-bold text-[var(--foreground)] mb-4">
                     {item ? "Editar artículo" : "Agregar artículo"}
                 </h3>
 
                 {loadingItems ? (
                     <div className="flex items-center justify-center py-8">
                         <Loader2 className="animate-spin text-nearby-accent" size={24} />
-                        <span className="ml-2 text-sm text-gray-500">Cargando artículos de ADMCloud...</span>
+                        <span className="ml-2 text-sm text-[var(--muted-text)]">Cargando artículos de ADMCloud...</span>
                     </div>
                 ) : error && admCloudItems.length === 0 ? (
                     <div className="space-y-4">
-                        <div className="p-4 text-sm text-amber-800 bg-amber-50 rounded-lg">
+                        <div className="p-4 text-sm text-amber-800 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-200 rounded-lg">
                             <p className="font-medium">No se pudieron cargar artículos</p>
                             <p className="mt-1">{error}</p>
                         </div>
@@ -506,7 +558,7 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="px-4 py-2 text-sm font-medium text-dark-slate bg-white border border-graphite-gray rounded-lg hover:bg-gray-50"
+                                className="px-4 py-2.5 min-h-[44px] text-sm font-medium text-[var(--foreground)] bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg hover:bg-[var(--hover-bg)]"
                             >
                                 Cerrar
                             </button>
@@ -515,20 +567,20 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                 ) : (
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {error && (
-                            <div className="p-3 text-sm text-red-800 bg-red-50 rounded-lg">
+                            <div className="p-3 text-sm text-red-800 bg-red-50 dark:bg-red-900/20 dark:text-red-200 rounded-lg">
                                 {error}
                             </div>
                         )}
 
                         {/* Article selector */}
                         <div>
-                            <label className="block text-sm font-medium text-dark-slate mb-1">
+                            <label className="block text-sm font-medium text-[var(--foreground)] mb-1">
                                 Artículo
                             </label>
                             <select
                                 value={selectedItemId}
                                 onChange={(e) => setSelectedItemId(e.target.value)}
-                                className="w-full px-3 py-2 text-sm border border-graphite-gray rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
                                 required
                             >
                                 <option value="">Seleccionar artículo...</option>
@@ -540,25 +592,57 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                             </select>
                         </div>
 
+                        {/* Price list selector - only show if item has multiple prices */}
+                        {selectedItem && selectedItem.prices.length > 1 && (
+                            <div>
+                                <label className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                                    Lista de precios
+                                </label>
+                                <select
+                                    value={selectedPriceListId}
+                                    onChange={(e) => setSelectedPriceListId(e.target.value)}
+                                    className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                    required
+                                >
+                                    {selectedItem.prices.map((priceOption) => (
+                                        <option key={priceOption.priceListId} value={priceOption.priceListId}>
+                                            {priceOption.priceListName} - ${priceOption.price.toFixed(2)} {priceOption.currency}
+                                        </option>
+                                    ))}
+                                </select>
+                                <p className="text-xs text-[var(--muted-text)] mt-1">
+                                    Este artículo tiene {selectedItem.prices.length} listas de precios disponibles
+                                </p>
+                            </div>
+                        )}
+
                         {/* Price (read-only) */}
                         <div>
-                            <label className="block text-sm font-medium text-dark-slate mb-1">
-                                Precio
+                            <label className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                                Precio {selectedItem && selectedItem.prices.length === 1 && (
+                                    <span className="font-normal text-[var(--muted-text)]">
+                                        ({selectedItem.prices[0]?.priceListName})
+                                    </span>
+                                )}
                             </label>
-                            <div className="px-3 py-2 text-sm border border-graphite-gray rounded-lg bg-gray-50 text-dark-slate">
-                                {selectedItem ? `$${selectedItem.price.toFixed(2)}` : "-"}
+                            <div className="px-3 py-2.5 min-h-[44px] flex items-center text-base sm:text-sm border border-[var(--input-border)] rounded-lg bg-[var(--hover-bg)] text-[var(--foreground)]">
+                                {selectedPrice ? (
+                                    <span className="font-medium">
+                                        ${selectedPrice.price.toFixed(2)} <span className="text-[var(--muted-text)] font-normal">{selectedPrice.currency}</span>
+                                    </span>
+                                ) : "-"}
                             </div>
                         </div>
 
                         {/* Count type */}
                         <div>
-                            <label className="block text-sm font-medium text-dark-slate mb-1">
+                            <label className="block text-sm font-medium text-[var(--foreground)] mb-1">
                                 Tipo de conteo
                             </label>
                             <select
                                 value={countType}
                                 onChange={(e) => setCountType(e.target.value as CountType)}
-                                className="w-full px-3 py-2 text-sm border border-graphite-gray rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
                             >
                                 <option value="MANUAL">Manual</option>
                                 <option value="ACTIVE_PROJECTS">Proyectos activos</option>
@@ -568,7 +652,7 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
 
                         {/* Quantity */}
                         <div>
-                            <label className="block text-sm font-medium text-dark-slate mb-1">
+                            <label className="block text-sm font-medium text-[var(--foreground)] mb-1">
                                 Cantidad
                             </label>
                             <input
@@ -578,15 +662,15 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                                 onChange={(e) => setManualQuantity(e.target.value)}
                                 disabled={countType !== "MANUAL"}
                                 placeholder={countType !== "MANUAL" ? "Se calculará automáticamente" : ""}
-                                className="w-full px-3 py-2 text-sm border border-graphite-gray rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] placeholder:text-[var(--muted-text)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:opacity-50 disabled:cursor-not-allowed"
                             />
                             {countType === "ACTIVE_PROJECTS" && (
-                                <p className="text-xs text-gray-500 mt-1">
+                                <p className="text-xs text-[var(--muted-text)] mt-1">
                                     Se totalizarán los proyectos con estado &ldquo;Activo&rdquo;
                                 </p>
                             )}
                             {countType === "ACTIVE_USERS" && (
-                                <p className="text-xs text-gray-500 mt-1">
+                                <p className="text-xs text-[var(--muted-text)] mt-1">
                                     Se totalizarán los usuarios con estado &ldquo;Activo&rdquo;
                                 </p>
                             )}
@@ -596,14 +680,14 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="px-4 py-2 text-sm font-medium text-dark-slate bg-white border border-graphite-gray rounded-lg hover:bg-gray-50"
+                                className="px-4 py-2.5 min-h-[44px] text-sm font-medium text-[var(--foreground)] bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg hover:bg-[var(--hover-bg)]"
                             >
                                 Cancelar
                             </button>
                             <button
                                 type="submit"
-                                disabled={saving || !selectedItem}
-                                className="px-4 py-2 text-sm font-medium text-white bg-nearby-dark rounded-lg hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                                disabled={saving || !selectedItem || !selectedPrice}
+                                className="px-4 py-2.5 min-h-[44px] text-sm font-medium text-white bg-nearby-dark rounded-lg hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                             >
                                 {saving && <Loader2 className="animate-spin mr-2" size={14} />}
                                 {item ? "Guardar cambios" : "Agregar"}

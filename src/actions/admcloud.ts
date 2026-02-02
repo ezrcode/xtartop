@@ -121,6 +121,8 @@ export async function saveAdmCloudSettings(
     const password = formData.get("password")?.toString().trim() || "";
     const company = formData.get("company")?.toString().trim() || "";
     const role = formData.get("role")?.toString().trim() || "Administradores";
+    const defaultPriceListId = formData.get("defaultPriceListId")?.toString().trim() || "";
+    const defaultPriceListName = formData.get("defaultPriceListName")?.toString().trim() || "";
 
     // Validar campos si está habilitado
     if (enabled) {
@@ -156,6 +158,8 @@ export async function saveAdmCloudSettings(
             admCloudPassword: enabled ? password : null,
             admCloudCompany: enabled ? company : null,
             admCloudRole: enabled ? role : null,
+            admCloudDefaultPriceListId: enabled && defaultPriceListId ? defaultPriceListId : null,
+            admCloudDefaultPriceListName: enabled && defaultPriceListName ? defaultPriceListName : null,
         }
     });
 

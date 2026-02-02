@@ -1,9 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { Save, Loader2, Cloud, CloudOff, CheckCircle, XCircle, ExternalLink } from "lucide-react";
+import { Save, Loader2, Cloud, CloudOff, CheckCircle, XCircle, ExternalLink, RefreshCw } from "lucide-react";
 import { saveAdmCloudSettings, type AdmCloudSettingsState } from "@/actions/admcloud";
+
+interface PriceListOption {
+    id: string;
+    name: string;
+}
 
 interface AdmCloudConfigTabProps {
     currentConfig: {
@@ -13,6 +18,8 @@ interface AdmCloudConfigTabProps {
         password: string | null;
         company: string | null;
         role: string | null;
+        defaultPriceListId: string | null;
+        defaultPriceListName: string | null;
     };
 }
 
@@ -42,9 +49,50 @@ function SubmitButton() {
 
 export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
     const [enabled, setEnabled] = useState(currentConfig.enabled);
+    const [priceLists, setPriceLists] = useState<PriceListOption[]>([]);
+    const [loadingPriceLists, setLoadingPriceLists] = useState(false);
+    const [selectedPriceListId, setSelectedPriceListId] = useState(currentConfig.defaultPriceListId || "");
+    const [selectedPriceListName, setSelectedPriceListName] = useState(currentConfig.defaultPriceListName || "");
     
     const initialState: AdmCloudSettingsState = { message: "" };
     const [state, formAction] = useFormState(saveAdmCloudSettings, initialState);
+
+    // Load available price lists when config is enabled and we have credentials
+    const loadPriceLists = async () => {
+        if (!enabled || !currentConfig.appId || !currentConfig.username) return;
+        
+        setLoadingPriceLists(true);
+        try {
+            const response = await fetch("/api/admcloud/price-lists");
+            const data = await response.json();
+            if (data.priceLists && Array.isArray(data.priceLists)) {
+                setPriceLists(data.priceLists);
+            }
+        } catch (error) {
+            console.error("Error loading price lists:", error);
+        } finally {
+            setLoadingPriceLists(false);
+        }
+    };
+
+    useEffect(() => {
+        if (enabled && currentConfig.appId && currentConfig.username) {
+            loadPriceLists();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [enabled, currentConfig.appId, currentConfig.username]);
+
+    // Update the selected name when the id changes
+    useEffect(() => {
+        if (selectedPriceListId && priceLists.length > 0) {
+            const found = priceLists.find(p => p.id === selectedPriceListId);
+            if (found) {
+                setSelectedPriceListName(found.name);
+            }
+        } else if (!selectedPriceListId) {
+            setSelectedPriceListName("");
+        }
+    }, [selectedPriceListId, priceLists]);
 
     return (
         <div className="space-y-6">
@@ -195,6 +243,49 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                         Normalmente es "Administradores"
                                     </p>
                                 </div>
+                            </div>
+
+                            {/* Default Price List Selector */}
+                            <div className="mt-6 pt-4 border-t border-graphite-gray">
+                                <div className="flex items-center justify-between mb-2">
+                                    <label htmlFor="defaultPriceListId" className="block text-sm font-medium text-dark-slate">
+                                        Lista de precios predeterminada
+                                    </label>
+                                    <button
+                                        type="button"
+                                        onClick={loadPriceLists}
+                                        disabled={loadingPriceLists}
+                                        className="text-xs text-nearby-accent hover:text-nearby-accent-600 flex items-center gap-1"
+                                    >
+                                        <RefreshCw size={12} className={loadingPriceLists ? "animate-spin" : ""} />
+                                        Actualizar listas
+                                    </button>
+                                </div>
+                                <input type="hidden" name="defaultPriceListId" value={selectedPriceListId} />
+                                <input type="hidden" name="defaultPriceListName" value={selectedPriceListName} />
+                                <select
+                                    id="defaultPriceListId"
+                                    value={selectedPriceListId}
+                                    onChange={(e) => setSelectedPriceListId(e.target.value)}
+                                    disabled={loadingPriceLists || priceLists.length === 0}
+                                    className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:opacity-50"
+                                >
+                                    <option value="">
+                                        {loadingPriceLists 
+                                            ? "Cargando listas de precios..." 
+                                            : priceLists.length === 0 
+                                                ? "Guarda la configuración primero para cargar listas" 
+                                                : "Seleccionar lista predeterminada (opcional)"}
+                                    </option>
+                                    {priceLists.map((priceList) => (
+                                        <option key={priceList.id} value={priceList.id}>
+                                            {priceList.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <p className="mt-1 text-xs text-gray-500">
+                                    Al seleccionar artículos con múltiples precios, esta lista se usará por defecto
+                                </p>
                             </div>
                         </div>
                     )}

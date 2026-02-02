@@ -160,6 +160,8 @@ model Workspace {
   admCloudPassword String?  // Contraseña para Basic Auth
   admCloudCompany  String?  // ID de la compañía en AdmCloud
   admCloudRole     String?  // Rol (ej: "Administradores")
+  admCloudDefaultPriceListId   String?  // Lista de precios predeterminada
+  admCloudDefaultPriceListName String?  // Nombre de lista de precios predeterminada
   
   // ClickUp Integration Settings
   clickUpEnabled       Boolean  @default(false)
