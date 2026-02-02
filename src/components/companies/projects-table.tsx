@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, X, Loader2, FolderOpen, ChevronDown, Pencil, Trash2 } from "lucide-react";
+import { Plus, X, Loader2, FolderOpen, ChevronDown, Pencil, Trash2, Search } from "lucide-react";
 import { createProject, updateProject, deleteProject, updateProjectStatus } from "@/actions/projects";
 import type { Project } from "@prisma/client";
 
@@ -24,6 +24,12 @@ export function ProjectsTable({ companyId, projects: initialProjects }: Projects
     const [updatingId, setUpdatingId] = useState<string | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState("");
+
+    // Filter projects by search term
+    const filteredProjects = projects.filter(project => 
+        project.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     // Sync with props when they change
     useEffect(() => {
@@ -160,14 +166,29 @@ export function ProjectsTable({ companyId, projects: initialProjects }: Projects
                 <h3 className="text-md font-semibold text-nearby-dark flex items-center gap-2">
                     <FolderOpen size={18} />
                     Proyectos
+                    <span className="text-sm font-normal text-gray-500">
+                        ({filteredProjects.length}{searchTerm ? ` de ${projects.length}` : ""})
+                    </span>
                 </h3>
-                <button
-                    type="button"
-                    onClick={() => setShowModal(true)}
-                    className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-nearby-accent text-white hover:bg-nearby-dark transition-colors"
-                >
-                    <Plus size={16} />
-                </button>
+                <div className="flex items-center gap-2">
+                    <div className="relative">
+                        <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            placeholder="Buscar..."
+                            className="pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-nearby-accent focus:border-nearby-accent w-40"
+                        />
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setShowModal(true)}
+                        className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-nearby-accent text-white hover:bg-nearby-dark transition-colors"
+                    >
+                        <Plus size={16} />
+                    </button>
+                </div>
             </div>
 
             {/* Projects Table */}
@@ -188,14 +209,14 @@ export function ProjectsTable({ companyId, projects: initialProjects }: Projects
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-graphite-gray">
-                            {projects.length === 0 ? (
+                            {filteredProjects.length === 0 ? (
                                 <tr>
                                     <td colSpan={3} className="px-4 py-8 text-center text-sm text-gray-500">
-                                        No hay proyectos registrados
+                                        {searchTerm ? "No se encontraron proyectos" : "No hay proyectos registrados"}
                                     </td>
                                 </tr>
                             ) : (
-                                projects.map((project) => (
+                                filteredProjects.map((project) => (
                                     <tr key={project.id} className="hover:bg-gray-50">
                                         <td className="px-4 py-3 text-sm text-dark-slate">
                                             {project.name}
