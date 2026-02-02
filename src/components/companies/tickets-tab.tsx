@@ -13,7 +13,6 @@ import {
     RefreshCw,
     Download,
     Filter,
-    Clock,
     CheckCircle2,
     ChevronDown,
     ChevronRight
@@ -115,22 +114,16 @@ export function TicketsTab({ companyId, companyName, clickUpClientName: initialC
         });
     };
 
-    const isOverdue = (date: Date | null) => {
-        if (!date) return false;
-        return new Date(date) < new Date();
-    };
-
     // Export to Excel (CSV)
     const handleExportExcel = () => {
         if (filteredTickets.length === 0) return;
 
-        const headers = ["ID", "Título", "Fecha Creación", "Fecha Vencimiento", "Tipo", "Estado", "Asignados", "URL"];
+        const headers = ["ID", "Título", "Fecha Creación", "Fecha Cierre", "Estado", "Asignados", "URL"];
         const rows = filteredTickets.map(ticket => [
             ticket.customId || ticket.id,
             `"${ticket.name.replace(/"/g, '""')}"`,
             formatDate(ticket.dateCreated) || "",
-            formatDate(ticket.dueDate) || "",
-            ticket.taskType || "",
+            formatDate(ticket.dateClosed) || "",
             ticket.status,
             `"${ticket.assignees.map(a => a.username).join(", ")}"`,
             ticket.url
@@ -367,27 +360,21 @@ export function TicketsTab({ companyId, companyName, clickUpClientName: initialC
                                 </div>
 
                                 {/* Details Row */}
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
                                     {/* Creation Date */}
                                     <div className="flex items-center gap-1.5 text-gray-600">
                                         <Calendar size={14} className="text-gray-400 flex-shrink-0" />
-                                        <span className="truncate">{formatDate(ticket.dateCreated) || "N/A"}</span>
+                                        <span className="truncate">Creado: {formatDate(ticket.dateCreated) || "N/A"}</span>
                                     </div>
 
-                                    {/* Due Date */}
+                                    {/* Closed Date */}
                                     <div className={`flex items-center gap-1.5 ${
-                                        isOverdue(ticket.dueDate) ? "text-error-red font-medium" : "text-gray-600"
+                                        ticket.dateClosed ? "text-success-green" : "text-gray-600"
                                     }`}>
-                                        <Clock size={14} className={`flex-shrink-0 ${isOverdue(ticket.dueDate) ? "text-error-red" : "text-gray-400"}`} />
+                                        <CheckCircle2 size={14} className={`flex-shrink-0 ${ticket.dateClosed ? "text-success-green" : "text-gray-400"}`} />
                                         <span className="truncate">
-                                            {formatDate(ticket.dueDate) || "Sin fecha"}
+                                            {ticket.dateClosed ? `Cerrado: ${formatDate(ticket.dateClosed)}` : "Abierto"}
                                         </span>
-                                    </div>
-
-                                    {/* Task Type */}
-                                    <div className="flex items-center gap-1.5 text-gray-600">
-                                        <CheckCircle2 size={14} className="text-gray-400 flex-shrink-0" />
-                                        <span className="truncate">{ticket.taskType || "Sin tipo"}</span>
                                     </div>
 
                                     {/* Assignees */}

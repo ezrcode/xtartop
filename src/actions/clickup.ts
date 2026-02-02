@@ -21,7 +21,7 @@ export interface ClickUpTicket {
   customId: string | null;
   name: string;
   dateCreated: Date;
-  dueDate: Date | null;
+  dateClosed: Date | null;
   status: string;
   statusColor: string;
   priority: string | null;
@@ -32,7 +32,6 @@ export interface ClickUpTicket {
     profilePicture: string | null;
     initials: string;
   }[];
-  taskType: string | null;
   url: string;
   isSubtask: boolean;
 }
@@ -207,17 +206,12 @@ export async function getCompanyTickets(clickUpClientName: string): Promise<{
 
     // Transform tasks to tickets
     const tickets: ClickUpTicket[] = (result.data || []).map((task: ClickUpTask) => {
-      // Find task type from custom fields
-      const taskTypeField = task.custom_fields?.find(
-        (f) => f.name.toLowerCase() === "tipo" || f.name.toLowerCase() === "type"
-      );
-
       return {
         id: task.id,
         customId: task.custom_id,
         name: task.name,
         dateCreated: new Date(parseInt(task.date_created)),
-        dueDate: task.due_date ? new Date(parseInt(task.due_date)) : null,
+        dateClosed: task.date_closed ? new Date(parseInt(task.date_closed)) : null,
         status: task.status.status,
         statusColor: task.status.color,
         priority: task.priority?.priority || null,
@@ -228,7 +222,6 @@ export async function getCompanyTickets(clickUpClientName: string): Promise<{
           profilePicture: a.profilePicture,
           initials: a.initials,
         })),
-        taskType: taskTypeField?.value?.toString() || null,
         url: task.url,
         isSubtask: !!task.parent,
       };
