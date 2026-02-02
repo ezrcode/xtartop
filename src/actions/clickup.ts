@@ -118,13 +118,19 @@ export async function saveClickUpSettings(
       }
     }
 
-    // Get user's workspace
+    // Get user's workspace (owned or as admin member)
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      include: { ownedWorkspaces: { select: { id: true } } },
+      include: { 
+        ownedWorkspaces: { select: { id: true } },
+        memberships: {
+          where: { role: "ADMIN" },
+          include: { workspace: { select: { id: true } } },
+        },
+      },
     });
 
-    const workspaceIdToUpdate = user?.ownedWorkspaces[0]?.id;
+    const workspaceIdToUpdate = user?.ownedWorkspaces[0]?.id || user?.memberships[0]?.workspace?.id;
     if (!workspaceIdToUpdate) {
       return { message: "No se encontró el workspace", success: false };
     }
