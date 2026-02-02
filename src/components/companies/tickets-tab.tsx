@@ -1,7 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Loader2, ExternalLink, AlertCircle, Ticket, Calendar, User, Save, Settings, RefreshCw } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { 
+    Loader2, 
+    ExternalLink, 
+    AlertCircle, 
+    Ticket, 
+    Calendar, 
+    User, 
+    Save, 
+    Settings, 
+    RefreshCw,
+    Download,
+    Filter,
+    Clock,
+    CheckCircle2
+} from "lucide-react";
 import { getCompanyTickets, updateCompanyClickUpClientName, type ClickUpTicket } from "@/actions/clickup";
 
 interface TicketsTabProps {
@@ -18,6 +32,20 @@ export function TicketsTab({ companyId, companyName, clickUpClientName: initialC
     const [saving, setSaving] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
     const [hasLoaded, setHasLoaded] = useState(false);
+    const [statusFilter, setStatusFilter] = useState<string>("all");
+
+    // Get unique statuses from tickets
+    const uniqueStatuses = useMemo(() => {
+        const statuses = new Set<string>();
+        tickets.forEach(t => statuses.add(t.status));
+        return Array.from(statuses).sort();
+    }, [tickets]);
+
+    // Filter tickets by status
+    const filteredTickets = useMemo(() => {
+        if (statusFilter === "all") return tickets;
+        return tickets.filter(t => t.status === statusFilter);
+    }, [tickets, statusFilter]);
 
     const loadTickets = async (nameToSearch: string) => {
         if (!nameToSearch.trim()) {
@@ -76,19 +104,50 @@ export function TicketsTab({ companyId, companyName, clickUpClientName: initialC
     };
 
     const formatDate = (date: Date | null) => {
-        if (!date) return "-";
+        if (!date) return null;
         return new Date(date).toLocaleDateString("es-ES", {
             day: "2-digit",
-            month: "2-digit",
+            month: "short",
             year: "numeric",
         });
+    };
+
+    const isOverdue = (date: Date | null) => {
+        if (!date) return false;
+        return new Date(date) < new Date();
+    };
+
+    // Export to Excel (CSV)
+    const handleExportExcel = () => {
+        if (filteredTickets.length === 0) return;
+
+        const headers = ["ID", "Título", "Fecha Creación", "Fecha Vencimiento", "Tipo", "Estado", "Asignados", "URL"];
+        const rows = filteredTickets.map(ticket => [
+            ticket.customId || ticket.id,
+            `"${ticket.name.replace(/"/g, '""')}"`,
+            formatDate(ticket.dateCreated) || "",
+            formatDate(ticket.dueDate) || "",
+            ticket.taskType || "",
+            ticket.status,
+            `"${ticket.assignees.map(a => a.username).join(", ")}"`,
+            ticket.url
+        ]);
+
+        const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+        const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `tickets-${companyName.replace(/\s+/g, "-")}-${new Date().toISOString().split("T")[0]}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
     };
 
     // Show config section if no client name configured
     const showConfig = !initialClientName || !hasLoaded;
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             {/* Client Name Configuration */}
             <div className={`bg-purple-50 border border-purple-200 rounded-lg p-4 ${showConfig ? "" : "hidden md:block"}`}>
                 <div className="flex items-start gap-3">
@@ -98,8 +157,7 @@ export function TicketsTab({ companyId, companyName, clickUpClientName: initialC
                             Nombre del cliente en ClickUp
                         </h4>
                         <p className="text-xs text-purple-600 mb-3">
-                            Ingresa el valor exacto del campo &quot;Cliente&quot; en ClickUp para filtrar los tickets de esta empresa.
-                            Este valor puede ser diferente al nombre de la empresa en el CRM.
+                            Ingresa el valor exacto del campo &quot;Cliente&quot; en ClickUp para filtrar los tickets.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-2">
                             <input
@@ -185,202 +243,177 @@ export function TicketsTab({ companyId, companyName, clickUpClientName: initialC
 
             {/* Tickets list */}
             {!loading && !error && tickets.length > 0 && (
-                <>
-                    <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-semibold text-nearby-dark">
-                            Tickets ({tickets.length})
-                        </h3>
+                <div className="space-y-4">
+                    {/* Header with filters and export */}
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                            <Ticket className="w-5 h-5 text-purple-600" />
+                            <h3 className="text-lg font-semibold text-nearby-dark">
+                                Tickets
+                            </h3>
+                            <span className="text-sm text-gray-500">
+                                ({filteredTickets.length}{statusFilter !== "all" ? ` de ${tickets.length}` : ""})
+                            </span>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                            {/* Status Filter */}
+                            <div className="relative">
+                                <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                <select
+                                    value={statusFilter}
+                                    onChange={(e) => setStatusFilter(e.target.value)}
+                                    className="pl-8 pr-8 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500 appearance-none bg-white"
+                                >
+                                    <option value="all">Todos los estados</option>
+                                    {uniqueStatuses.map(status => (
+                                        <option key={status} value={status}>{status}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Export Button */}
+                            <button
+                                type="button"
+                                onClick={handleExportExcel}
+                                disabled={filteredTickets.length === 0}
+                                className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                            >
+                                <Download size={14} className="mr-1.5" />
+                                Excel
+                            </button>
+
+                            {/* Refresh Button */}
+                            <button
+                                type="button"
+                                onClick={() => loadTickets(clientName)}
+                                disabled={loading}
+                                className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+                            >
+                                <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+                            </button>
+                        </div>
                     </div>
 
-                    {/* Desktop Table */}
-                    <div className="hidden md:block overflow-x-auto bg-white border border-graphite-gray rounded-lg">
-                        <table className="min-w-full divide-y divide-graphite-gray">
-                            <thead className="bg-soft-gray">
-                                <tr>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
-                                        ID
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
-                                        Título
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
-                                        Creación
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
-                                        Vencimiento
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
-                                        Tipo
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
-                                        Estado
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
-                                        Asignados
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider w-10">
-                                        
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-graphite-gray">
-                                {tickets.map((ticket) => (
-                                    <tr key={ticket.id} className={`hover:bg-soft-gray ${ticket.isSubtask ? "bg-gray-50" : ""}`}>
-                                        <td className="px-4 py-3 whitespace-nowrap">
-                                            <span className="text-xs font-mono text-gray-500">
-                                                {ticket.isSubtask && "↳ "}
-                                                {ticket.customId || ticket.id.slice(0, 8)}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <span className="text-sm font-medium text-dark-slate">
-                                                {ticket.name}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3 whitespace-nowrap">
-                                            <span className="text-sm text-gray-500">
-                                                {formatDate(ticket.dateCreated)}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3 whitespace-nowrap">
-                                            <span className={`text-sm ${
-                                                ticket.dueDate && new Date(ticket.dueDate) < new Date()
-                                                    ? "text-error-red font-medium"
-                                                    : "text-gray-500"
-                                            }`}>
-                                                {formatDate(ticket.dueDate)}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3 whitespace-nowrap">
-                                            <span className="text-sm text-gray-600">
-                                                {ticket.taskType || "-"}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3 whitespace-nowrap">
-                                            <span
-                                                className="px-2 py-1 text-xs font-medium rounded-full"
-                                                style={{
-                                                    backgroundColor: `${ticket.statusColor}20`,
-                                                    color: ticket.statusColor,
-                                                }}
-                                            >
-                                                {ticket.status}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3 whitespace-nowrap">
-                                            <div className="flex -space-x-2">
-                                                {ticket.assignees.slice(0, 3).map((assignee) => (
-                                                    <div
-                                                        key={assignee.id}
-                                                        className="w-7 h-7 rounded-full border-2 border-white flex items-center justify-center text-xs font-medium bg-purple-100 text-purple-700"
-                                                        title={assignee.username}
-                                                    >
-                                                        {assignee.profilePicture ? (
-                                                            <img
-                                                                src={assignee.profilePicture}
-                                                                alt={assignee.username}
-                                                                className="w-full h-full rounded-full object-cover"
-                                                            />
-                                                        ) : (
-                                                            assignee.initials || assignee.username.slice(0, 2).toUpperCase()
-                                                        )}
-                                                    </div>
-                                                ))}
-                                                {ticket.assignees.length > 3 && (
-                                                    <div className="w-7 h-7 rounded-full border-2 border-white bg-gray-200 text-gray-600 flex items-center justify-center text-xs font-medium">
-                                                        +{ticket.assignees.length - 3}
-                                                    </div>
-                                                )}
-                                                {ticket.assignees.length === 0 && (
-                                                    <span className="text-gray-400 text-sm">-</span>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-3 whitespace-nowrap">
-                                            <a
-                                                href={ticket.url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-purple-600 hover:text-purple-800"
-                                                title="Abrir en ClickUp"
-                                            >
-                                                <ExternalLink size={16} />
-                                            </a>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {/* Mobile Cards */}
-                    <div className="md:hidden space-y-3">
-                        {tickets.map((ticket) => (
-                            <div
-                                key={ticket.id}
-                                className={`bg-white border border-graphite-gray rounded-lg p-4 ${
+                    {/* Tickets Cards */}
+                    <div className="space-y-3">
+                        {filteredTickets.map((ticket) => (
+                            <div 
+                                key={ticket.id} 
+                                className={`bg-white border border-graphite-gray rounded-lg p-4 hover:shadow-sm transition-shadow ${
                                     ticket.isSubtask ? "ml-4 border-l-4 border-l-purple-300" : ""
                                 }`}
                             >
-                                <div className="flex items-start justify-between mb-2">
-                                    <div className="flex-1">
-                                        <span className="text-xs font-mono text-gray-400 block mb-1">
-                                            {ticket.customId || ticket.id.slice(0, 8)}
+                                {/* Header Row */}
+                                <div className="flex items-start justify-between mb-3">
+                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                        <Ticket className="text-gray-400 flex-shrink-0" size={18} />
+                                        <span className="text-xs font-mono text-gray-500 flex-shrink-0">
+                                            {ticket.isSubtask && "↳ "}
+                                            #{ticket.customId || ticket.id.slice(0, 8)}
                                         </span>
-                                        <h4 className="text-sm font-medium text-dark-slate">
+                                        <h4 className="font-medium text-dark-slate truncate">
                                             {ticket.name}
                                         </h4>
                                     </div>
-                                    <a
-                                        href={ticket.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="ml-2 text-purple-600"
-                                    >
-                                        <ExternalLink size={16} />
-                                    </a>
-                                </div>
-
-                                <div className="flex flex-wrap items-center gap-2 mt-3">
-                                    <span
-                                        className="px-2 py-0.5 text-xs font-medium rounded-full"
-                                        style={{
-                                            backgroundColor: `${ticket.statusColor}20`,
-                                            color: ticket.statusColor,
-                                        }}
-                                    >
-                                        {ticket.status}
-                                    </span>
-                                    {ticket.taskType && (
-                                        <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-full">
-                                            {ticket.taskType}
+                                    <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                                        <span
+                                            className="px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap"
+                                            style={{
+                                                backgroundColor: `${ticket.statusColor}20`,
+                                                color: ticket.statusColor,
+                                            }}
+                                        >
+                                            {ticket.status}
                                         </span>
-                                    )}
+                                        <a
+                                            href={ticket.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-purple-600 hover:text-purple-800 p-1"
+                                            title="Abrir en ClickUp"
+                                        >
+                                            <ExternalLink size={16} />
+                                        </a>
+                                    </div>
                                 </div>
 
-                                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 text-xs text-gray-500">
-                                    <div className="flex items-center gap-1">
-                                        <Calendar size={12} />
-                                        <span>{formatDate(ticket.dateCreated)}</span>
-                                        {ticket.dueDate && (
-                                            <span className={`ml-2 ${
-                                                new Date(ticket.dueDate) < new Date() ? "text-error-red" : ""
-                                            }`}>
-                                                → {formatDate(ticket.dueDate)}
-                                            </span>
+                                {/* Details Row */}
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                                    {/* Creation Date */}
+                                    <div className="flex items-center gap-1.5 text-gray-600">
+                                        <Calendar size={14} className="text-gray-400 flex-shrink-0" />
+                                        <span className="truncate">{formatDate(ticket.dateCreated) || "N/A"}</span>
+                                    </div>
+
+                                    {/* Due Date */}
+                                    <div className={`flex items-center gap-1.5 ${
+                                        isOverdue(ticket.dueDate) ? "text-error-red font-medium" : "text-gray-600"
+                                    }`}>
+                                        <Clock size={14} className={`flex-shrink-0 ${isOverdue(ticket.dueDate) ? "text-error-red" : "text-gray-400"}`} />
+                                        <span className="truncate">
+                                            {formatDate(ticket.dueDate) || "Sin fecha"}
+                                        </span>
+                                    </div>
+
+                                    {/* Task Type */}
+                                    <div className="flex items-center gap-1.5 text-gray-600">
+                                        <CheckCircle2 size={14} className="text-gray-400 flex-shrink-0" />
+                                        <span className="truncate">{ticket.taskType || "Sin tipo"}</span>
+                                    </div>
+
+                                    {/* Assignees */}
+                                    <div className="flex items-center gap-1.5 text-gray-600">
+                                        <User size={14} className="text-gray-400 flex-shrink-0" />
+                                        {ticket.assignees.length > 0 ? (
+                                            <div className="flex items-center gap-1">
+                                                <div className="flex -space-x-1">
+                                                    {ticket.assignees.slice(0, 3).map((assignee) => (
+                                                        <div
+                                                            key={assignee.id}
+                                                            className="w-5 h-5 rounded-full border border-white flex items-center justify-center text-[10px] font-medium bg-purple-100 text-purple-700"
+                                                            title={assignee.username}
+                                                        >
+                                                            {assignee.profilePicture ? (
+                                                                <img
+                                                                    src={assignee.profilePicture}
+                                                                    alt={assignee.username}
+                                                                    className="w-full h-full rounded-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                assignee.initials || assignee.username.slice(0, 2).toUpperCase()
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                {ticket.assignees.length > 3 && (
+                                                    <span className="text-xs text-gray-500">+{ticket.assignees.length - 3}</span>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <span className="text-gray-400 truncate">Sin asignar</span>
                                         )}
                                     </div>
-                                    {ticket.assignees.length > 0 && (
-                                        <div className="flex items-center gap-1">
-                                            <User size={12} />
-                                            <span>{ticket.assignees.map(a => a.username).join(", ")}</span>
-                                        </div>
-                                    )}
                                 </div>
+
+                                {/* Priority badge if exists */}
+                                {ticket.priority && (
+                                    <div className="mt-2 pt-2 border-t border-gray-100">
+                                        <span 
+                                            className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded"
+                                            style={{
+                                                backgroundColor: `${ticket.priorityColor || "#666"}20`,
+                                                color: ticket.priorityColor || "#666",
+                                            }}
+                                        >
+                                            Prioridad: {ticket.priority}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>
-                </>
+                </div>
             )}
         </div>
     );
