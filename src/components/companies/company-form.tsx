@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import Link from "next/link";
 import { Save, Trash2, ArrowLeft, Loader2 } from "lucide-react";
@@ -134,6 +134,32 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
             setPendingAction(null);
         }
     }, [state]);
+
+    // Memoize activities props to prevent re-renders when typing in form fields
+    const memoizedClientInvitations = useMemo(() => {
+        return company?.clientInvitations?.map(inv => ({
+            id: inv.id,
+            contactId: inv.contactId,
+            status: inv.status,
+            createdAt: inv.createdAt,
+            expiresAt: inv.expiresAt,
+            contact: {
+                fullName: inv.contact.fullName,
+                email: inv.contact.email,
+            },
+        })) || [];
+    }, [company?.clientInvitations]);
+
+    const memoizedContractStatus = useMemo(() => ({
+        termsAccepted: company?.termsAccepted || false,
+        termsAcceptedAt: company?.termsAcceptedAt || null,
+        termsAcceptedByName: company?.termsAcceptedByName || null,
+        termsVersion: company?.termsVersion || null,
+    }), [company?.termsAccepted, company?.termsAcceptedAt, company?.termsAcceptedByName, company?.termsVersion]);
+
+    const memoizedCompanyContacts = useMemo(() => {
+        return contacts.filter(c => c.companyId === company?.id);
+    }, [contacts, company?.id]);
 
     return (
         <div className="flex flex-col h-full">
@@ -685,24 +711,9 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                 <CompanyActivitiesWithSuspense
                                     companyId={company.id}
                                     defaultEmail={company.primaryContact?.email || ""}
-                                    clientInvitations={company.clientInvitations?.map(inv => ({
-                                        id: inv.id,
-                                        contactId: inv.contactId,
-                                        status: inv.status,
-                                        createdAt: inv.createdAt,
-                                        expiresAt: inv.expiresAt,
-                                        contact: {
-                                            fullName: inv.contact.fullName,
-                                            email: inv.contact.email,
-                                        },
-                                    })) || []}
-                                    contractStatus={{
-                                        termsAccepted: company.termsAccepted,
-                                        termsAcceptedAt: company.termsAcceptedAt,
-                                        termsAcceptedByName: company.termsAcceptedByName,
-                                        termsVersion: company.termsVersion,
-                                    }}
-                                    companyContacts={contacts.filter(c => c.companyId === company.id)}
+                                    clientInvitations={memoizedClientInvitations}
+                                    contractStatus={memoizedContractStatus}
+                                    companyContacts={memoizedCompanyContacts}
                                 />
                             ) : (
                                 <div className="flex flex-col items-center justify-center h-64 text-center border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
