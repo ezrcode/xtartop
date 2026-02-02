@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Plus, Table2, LayoutGrid } from "lucide-react";
-import { Deal, Company, Contact, User, DealStatus } from "@prisma/client";
+import { Deal, Company, Contact, User, DealStatus, DealType } from "@prisma/client";
 import {
     DndContext,
     DragEndEvent,
@@ -18,6 +19,8 @@ import {
     useDraggable,
 } from "@dnd-kit/core";
 import { updateDealStatus } from "@/actions/deals";
+import { saveTablePreferences } from "@/actions/table-preferences";
+import { DataTable, Column, TablePreferences } from "@/components/ui/data-table";
 
 type DealWithRelations = Deal & {
     company?: Company | null;
@@ -28,9 +31,10 @@ type DealWithRelations = Deal & {
 interface DealsClientPageProps {
     deals: DealWithRelations[];
     defaultView?: "table" | "kanban";
+    initialTablePreferences?: TablePreferences | null;
 }
 
-const dealStatusConfig = {
+const dealStatusConfig: Record<DealStatus, { label: string; color: string }> = {
     PROSPECCION: { label: "Prospección", color: "bg-gray-100 text-gray-800" },
     CALIFICACION: { label: "Calificación", color: "bg-blue-100 text-blue-800" },
     NEGOCIACION: { label: "Negociación", color: "bg-yellow-100 text-yellow-800" },
@@ -38,6 +42,11 @@ const dealStatusConfig = {
     CIERRE_GANADO: { label: "Cierre ganado", color: "bg-success-green/10 text-success-green" },
     CIERRE_PERDIDO: { label: "Cierre perdido", color: "bg-error-red/10 text-error-red" },
     NO_CALIFICADOS: { label: "No calificados", color: "bg-gray-100 text-gray-600" },
+};
+
+const dealTypeConfig: Record<DealType, { label: string }> = {
+    CLIENTE_NUEVO: { label: "Cliente nuevo" },
+    UPSELLING: { label: "Upselling" },
 };
 
 const kanbanColumns = [
@@ -222,7 +231,242 @@ function KanbanColumn({ status, deals }: { status: DealStatus, deals: DealWithRe
     );
 }
 
-export function DealsClientPage({ deals: initialDeals, defaultView = "table" }: DealsClientPageProps) {
+// Deals Table Component using DataTable
+function DealsTable({ deals, initialPreferences }: { deals: DealWithRelations[], initialPreferences?: TablePreferences | null }) {
+    const router = useRouter();
+
+    const formatCurrency = (value: number | string) => {
+        const numValue = typeof value === 'string' ? parseFloat(value) : value;
+        return new Intl.NumberFormat('es-ES', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        }).format(numValue);
+    };
+
+    const columns: Column<DealWithRelations>[] = [
+        {
+            key: "name",
+            header: "Nombre",
+            sortable: true,
+            hideable: false,
+            render: (deal) => (
+                <Link
+                    href={`/app/deals/${deal.id}`}
+                    className="text-sm font-medium text-nearby-accent hover:text-nearby-dark"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    {deal.name}
+                </Link>
+            ),
+        },
+        {
+            key: "company",
+            header: "Empresa",
+            hideable: true,
+            defaultVisible: true,
+            render: (deal) => (
+                deal.company ? (
+                    <Link
+                        href={`/app/companies/${deal.company.id}`}
+                        className="text-sm text-nearby-accent hover:text-nearby-dark"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {deal.company.name}
+                    </Link>
+                ) : (
+                    <span className="text-sm text-gray-400">-</span>
+                )
+            ),
+        },
+        {
+            key: "contact",
+            header: "Contacto",
+            hideable: true,
+            defaultVisible: true,
+            render: (deal) => (
+                deal.contact ? (
+                    <Link
+                        href={`/app/contacts/${deal.contact.id}`}
+                        className="text-sm text-nearby-accent hover:text-nearby-dark"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {deal.contact.fullName}
+                    </Link>
+                ) : (
+                    <span className="text-sm text-gray-400">-</span>
+                )
+            ),
+        },
+        {
+            key: "value",
+            header: "Valor",
+            sortable: true,
+            hideable: true,
+            defaultVisible: true,
+            render: (deal) => (
+                <span className="text-sm font-medium text-dark-slate">
+                    {formatCurrency(Number(deal.value))}
+                </span>
+            ),
+        },
+        {
+            key: "type",
+            header: "Tipo",
+            sortable: true,
+            filterable: true,
+            filterOptions: Object.entries(dealTypeConfig).map(([value, { label }]) => ({
+                value,
+                label,
+            })),
+            hideable: true,
+            defaultVisible: true,
+            render: (deal) => (
+                <span className="text-sm text-dark-slate">
+                    {deal.type ? dealTypeConfig[deal.type].label : "-"}
+                </span>
+            ),
+        },
+        {
+            key: "status",
+            header: "Estado",
+            sortable: true,
+            filterable: true,
+            filterOptions: Object.entries(dealStatusConfig).map(([value, { label }]) => ({
+                value,
+                label,
+            })),
+            hideable: true,
+            defaultVisible: true,
+            render: (deal) => {
+                const config = dealStatusConfig[deal.status];
+                return (
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${config.color}`}>
+                        {config.label}
+                    </span>
+                );
+            },
+        },
+        {
+            key: "createdAt",
+            header: "Fecha",
+            sortable: true,
+            hideable: true,
+            defaultVisible: false,
+            render: (deal) => (
+                <span className="text-sm text-gray-500">
+                    {new Date(deal.createdAt).toLocaleDateString('es-ES')}
+                </span>
+            ),
+        },
+    ];
+
+    const handleSavePreferences = async (prefs: TablePreferences) => {
+        await saveTablePreferences("deals", prefs);
+    };
+
+    if (deals.length === 0) {
+        return (
+            <div className="bg-white shadow-sm rounded-lg border border-graphite-gray overflow-hidden">
+                <div className="text-center py-8 sm:py-12 px-4">
+                    <p className="text-dark-slate text-base sm:text-lg">No hay negocios registrados</p>
+                    <Link
+                        href="/app/deals/new"
+                        className="inline-flex items-center px-4 py-2 mt-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900"
+                    >
+                        <Plus size={16} className="mr-2" />
+                        Agregar primer negocio
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <>
+            {/* Desktop Table View */}
+            <div className="hidden md:block">
+                <DataTable
+                    data={deals}
+                    columns={columns}
+                    keyExtractor={(deal) => deal.id}
+                    onRowClick={(deal) => router.push(`/app/deals/${deal.id}`)}
+                    searchable
+                    searchPlaceholder="Buscar negocios..."
+                    searchKeys={["name"]}
+                    initialPreferences={initialPreferences || undefined}
+                    onSavePreferences={handleSavePreferences}
+                />
+            </div>
+
+            {/* Mobile Card View - Optimizado para iOS */}
+            <div className="md:hidden bg-white shadow-sm rounded-lg border border-graphite-gray overflow-hidden divide-y divide-graphite-gray">
+                {deals.map((deal) => {
+                    const formatCurrencyShort = (value: number) => {
+                        if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+                        if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
+                        return formatCurrency(value);
+                    };
+
+                    return (
+                        <Link
+                            key={deal.id}
+                            href={`/app/deals/${deal.id}`}
+                            className="block p-3 sm:p-4 hover:bg-soft-gray active:bg-gray-100 transition-colors touch-manipulation"
+                        >
+                            <div className="flex items-start gap-3">
+                                {/* Value Badge */}
+                                <div className="flex-shrink-0 w-16 h-16 rounded-xl bg-gradient-to-br from-nearby-accent/10 to-nearby-accent/5 flex flex-col items-center justify-center border border-nearby-accent/20">
+                                    <span className="text-[10px] text-nearby-accent font-medium">VALOR</span>
+                                    <span className="text-sm font-bold text-nearby-dark">
+                                        {formatCurrencyShort(Number(deal.value))}
+                                    </span>
+                                </div>
+                                
+                                {/* Content */}
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-start justify-between gap-2 mb-1">
+                                        <h3 className="text-sm font-semibold text-nearby-dark truncate">
+                                            {deal.name}
+                                        </h3>
+                                        <span className={`flex-shrink-0 px-2 py-0.5 text-[10px] font-semibold rounded-full ${dealStatusConfig[deal.status].color}`}>
+                                            {dealStatusConfig[deal.status].label}
+                                        </span>
+                                    </div>
+                                    
+                                    <div className="space-y-0.5 text-xs text-gray-600">
+                                        {deal.company && (
+                                            <p className="truncate">
+                                                <span className="text-gray-500">Empresa:</span> {deal.company.name}
+                                            </p>
+                                        )}
+                                        {deal.contact && (
+                                            <p className="truncate">
+                                                <span className="text-gray-500">Contacto:</span> {deal.contact.fullName}
+                                            </p>
+                                        )}
+                                    </div>
+                                    
+                                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
+                                        <span className="text-[10px] text-gray-500">
+                                            {deal.type ? dealTypeConfig[deal.type].label : "—"}
+                                        </span>
+                                        <span className="text-[10px] text-gray-400">
+                                            {new Date(deal.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </Link>
+                    );
+                })}
+            </div>
+        </>
+    );
+}
+
+export function DealsClientPage({ deals: initialDeals, defaultView = "table", initialTablePreferences }: DealsClientPageProps) {
     const [viewMode, setViewMode] = useState<"table" | "kanban">(defaultView);
     const [deals, setDeals] = useState<DealWithRelations[]>(initialDeals);
     const [activeDeal, setActiveDeal] = useState<DealWithRelations | null>(null);
@@ -245,16 +489,6 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table" }: 
         acc[status] = deals.filter(deal => deal.status === status);
         return acc;
     }, {} as Record<string, DealWithRelations[]>);
-
-    const formatCurrency = (value: number | string) => {
-        const numValue = typeof value === 'string' ? parseFloat(value) : value;
-        return new Intl.NumberFormat('es-ES', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-        }).format(numValue);
-    };
 
     const handleDragStart = (event: DragStartEvent) => {
         const dealId = event.active.id as string;
@@ -349,162 +583,7 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table" }: 
 
                 {/* Table View */}
                 {viewMode === "table" && (
-                    <div className="bg-white shadow-sm rounded-lg border border-graphite-gray overflow-hidden">
-                        {deals.length === 0 ? (
-                            <div className="text-center py-8 sm:py-12 px-4">
-                                <p className="text-dark-slate text-base sm:text-lg">No hay negocios registrados</p>
-                                <Link
-                                    href="/app/deals/new"
-                                    className="inline-flex items-center px-4 py-2 mt-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900"
-                                >
-                                    <Plus size={16} className="mr-2" />
-                                    Agregar primer negocio
-                                </Link>
-                            </div>
-                        ) : (
-                            <>
-                                {/* Desktop Table */}
-                                <div className="hidden md:block overflow-x-auto">
-                                    <table className="min-w-full divide-y divide-graphite-gray">
-                                        <thead className="bg-soft-gray">
-                                            <tr>
-                                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
-                                                    Nombre
-                                                </th>
-                                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
-                                                    Empresa
-                                                </th>
-                                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
-                                                    Contacto
-                                                </th>
-                                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
-                                                    Valor
-                                                </th>
-                                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
-                                                    Tipo
-                                                </th>
-                                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
-                                                    Estado
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="bg-white divide-y divide-graphite-gray">
-                                            {deals.map((deal) => (
-                                                <tr key={deal.id} className="hover:bg-soft-gray transition-colors">
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <Link
-                                                            href={`/app/deals/${deal.id}`}
-                                                            className="text-sm font-medium text-nearby-accent hover:text-nearby-dark"
-                                                        >
-                                                            {deal.name}
-                                                        </Link>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        {deal.company ? (
-                                                            <Link
-                                                                href={`/app/companies/${deal.company.id}`}
-                                                                className="text-sm text-nearby-accent hover:text-nearby-dark"
-                                                            >
-                                                                {deal.company.name}
-                                                            </Link>
-                                                        ) : (
-                                                            <span className="text-sm text-gray-400">-</span>
-                                                        )}
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        {deal.contact ? (
-                                                            <Link
-                                                                href={`/app/contacts/${deal.contact.id}`}
-                                                                className="text-sm text-nearby-accent hover:text-nearby-dark"
-                                                            >
-                                                                {deal.contact.fullName}
-                                                            </Link>
-                                                        ) : (
-                                                            <span className="text-sm text-gray-400">-</span>
-                                                        )}
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="text-sm font-medium text-dark-slate">
-                                                            {formatCurrency(Number(deal.value))}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="text-sm text-dark-slate">
-                                                            {deal.type === "CLIENTE_NUEVO" ? "Cliente nuevo" : deal.type === "UPSELLING" ? "Upselling" : "-"}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${dealStatusConfig[deal.status].color}`}>
-                                                            {dealStatusConfig[deal.status].label}
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                {/* Mobile Card View - Optimizado para iOS */}
-                                <div className="md:hidden divide-y divide-graphite-gray">
-                                    {deals.map((deal) => (
-                                        <Link
-                                            key={deal.id}
-                                            href={`/app/deals/${deal.id}`}
-                                            className="block p-3 sm:p-4 hover:bg-soft-gray active:bg-gray-100 transition-colors touch-manipulation"
-                                        >
-                                            <div className="flex items-start gap-3">
-                                                {/* Value Badge */}
-                                                <div className="flex-shrink-0 w-16 h-16 rounded-xl bg-gradient-to-br from-nearby-accent/10 to-nearby-accent/5 flex flex-col items-center justify-center border border-nearby-accent/20">
-                                                    <span className="text-[10px] text-nearby-accent font-medium">VALOR</span>
-                                                    <span className="text-sm font-bold text-nearby-dark">
-                                                        {Number(deal.value) >= 1000000
-                                                            ? `${(Number(deal.value) / 1000000).toFixed(1)}M`
-                                                            : Number(deal.value) >= 1000
-                                                                ? `${(Number(deal.value) / 1000).toFixed(0)}K`
-                                                                : formatCurrency(Number(deal.value))}
-                                                    </span>
-                                                </div>
-                                                
-                                                {/* Content */}
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-start justify-between gap-2 mb-1">
-                                                        <h3 className="text-sm font-semibold text-nearby-dark truncate">
-                                                            {deal.name}
-                                                        </h3>
-                                                        <span className={`flex-shrink-0 px-2 py-0.5 text-[10px] font-semibold rounded-full ${dealStatusConfig[deal.status].color}`}>
-                                                            {dealStatusConfig[deal.status].label}
-                                                        </span>
-                                                    </div>
-                                                    
-                                                    <div className="space-y-0.5 text-xs text-gray-600">
-                                                        {deal.company && (
-                                                            <p className="truncate">
-                                                                <span className="text-gray-500">Empresa:</span> {deal.company.name}
-                                                            </p>
-                                                        )}
-                                                        {deal.contact && (
-                                                            <p className="truncate">
-                                                                <span className="text-gray-500">Contacto:</span> {deal.contact.fullName}
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                    
-                                                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
-                                                        <span className="text-[10px] text-gray-500">
-                                                            {deal.type === "CLIENTE_NUEVO" ? "Cliente nuevo" : deal.type === "UPSELLING" ? "Upselling" : "—"}
-                                                        </span>
-                                                        <span className="text-[10px] text-gray-400">
-                                                            {new Date(deal.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </Link>
-                                    ))}
-                                </div>
-                            </>
-                        )}
-                    </div>
+                    <DealsTable deals={deals} initialPreferences={initialTablePreferences} />
                 )}
 
                 {/* Kanban View - Optimizado para móvil */}

@@ -108,6 +108,9 @@ model User {
   userType      UserType           @default(INTERNAL)
   dealsViewPref DealViewPreference @default(TABLE)
   
+  // Table Preferences (sorting, filters, visible columns per table)
+  tablePreferences Json?
+  
   // Email Configuration (Personal - for sending emails)
   emailConfigured  Boolean @default(false)
   emailFromAddress String?

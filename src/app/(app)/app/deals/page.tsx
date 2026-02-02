@@ -1,4 +1,5 @@
 import { getDeals } from "@/actions/deals";
+import { getTablePreferences } from "@/actions/table-preferences";
 import { DealsClientPage } from "@/components/deals/deals-client-page";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -14,16 +15,22 @@ export default async function DealsPage() {
         redirect("/login");
     }
 
-    const [deals, user] = await Promise.all([
+    const [deals, user, tablePreferences] = await Promise.all([
         getDeals(),
         prisma.user.findUnique({
             where: { email: session.user.email },
             select: { dealsViewPref: true },
         }),
+        getTablePreferences("deals"),
     ]);
 
     const defaultView = user?.dealsViewPref === "KANBAN" ? "kanban" : "table";
 
-    return <DealsClientPage deals={deals} defaultView={defaultView} />;
+    return (
+        <DealsClientPage 
+            deals={deals} 
+            defaultView={defaultView} 
+            initialTablePreferences={tablePreferences}
+        />
+    );
 }
-

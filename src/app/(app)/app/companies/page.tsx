@@ -1,13 +1,17 @@
 import { getCompanies } from "@/actions/companies";
+import { getTablePreferences } from "@/actions/table-preferences";
+import { CompaniesTable } from "@/components/companies/companies-table";
 import Link from "next/link";
-import Image from "next/image";
-import { Plus, Building2 } from "lucide-react";
+import { Plus } from "lucide-react";
 
 // Cache for 30 seconds - good balance for list pages
 export const revalidate = 30;
 
 export default async function CompaniesPage() {
-    const companies = await getCompanies();
+    const [companies, preferences] = await Promise.all([
+        getCompanies(),
+        getTablePreferences("companies"),
+    ]);
 
     return (
         <div className="min-h-screen bg-soft-gray py-8">
@@ -29,176 +33,8 @@ export default async function CompaniesPage() {
                     </Link>
                 </div>
 
-                {/* Companies Table/Cards */}
-                <div className="bg-white shadow-sm rounded-lg border border-graphite-gray overflow-hidden">
-                    {companies.length === 0 ? (
-                        <div className="text-center py-12 px-4">
-                            <p className="text-dark-slate text-base sm:text-lg">No hay empresas registradas</p>
-                            <Link
-                                href="/app/companies/new"
-                                className="inline-flex items-center px-4 py-2 mt-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900"
-                            >
-                                <Plus size={16} className="mr-2" />
-                                Agregar primera empresa
-                            </Link>
-                        </div>
-                    ) : (
-                        <>
-                            {/* Desktop Table View */}
-                            <div className="hidden md:block overflow-x-auto">
-                                <table className="min-w-full divide-y divide-graphite-gray">
-                                    <thead className="bg-soft-gray">
-                                        <tr>
-                                            <th scope="col" className="w-14 px-3 py-3">
-                                                <span className="sr-only">Logo</span>
-                                            </th>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
-                                                Nombre o Razón Social
-                                            </th>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
-                                                Ciudad
-                                            </th>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
-                                                País
-                                            </th>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
-                                                Contacto Principal
-                                            </th>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-dark-slate uppercase tracking-wider">
-                                                Estado
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-graphite-gray">
-                                        {companies.map((company) => (
-                                            <tr key={company.id} className="hover:bg-soft-gray transition-colors">
-                                                <td className="px-3 py-3 whitespace-nowrap">
-                                                    <Link href={`/app/companies/${company.id}`}>
-                                                        <div className="w-10 h-10 rounded-lg bg-gray-100 border border-graphite-gray overflow-hidden flex items-center justify-center">
-                                                            {company.logoUrl ? (
-                                                                <Image
-                                                                    src={company.logoUrl}
-                                                                    alt={company.name}
-                                                                    width={40}
-                                                                    height={40}
-                                                                    className="object-contain"
-                                                                />
-                                                            ) : (
-                                                                <Building2 size={20} className="text-gray-400" />
-                                                            )}
-                                                        </div>
-                                                    </Link>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <Link
-                                                        href={`/app/companies/${company.id}`}
-                                                        className="text-sm font-medium text-nearby-accent hover:text-nearby-dark"
-                                                    >
-                                                        {company.name}
-                                                    </Link>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm text-dark-slate">
-                                                        {company.city || "-"}
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm text-dark-slate">
-                                                        {company.country || "-"}
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    {company.primaryContact ? (
-                                                        <Link
-                                                            href={`/app/contacts/${company.primaryContact.id}`}
-                                                            className="text-sm text-nearby-accent hover:text-nearby-dark"
-                                                        >
-                                                            {company.primaryContact.fullName}
-                                                        </Link>
-                                                    ) : (
-                                                        <span className="text-sm text-gray-400">-</span>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${company.status === "CLIENTE"
-                                                        ? "bg-success-green/10 text-success-green"
-                                                        : company.status === "POTENCIAL"
-                                                            ? "bg-nearby-accent/10 text-nearby-accent"
-                                                            : company.status === "PROSPECTO"
-                                                                ? "bg-gray-100 text-gray-800"
-                                                                : company.status === "DESCARTADA"
-                                                                    ? "bg-error-red/10 text-error-red"
-                                                                    : "bg-gray-100 text-gray-600"
-                                                        }`}>
-                                                        {company.status}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            {/* Mobile Card View */}
-                            <div className="md:hidden divide-y divide-graphite-gray">
-                                {companies.map((company) => (
-                                    <Link
-                                        key={company.id}
-                                        href={`/app/companies/${company.id}`}
-                                        className="block p-4 hover:bg-soft-gray transition-colors"
-                                    >
-                                        <div className="flex items-start gap-3 mb-2">
-                                            <div className="w-10 h-10 rounded-lg bg-gray-100 border border-graphite-gray overflow-hidden flex items-center justify-center flex-shrink-0">
-                                                {company.logoUrl ? (
-                                                    <Image
-                                                        src={company.logoUrl}
-                                                        alt={company.name}
-                                                        width={40}
-                                                        height={40}
-                                                        className="object-contain"
-                                                    />
-                                                ) : (
-                                                    <Building2 size={20} className="text-gray-400" />
-                                                )}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-start justify-between">
-                                                    <h3 className="text-base font-semibold text-nearby-accent truncate">
-                                                        {company.name}
-                                                    </h3>
-                                                    <span className={`ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full flex-shrink-0 ${company.status === "CLIENTE"
-                                                        ? "bg-success-green/10 text-success-green"
-                                                        : company.status === "POTENCIAL"
-                                                            ? "bg-nearby-accent/10 text-nearby-accent"
-                                                            : company.status === "PROSPECTO"
-                                                                ? "bg-gray-100 text-gray-800"
-                                                                : company.status === "DESCARTADA"
-                                                                    ? "bg-error-red/10 text-error-red"
-                                                                    : "bg-gray-100 text-gray-600"
-                                                    }`}>
-                                                        {company.status}
-                                                    </span>
-                                                </div>
-                                                <div className="space-y-1 text-sm text-dark-slate mt-1">
-                                                    {(company.city || company.country) && (
-                                                        <p>
-                                                            <span className="font-medium">Ubicación:</span> {[company.city, company.country].filter(Boolean).join(", ") || "-"}
-                                                        </p>
-                                                    )}
-                                                    {company.primaryContact && (
-                                                        <p>
-                                                            <span className="font-medium">Contacto:</span> {company.primaryContact.fullName}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </Link>
-                                ))}
-                            </div>
-                        </>
-                    )}
-                </div>
+                {/* Companies Table */}
+                <CompaniesTable companies={companies} initialPreferences={preferences} />
             </div>
         </div>
     );
