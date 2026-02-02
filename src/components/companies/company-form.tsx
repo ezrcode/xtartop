@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import Link from "next/link";
-import { Save, Trash2, ArrowLeft, Loader2 } from "lucide-react";
+import { Save, Trash2, ArrowLeft, Loader2, ChevronDown, Search, X } from "lucide-react";
 import { createCompanyAction, updateCompanyAction, deleteCompany, CompanyState } from "@/actions/companies";
 import { Company, Contact, CompanyStatus, ClientInvitation, Project, ClientUser } from "@prisma/client";
 import { CompanyActivitiesClient } from "../activities/company-activities-client";
@@ -122,6 +122,36 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
     const updateField = (field: keyof typeof formData, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
+
+    // Searchable dropdown state for primary contact
+    const [contactDropdownOpen, setContactDropdownOpen] = useState(false);
+    const [contactSearchTerm, setContactSearchTerm] = useState("");
+    const contactDropdownRef = useRef<HTMLDivElement>(null);
+
+    const filteredContacts = useMemo(() => {
+        if (!contactSearchTerm.trim()) return contacts;
+        const term = contactSearchTerm.toLowerCase();
+        return contacts.filter(contact => 
+            contact.fullName.toLowerCase().includes(term) ||
+            (contact.email && contact.email.toLowerCase().includes(term))
+        );
+    }, [contacts, contactSearchTerm]);
+
+    const selectedContact = useMemo(() => {
+        if (formData.primaryContactId === "null") return null;
+        return contacts.find(c => c.id === formData.primaryContactId) || null;
+    }, [contacts, formData.primaryContactId]);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (contactDropdownRef.current && !contactDropdownRef.current.contains(event.target as Node)) {
+                setContactDropdownOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     const updateAction = company ? updateCompanyAction.bind(null, company.id) : () => Promise.resolve({ message: "Error" });
 
@@ -461,22 +491,92 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                             </div>
 
                                             <div className="sm:col-span-6">
-                                                <label htmlFor="primaryContactId-input" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     Contacto Principal
                                                 </label>
-                                                <select
-                                                    id="primaryContactId-input"
-                                                    value={formData.primaryContactId}
-                                                    onChange={(e) => updateField("primaryContactId", e.target.value)}
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
-                                                >
-                                                    <option value="null">Sin contacto principal</option>
-                                                    {contacts.map((contact) => (
-                                                        <option key={contact.id} value={contact.id}>
-                                                            {contact.fullName}
-                                                        </option>
-                                                    ))}
-                                                </select>
+                                                <div className="relative" ref={contactDropdownRef}>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setContactDropdownOpen(!contactDropdownOpen);
+                                                            setContactSearchTerm("");
+                                                        }}
+                                                        className="flex items-center justify-between w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white text-left"
+                                                    >
+                                                        <span className={selectedContact ? "text-dark-slate" : "text-gray-500"}>
+                                                            {selectedContact ? selectedContact.fullName : "Sin contacto principal"}
+                                                        </span>
+                                                        <ChevronDown size={16} className={`text-gray-400 transition-transform ${contactDropdownOpen ? "rotate-180" : ""}`} />
+                                                    </button>
+
+                                                    {contactDropdownOpen && (
+                                                        <div className="absolute z-50 mt-1 w-full bg-white border border-graphite-gray rounded-lg shadow-lg">
+                                                            {/* Search input */}
+                                                            <div className="p-2 border-b border-gray-100">
+                                                                <div className="relative">
+                                                                    <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                                                                    <input
+                                                                        type="text"
+                                                                        value={contactSearchTerm}
+                                                                        onChange={(e) => setContactSearchTerm(e.target.value)}
+                                                                        placeholder="Buscar contacto..."
+                                                                        className="w-full pl-8 pr-8 py-2 text-sm border border-gray-200 rounded-md focus:ring-nearby-accent focus:border-nearby-accent"
+                                                                        autoFocus
+                                                                    />
+                                                                    {contactSearchTerm && (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => setContactSearchTerm("")}
+                                                                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                                                        >
+                                                                            <X size={14} />
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Options list */}
+                                                            <div className="max-h-48 overflow-y-auto">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        updateField("primaryContactId", "null");
+                                                                        setContactDropdownOpen(false);
+                                                                    }}
+                                                                    className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${
+                                                                        formData.primaryContactId === "null" ? "bg-nearby-accent/10 text-nearby-accent font-medium" : "text-gray-500"
+                                                                    }`}
+                                                                >
+                                                                    Sin contacto principal
+                                                                </button>
+                                                                {filteredContacts.length > 0 ? (
+                                                                    filteredContacts.map((contact) => (
+                                                                        <button
+                                                                            key={contact.id}
+                                                                            type="button"
+                                                                            onClick={() => {
+                                                                                updateField("primaryContactId", contact.id);
+                                                                                setContactDropdownOpen(false);
+                                                                            }}
+                                                                            className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${
+                                                                                formData.primaryContactId === contact.id ? "bg-nearby-accent/10 text-nearby-accent font-medium" : "text-dark-slate"
+                                                                            }`}
+                                                                        >
+                                                                            <div>{contact.fullName}</div>
+                                                                            {contact.email && (
+                                                                                <div className="text-xs text-gray-400">{contact.email}</div>
+                                                                            )}
+                                                                        </button>
+                                                                    ))
+                                                                ) : (
+                                                                    <div className="px-3 py-4 text-sm text-gray-500 text-center">
+                                                                        No se encontraron contactos
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
 
                                             <div className="sm:col-span-6">
