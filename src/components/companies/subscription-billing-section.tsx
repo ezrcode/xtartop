@@ -11,6 +11,7 @@ import {
     updateSubscriptionItem,
     deleteSubscriptionItem,
 } from "@/actions/subscription-billing";
+import { formatMoney } from "@/lib/format";
 
 interface PriceOption {
     priceListId: string;
@@ -221,8 +222,8 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                                                             </span>
                                                         )}
                                                     </td>
-                                                    <td className="px-4 py-3 text-right text-dark-slate">${Number(item.price).toFixed(2)}</td>
-                                                    <td className="px-4 py-3 text-right font-medium text-dark-slate">${item.subtotal.toFixed(2)}</td>
+                                                    <td className="px-4 py-3 text-right text-dark-slate">{formatMoney(item.price)}</td>
+                                                    <td className="px-4 py-3 text-right font-medium text-dark-slate">{formatMoney(item.subtotal)}</td>
                                                     <td className="px-4 py-3">
                                                         <div className="flex items-center justify-end space-x-1">
                                                             <button
@@ -286,7 +287,7 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                     <div className="flex items-center space-x-3 bg-gray-50 px-4 py-2 rounded-lg">
                         <span className="text-sm font-medium text-gray-500">Total suscripción:</span>
                         <span className="text-lg font-bold text-nearby-dark">
-                            ${billing?.total?.toFixed(2) || "0.00"}
+                            {formatMoney(billing?.total || 0)}
                         </span>
                     </div>
                 </div>
@@ -615,7 +616,7 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                                 >
                                     {selectedItem.prices.map((priceOption) => (
                                         <option key={priceOption.priceListId} value={priceOption.priceListId}>
-                                            {priceOption.priceListName} - ${priceOption.price.toFixed(2)} {priceOption.currency}
+                                            {priceOption.priceListName} - {formatMoney(priceOption.price)} {priceOption.currency}
                                         </option>
                                     ))}
                                 </select>
@@ -637,7 +638,7 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                             <div className="px-3 py-2.5 min-h-[44px] flex items-center text-base sm:text-sm border border-[var(--input-border)] rounded-lg bg-[var(--hover-bg)] text-[var(--foreground)]">
                                 {selectedPrice ? (
                                     <span className="font-medium">
-                                        ${selectedPrice.price.toFixed(2)} <span className="text-[var(--muted-text)] font-normal">{selectedPrice.currency}</span>
+                                        {formatMoney(selectedPrice.price)} <span className="text-[var(--muted-text)] font-normal">{selectedPrice.currency}</span>
                                     </span>
                                 ) : "-"}
                             </div>

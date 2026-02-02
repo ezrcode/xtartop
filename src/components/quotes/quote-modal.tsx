@@ -5,6 +5,7 @@ import { X, Plus, Trash2, Save, Printer } from "lucide-react";
 import { createQuoteAction, updateQuoteAction, QuoteState } from "@/actions/quotes";
 import { QuoteStatus, Currency, TaxType, PaymentFrequency } from "@prisma/client";
 import { QuotePDFTemplate } from "./quote-pdf-template";
+import { formatNumber } from "@/lib/format";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -424,7 +425,7 @@ export function QuoteModal({
                                                     </select>
                                                 </td>
                                                 <td className="px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium whitespace-nowrap">
-                                                    {(typeof item.netPrice === 'number' ? item.netPrice : parseFloat(String(item.netPrice) || '0')).toFixed(2)}
+                                                    {formatNumber(typeof item.netPrice === 'number' ? item.netPrice : parseFloat(String(item.netPrice) || '0'), 2)}
                                                 </td>
                                                 <td className="px-2 sm:px-3 py-2">
                                                     <button

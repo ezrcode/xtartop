@@ -28,13 +28,14 @@ interface InvoicesTabProps {
 
 function formatCurrency(amount: number, currency: string = "DOP"): string {
     try {
-        return new Intl.NumberFormat("es-DO", {
+        return new Intl.NumberFormat("en-US", {
             style: "currency",
             currency,
             minimumFractionDigits: 2,
         }).format(amount);
     } catch {
-        return `${currency} ${amount.toFixed(2)}`;
+        // Fallback con formato de miles
+        return `${currency} ${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount)}`;
     }
 }
 
