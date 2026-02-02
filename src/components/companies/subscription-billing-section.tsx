@@ -351,7 +351,7 @@ interface SubscriptionItemModalProps {
 }
 
 function SubscriptionItemModal({ companyId, item, onClose, onSaved }: SubscriptionItemModalProps) {
-    console.log("[SubscriptionItemModal] Modal mounted, companyId:", companyId);
+    console.log("[SubscriptionItemModal] Modal mounted, companyId:", companyId, "editing item:", item?.id);
     
     const [admCloudItems, setAdmCloudItems] = useState<AdmCloudItem[]>([]);
     const [loadingItems, setLoadingItems] = useState(true);
@@ -399,22 +399,27 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                     
                     // If editing, find and set the selected item
                     if (item) {
+                        console.log("[SubscriptionItemModal] Editing mode - looking for item:", item.admCloudItemId);
                         const found = data.items.find((i: AdmCloudItem) => i.id === item.admCloudItemId);
                         if (found) {
+                            console.log("[SubscriptionItemModal] Found item:", found.code, "with", found.prices.length, "prices");
                             setSelectedItem(found);
                             setSelectedItemId(found.id);
-                            // Try to find matching price, otherwise use first
+                            // Try to find matching price by value, otherwise use first
+                            const savedPrice = Number(item.price);
                             const matchingPrice = found.prices.find(
-                                (p: PriceOption) => p.price === Number(item.price)
+                                (p: PriceOption) => p.price === savedPrice
                             ) || found.prices[0];
+                            console.log("[SubscriptionItemModal] Matching price:", matchingPrice?.priceListName, matchingPrice?.price);
                             if (matchingPrice) {
                                 setSelectedPriceListId(matchingPrice.priceListId);
                                 setSelectedPrice(matchingPrice);
                             }
                         } else {
+                            console.log("[SubscriptionItemModal] Item not found in ADMCloud, creating placeholder");
                             // Item not found in ADMCloud, create a placeholder
                             const placeholderPrice: PriceOption = {
-                                priceListId: "",
+                                priceListId: "saved",
                                 priceListName: "Precio guardado",
                                 price: Number(item.price),
                                 currency: "USD",
@@ -426,9 +431,11 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                                 prices: [placeholderPrice],
                             });
                             setSelectedItemId(item.admCloudItemId);
+                            setSelectedPriceListId("saved");
                             setSelectedPrice(placeholderPrice);
                         }
                     }
+                    
                 } else {
                     setError("Respuesta inválida de ADMCloud");
                 }
@@ -442,20 +449,19 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
         loadItems();
     }, [item]);
 
-    // Update selected item and auto-select price when selection changes
-    useEffect(() => {
-        if (selectedItemId) {
-            const found = admCloudItems.find((i) => i.id === selectedItemId);
+    // Handle item selection change (only for user-initiated changes, not initial load)
+    const handleItemChange = (newItemId: string) => {
+        console.log("[SubscriptionItemModal] handleItemChange:", newItemId);
+        setSelectedItemId(newItemId);
+        
+        if (newItemId) {
+            const found = admCloudItems.find((i) => i.id === newItemId);
             if (found) {
                 setSelectedItem(found);
-                // Auto-select price if only one, or keep current selection if valid
-                if (found.prices.length === 1) {
+                // Auto-select first price (or only price)
+                if (found.prices.length > 0) {
                     setSelectedPriceListId(found.prices[0].priceListId);
                     setSelectedPrice(found.prices[0]);
-                } else if (!found.prices.some(p => p.priceListId === selectedPriceListId)) {
-                    // Current selection not valid for new item, select first
-                    setSelectedPriceListId(found.prices[0]?.priceListId || "");
-                    setSelectedPrice(found.prices[0] || null);
                 }
             }
         } else {
@@ -463,17 +469,20 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
             setSelectedPrice(null);
             setSelectedPriceListId("");
         }
-    }, [selectedItemId, admCloudItems, selectedPriceListId]);
+    };
 
-    // Update selected price when price list changes
-    useEffect(() => {
-        if (selectedItem && selectedPriceListId) {
-            const price = selectedItem.prices.find(p => p.priceListId === selectedPriceListId);
+    // Handle price list selection change
+    const handlePriceListChange = (newPriceListId: string) => {
+        console.log("[SubscriptionItemModal] handlePriceListChange:", newPriceListId);
+        setSelectedPriceListId(newPriceListId);
+        
+        if (selectedItem && newPriceListId) {
+            const price = selectedItem.prices.find(p => p.priceListId === newPriceListId);
             if (price) {
                 setSelectedPrice(price);
             }
         }
-    }, [selectedPriceListId, selectedItem]);
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         console.log("[SubscriptionItemModal] handleSubmit called");
@@ -579,7 +588,7 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                             </label>
                             <select
                                 value={selectedItemId}
-                                onChange={(e) => setSelectedItemId(e.target.value)}
+                                onChange={(e) => handleItemChange(e.target.value)}
                                 className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
                                 required
                             >
@@ -600,7 +609,7 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                                 </label>
                                 <select
                                     value={selectedPriceListId}
-                                    onChange={(e) => setSelectedPriceListId(e.target.value)}
+                                    onChange={(e) => handlePriceListChange(e.target.value)}
                                     className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
                                     required
                                 >
