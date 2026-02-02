@@ -53,7 +53,8 @@ export async function GET(request: NextRequest) {
         });
 
         // Usar PriceList que ya tiene items con sus precios
-        const priceListResponse = await client.getPriceLists();
+        // Filtrar solo servicios (ItemType = "S")
+        const priceListResponse = await client.getPriceLists("S");
 
         if (!priceListResponse.success) {
             return NextResponse.json({ 
