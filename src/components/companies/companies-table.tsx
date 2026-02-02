@@ -15,6 +15,7 @@ interface Company {
     city: string | null;
     country: string | null;
     status: CompanyStatus;
+    createdAt: Date;
     primaryContact: {
         id: string;
         fullName: string;
@@ -132,6 +133,18 @@ export function CompaniesTable({ companies, initialPreferences }: CompaniesTable
                     </span>
                 );
             },
+        },
+        {
+            key: "createdAt",
+            header: "Fecha de creación",
+            sortable: true,
+            hideable: true,
+            defaultVisible: false,
+            render: (company) => (
+                <span className="text-sm text-gray-500">
+                    {new Date(company.createdAt).toLocaleDateString('es-ES')}
+                </span>
+            ),
         },
     ];
 

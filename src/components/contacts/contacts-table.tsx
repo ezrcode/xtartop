@@ -12,6 +12,7 @@ interface Contact {
     email: string;
     mobile: string | null;
     status: ContactStatus;
+    createdAt: Date;
     company: {
         id: string;
         name: string;
@@ -109,6 +110,18 @@ export function ContactsTable({ contacts, initialPreferences }: ContactsTablePro
                     </span>
                 );
             },
+        },
+        {
+            key: "createdAt",
+            header: "Fecha de creación",
+            sortable: true,
+            hideable: true,
+            defaultVisible: false,
+            render: (contact) => (
+                <span className="text-sm text-gray-500">
+                    {new Date(contact.createdAt).toLocaleDateString('es-ES')}
+                </span>
+            ),
         },
     ];
 
