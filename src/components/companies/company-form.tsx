@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Save, Trash2, ArrowLeft, Loader2 } from "lucide-react";
 import { createCompanyAction, updateCompanyAction, deleteCompany, CompanyState } from "@/actions/companies";
 import { Company, Contact, CompanyStatus, ClientInvitation, Project, ClientUser } from "@prisma/client";
-import { CompanyActivitiesWithSuspense } from "../activities/company-activities-with-suspense";
+import { CompanyActivitiesClient } from "../activities/company-activities-client";
 import { ProjectsTable } from "./projects-table";
 import { ClientUsersTable } from "./client-users-table";
 import { CompanyContactsTab } from "./company-contacts-tab";
@@ -708,7 +708,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                     <div className="lg:col-span-5 flex flex-col">
                         <div className="bg-white shadow-sm rounded-xl border border-graphite-gray p-4 sm:p-6 flex-1 flex flex-col min-h-[300px] sm:min-h-[400px] max-h-[500px] lg:max-h-[calc(100vh-200px)]">
                             {isEditMode && company ? (
-                                <CompanyActivitiesWithSuspense
+                                <CompanyActivitiesClient
                                     companyId={company.id}
                                     defaultEmail={company.primaryContact?.email || ""}
                                     clientInvitations={memoizedClientInvitations}
