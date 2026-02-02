@@ -14,6 +14,7 @@ import { ImageUpload } from "../ui/image-upload";
 import { PdfUpload } from "../ui/pdf-upload";
 import { InvoicesTab } from "./invoices-tab";
 import { SubscriptionBillingSection } from "./subscription-billing-section";
+import { TicketsTab } from "./tickets-tab";
 
 type CompanyWithTerms = Company & { 
     primaryContact?: Contact | null;
@@ -94,7 +95,7 @@ function DeleteButton() {
 export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFormProps) {
     const formRef = useRef<HTMLFormElement>(null);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState<"general" | "contacts" | "subscription" | "invoices">("general");
+    const [activeTab, setActiveTab] = useState<"general" | "contacts" | "subscription" | "invoices" | "tickets">("general");
     const [pendingAction, setPendingAction] = useState<string | null>(null);
     
     // Controlled form fields - persist values across tab switches
@@ -252,6 +253,17 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                     }`}
                                 >
                                     Facturación
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTab("tickets")}
+                                    className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
+                                        activeTab === "tickets"
+                                            ? "border-purple-600 text-purple-600"
+                                            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                    }`}
+                                >
+                                    Tickets
                                 </button>
                             </nav>
                         </div>
@@ -652,6 +664,11 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                     admCloudRelationshipId={company.admCloudRelationshipId || null}
                                     admCloudLastSync={company.admCloudLastSync || null}
                                 />
+                            )}
+
+                            {/* Tab Content: Tickets */}
+                            {activeTab === "tickets" && company && (
+                                <TicketsTab companyName={company.name} />
                             )}
                         </form>
                     </div>

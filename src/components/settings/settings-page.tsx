@@ -14,6 +14,7 @@ import {
 } from "@/actions/workspace";
 import type { Workspace, WorkspaceMember, Invitation, User, Subscription } from "@prisma/client";
 import { AdmCloudConfigTab } from "./admcloud-config-tab";
+import { ClickUpConfigTab } from "./clickup-config-tab";
 
 type WorkspaceWithDetails = Workspace & {
     owner: Pick<User, 'id' | 'name' | 'email' | 'photoUrl'>;
@@ -33,6 +34,12 @@ type WorkspaceWithDetails = Workspace & {
     admCloudPassword?: string | null;
     admCloudCompany?: string | null;
     admCloudRole?: string | null;
+    // ClickUp config
+    clickUpEnabled?: boolean;
+    clickUpApiToken?: string | null;
+    clickUpWorkspaceId?: string | null;
+    clickUpListId?: string | null;
+    clickUpClientFieldId?: string | null;
     _count: {
         contacts: number;
         companies: number;
@@ -723,16 +730,27 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                 )}
 
                 {activeTab === 'integrations' && (
-                    <AdmCloudConfigTab 
-                        currentConfig={{
-                            enabled: workspace.admCloudEnabled || false,
-                            appId: workspace.admCloudAppId || null,
-                            username: workspace.admCloudUsername || null,
-                            password: workspace.admCloudPassword || null,
-                            company: workspace.admCloudCompany || null,
-                            role: workspace.admCloudRole || null,
-                        }}
-                    />
+                    <>
+                        <AdmCloudConfigTab 
+                            currentConfig={{
+                                enabled: workspace.admCloudEnabled || false,
+                                appId: workspace.admCloudAppId || null,
+                                username: workspace.admCloudUsername || null,
+                                password: workspace.admCloudPassword || null,
+                                company: workspace.admCloudCompany || null,
+                                role: workspace.admCloudRole || null,
+                            }}
+                        />
+                        <ClickUpConfigTab 
+                            currentConfig={{
+                                enabled: workspace.clickUpEnabled || false,
+                                apiToken: workspace.clickUpApiToken || null,
+                                workspaceId: workspace.clickUpWorkspaceId || null,
+                                listId: workspace.clickUpListId || null,
+                                clientFieldId: workspace.clickUpClientFieldId || null,
+                            }}
+                        />
+                    </>
                 )}
             </div>
         </div>

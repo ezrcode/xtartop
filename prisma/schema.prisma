@@ -154,6 +154,13 @@ model Workspace {
   admCloudCompany  String?  // ID de la compañía en AdmCloud
   admCloudRole     String?  // Rol (ej: "Administradores")
   
+  // ClickUp Integration Settings
+  clickUpEnabled       Boolean  @default(false)
+  clickUpApiToken      String?  // Personal API Token
+  clickUpWorkspaceId   String?  // Team/Workspace ID
+  clickUpListId        String?  // ID de la lista de tickets
+  clickUpClientFieldId String?  // ID del campo personalizado "Cliente"
+  
   createdAt        DateTime @default(now())
   ownerId     String
   owner       User     @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
