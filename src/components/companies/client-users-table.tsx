@@ -48,6 +48,15 @@ export function ClientUsersTable({ companyId, clientUsers: initialClientUsers }:
             return;
         }
 
+        // Check for duplicate email
+        const isDuplicate = clientUsers.some(
+            u => u.email.toLowerCase() === email.trim().toLowerCase()
+        );
+        if (isDuplicate) {
+            setError("Ya existe un usuario con este correo electrónico");
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
@@ -81,6 +90,16 @@ export function ClientUsersTable({ companyId, clientUsers: initialClientUsers }:
         }
         if (!email.trim()) {
             setError("El correo es requerido");
+            return;
+        }
+
+        // Check for duplicate email (excluding current user)
+        const isDuplicate = clientUsers.some(
+            u => u.id !== editingUser.id && 
+                 u.email.toLowerCase() === email.trim().toLowerCase()
+        );
+        if (isDuplicate) {
+            setError("Ya existe un usuario con este correo electrónico");
             return;
         }
 

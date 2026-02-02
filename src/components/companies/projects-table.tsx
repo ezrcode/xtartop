@@ -42,6 +42,15 @@ export function ProjectsTable({ companyId, projects: initialProjects }: Projects
             return;
         }
 
+        // Check for duplicate name
+        const isDuplicate = projects.some(
+            p => p.name.toLowerCase() === projectName.trim().toLowerCase()
+        );
+        if (isDuplicate) {
+            setError("Ya existe un proyecto con este nombre");
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
@@ -68,6 +77,16 @@ export function ProjectsTable({ companyId, projects: initialProjects }: Projects
     const handleUpdate = async () => {
         if (!editingProject || !projectName.trim()) {
             setError("El nombre es requerido");
+            return;
+        }
+
+        // Check for duplicate name (excluding current project)
+        const isDuplicate = projects.some(
+            p => p.id !== editingProject.id && 
+                 p.name.toLowerCase() === projectName.trim().toLowerCase()
+        );
+        if (isDuplicate) {
+            setError("Ya existe un proyecto con este nombre");
             return;
         }
 
