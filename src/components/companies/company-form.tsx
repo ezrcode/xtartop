@@ -25,6 +25,7 @@ type CompanyWithTerms = Company & {
     admCloudLastSync?: Date | null;
     quoteId?: string | null;
     quoteFileUrl?: string | null;
+    clickUpClientName?: string | null;
 };
 
 interface CompanyFormProps {
@@ -668,7 +669,11 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
 
                             {/* Tab Content: Tickets */}
                             {activeTab === "tickets" && company && (
-                                <TicketsTab companyName={company.name} />
+                                <TicketsTab 
+                                    companyId={company.id}
+                                    companyName={company.name}
+                                    clickUpClientName={company.clickUpClientName || null}
+                                />
                             )}
                         </form>
                     </div>

@@ -243,6 +243,9 @@ model Company {
   admCloudRelationshipId String?  // ID del cliente en AdmCloud (RelationshipID)
   admCloudLastSync       DateTime? // Última sincronización con AdmCloud
   
+  // ClickUp Integration
+  clickUpClientName      String?  // Nombre del cliente en ClickUp (campo personalizado)
+  
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 

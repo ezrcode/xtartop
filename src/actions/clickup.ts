@@ -170,12 +170,16 @@ export async function saveClickUpSettings(
 }
 
 // Get tickets for a company
-export async function getCompanyTickets(companyName: string): Promise<{
+export async function getCompanyTickets(clickUpClientName: string): Promise<{
   success: boolean;
   tickets?: ClickUpTicket[];
   error?: string;
 }> {
   try {
+    if (!clickUpClientName?.trim()) {
+      return { success: false, error: "Nombre de cliente en ClickUp no configurado" };
+    }
+
     const workspace = await getWorkspaceClickUpConfig();
 
     if (!workspace) {
@@ -194,7 +198,7 @@ export async function getCompanyTickets(companyName: string): Promise<{
     const result = await client.getTasksByClient(
       workspace.clickUpListId,
       workspace.clickUpClientFieldId,
-      companyName
+      clickUpClientName
     );
 
     if (!result.success) {
@@ -234,6 +238,29 @@ export async function getCompanyTickets(companyName: string): Promise<{
   } catch (error) {
     console.error("Error getting company tickets:", error);
     return { success: false, error: "Error al obtener los tickets" };
+  }
+}
+
+// Update company's ClickUp client name
+export async function updateCompanyClickUpClientName(
+  companyId: string,
+  clickUpClientName: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return { success: false, error: "No autenticado" };
+    }
+
+    await prisma.company.update({
+      where: { id: companyId },
+      data: { clickUpClientName: clickUpClientName.trim() || null },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating ClickUp client name:", error);
+    return { success: false, error: "Error al guardar" };
   }
 }
 

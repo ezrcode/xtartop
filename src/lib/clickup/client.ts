@@ -256,22 +256,44 @@ class ClickUpClient {
   }
 
   // Get tasks filtered by client name (custom field)
+  // Note: ClickUp API has issues filtering by dropdown custom fields (ITEMV2_003 error)
+  // So we fetch all tasks and filter on the server side
   async getTasksByClient(
     listId: string,
     clientFieldId: string,
     clientName: string
   ): Promise<ApiResult<ClickUpTask[]>> {
-    return this.getTasks(listId, {
+    // Get all tasks without custom field filter
+    const result = await this.getTasks(listId, {
       subtasks: true,
       include_closed: true,
-      custom_fields: [
-        {
-          field_id: clientFieldId,
-          operator: "=",
-          value: clientName,
-        },
-      ],
     });
+
+    if (!result.success || !result.data) {
+      return result;
+    }
+
+    // Filter tasks by client name in custom field
+    const filteredTasks = result.data.filter((task) => {
+      const clientField = task.custom_fields?.find((f) => f.id === clientFieldId);
+      if (!clientField) return false;
+      
+      // Handle different field types
+      // For dropdown fields, value might be the option name or ID
+      const fieldValue = clientField.value;
+      if (typeof fieldValue === "string") {
+        return fieldValue.toLowerCase() === clientName.toLowerCase();
+      }
+      // For dropdown with type_config, check the options
+      if (clientField.type_config && typeof fieldValue === "number") {
+        const options = (clientField.type_config as { options?: { id: string; name: string; orderindex: number }[] }).options;
+        const selectedOption = options?.find((opt) => opt.orderindex === fieldValue);
+        return selectedOption?.name?.toLowerCase() === clientName.toLowerCase();
+      }
+      return false;
+    });
+
+    return { success: true, data: filteredTasks };
   }
 
   // Test connection
