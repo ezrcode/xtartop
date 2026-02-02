@@ -38,6 +38,12 @@ enum DealViewPreference {
   KANBAN
 }
 
+enum ThemePreference {
+  LIGHT
+  DARK
+  SYSTEM
+}
+
 enum QuoteStatus {
   BORRADOR
   ACTIVA
@@ -105,8 +111,9 @@ model User {
   email         String             @unique
   passwordHash  String
   photoUrl      String?
-  userType      UserType           @default(INTERNAL)
-  dealsViewPref DealViewPreference @default(TABLE)
+  userType        UserType           @default(INTERNAL)
+  dealsViewPref   DealViewPreference @default(TABLE)
+  themePreference ThemePreference    @default(SYSTEM)
   
   // Table Preferences (sorting, filters, visible columns per table)
   tablePreferences Json?

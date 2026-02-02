@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import { ThemePreference } from "@prisma/client";
 
 const ProfileSchema = z.object({
     name: z.string().min(1, "Name is required"),
@@ -63,6 +64,7 @@ export async function getUser() {
             email: true,
             photoUrl: true,
             dealsViewPref: true,
+            themePreference: true,
             createdAt: true,
         },
     });
@@ -210,3 +212,38 @@ export async function updatePreferences(prevState: PreferencesState | undefined,
     }
 }
 
+// Update theme preference
+export async function updateThemePreference(theme: ThemePreference): Promise<{ success: boolean; error?: string }> {
+    const session = await auth();
+    if (!session?.user?.email) {
+        return { success: false, error: "No autenticado" };
+    }
+
+    try {
+        await prisma.user.update({
+            where: { email: session.user.email },
+            data: { themePreference: theme },
+        });
+
+        revalidatePath("/app");
+        return { success: true };
+    } catch (error) {
+        console.error("Error updating theme:", error);
+        return { success: false, error: "Error al actualizar el tema" };
+    }
+}
+
+// Get user theme preference
+export async function getUserThemePreference(): Promise<ThemePreference> {
+    const session = await auth();
+    if (!session?.user?.email) {
+        return "SYSTEM";
+    }
+
+    const user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        select: { themePreference: true },
+    });
+
+    return user?.themePreference ?? "SYSTEM";
+}

@@ -101,13 +101,13 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
             {/* Sidebar Container */}
             <aside
                 ref={sidebarRef}
-                className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-white border-r border-graphite-gray transition-all duration-300 ease-in-out
+                className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-[var(--card-bg)] border-r border-[var(--card-border)] transition-all duration-300 ease-in-out
                     ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
                     ${isMobileOpen || !isCollapsed ? "w-64" : "w-64"}
                     md:translate-x-0 ${isCollapsed ? "md:w-20" : "md:w-64"}`}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between h-16 px-4 border-b border-graphite-gray">
+                <div className="flex items-center justify-between h-16 px-4 border-b border-[var(--card-border)]">
                     {/* Mobile: Always show full logo */}
                     <div className="md:hidden">
                         <Image 
@@ -145,7 +145,7 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
                     {/* Desktop collapse button */}
                     <button
                         onClick={toggleCollapse}
-                        className={`p-1 rounded-md hover:bg-soft-gray text-dark-slate hidden md:block ${isCollapsed ? "absolute top-4 right-2" : ""}`}
+                        className={`p-1 rounded-md hover:bg-[var(--hover-bg)] text-[var(--foreground)] hidden md:block ${isCollapsed ? "absolute top-4 right-2" : ""}`}
                     >
                         {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
                     </button>
@@ -153,7 +153,7 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
                     {/* Mobile close button */}
                     <button
                         onClick={() => setIsMobileOpen(false)}
-                        className="md:hidden p-1 rounded-md hover:bg-soft-gray text-dark-slate"
+                        className="md:hidden p-1 rounded-md hover:bg-[var(--hover-bg)] text-[var(--foreground)]"
                     >
                         <X size={20} />
                     </button>
@@ -174,13 +174,13 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
                                 onClick={() => setIsMobileOpen(false)}
                                 className={`flex items-center px-3 py-2 rounded-md transition-colors group ${isActive
                                         ? "bg-nearby-accent/10 text-nearby-accent border-l-4 border-nearby-accent"
-                                        : "text-dark-slate hover:bg-soft-gray hover:text-nearby-dark"
+                                        : "text-[var(--foreground)] hover:bg-[var(--hover-bg)]"
                                     }`}
                                 title={isCollapsed ? item.name : undefined}
                             >
                                 <item.icon
                                     size={20}
-                                    className={`${isActive ? "text-nearby-accent" : "text-dark-slate group-hover:text-nearby-dark"} ${
+                                    className={`${isActive ? "text-nearby-accent" : "text-[var(--muted-text)] group-hover:text-[var(--foreground)]"} ${
                                         !isCollapsed ? "mr-3" : "mx-auto"
                                     }`}
                                 />
@@ -191,16 +191,16 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
                 </nav>
 
                 {/* Footer / Logout */}
-                <div className="p-4 border-t border-graphite-gray">
+                <div className="p-4 border-t border-[var(--card-border)]">
                     <form action={logout}>
                         <button
                             type="submit"
                             onClick={() => setIsMobileOpen(false)}
-                            className={`flex items-center w-full px-3 py-2 rounded-md text-dark-slate hover:bg-soft-gray hover:text-error-red transition-colors group ${isCollapsed ? "md:justify-center" : ""
+                            className={`flex items-center w-full px-3 py-2 rounded-md text-[var(--foreground)] hover:bg-[var(--hover-bg)] hover:text-error-red transition-colors group ${isCollapsed ? "md:justify-center" : ""
                                 }`}
                             title="Cerrar sesión"
                         >
-                            <LogOut size={20} className={`text-dark-slate group-hover:text-error-red ${!isCollapsed ? "mr-3" : "md:mr-0"}`} />
+                            <LogOut size={20} className={`text-[var(--muted-text)] group-hover:text-error-red ${!isCollapsed ? "mr-3" : "md:mr-0"}`} />
                             <span className={`font-medium ${!isCollapsed ? "block" : "hidden"}`}>Cerrar sesión</span>
                         </button>
                     </form>

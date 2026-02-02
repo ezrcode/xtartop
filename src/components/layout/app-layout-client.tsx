@@ -5,13 +5,14 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { OfflineBanner } from "@/components/ui/offline-banner";
+import { ThemePreference } from "@prisma/client";
 
 // Loading fallback para el topbar
 function TopbarSkeleton() {
     return (
-        <div className="h-16 bg-white border-b border-graphite-gray animate-pulse">
+        <div className="h-16 bg-[var(--card-bg)] border-b border-[var(--card-border)] animate-pulse">
             <div className="h-full flex items-center justify-end px-4">
-                <div className="h-8 w-8 rounded-full bg-gray-200" />
+                <div className="h-8 w-8 rounded-full bg-[var(--hover-bg)]" />
             </div>
         </div>
     );
@@ -22,6 +23,7 @@ interface AppLayoutClientProps {
         name?: string | null;
         email?: string | null;
         photoUrl?: string | null;
+        themePreference?: ThemePreference;
     };
     userRole: 'OWNER' | 'ADMIN' | 'MEMBER' | 'VIEWER' | null;
     children: React.ReactNode;
@@ -30,6 +32,22 @@ interface AppLayoutClientProps {
 export function AppLayoutClient({ user, userRole, children }: AppLayoutClientProps) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+    // Apply theme on mount based on user preference
+    useEffect(() => {
+        const theme = user.themePreference || "SYSTEM";
+        const root = document.documentElement;
+        
+        // Remove all theme classes
+        root.classList.remove("dark", "theme-system");
+        
+        if (theme === "DARK") {
+            root.classList.add("dark");
+        } else if (theme === "SYSTEM") {
+            root.classList.add("theme-system");
+        }
+        // LIGHT is the default (no class needed)
+    }, [user.themePreference]);
 
     // Listen to sidebar collapse state from localStorage
     useEffect(() => {
@@ -47,7 +65,7 @@ export function AppLayoutClient({ user, userRole, children }: AppLayoutClientPro
     }, []);
 
     return (
-        <div className="flex min-h-screen bg-soft-gray">
+        <div className="flex min-h-screen bg-[var(--background)]">
             {/* Offline Banner */}
             <OfflineBanner />
             

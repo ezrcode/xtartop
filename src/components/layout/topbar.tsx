@@ -4,12 +4,15 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { User, LogOut, ChevronDown, Menu } from "lucide-react";
 import { logout } from "@/actions/auth";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { ThemePreference } from "@prisma/client";
 
 interface TopbarProps {
     user: {
         name?: string | null;
         email?: string | null;
         photoUrl?: string | null;
+        themePreference?: ThemePreference;
     };
     onMenuClick: () => void;
 }
@@ -48,24 +51,32 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
     };
 
     return (
-        <div className="sticky top-0 z-40 bg-white border-b border-graphite-gray shadow-sm">
+        <div className="sticky top-0 z-40 bg-[var(--card-bg)] border-b border-[var(--card-border)] shadow-sm">
             <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
                 {/* Left side - Mobile Menu Button */}
                 <div className="flex items-center flex-1">
                     <button
                         onClick={onMenuClick}
-                        className="md:hidden p-2 rounded-lg hover:bg-soft-gray transition-colors text-dark-slate"
+                        className="md:hidden p-2 rounded-lg hover:bg-[var(--hover-bg)] transition-colors text-[var(--foreground)]"
                         aria-label="Abrir menú"
                     >
                         <Menu size={24} />
                     </button>
                 </div>
 
-                {/* Right side - User Profile */}
-                <div className="relative" ref={dropdownRef}>
+                {/* Right side - Theme Toggle & User Profile */}
+                <div className="flex items-center gap-2">
+                    {/* Theme Toggle (icon only) */}
+                    <ThemeToggle 
+                        initialTheme={user.themePreference || "SYSTEM"} 
+                        variant="icon" 
+                    />
+
+                    {/* User Dropdown */}
+                    <div className="relative" ref={dropdownRef}>
                     <button
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                        className="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-soft-gray transition-colors group"
+                        className="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-[var(--hover-bg)] transition-colors group"
                     >
                         {/* Avatar */}
                         {user.photoUrl ? (
@@ -82,10 +93,10 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
 
                         {/* User Info */}
                         <div className="hidden sm:block text-left">
-                            <p className="text-sm font-medium text-dark-slate">
+                            <p className="text-sm font-medium text-[var(--foreground)]">
                                 {user.name || "Usuario"}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-[var(--muted-text)]">
                                 {user.email}
                             </p>
                         </div>
@@ -93,19 +104,19 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                         {/* Dropdown Icon */}
                         <ChevronDown 
                             size={16} 
-                            className={`text-gray-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+                            className={`text-[var(--muted-text)] transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
                         />
                     </button>
 
                     {/* Dropdown Menu */}
                     {isDropdownOpen && (
-                        <div className="absolute right-0 mt-2 w-56 bg-white border border-graphite-gray rounded-lg shadow-lg py-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="absolute right-0 mt-2 w-56 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-lg py-2 animate-in fade-in slide-in-from-top-2 duration-200">
                             {/* User Info in Dropdown (mobile) */}
-                            <div className="sm:hidden px-4 py-3 border-b border-graphite-gray">
-                                <p className="text-sm font-medium text-dark-slate">
+                            <div className="sm:hidden px-4 py-3 border-b border-[var(--card-border)]">
+                                <p className="text-sm font-medium text-[var(--foreground)]">
                                     {user.name || "Usuario"}
                                 </p>
-                                <p className="text-xs text-gray-500 mt-1">
+                                <p className="text-xs text-[var(--muted-text)] mt-1">
                                     {user.email}
                                 </p>
                             </div>
@@ -113,19 +124,19 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                             {/* Menu Items */}
                             <Link
                                 href="/app/profile"
-                                className="flex items-center px-4 py-2 text-sm text-dark-slate hover:bg-soft-gray transition-colors"
+                                className="flex items-center px-4 py-2 text-sm text-[var(--foreground)] hover:bg-[var(--hover-bg)] transition-colors"
                                 onClick={() => setIsDropdownOpen(false)}
                             >
-                                <User size={16} className="mr-3 text-gray-400" />
+                                <User size={16} className="mr-3 text-[var(--muted-text)]" />
                                 Mi perfil
                             </Link>
 
-                            <div className="border-t border-graphite-gray my-2"></div>
+                            <div className="border-t border-[var(--card-border)] my-2"></div>
 
                             <form action={logout}>
                                 <button
                                     type="submit"
-                                    className="flex items-center w-full px-4 py-2 text-sm text-error-red hover:bg-red-50 transition-colors"
+                                    className="flex items-center w-full px-4 py-2 text-sm text-error-red hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                                 >
                                     <LogOut size={16} className="mr-3" />
                                     Cerrar sesión
@@ -133,6 +144,7 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                             </form>
                         </div>
                     )}
+                    </div>
                 </div>
             </div>
         </div>

@@ -4,9 +4,10 @@ import { useState } from "react";
 import { useFormState } from "react-dom";
 import { User, Lock, Settings, Save, Mail } from "lucide-react";
 import { updateProfile, updatePassword, updatePreferences, ProfileState, PasswordState, PreferencesState } from "@/actions/profile";
-import { DealViewPreference } from "@prisma/client";
+import { DealViewPreference, ThemePreference } from "@prisma/client";
 import { EmailConfigTab } from "../settings/email-config-tab";
 import { ImageUpload } from "../ui/image-upload";
+import { ThemeToggle } from "../ui/theme-toggle";
 
 interface ProfileFormProps {
     user: {
@@ -15,6 +16,7 @@ interface ProfileFormProps {
         email: string;
         photoUrl: string | null;
         dealsViewPref: DealViewPreference;
+        themePreference: ThemePreference;
         createdAt: Date;
     };
     emailConfig: {
@@ -178,69 +180,84 @@ function PreferencesTab({ user }: { user: ProfileFormProps['user'] }) {
     const [preferencesState, preferencesAction] = useFormState(updatePreferences, initialPreferencesState);
 
     return (
-        <form action={preferencesAction} className="space-y-6">
-            {preferencesState?.message && (
-                <div className={`p-4 rounded-md ${preferencesState.message.includes("success") ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}`}>
-                    {preferencesState.message}
-                </div>
-            )}
-
+        <div className="space-y-8">
+            {/* Theme Preference */}
             <div>
-                <label htmlFor="dealsViewPref" className="block text-sm font-medium text-dark-slate mb-3">
-                    Vista Predeterminada de Negocios
+                <label className="block text-sm font-medium text-[var(--foreground)] mb-3">
+                    Tema de la Aplicación
                 </label>
-                <div className="space-y-3">
-                    <label className="flex items-center p-4 border border-graphite-gray rounded-lg cursor-pointer hover:bg-soft-gray transition-colors">
-                        <input
-                            type="radio"
-                            name="dealsViewPref"
-                            value="TABLE"
-                            defaultChecked={user.dealsViewPref === "TABLE"}
-                            className="h-4 w-4 text-nearby-accent focus:ring-nearby-accent border-gray-300"
-                        />
-                        <div className="ml-3">
-                            <span className="block text-sm font-medium text-dark-slate">
-                                Vista de Tabla
-                            </span>
-                            <span className="block text-xs text-gray-500 mt-1">
-                                Muestra los negocios en formato de tabla con todas las columnas
-                            </span>
-                        </div>
-                    </label>
+                <ThemeToggle initialTheme={user.themePreference} variant="buttons" />
+                <p className="mt-2 text-xs text-[var(--muted-text)]">
+                    Selecciona &quot;Auto&quot; para que el tema cambie según la configuración de tu dispositivo.
+                </p>
+            </div>
 
-                    <label className="flex items-center p-4 border border-graphite-gray rounded-lg cursor-pointer hover:bg-soft-gray transition-colors">
-                        <input
-                            type="radio"
-                            name="dealsViewPref"
-                            value="KANBAN"
-                            defaultChecked={user.dealsViewPref === "KANBAN"}
-                            className="h-4 w-4 text-nearby-accent focus:ring-nearby-accent border-gray-300"
-                        />
-                        <div className="ml-3">
-                            <span className="block text-sm font-medium text-dark-slate">
-                                Vista Kanban
-                            </span>
-                            <span className="block text-xs text-gray-500 mt-1">
-                                Muestra los negocios en columnas según su estado
-                            </span>
+            <div className="border-t border-[var(--card-border)] pt-6">
+                <form action={preferencesAction} className="space-y-6">
+                    {preferencesState?.message && (
+                        <div className={`p-4 rounded-md ${preferencesState.message.includes("success") ? "bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-400" : "bg-red-50 text-red-800 dark:bg-red-900/20 dark:text-red-400"}`}>
+                            {preferencesState.message}
                         </div>
-                    </label>
+                    )}
+
+                    <div>
+                        <label htmlFor="dealsViewPref" className="block text-sm font-medium text-[var(--foreground)] mb-3">
+                            Vista Predeterminada de Negocios
+                        </label>
+                    <div className="space-y-3">
+                        <label className="flex items-center p-4 border border-[var(--card-border)] rounded-lg cursor-pointer hover:bg-[var(--hover-bg)] transition-colors">
+                            <input
+                                type="radio"
+                                name="dealsViewPref"
+                                value="TABLE"
+                                defaultChecked={user.dealsViewPref === "TABLE"}
+                                className="h-4 w-4 text-nearby-accent focus:ring-nearby-accent border-gray-300"
+                            />
+                            <div className="ml-3">
+                                <span className="block text-sm font-medium text-[var(--foreground)]">
+                                    Vista de Tabla
+                                </span>
+                                <span className="block text-xs text-[var(--muted-text)] mt-1">
+                                    Muestra los negocios en formato de tabla con todas las columnas
+                                </span>
+                            </div>
+                        </label>
+
+                        <label className="flex items-center p-4 border border-[var(--card-border)] rounded-lg cursor-pointer hover:bg-[var(--hover-bg)] transition-colors">
+                            <input
+                                type="radio"
+                                name="dealsViewPref"
+                                value="KANBAN"
+                                defaultChecked={user.dealsViewPref === "KANBAN"}
+                                className="h-4 w-4 text-nearby-accent focus:ring-nearby-accent border-gray-300"
+                            />
+                            <div className="ml-3">
+                                <span className="block text-sm font-medium text-[var(--foreground)]">
+                                    Vista Kanban
+                                </span>
+                                <span className="block text-xs text-[var(--muted-text)] mt-1">
+                                    Muestra los negocios en columnas según su estado
+                                </span>
+                            </div>
+                        </label>
+                    </div>
+                    {preferencesState?.errors?.dealsViewPref && (
+                        <p className="mt-1 text-sm text-error-red">{preferencesState.errors.dealsViewPref}</p>
+                    )}
                 </div>
-                {preferencesState?.errors?.dealsViewPref && (
-                    <p className="mt-1 text-sm text-error-red">{preferencesState.errors.dealsViewPref}</p>
-                )}
-            </div>
 
-            <div className="flex justify-end">
-                <button
-                    type="submit"
-                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900 transition-colors"
-                >
-                    <Save size={16} className="mr-2" />
-                    Guardar Preferencias
-                </button>
+                <div className="flex justify-end">
+                    <button
+                        type="submit"
+                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900 transition-colors"
+                    >
+                        <Save size={16} className="mr-2" />
+                        Guardar Preferencias
+                    </button>
+                </div>
+                </form>
             </div>
-        </form>
+        </div>
     );
 }
 

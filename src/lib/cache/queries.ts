@@ -14,6 +14,7 @@ export const getCachedUser = cache(async (email: string) => {
             email: true,
             photoUrl: true,
             dealsViewPref: true,
+            themePreference: true,
         },
     });
 });
@@ -49,6 +50,7 @@ export const getCachedUserWithRole = cache(async (email: string) => {
                 name: user.name,
                 email: user.email,
                 photoUrl: user.photoUrl,
+                themePreference: user.themePreference,
             }
         };
     }
@@ -63,6 +65,7 @@ export const getCachedUserWithRole = cache(async (email: string) => {
                 name: user.name,
                 email: user.email,
                 photoUrl: user.photoUrl,
+                themePreference: user.themePreference,
             }
         };
     }

@@ -50,6 +50,43 @@
 :root {
   --background: #ffffff;
   --foreground: #2d3e50;
+  --card-bg: #ffffff;
+  --card-border: #D7D9DB;
+  --input-bg: #ffffff;
+  --input-border: #D7D9DB;
+  --hover-bg: #F5F6F7;
+  --muted-text: #4A4A4A;
+  --skeleton-base: #f0f0f0;
+  --skeleton-shine: #e0e0e0;
+}
+
+.dark {
+  --background: #121a21;
+  --foreground: #e3e7eb;
+  --card-bg: #1b2631;
+  --card-border: #243242;
+  --input-bg: #1b2631;
+  --input-border: #243242;
+  --hover-bg: #243242;
+  --muted-text: #9aa8b8;
+  --skeleton-base: #1b2631;
+  --skeleton-shine: #243242;
+}
+
+/* System preference detection */
+@media (prefers-color-scheme: dark) {
+  .theme-system {
+    --background: #121a21;
+    --foreground: #e3e7eb;
+    --card-bg: #1b2631;
+    --card-border: #243242;
+    --input-bg: #1b2631;
+    --input-border: #243242;
+    --hover-bg: #243242;
+    --muted-text: #9aa8b8;
+    --skeleton-base: #1b2631;
+    --skeleton-shine: #243242;
+  }
 }
 
 body {
@@ -58,6 +95,7 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Modern Glass Effect */
@@ -129,7 +167,7 @@ body {
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 4px;
@@ -146,12 +184,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-graphite-gray);
+  background: var(--card-border);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-dark-slate);
+  background: var(--muted-text);
 }
 
 /* Focus Ring */
