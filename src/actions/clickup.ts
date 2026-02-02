@@ -88,6 +88,8 @@ export async function saveClickUpSettings(
 ): Promise<ClickUpSettingsState> {
   try {
     const session = await auth();
+    console.log("[ClickUp] Session:", session?.user?.id ? "authenticated" : "no session", session?.user?.email);
+    
     if (!session?.user?.id) {
       return { message: "No autenticado", success: false };
     }
@@ -97,6 +99,8 @@ export async function saveClickUpSettings(
     const workspaceId = formData.get("workspaceId") as string;
     const listId = formData.get("listId") as string;
     const clientFieldId = formData.get("clientFieldId") as string;
+    
+    console.log("[ClickUp] Form data:", { enabled, hasApiToken: !!apiToken, workspaceId, listId, clientFieldId });
 
     // Validation
     const errors: ClickUpSettingsState["errors"] = {};
@@ -130,7 +134,11 @@ export async function saveClickUpSettings(
       },
     });
 
+    console.log("[ClickUp] User found:", !!user, "ownedWorkspaces:", user?.ownedWorkspaces?.length, "memberships:", user?.memberships?.length);
+    
     const workspaceIdToUpdate = user?.ownedWorkspaces[0]?.id || user?.memberships[0]?.workspace?.id;
+    console.log("[ClickUp] workspaceIdToUpdate:", workspaceIdToUpdate);
+    
     if (!workspaceIdToUpdate) {
       return { message: "No se encontró el workspace", success: false };
     }
