@@ -359,18 +359,12 @@ class AdmCloudClient {
 
     /**
      * Obtener listas de precios de AdmCloud
-     * @param itemType - Tipo de item a filtrar: "I" = Artículo, "S" = Servicio, "N" = No Inventariable
      */
-    async getPriceLists(itemType?: string): Promise<AdmCloudApiResponse<AdmCloudItemPrice[]>> {
-        const additionalParams: Record<string, string> = { skip: "0" };
-        if (itemType) {
-            additionalParams.ItemType = itemType;
-        }
-        
+    async getPriceLists(): Promise<AdmCloudApiResponse<AdmCloudItemPrice[]>> {
         const response = await this.request<AdmCloudItemPrice[] | AdmCloudItemPrice>(
             '/PriceList',
             {},
-            additionalParams
+            { skip: "0" }
         );
         if (!response.success) {
             return { success: false, error: response.error };

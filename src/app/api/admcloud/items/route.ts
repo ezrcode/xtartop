@@ -53,8 +53,7 @@ export async function GET(request: NextRequest) {
         });
 
         // Usar PriceList que ya tiene items con sus precios
-        // Filtrar solo servicios (ItemType = "S")
-        const priceListResponse = await client.getPriceLists("S");
+        const priceListResponse = await client.getPriceLists();
 
         if (!priceListResponse.success) {
             return NextResponse.json({ 
@@ -63,16 +62,18 @@ export async function GET(request: NextRequest) {
             }, { status: 500 });
         }
 
-        // Transformar PriceList a formato de items
-        // PriceList tiene: ItemID, ItemSKU, ItemName, Price
-        const items = (priceListResponse.data || []).map((item: Record<string, unknown>) => {
-            const id = (item.ItemID || item.ID || "") as string;
-            const code = (item.ItemSKU || item.SKU || "") as string;
-            const name = (item.ItemName || item.SalesDescription || item.Name || "") as string;
-            const price = Number(item.Price) || 0;
-            
-            return { id, code, name, price };
-        });
+        // Filtrar solo servicios (ItemType = "S") y transformar a formato de items
+        // PriceList tiene: ItemID, ItemSKU, ItemName, Price, ItemType
+        const items = (priceListResponse.data || [])
+            .filter((item: Record<string, unknown>) => item.ItemType === "S")
+            .map((item: Record<string, unknown>) => {
+                const id = (item.ItemID || item.ID || "") as string;
+                const code = (item.ItemSKU || item.SKU || "") as string;
+                const name = (item.ItemName || item.SalesDescription || item.Name || "") as string;
+                const price = Number(item.Price) || 0;
+                
+                return { id, code, name, price };
+            });
 
         // Filtrar duplicados (puede haber varios precios por item, tomamos el primero)
         const uniqueItems = new Map<string, { id: string; code: string; name: string; price: number }>();
