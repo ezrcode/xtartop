@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import type { User } from "@prisma/client";
 
-const INTERNAL_DOMAIN = "nearbycrm.com";
+const INTERNAL_DOMAIN = "nearbycrm.com"; // Internal users domain
 
 async function getUser(email: string): Promise<User | null> {
     try {
