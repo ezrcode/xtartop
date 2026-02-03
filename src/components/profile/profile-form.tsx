@@ -8,6 +8,11 @@ import { DealViewPreference, ThemePreference } from "@prisma/client";
 import { EmailConfigTab } from "../settings/email-config-tab";
 import { ImageUpload } from "../ui/image-upload";
 import { ThemeToggle } from "../ui/theme-toggle";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "../ui/tabs";
+import { Card, CardContent } from "../ui/card";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 
 interface ProfileFormProps {
     user: {
@@ -34,9 +39,9 @@ function ProfileTab({ user }: { user: ProfileFormProps['user'] }) {
     const [photoUrl, setPhotoUrl] = useState<string | null>(user.photoUrl);
 
     return (
-        <form action={profileAction} className="space-y-6">
+        <form action={profileAction} className="space-y-6 max-w-lg">
             {profileState?.message && (
-                <div className={`p-4 rounded-md ${profileState.message.includes("success") ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}`}>
+                <div className={`p-4 rounded-xl ${profileState.message.includes("success") ? "bg-success-green/10 text-success-green" : "bg-error-red/10 text-error-red"}`}>
                     {profileState.message}
                 </div>
             )}
@@ -53,46 +58,39 @@ function ProfileTab({ user }: { user: ProfileFormProps['user'] }) {
             />
             <input type="hidden" name="photoUrl" value={photoUrl || ""} />
 
-            <div>
-                <label htmlFor="name" className="block text-sm font-medium text-dark-slate mb-1.5 sm:mb-2">
-                    Nombre Completo
-                </label>
-                <input
+            <div className="space-y-2">
+                <Label htmlFor="name">Nombre Completo</Label>
+                <Input
                     type="text"
                     name="name"
                     id="name"
                     defaultValue={user.name || ""}
-                    className="w-full px-3 py-3 sm:py-2 text-base sm:text-sm border border-graphite-gray rounded-lg sm:rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                    error={!!profileState?.errors?.name}
                 />
                 {profileState?.errors?.name && (
-                    <p className="mt-1 text-sm text-error-red">{profileState.errors.name}</p>
+                    <p className="text-sm text-error-red">{profileState.errors.name}</p>
                 )}
             </div>
 
-            <div>
-                <label htmlFor="email" className="block text-sm font-medium text-dark-slate mb-1.5 sm:mb-2">
-                    Email
-                </label>
-                <input
+            <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
                     type="email"
                     name="email"
                     id="email"
                     defaultValue={user.email}
-                    className="w-full px-3 py-3 sm:py-2 text-base sm:text-sm border border-graphite-gray rounded-lg sm:rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                    error={!!profileState?.errors?.email}
                 />
                 {profileState?.errors?.email && (
-                    <p className="mt-1 text-sm text-error-red">{profileState.errors.email}</p>
+                    <p className="text-sm text-error-red">{profileState.errors.email}</p>
                 )}
             </div>
 
-            <div className="flex justify-end">
-                <button
-                    type="submit"
-                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900 transition-colors"
-                >
-                    <Save size={16} className="mr-2" />
+            <div className="flex justify-end pt-2">
+                <Button type="submit">
+                    <Save size={16} />
                     Guardar Cambios
-                </button>
+                </Button>
             </div>
         </form>
     );
@@ -104,71 +102,62 @@ function PasswordTab() {
     const [passwordState, passwordAction] = useFormState(updatePassword, initialPasswordState);
 
     return (
-        <form action={passwordAction} className="space-y-6">
+        <form action={passwordAction} className="space-y-6 max-w-lg">
             {passwordState?.message && (
-                <div className={`p-4 rounded-md ${passwordState.message.includes("success") ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}`}>
+                <div className={`p-4 rounded-xl ${passwordState.message.includes("success") ? "bg-success-green/10 text-success-green" : "bg-error-red/10 text-error-red"}`}>
                     {passwordState.message}
                 </div>
             )}
 
-            <div>
-                <label htmlFor="currentPassword" className="block text-sm font-medium text-dark-slate mb-1.5 sm:mb-2">
-                    Contraseña Actual
-                </label>
-                <input
+            <div className="space-y-2">
+                <Label htmlFor="currentPassword">Contraseña Actual</Label>
+                <Input
                     type="password"
                     name="currentPassword"
                     id="currentPassword"
                     required
-                    className="w-full px-3 py-3 sm:py-2 text-base sm:text-sm border border-graphite-gray rounded-lg sm:rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                    error={!!passwordState?.errors?.currentPassword}
                 />
                 {passwordState?.errors?.currentPassword && (
-                    <p className="mt-1 text-sm text-error-red">{passwordState.errors.currentPassword}</p>
+                    <p className="text-sm text-error-red">{passwordState.errors.currentPassword}</p>
                 )}
             </div>
 
-            <div>
-                <label htmlFor="newPassword" className="block text-sm font-medium text-dark-slate mb-1.5 sm:mb-2">
-                    Nueva Contraseña
-                </label>
-                <input
+            <div className="space-y-2">
+                <Label htmlFor="newPassword">Nueva Contraseña</Label>
+                <Input
                     type="password"
                     name="newPassword"
                     id="newPassword"
                     required
                     minLength={6}
-                    className="w-full px-3 py-3 sm:py-2 text-base sm:text-sm border border-graphite-gray rounded-lg sm:rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                    error={!!passwordState?.errors?.newPassword}
                 />
                 {passwordState?.errors?.newPassword && (
-                    <p className="mt-1 text-sm text-error-red">{passwordState.errors.newPassword}</p>
+                    <p className="text-sm text-error-red">{passwordState.errors.newPassword}</p>
                 )}
             </div>
 
-            <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-dark-slate mb-1.5 sm:mb-2">
-                    Confirmar Nueva Contraseña
-                </label>
-                <input
+            <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirmar Nueva Contraseña</Label>
+                <Input
                     type="password"
                     name="confirmPassword"
                     id="confirmPassword"
                     required
                     minLength={6}
-                    className="w-full px-3 py-3 sm:py-2 text-base sm:text-sm border border-graphite-gray rounded-lg sm:rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                    error={!!passwordState?.errors?.confirmPassword}
                 />
                 {passwordState?.errors?.confirmPassword && (
-                    <p className="mt-1 text-sm text-error-red">{passwordState.errors.confirmPassword}</p>
+                    <p className="text-sm text-error-red">{passwordState.errors.confirmPassword}</p>
                 )}
             </div>
 
-            <div className="flex justify-end">
-                <button
-                    type="submit"
-                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900 transition-colors"
-                >
-                    <Save size={16} className="mr-2" />
+            <div className="flex justify-end pt-2">
+                <Button type="submit">
+                    <Save size={16} />
                     Actualizar Contraseña
-                </button>
+                </Button>
             </div>
         </form>
     );
@@ -262,79 +251,56 @@ function PreferencesTab({ user }: { user: ProfileFormProps['user'] }) {
 }
 
 export function ProfileForm({ user, emailConfig }: ProfileFormProps) {
-    const [activeTab, setActiveTab] = useState<"profile" | "password" | "email" | "preferences">("profile");
-
     return (
-        <div className="min-h-screen bg-soft-gray py-8">
+        <div className="min-h-screen bg-[var(--background)] py-6 sm:py-8">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-nearby-dark">Mi Perfil</h1>
-                    <p className="text-dark-slate mt-2">
+                <div className="mb-6 sm:mb-8">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-[var(--foreground)]">Mi Perfil</h1>
+                    <p className="text-[var(--muted-text)] mt-1 sm:mt-2 text-sm sm:text-base">
                         Gestiona tu información personal y preferencias
                     </p>
                 </div>
 
-                <div className="bg-white shadow-sm rounded-lg border border-graphite-gray">
-                    {/* Tabs Navigation - Optimized for iOS */}
-                    <div className="border-b border-graphite-gray overflow-x-auto">
-                        <nav className="flex space-x-4 sm:space-x-8 px-4 sm:px-6 min-w-max">
-                            <button
-                                onClick={() => setActiveTab("profile")}
-                                className={`flex items-center py-3 sm:py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
-                                    activeTab === "profile"
-                                        ? "border-nearby-accent text-nearby-accent"
-                                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                                }`}
-                            >
-                                <User size={16} className="mr-1.5 sm:mr-2" />
-                                <span className="hidden sm:inline">Información Personal</span>
+                <Card>
+                    <Tabs defaultValue="profile" className="w-full">
+                        {/* Tabs Navigation - iOS optimized with horizontal scroll */}
+                        <TabsList variant="underline" className="w-full justify-start px-4 sm:px-6">
+                            <TabsTrigger value="profile" variant="underline">
+                                <User size={16} />
+                                <span className="hidden sm:inline">Información</span>
                                 <span className="sm:hidden">Perfil</span>
-                            </button>
-                            <button
-                                onClick={() => setActiveTab("password")}
-                                className={`flex items-center py-3 sm:py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
-                                    activeTab === "password"
-                                        ? "border-nearby-accent text-nearby-accent"
-                                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                                }`}
-                            >
-                                <Lock size={16} className="mr-1.5 sm:mr-2" />
-                                Contraseña
-                            </button>
-                            <button
-                                onClick={() => setActiveTab("email")}
-                                className={`flex items-center py-3 sm:py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
-                                    activeTab === "email"
-                                        ? "border-nearby-accent text-nearby-accent"
-                                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                                }`}
-                            >
-                                <Mail size={16} className="mr-1.5 sm:mr-2" />
-                                Email
-                            </button>
-                            <button
-                                onClick={() => setActiveTab("preferences")}
-                                className={`flex items-center py-3 sm:py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
-                                    activeTab === "preferences"
-                                        ? "border-nearby-accent text-nearby-accent"
-                                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                                }`}
-                            >
-                                <Settings size={16} className="mr-1.5 sm:mr-2" />
+                            </TabsTrigger>
+                            <TabsTrigger value="password" variant="underline">
+                                <Lock size={16} />
+                                <span>Contraseña</span>
+                            </TabsTrigger>
+                            <TabsTrigger value="email" variant="underline">
+                                <Mail size={16} />
+                                <span>Email</span>
+                            </TabsTrigger>
+                            <TabsTrigger value="preferences" variant="underline">
+                                <Settings size={16} />
                                 <span className="hidden sm:inline">Preferencias</span>
                                 <span className="sm:hidden">Prefs</span>
-                            </button>
-                        </nav>
-                    </div>
+                            </TabsTrigger>
+                        </TabsList>
 
-                    {/* Tab Content */}
-                    <div className="p-4 sm:p-6">
-                        {activeTab === "profile" && <ProfileTab user={user} />}
-                        {activeTab === "password" && <PasswordTab />}
-                        {activeTab === "email" && <EmailConfigTab emailConfig={emailConfig} />}
-                        {activeTab === "preferences" && <PreferencesTab user={user} />}
-                    </div>
-                </div>
+                        <CardContent className="p-4 sm:p-6">
+                            <TabsContent value="profile" className="mt-0">
+                                <ProfileTab user={user} />
+                            </TabsContent>
+                            <TabsContent value="password" className="mt-0">
+                                <PasswordTab />
+                            </TabsContent>
+                            <TabsContent value="email" className="mt-0">
+                                <EmailConfigTab emailConfig={emailConfig} />
+                            </TabsContent>
+                            <TabsContent value="preferences" className="mt-0">
+                                <PreferencesTab user={user} />
+                            </TabsContent>
+                        </CardContent>
+                    </Tabs>
+                </Card>
             </div>
         </div>
     );

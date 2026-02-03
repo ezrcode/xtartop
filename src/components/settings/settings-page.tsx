@@ -16,6 +16,13 @@ import {
 import type { Workspace, WorkspaceMember, Invitation, User, Subscription } from "@prisma/client";
 import { AdmCloudConfigTab } from "./admcloud-config-tab";
 import { ClickUpConfigTab } from "./clickup-config-tab";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "../ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Badge } from "../ui/badge";
+import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 
 type WorkspaceWithDetails = Workspace & {
     owner: Pick<User, 'id' | 'name' | 'email' | 'photoUrl'>;
@@ -205,51 +212,41 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
         setSavingContract(false);
     };
 
-    const tabs = [
-        { id: 'workspace' as Tab, name: 'Espacio de trabajo', icon: Building2 },
-        { id: 'team' as Tab, name: 'Equipo', icon: Users2 },
-        { id: 'contract' as Tab, name: 'Contrato', icon: FileText },
-        { id: 'integrations' as Tab, name: 'Integraciones', icon: Cloud },
-    ];
-
     return (
-        <div className="min-h-screen bg-soft-gray py-8">
+        <div className="min-h-screen bg-[var(--background)] py-6 sm:py-8">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mb-6 sm:mb-8">
-                    <h1 className="text-2xl sm:text-3xl font-bold text-nearby-dark">Configuración</h1>
-                    <p className="text-sm sm:text-base text-dark-slate mt-2">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-[var(--foreground)]">Configuración</h1>
+                    <p className="text-sm sm:text-base text-[var(--muted-text)] mt-1 sm:mt-2">
                         Gestiona tu workspace, equipo y configuraciones
                     </p>
                 </div>
 
-                {/* Tabs - Optimized for iOS */}
-                <div className="mb-6">
-                    <div className="border-b border-graphite-gray overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-                        <nav className="-mb-px flex space-x-4 sm:space-x-8 min-w-max">
-                            {tabs.map((tab) => {
-                                const Icon = tab.icon;
-                                return (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => setActiveTab(tab.id)}
-                                        className={`flex items-center py-3 sm:py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
-                                            activeTab === tab.id
-                                                ? 'border-nearby-accent text-nearby-accent'
-                                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                        }`}
-                                    >
-                                        <Icon size={18} className="mr-1.5 sm:mr-2" />
-                                        <span className="hidden sm:inline">{tab.name}</span>
-                                        <span className="sm:hidden">{tab.id === 'workspace' ? 'Espacio' : tab.id === 'team' ? 'Equipo' : tab.id === 'contract' ? 'Contrato' : 'Integr.'}</span>
-                                    </button>
-                                );
-                            })}
-                        </nav>
-                    </div>
-                </div>
+                <Tabs defaultValue="workspace" value={activeTab} onValueChange={(v) => setActiveTab(v as Tab)} className="w-full">
+                    {/* Tabs - iOS optimized with horizontal scroll */}
+                    <TabsList variant="underline" className="w-full justify-start mb-6 border-[var(--card-border)]">
+                        <TabsTrigger value="workspace" variant="underline">
+                            <Building2 size={18} />
+                            <span className="hidden sm:inline">Espacio de trabajo</span>
+                            <span className="sm:hidden">Espacio</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="team" variant="underline">
+                            <Users2 size={18} />
+                            <span>Equipo</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="contract" variant="underline">
+                            <FileText size={18} />
+                            <span>Contrato</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="integrations" variant="underline">
+                            <Cloud size={18} />
+                            <span className="hidden sm:inline">Integraciones</span>
+                            <span className="sm:hidden">Integr.</span>
+                        </TabsTrigger>
+                    </TabsList>
 
-                {/* Tab Content */}
-                {activeTab === 'workspace' && (
+                    {/* Tab Content: Workspace */}
+                    <TabsContent value="workspace" className="mt-0">
                     <div className="space-y-6">
                         {/* Workspace Info */}
                         <div className="bg-white shadow-sm rounded-lg border border-graphite-gray p-6">
@@ -369,9 +366,10 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                             </form>
                         </div>
                     </div>
-                )}
+                    </TabsContent>
 
-                {activeTab === 'contract' && (
+                    {/* Tab Content: Contract */}
+                    <TabsContent value="contract" className="mt-0">
                     <div className="space-y-6">
                         <div className="bg-white shadow-sm rounded-lg border border-graphite-gray p-6">
                             <h2 className="text-lg font-semibold text-nearby-dark mb-2">Plantilla del Contrato</h2>
@@ -474,9 +472,10 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                             </div>
                         </div>
                     </div>
-                )}
+                    </TabsContent>
 
-                {activeTab === 'team' && (
+                    {/* Tab Content: Team */}
+                    <TabsContent value="team" className="mt-0">
                     <div className="space-y-6">
                         {/* Team Management */}
                         <div className="bg-white shadow-sm rounded-lg border border-graphite-gray p-6">
@@ -673,10 +672,10 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                             )}
                         </div>
                     </div>
-                )}
+                    </TabsContent>
 
-                {activeTab === 'integrations' && (
-                    <>
+                    {/* Tab Content: Integrations */}
+                    <TabsContent value="integrations" className="mt-0 space-y-6">
                         <AdmCloudConfigTab 
                             currentConfig={{
                                 enabled: workspace.admCloudEnabled || false,
@@ -698,8 +697,8 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                 clientFieldId: workspace.clickUpClientFieldId || null,
                             }}
                         />
-                    </>
-                )}
+                    </TabsContent>
+                </Tabs>
             </div>
         </div>
     );
