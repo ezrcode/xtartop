@@ -486,51 +486,48 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
 
                             {/* Invite Form */}
                             {showInviteForm && (
-                                <form action={invitationAction} className="mb-6 p-4 bg-gray-50 rounded-lg border border-graphite-gray">
+                                <form action={invitationAction} className="mb-6 p-4 bg-[var(--hover-bg)] rounded-xl border border-[var(--card-border)]">
                                     <div className="flex items-start justify-between mb-4">
-                                        <h3 className="text-sm font-medium text-dark-slate">Nueva Invitación</h3>
+                                        <h3 className="text-sm font-medium text-[var(--foreground)]">Nueva Invitación</h3>
                                         <button
                                             type="button"
                                             onClick={() => setShowInviteForm(false)}
-                                            className="text-gray-400 hover:text-gray-600"
+                                            className="text-[var(--muted-text)] hover:text-[var(--foreground)] p-1"
                                         >
-                                            <X size={20} />
+                                            <X size={18} />
                                         </button>
                                     </div>
 
                                     {invitationState?.message && (
-                                        <div className={`p-3 rounded-md mb-4 text-sm ${invitationState.message.includes("success") ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}`}>
+                                        <div className={`p-3 rounded-xl mb-4 text-sm ${invitationState.message.includes("success") ? "bg-success-green/10 text-success-green" : "bg-error-red/10 text-error-red"}`}>
                                             {invitationState.message}
                                         </div>
                                     )}
 
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div className="md:col-span-2">
-                                            <label htmlFor="email" className="block text-sm font-medium text-dark-slate mb-2">
-                                                Email
-                                            </label>
-                                            <input
+                                    {/* Stacked on mobile */}
+                                    <div className="space-y-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="email">Email</Label>
+                                            <Input
                                                 type="email"
                                                 name="email"
                                                 id="email"
                                                 placeholder="miembro@email.com"
                                                 required
-                                                className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                                error={!!invitationState?.errors?.email}
                                             />
                                             {invitationState?.errors?.email && (
-                                                <p className="mt-1 text-sm text-error-red">{invitationState.errors.email}</p>
+                                                <p className="text-sm text-error-red">{invitationState.errors.email}</p>
                                             )}
                                         </div>
 
-                                        <div>
-                                            <label htmlFor="role" className="block text-sm font-medium text-dark-slate mb-2">
-                                                Rol
-                                            </label>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="role">Rol</Label>
                                             <select
                                                 name="role"
                                                 id="role"
                                                 defaultValue="MEMBER"
-                                                className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                                className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                             >
                                                 <option value="MEMBER">Miembro</option>
                                                 <option value="ADMIN">Administrador</option>
@@ -539,25 +536,22 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                         </div>
                                     </div>
 
-                                    <div className="mt-4 flex justify-end">
-                                        <button
-                                            type="submit"
-                                            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-accent hover:bg-nearby-dark transition-colors"
-                                        >
-                                            <Mail size={16} className="mr-2" />
+                                    <div className="mt-4">
+                                        <Button type="submit" className="w-full sm:w-auto">
+                                            <Mail size={16} />
                                             Enviar Invitación
-                                        </button>
+                                        </Button>
                                     </div>
                                 </form>
                             )}
 
                             {/* Members List */}
-                            <div className="space-y-4">
-                                <h3 className="text-sm font-medium text-gray-700">Miembros Activos</h3>
+                            <div className="space-y-3">
+                                <h3 className="text-sm font-medium text-[var(--foreground)]">Miembros Activos</h3>
                                 
                                 {/* Owner */}
-                                <div className="flex items-center justify-between p-4 border border-graphite-gray rounded-lg">
-                                    <div className="flex items-center space-x-3">
+                                <div className="flex items-center gap-3 p-3 border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)]">
+                                    <div className="shrink-0">
                                         {workspace.owner.photoUrl ? (
                                             <img
                                                 src={workspace.owner.photoUrl}
@@ -565,26 +559,24 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                                 className="h-10 w-10 rounded-full object-cover"
                                             />
                                         ) : (
-                                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-dark flex items-center justify-center text-white font-semibold">
+                                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-dark flex items-center justify-center text-white font-semibold text-sm">
                                                 {getInitials(workspace.owner.name, workspace.owner.email)}
                                             </div>
                                         )}
-                                        <div>
-                                            <p className="text-sm font-medium text-dark-slate">
-                                                {workspace.owner.name || workspace.owner.email}
-                                            </p>
-                                            <p className="text-xs text-gray-500">{workspace.owner.email}</p>
-                                        </div>
                                     </div>
-                                    <span className="px-3 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
-                                        Owner
-                                    </span>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-[var(--foreground)] truncate">
+                                            {workspace.owner.name || workspace.owner.email}
+                                        </p>
+                                        <p className="text-xs text-[var(--muted-text)] truncate">{workspace.owner.email}</p>
+                                    </div>
+                                    <Badge variant="secondary" className="shrink-0">Owner</Badge>
                                 </div>
 
                                 {/* Members */}
                                 {workspace.members.map((member) => (
-                                    <div key={member.id} className="flex items-center justify-between p-4 border border-graphite-gray rounded-lg">
-                                        <div className="flex items-center space-x-3">
+                                    <div key={member.id} className="flex items-center gap-3 p-3 border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)]">
+                                        <div className="shrink-0">
                                             {member.user.photoUrl ? (
                                                 <img
                                                     src={member.user.photoUrl}
@@ -592,29 +584,25 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                                     className="h-10 w-10 rounded-full object-cover"
                                                 />
                                             ) : (
-                                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-dark flex items-center justify-center text-white font-semibold">
+                                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-dark flex items-center justify-center text-white font-semibold text-sm">
                                                     {getInitials(member.user.name, member.user.email)}
                                                 </div>
                                             )}
-                                            <div>
-                                                <p className="text-sm font-medium text-dark-slate">
-                                                    {member.user.name || member.user.email}
-                                                </p>
-                                                <p className="text-xs text-gray-500">{member.user.email}</p>
-                                            </div>
                                         </div>
-                                        <div className="flex items-center space-x-3">
-                                            <span className={`px-3 py-1 text-xs font-medium rounded-full ${
-                                                member.role === 'ADMIN' ? 'bg-blue-100 text-blue-800' :
-                                                member.role === 'MEMBER' ? 'bg-green-100 text-green-800' :
-                                                'bg-gray-100 text-gray-800'
-                                            }`}>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium text-[var(--foreground)] truncate">
+                                                {member.user.name || member.user.email}
+                                            </p>
+                                            <p className="text-xs text-[var(--muted-text)] truncate">{member.user.email}</p>
+                                        </div>
+                                        <div className="shrink-0 flex items-center gap-2">
+                                            <Badge variant={member.role === 'ADMIN' ? 'info' : 'success'}>
                                                 {member.role}
-                                            </span>
+                                            </Badge>
                                             <button
                                                 onClick={() => handleRemoveMember(member.id)}
                                                 disabled={removingId === member.id || member.user.id === workspace.owner.id}
-                                                className="text-error-red hover:text-red-700 disabled:opacity-50"
+                                                className="text-error-red hover:text-red-700 disabled:opacity-50 p-1"
                                                 title={member.user.id === workspace.owner.id ? "No se puede eliminar al Owner" : "Eliminar"}
                                             >
                                                 <Trash2 size={16} />
@@ -626,29 +614,25 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
 
                             {/* Pending Invitations */}
                             {workspace.invitations.length > 0 && (
-                                <div className="mt-6 space-y-4">
-                                    <h3 className="text-sm font-medium text-gray-700">Invitaciones Pendientes</h3>
+                                <div className="mt-6 space-y-3">
+                                    <h3 className="text-sm font-medium text-[var(--foreground)]">Invitaciones Pendientes</h3>
                                     {workspace.invitations.map((invitation) => (
-                                        <div key={invitation.id} className="flex items-center justify-between p-4 border border-dashed border-graphite-gray rounded-lg bg-gray-50">
-                                            <div className="flex items-center space-x-3">
-                                                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
-                                                    <Mail size={20} />
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm font-medium text-dark-slate">{invitation.email}</p>
-                                                    <p className="text-xs text-gray-500">
-                                                        Invitado por {invitation.inviter.name || invitation.inviter.email}
-                                                    </p>
-                                                </div>
+                                        <div key={invitation.id} className="flex items-center gap-3 p-3 border border-dashed border-[var(--card-border)] rounded-xl bg-[var(--hover-bg)]">
+                                            <div className="shrink-0 h-10 w-10 rounded-full bg-[var(--card-border)] flex items-center justify-center text-[var(--muted-text)]">
+                                                <Mail size={18} />
                                             </div>
-                                            <div className="flex items-center space-x-3">
-                                                <span className="px-3 py-1 text-xs font-medium rounded-full bg-warning-amber/20 text-warning-amber">
-                                                    Pendiente
-                                                </span>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-medium text-[var(--foreground)] truncate">{invitation.email}</p>
+                                                <p className="text-xs text-[var(--muted-text)] truncate">
+                                                    Por {invitation.inviter.name || invitation.inviter.email}
+                                                </p>
+                                            </div>
+                                            <div className="shrink-0 flex items-center gap-2">
+                                                <Badge variant="warning">Pendiente</Badge>
                                                 <button
                                                     onClick={() => handleRevokeInvitation(invitation.id)}
                                                     disabled={revokingId === invitation.id}
-                                                    className="text-error-red hover:text-red-700 disabled:opacity-50"
+                                                    className="text-error-red hover:text-red-700 disabled:opacity-50 p-1"
                                                 >
                                                     <X size={16} />
                                                 </button>
