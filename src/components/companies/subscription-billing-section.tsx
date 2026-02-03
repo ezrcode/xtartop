@@ -222,7 +222,7 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                                                             </span>
                                                         )}
                                                     </td>
-                                                    <td className="px-4 py-3 text-right text-dark-slate">{formatMoney(item.price)}</td>
+                                                    <td className="px-4 py-3 text-right text-dark-slate">{formatMoney(Number(item.price))}</td>
                                                     <td className="px-4 py-3 text-right font-medium text-dark-slate">{formatMoney(item.subtotal)}</td>
                                                     <td className="px-4 py-3">
                                                         <div className="flex items-center justify-end space-x-1">
