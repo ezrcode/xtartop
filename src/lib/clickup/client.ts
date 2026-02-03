@@ -224,7 +224,7 @@ class ClickUpClient {
     return { success: false, error: result.error };
   }
 
-  // Get tasks from a list
+  // Get tasks from a list (with pagination - fetches all pages)
   async getTasks(
     listId: string,
     options?: {
@@ -233,26 +233,51 @@ class ClickUpClient {
       custom_fields?: { field_id: string; operator: string; value: string }[];
     }
   ): Promise<ApiResult<ClickUpTask[]>> {
-    const params = new URLSearchParams();
+    const allTasks: ClickUpTask[] = [];
+    let page = 0;
+    const maxPages = 50; // Safety limit to prevent infinite loops (5000 tasks max)
     
-    if (options?.subtasks) {
-      params.append("subtasks", "true");
-    }
-    if (options?.include_closed) {
-      params.append("include_closed", "true");
-    }
-    if (options?.custom_fields && options.custom_fields.length > 0) {
-      params.append("custom_fields", JSON.stringify(options.custom_fields));
-    }
+    while (page < maxPages) {
+      const params = new URLSearchParams();
+      params.append("page", page.toString());
+      
+      if (options?.subtasks) {
+        params.append("subtasks", "true");
+      }
+      if (options?.include_closed) {
+        params.append("include_closed", "true");
+      }
+      if (options?.custom_fields && options.custom_fields.length > 0) {
+        params.append("custom_fields", JSON.stringify(options.custom_fields));
+      }
 
-    const queryString = params.toString();
-    const endpoint = `/list/${listId}/task${queryString ? `?${queryString}` : ""}`;
-    
-    const result = await this.request<ClickUpTasksResponse>(endpoint);
-    if (result.success && result.data) {
-      return { success: true, data: result.data.tasks };
+      const queryString = params.toString();
+      const endpoint = `/list/${listId}/task?${queryString}`;
+      
+      const result = await this.request<ClickUpTasksResponse>(endpoint);
+      
+      if (!result.success) {
+        // If we already have some tasks and hit an error, return what we have
+        if (allTasks.length > 0) {
+          console.warn(`[ClickUp] Error fetching page ${page}, returning ${allTasks.length} tasks collected so far:`, result.error);
+          return { success: true, data: allTasks };
+        }
+        return { success: false, error: result.error };
+      }
+      
+      const tasks = result.data?.tasks || [];
+      allTasks.push(...tasks);
+      
+      // If we got fewer than 100 tasks, we've reached the last page
+      if (tasks.length < 100) {
+        break;
+      }
+      
+      page++;
     }
-    return { success: false, error: result.error };
+    
+    console.log(`[ClickUp] Fetched ${allTasks.length} tasks across ${page + 1} pages for list ${listId}`);
+    return { success: true, data: allTasks };
   }
 
   // Get tasks filtered by client name (custom field)
