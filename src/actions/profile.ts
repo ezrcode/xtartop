@@ -245,5 +245,5 @@ export async function getUserThemePreference(): Promise<ThemePreference> {
         select: { themePreference: true },
     });
 
-    return user?.themePreference ?? "SYSTEM";
+    return user?.themePreference ?? "LIGHT";
 }

@@ -35,7 +35,7 @@ export function AppLayoutClient({ user, userRole, children }: AppLayoutClientPro
 
     // Apply theme on mount based on user preference
     useEffect(() => {
-        const theme = user.themePreference || "SYSTEM";
+        const theme = user.themePreference || "LIGHT";
         const root = document.documentElement;
         
         // Remove all theme classes

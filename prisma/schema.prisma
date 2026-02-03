@@ -113,7 +113,7 @@ model User {
   photoUrl      String?
   userType        UserType           @default(INTERNAL)
   dealsViewPref   DealViewPreference @default(TABLE)
-  themePreference ThemePreference    @default(SYSTEM)
+  themePreference ThemePreference    @default(LIGHT)
   
   // Table Preferences (sorting, filters, visible columns per table)
   tablePreferences Json?

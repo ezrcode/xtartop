@@ -68,7 +68,7 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                 <div className="flex items-center gap-2">
                     {/* Theme Toggle (icon only) */}
                     <ThemeToggle 
-                        initialTheme={user.themePreference || "SYSTEM"} 
+                        initialTheme={user.themePreference || "LIGHT"} 
                         variant="icon" 
                     />
 
