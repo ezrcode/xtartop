@@ -463,22 +463,24 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                     <TabsContent value="team" className="mt-0">
                     <div className="space-y-6">
                         {/* Team Management */}
-                        <div className="bg-white shadow-sm rounded-lg border border-graphite-gray p-6">
-                            <div className="flex items-center justify-between mb-6">
+                        <Card>
+                            <CardContent className="pt-6">
+                            {/* Header - stacked on mobile */}
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                                 <div>
-                                    <h2 className="text-lg font-semibold text-nearby-dark">Equipo</h2>
-                                    <p className="text-sm text-gray-500 mt-1">
+                                    <h2 className="text-lg font-semibold text-[var(--foreground)]">Equipo</h2>
+                                    <p className="text-sm text-[var(--muted-text)] mt-1">
                                         {totalMembers} de 5 miembros (Plan FREE)
                                     </p>
                                 </div>
                                 {canAddMembers && (
-                                    <button
+                                    <Button
                                         onClick={() => setShowInviteForm(!showInviteForm)}
-                                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900 transition-colors"
+                                        className="w-full sm:w-auto"
                                     >
-                                        <UserPlus size={16} className="mr-2" />
+                                        <UserPlus size={16} />
                                         Invitar Miembro
-                                    </button>
+                                    </Button>
                                 )}
                             </div>
 
@@ -655,7 +657,8 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                     ))}
                                 </div>
                             )}
-                        </div>
+                            </CardContent>
+                        </Card>
                     </div>
                     </TabsContent>
 
