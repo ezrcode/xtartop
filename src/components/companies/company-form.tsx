@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import Link from "next/link";
-import { Save, Trash2, ArrowLeft, Loader2, ChevronDown, Search, X } from "lucide-react";
+import { Save, Trash2, ArrowLeft, Loader2, ChevronDown, Search, X, Building2, Users, CreditCard, FileText, Ticket } from "lucide-react";
 import { createCompanyAction, updateCompanyAction, deleteCompany, CompanyState } from "@/actions/companies";
 import { Company, Contact, CompanyStatus, ClientInvitation, Project, ClientUser } from "@prisma/client";
 import { CompanyActivitiesClient } from "../activities/company-activities-client";
@@ -264,63 +264,68 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
 
                     {/* Left Column: Form */}
                     <div className="lg:col-span-7 space-y-4 sm:space-y-6">
-                        {/* Tabs - Mobile Optimized - Outside the form */}
-                        <div className="border-b border-graphite-gray overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0">
-                            <nav className="-mb-px flex space-x-1 sm:space-x-6 min-w-max">
+                        {/* Tabs - iOS optimized: icons only on mobile, distributed evenly */}
+                        <div className="border-b border-[var(--card-border)]">
+                            <nav className="flex justify-between sm:justify-start sm:gap-1">
                                 <button
                                     type="button"
                                     onClick={() => setActiveTab("general")}
-                                    className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
+                                    className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 py-3 px-2 sm:px-4 border-b-2 font-medium text-xs sm:text-sm transition-colors ${
                                         activeTab === "general"
                                             ? "border-nearby-accent text-nearby-accent"
-                                            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                            : "border-transparent text-[var(--muted-text)] hover:text-[var(--foreground)]"
                                     }`}
                                 >
-                                    Información General
+                                    <Building2 size={16} className="shrink-0" />
+                                    <span className="hidden sm:inline">General</span>
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setActiveTab("contacts")}
-                                    className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
+                                    className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 py-3 px-2 sm:px-4 border-b-2 font-medium text-xs sm:text-sm transition-colors ${
                                         activeTab === "contacts"
                                             ? "border-nearby-accent text-nearby-accent"
-                                            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                            : "border-transparent text-[var(--muted-text)] hover:text-[var(--foreground)]"
                                     }`}
                                 >
-                                    Contactos
+                                    <Users size={16} className="shrink-0" />
+                                    <span className="hidden sm:inline">Contactos</span>
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setActiveTab("subscription")}
-                                    className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
+                                    className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 py-3 px-2 sm:px-4 border-b-2 font-medium text-xs sm:text-sm transition-colors ${
                                         activeTab === "subscription"
                                             ? "border-nearby-accent text-nearby-accent"
-                                            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                            : "border-transparent text-[var(--muted-text)] hover:text-[var(--foreground)]"
                                     }`}
                                 >
-                                    Suscripción
+                                    <CreditCard size={16} className="shrink-0" />
+                                    <span className="hidden sm:inline">Suscripción</span>
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setActiveTab("invoices")}
-                                    className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
+                                    className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 py-3 px-2 sm:px-4 border-b-2 font-medium text-xs sm:text-sm transition-colors ${
                                         activeTab === "invoices"
                                             ? "border-nearby-accent text-nearby-accent"
-                                            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                            : "border-transparent text-[var(--muted-text)] hover:text-[var(--foreground)]"
                                     }`}
                                 >
-                                    Facturación
+                                    <FileText size={16} className="shrink-0" />
+                                    <span className="hidden sm:inline">Facturación</span>
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setActiveTab("tickets")}
-                                    className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
+                                    className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 py-3 px-2 sm:px-4 border-b-2 font-medium text-xs sm:text-sm transition-colors ${
                                         activeTab === "tickets"
                                             ? "border-purple-600 text-purple-600"
-                                            : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                            : "border-transparent text-[var(--muted-text)] hover:text-[var(--foreground)]"
                                     }`}
                                 >
-                                    Tickets
+                                    <Ticket size={16} className="shrink-0" />
+                                    <span className="hidden sm:inline">Tickets</span>
                                 </button>
                             </nav>
                         </div>
