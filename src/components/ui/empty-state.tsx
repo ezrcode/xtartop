@@ -4,6 +4,7 @@ import { LucideIcon, Plus, Building2, Users, TrendingUp } from "lucide-react";
 import { Button } from "./button";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 interface EmptyStateProps {
     icon: LucideIcon;
@@ -12,6 +13,7 @@ interface EmptyStateProps {
     actionLabel?: string;
     actionHref?: string;
     onAction?: () => void;
+    size?: "sm" | "default" | "lg";
 }
 
 export function EmptyState({ 
@@ -20,50 +22,101 @@ export function EmptyState({
     description, 
     actionLabel,
     actionHref,
-    onAction 
+    onAction,
+    size = "default"
 }: EmptyStateProps) {
+    const sizeClasses = {
+        sm: {
+            container: "py-8",
+            iconBox: "w-14 h-14 mb-4",
+            icon: 28,
+            title: "text-base",
+            desc: "text-xs mb-4",
+        },
+        default: {
+            container: "py-16",
+            iconBox: "w-20 h-20 mb-6",
+            icon: 40,
+            title: "text-xl",
+            desc: "text-sm mb-8",
+        },
+        lg: {
+            container: "py-24",
+            iconBox: "w-28 h-28 mb-8",
+            icon: 56,
+            title: "text-2xl",
+            desc: "text-base mb-10",
+        },
+    };
+
+    const s = sizeClasses[size];
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="flex flex-col items-center justify-center py-12 px-4"
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className={cn("flex flex-col items-center justify-center px-4", s.container)}
         >
             <motion.div 
-                className="w-20 h-20 rounded-2xl bg-[var(--hover-bg)] flex items-center justify-center mb-6"
-                initial={{ scale: 0.8 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+                className={cn(
+                    "rounded-2xl bg-gradient-to-br from-[var(--hover-bg)] to-[var(--card-border)]/30 flex items-center justify-center shadow-inner",
+                    s.iconBox
+                )}
+                initial={{ scale: 0.8, rotate: -10 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ delay: 0.1, type: "spring", stiffness: 200, damping: 15 }}
             >
-                <Icon size={40} className="text-[var(--muted-text)]" />
+                <Icon size={s.icon} className="text-[var(--muted-text)]" strokeWidth={1.5} />
             </motion.div>
             
-            <h3 className="text-lg font-semibold text-[var(--foreground)] mb-2 text-center">
+            <motion.h3 
+                className={cn("font-semibold text-[var(--foreground)] mb-2 text-center", s.title)}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+            >
                 {title}
-            </h3>
-            <p className="text-sm text-[var(--muted-text)] max-w-sm text-center mb-6">
+            </motion.h3>
+            <motion.p 
+                className={cn("text-[var(--muted-text)] max-w-md text-center", s.desc)}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+            >
                 {description}
-            </p>
+            </motion.p>
             
             {(actionLabel && actionHref) && (
-                <Link href={actionHref}>
-                    <Button 
-                        variant="primary" 
-                        leftIcon={<Plus size={18} />}
-                    >
-                        {actionLabel}
-                    </Button>
-                </Link>
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                >
+                    <Link href={actionHref}>
+                        <Button variant="primary" size={size === "sm" ? "sm" : "default"}>
+                            <Plus size={18} />
+                            {actionLabel}
+                        </Button>
+                    </Link>
+                </motion.div>
             )}
             
             {(actionLabel && onAction && !actionHref) && (
-                <Button 
-                    variant="primary" 
-                    leftIcon={<Plus size={18} />}
-                    onClick={onAction}
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
                 >
-                    {actionLabel}
-                </Button>
+                    <Button 
+                        variant="primary"
+                        size={size === "sm" ? "sm" : "default"}
+                        onClick={onAction}
+                    >
+                        <Plus size={18} />
+                        {actionLabel}
+                    </Button>
+                </motion.div>
             )}
         </motion.div>
     );

@@ -16,6 +16,11 @@ import {
     X,
 } from "lucide-react";
 import { logout } from "@/actions/auth";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const menuItems = [
     { name: "Inicio", href: "/app", icon: LayoutDashboard },
@@ -60,14 +65,13 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
             }
         };
         window.addEventListener('resize', handleResize);
-        handleResize(); // Call on mount
+        handleResize();
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
     // Handle click outside to minimize sidebar
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            // Only for desktop view (not mobile)
             if (window.innerWidth >= 768 && !isCollapsed) {
                 if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
                     setIsCollapsed(true);
@@ -88,12 +92,60 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
         localStorage.setItem("sidebarCollapsed", JSON.stringify(newState));
     };
 
+    const NavItem = ({ item, isActive }: { item: typeof menuItems[0], isActive: boolean }) => {
+        const content = (
+            <Link
+                href={item.href}
+                onClick={() => setIsMobileOpen(false)}
+                className={cn(
+                    "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200",
+                    isActive
+                        ? "bg-gradient-to-r from-nearby-accent/15 to-nearby-accent/5 text-nearby-accent shadow-sm"
+                        : "text-[var(--muted-text)] hover:bg-[var(--hover-bg)] hover:text-[var(--foreground)]",
+                    isCollapsed && "md:justify-center md:px-3"
+                )}
+            >
+                <item.icon
+                    size={20}
+                    className={cn(
+                        "shrink-0 transition-colors",
+                        isActive ? "text-nearby-accent" : "text-[var(--muted-text)]"
+                    )}
+                />
+                <span className={cn(
+                    "transition-opacity duration-200",
+                    isCollapsed ? "md:hidden" : ""
+                )}>
+                    {item.name}
+                </span>
+                {isActive && (
+                    <div className="ml-auto h-2 w-2 rounded-full bg-nearby-accent animate-pulse" />
+                )}
+            </Link>
+        );
+
+        if (isCollapsed) {
+            return (
+                <Tooltip delayDuration={0}>
+                    <TooltipTrigger asChild className="hidden md:flex">
+                        {content}
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="hidden md:block">
+                        {item.name}
+                    </TooltipContent>
+                </Tooltip>
+            );
+        }
+
+        return content;
+    };
+
     return (
-        <>
+        <TooltipProvider>
             {/* Mobile overlay */}
             {isMobileOpen && (
                 <div
-                    className="fixed inset-0 z-40 bg-black/50 md:hidden"
+                    className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden animate-in fade-in-0"
                     onClick={() => setIsMobileOpen(false)}
                 />
             )}
@@ -101,13 +153,15 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
             {/* Sidebar Container */}
             <aside
                 ref={sidebarRef}
-                className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-[var(--card-bg)] border-r border-[var(--card-border)] transition-all duration-300 ease-in-out
-                    ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
-                    ${isMobileOpen || !isCollapsed ? "w-64" : "w-64"}
-                    md:translate-x-0 ${isCollapsed ? "md:w-20" : "md:w-64"}`}
+                className={cn(
+                    "fixed inset-y-0 left-0 z-50 flex flex-col bg-[var(--card-bg)] border-r border-[var(--card-border)] transition-all duration-300 ease-in-out shadow-xl md:shadow-none",
+                    isMobileOpen ? "translate-x-0" : "-translate-x-full",
+                    "w-72 md:translate-x-0",
+                    isCollapsed ? "md:w-20" : "md:w-72"
+                )}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between h-16 px-4 border-b border-[var(--card-border)]">
+                <div className="flex items-center justify-between h-16 px-4">
                     {/* Mobile: Always show full logo */}
                     <div className="md:hidden">
                         <Image 
@@ -120,9 +174,12 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
                     </div>
                     
                     {/* Desktop: Collapsed/Expanded logo */}
-                    <div className="hidden md:block">
+                    <div className={cn(
+                        "hidden md:flex items-center transition-all duration-300",
+                        isCollapsed ? "justify-center w-full" : ""
+                    )}>
                         {isCollapsed ? (
-                            <div className="flex items-center justify-center w-full">
+                            <div className="p-2 rounded-xl bg-gradient-to-br from-nearby-accent/10 to-transparent">
                                 <Image 
                                     src="/nearby_isotipo.png" 
                                     alt="NEARBY" 
@@ -143,69 +200,77 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
                     </div>
                     
                     {/* Desktop collapse button */}
-                    <button
+                    <Button
+                        variant="ghost"
+                        size="icon-sm"
                         onClick={toggleCollapse}
-                        className={`p-1 rounded-md hover:bg-[var(--hover-bg)] text-[var(--foreground)] hidden md:block ${isCollapsed ? "absolute top-4 right-2" : ""}`}
+                        className={cn(
+                            "hidden md:flex rounded-lg",
+                            isCollapsed && "absolute top-4 right-3"
+                        )}
                     >
-                        {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-                    </button>
+                        {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+                    </Button>
                     
                     {/* Mobile close button */}
-                    <button
+                    <Button
+                        variant="ghost"
+                        size="icon-sm"
                         onClick={() => setIsMobileOpen(false)}
-                        className="md:hidden p-1 rounded-md hover:bg-[var(--hover-bg)] text-[var(--foreground)]"
+                        className="md:hidden rounded-lg"
                     >
-                        <X size={20} />
-                    </button>
+                        <X size={18} />
+                    </Button>
                 </div>
 
+                <Separator className="mx-4" />
+
                 {/* Navigation */}
-                <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
-                    {visibleMenuItems.map((item) => {
-                        // Special handling for Dashboard (/app) to avoid matching all /app/* routes
-                        const isActive = item.href === "/app" 
-                            ? pathname === "/app"
-                            : pathname === item.href || pathname.startsWith(`${item.href}/`);
-                        const showText = !isCollapsed; // In mobile, always show text
-                        return (
-                            <Link
-                                key={item.name}
-                                href={item.href}
-                                onClick={() => setIsMobileOpen(false)}
-                                className={`flex items-center px-3 py-2 rounded-md transition-colors group ${isActive
-                                        ? "bg-nearby-accent/10 text-nearby-accent border-l-4 border-nearby-accent"
-                                        : "text-[var(--foreground)] hover:bg-[var(--hover-bg)]"
-                                    }`}
-                                title={isCollapsed ? item.name : undefined}
-                            >
-                                <item.icon
-                                    size={20}
-                                    className={`${isActive ? "text-nearby-accent" : "text-[var(--muted-text)] group-hover:text-[var(--foreground)]"} ${
-                                        !isCollapsed ? "mr-3" : "mx-auto"
-                                    }`}
-                                />
-                                <span className={`font-medium ${!isCollapsed ? "block" : "hidden md:hidden"}`}>{item.name}</span>
-                            </Link>
-                        );
-                    })}
-                </nav>
+                <ScrollArea className="flex-1 px-3 py-4">
+                    <nav className="space-y-1">
+                        {visibleMenuItems.map((item) => {
+                            const isActive = item.href === "/app" 
+                                ? pathname === "/app"
+                                : pathname === item.href || pathname.startsWith(`${item.href}/`);
+                            
+                            return (
+                                <NavItem key={item.name} item={item} isActive={isActive} />
+                            );
+                        })}
+                    </nav>
+                </ScrollArea>
+
+                <Separator className="mx-4" />
 
                 {/* Footer / Logout */}
-                <div className="p-4 border-t border-[var(--card-border)]">
+                <div className="p-3">
                     <form action={logout}>
-                        <button
-                            type="submit"
-                            onClick={() => setIsMobileOpen(false)}
-                            className={`flex items-center w-full px-3 py-2 rounded-md text-[var(--foreground)] hover:bg-[var(--hover-bg)] hover:text-error-red transition-colors group ${isCollapsed ? "md:justify-center" : ""
-                                }`}
-                            title="Cerrar sesión"
-                        >
-                            <LogOut size={20} className={`text-[var(--muted-text)] group-hover:text-error-red ${!isCollapsed ? "mr-3" : "md:mr-0"}`} />
-                            <span className={`font-medium ${!isCollapsed ? "block" : "hidden"}`}>Cerrar sesión</span>
-                        </button>
+                        <Tooltip delayDuration={0}>
+                            <TooltipTrigger asChild>
+                                <button
+                                    type="submit"
+                                    onClick={() => setIsMobileOpen(false)}
+                                    className={cn(
+                                        "flex items-center gap-3 w-full rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200",
+                                        "text-[var(--muted-text)] hover:bg-error-red/10 hover:text-error-red",
+                                        isCollapsed && "md:justify-center"
+                                    )}
+                                >
+                                    <LogOut size={20} className="shrink-0" />
+                                    <span className={cn(isCollapsed && "md:hidden")}>
+                                        Cerrar sesión
+                                    </span>
+                                </button>
+                            </TooltipTrigger>
+                            {isCollapsed && (
+                                <TooltipContent side="right" className="hidden md:block">
+                                    Cerrar sesión
+                                </TooltipContent>
+                            )}
+                        </Tooltip>
                     </form>
                 </div>
             </aside>
-        </>
+        </TooltipProvider>
     );
 }

@@ -1,11 +1,21 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { User, LogOut, ChevronDown, Menu } from "lucide-react";
+import { User, LogOut, Menu } from "lucide-react";
 import { logout } from "@/actions/auth";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { ThemePreference } from "@prisma/client";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface TopbarProps {
     user: {
@@ -18,23 +28,6 @@ interface TopbarProps {
 }
 
 export function Topbar({ user, onMenuClick }: TopbarProps) {
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const dropdownRef = useRef<HTMLDivElement>(null);
-
-    // Cerrar dropdown al hacer click fuera
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setIsDropdownOpen(false);
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, []);
-
     // Obtener iniciales para el avatar
     const getInitials = () => {
         if (user.name) {
@@ -51,21 +44,23 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
     };
 
     return (
-        <div className="sticky top-0 z-40 bg-[var(--card-bg)] border-b border-[var(--card-border)] shadow-sm">
+        <header className="sticky top-0 z-40 bg-[var(--card-bg)]/80 backdrop-blur-xl border-b border-[var(--card-border)]">
             <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
                 {/* Left side - Mobile Menu Button */}
                 <div className="flex items-center flex-1">
-                    <button
+                    <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={onMenuClick}
-                        className="md:hidden p-2 rounded-lg hover:bg-[var(--hover-bg)] transition-colors text-[var(--foreground)]"
+                        className="md:hidden"
                         aria-label="Abrir menú"
                     >
-                        <Menu size={24} />
-                    </button>
+                        <Menu size={22} />
+                    </Button>
                 </div>
 
                 {/* Right side - Theme Toggle & User Profile */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                     {/* Theme Toggle (icon only) */}
                     <ThemeToggle 
                         initialTheme={user.themePreference || "LIGHT"} 
@@ -73,81 +68,72 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
                     />
 
                     {/* User Dropdown */}
-                    <div className="relative" ref={dropdownRef}>
-                    <button
-                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                        className="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-[var(--hover-bg)] transition-colors group"
-                    >
-                        {/* Avatar */}
-                        {user.photoUrl ? (
-                            <img
-                                src={user.photoUrl}
-                                alt={user.name || "Profile"}
-                                className="h-10 w-10 rounded-full object-cover shadow-sm"
-                            />
-                        ) : (
-                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-dark flex items-center justify-center text-white font-semibold shadow-sm">
-                                {getInitials()}
-                            </div>
-                        )}
-
-                        {/* User Info */}
-                        <div className="hidden sm:block text-left">
-                            <p className="text-sm font-medium text-[var(--foreground)]">
-                                {user.name || "Usuario"}
-                            </p>
-                            <p className="text-xs text-[var(--muted-text)]">
-                                {user.email}
-                            </p>
-                        </div>
-
-                        {/* Dropdown Icon */}
-                        <ChevronDown 
-                            size={16} 
-                            className={`text-[var(--muted-text)] transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
-                        />
-                    </button>
-
-                    {/* Dropdown Menu */}
-                    {isDropdownOpen && (
-                        <div className="absolute right-0 mt-2 w-56 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-lg py-2 animate-in fade-in slide-in-from-top-2 duration-200">
-                            {/* User Info in Dropdown (mobile) */}
-                            <div className="sm:hidden px-4 py-3 border-b border-[var(--card-border)]">
-                                <p className="text-sm font-medium text-[var(--foreground)]">
-                                    {user.name || "Usuario"}
-                                </p>
-                                <p className="text-xs text-[var(--muted-text)] mt-1">
-                                    {user.email}
-                                </p>
-                            </div>
-
-                            {/* Menu Items */}
-                            <Link
-                                href="/app/profile"
-                                className="flex items-center px-4 py-2 text-sm text-[var(--foreground)] hover:bg-[var(--hover-bg)] transition-colors"
-                                onClick={() => setIsDropdownOpen(false)}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button 
+                                variant="ghost" 
+                                className={cn(
+                                    "relative h-auto p-2 hover:bg-[var(--hover-bg)] rounded-xl",
+                                    "flex items-center gap-3"
+                                )}
                             >
-                                <User size={16} className="mr-3 text-[var(--muted-text)]" />
-                                Mi perfil
-                            </Link>
+                                <Avatar size="default">
+                                    <AvatarImage src={user.photoUrl || undefined} alt={user.name || "Profile"} />
+                                    <AvatarFallback>{getInitials()}</AvatarFallback>
+                                </Avatar>
+                                
+                                {/* User Info - Desktop only */}
+                                <div className="hidden sm:block text-left max-w-[150px]">
+                                    <p className="text-sm font-medium text-[var(--foreground)] truncate">
+                                        {user.name || "Usuario"}
+                                    </p>
+                                    <p className="text-xs text-[var(--muted-text)] truncate">
+                                        {user.email}
+                                    </p>
+                                </div>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        
+                        <DropdownMenuContent align="end" className="w-60">
+                            {/* User Info in Dropdown (mobile) */}
+                            <div className="sm:hidden">
+                                <DropdownMenuLabel className="font-normal">
+                                    <div className="flex flex-col space-y-1">
+                                        <p className="text-sm font-medium text-[var(--foreground)]">
+                                            {user.name || "Usuario"}
+                                        </p>
+                                        <p className="text-xs text-[var(--muted-text)]">
+                                            {user.email}
+                                        </p>
+                                    </div>
+                                </DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                            </div>
 
-                            <div className="border-t border-[var(--card-border)] my-2"></div>
+                            <DropdownMenuItem asChild>
+                                <Link href="/app/profile" className="cursor-pointer">
+                                    <User className="mr-2.5" size={16} />
+                                    Mi perfil
+                                </Link>
+                            </DropdownMenuItem>
 
-                            <form action={logout}>
-                                <button
-                                    type="submit"
-                                    className="flex items-center w-full px-4 py-2 text-sm text-error-red hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                                >
-                                    <LogOut size={16} className="mr-3" />
-                                    Cerrar sesión
-                                </button>
+                            <DropdownMenuSeparator />
+
+                            <form action={logout} className="w-full">
+                                <DropdownMenuItem asChild>
+                                    <button
+                                        type="submit"
+                                        className="w-full text-error-red focus:text-error-red focus:bg-error-red/10 cursor-pointer"
+                                    >
+                                        <LogOut className="mr-2.5" size={16} />
+                                        Cerrar sesión
+                                    </button>
+                                </DropdownMenuItem>
                             </form>
-                        </div>
-                    )}
-                    </div>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             </div>
-        </div>
+        </header>
     );
 }
-

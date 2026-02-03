@@ -1,13 +1,22 @@
-// UI Components
-export * from "./button";
-export * from "./card";
-export * from "./input";
-export * from "./skeleton";
-export * from "./empty-state";
-export * from "./data-table";
-export * from "./prefetch-link";
-export * from "./motion";
-export * from "./offline-banner";
-export * from "./modal";
-export * from "./select";
-export * from "./theme-toggle";
+// shadcn/ui components
+export * from "./button"
+export * from "./input"
+export * from "./card"
+export * from "./label"
+export * from "./badge"
+export * from "./avatar"
+export * from "./dialog"
+export * from "./dropdown-menu"
+export * from "./select"
+export * from "./tabs"
+export * from "./tooltip"
+export * from "./separator"
+export * from "./switch"
+export * from "./textarea"
+export * from "./scroll-area"
+export * from "./skeleton"
+
+// Keep existing components
+export * from "./data-table"
+export * from "./empty-state"
+export * from "./theme-toggle"

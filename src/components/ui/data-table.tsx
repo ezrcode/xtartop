@@ -1,8 +1,12 @@
 "use client";
 
 import { ReactNode, useState, useMemo, useEffect, useCallback, useRef } from "react";
-import { ChevronUp, ChevronDown, Search, Filter, Columns, Check, X, Save } from "lucide-react";
+import { ChevronUp, ChevronDown, Search, Filter, Columns, Check, X, Save, MoreHorizontal } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { Button } from "./button";
+import { Input } from "./input";
+import { Badge } from "./badge";
 
 export interface TablePreferences {
     sortKey?: string;
@@ -33,7 +37,6 @@ interface DataTableProps<T> {
     searchable?: boolean;
     searchPlaceholder?: string;
     searchKeys?: (keyof T)[];
-    // Preferences
     initialPreferences?: TablePreferences;
     onSavePreferences?: (prefs: TablePreferences) => Promise<void>;
     showSaveButton?: boolean;
@@ -52,7 +55,6 @@ export function DataTable<T>({
     onSavePreferences,
     showSaveButton = true,
 }: DataTableProps<T>) {
-    // Initialize state from preferences or defaults
     const [sortKey, setSortKey] = useState<string | null>(initialPreferences?.sortKey || null);
     const [sortDirection, setSortDirection] = useState<"asc" | "desc">(initialPreferences?.sortDirection || "asc");
     const [searchQuery, setSearchQuery] = useState(initialPreferences?.searchTerm || "");
@@ -66,17 +68,14 @@ export function DataTable<T>({
             .map(col => String(col.key));
     });
     
-    // UI state
     const [showFilters, setShowFilters] = useState(false);
     const [showColumnSelector, setShowColumnSelector] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
     
-    // Refs for click outside
     const filterRef = useRef<HTMLDivElement>(null);
     const columnRef = useRef<HTMLDivElement>(null);
 
-    // Track changes
     useEffect(() => {
         const currentPrefs: TablePreferences = {
             sortKey: sortKey || undefined,
@@ -102,7 +101,6 @@ export function DataTable<T>({
         setHasChanges(changed);
     }, [sortKey, sortDirection, visibleColumns, filters, searchQuery, initialPreferences, columns]);
 
-    // Click outside handlers
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
@@ -139,7 +137,6 @@ export function DataTable<T>({
     const toggleColumn = (key: string) => {
         setVisibleColumns(prev => {
             if (prev.includes(key)) {
-                // Don't allow hiding all columns
                 if (prev.length <= 1) return prev;
                 return prev.filter(k => k !== key);
             }
@@ -171,11 +168,9 @@ export function DataTable<T>({
         setFilters({});
     };
 
-    // Filter data based on search and column filters
     const filteredData = useMemo(() => {
         let result = data;
         
-        // Apply search filter
         if (searchQuery && searchKeys.length > 0) {
             const query = searchQuery.toLowerCase();
             result = result.filter(item => 
@@ -189,7 +184,6 @@ export function DataTable<T>({
             );
         }
         
-        // Apply column filters
         Object.entries(filters).forEach(([key, filterValue]) => {
             if (filterValue) {
                 result = result.filter(item => {
@@ -202,7 +196,6 @@ export function DataTable<T>({
         return result;
     }, [data, searchQuery, searchKeys, filters]);
 
-    // Sort filtered data
     const sortedData = useMemo(() => {
         if (!sortKey) return filteredData;
 
@@ -227,17 +220,14 @@ export function DataTable<T>({
         });
     }, [filteredData, sortKey, sortDirection]);
 
-    // Get visible columns
     const displayColumns = useMemo(() => {
         return columns.filter(col => visibleColumns.includes(String(col.key)));
     }, [columns, visibleColumns]);
 
-    // Get filterable columns
     const filterableColumns = useMemo(() => {
         return columns.filter(col => col.filterable && col.filterOptions);
     }, [columns]);
 
-    // Get hideable columns
     const hideableColumns = useMemo(() => {
         return columns.filter(col => col.hideable !== false);
     }, [columns]);
@@ -245,19 +235,20 @@ export function DataTable<T>({
     const activeFiltersCount = Object.keys(filters).length;
 
     return (
-        <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] overflow-hidden">
+        <div className="bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)] overflow-hidden shadow-sm">
             {/* Toolbar */}
             <div className="p-4 border-b border-[var(--card-border)] flex flex-wrap items-center gap-3">
                 {/* Search */}
                 {searchable && (
-                    <div className="relative flex-1 min-w-[200px] max-w-sm">
-                        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted-text)]" />
-                        <input
+                    <div className="relative flex-1 min-w-[200px] max-w-md">
+                        <Input
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder={searchPlaceholder}
-                            className="w-full pl-10 pr-4 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] placeholder:text-[var(--muted-text)] border border-[var(--input-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                            icon={<Search size={18} />}
+                            iconPosition="left"
+                            className="h-10"
                         />
                     </div>
                 )}
@@ -266,48 +257,46 @@ export function DataTable<T>({
                     {/* Filter Button */}
                     {filterableColumns.length > 0 && (
                         <div className="relative" ref={filterRef}>
-                            <button
-                                type="button"
+                            <Button
+                                variant={activeFiltersCount > 0 ? "primary" : "outline"}
+                                size="sm"
                                 onClick={() => setShowFilters(!showFilters)}
-                                className={`flex items-center gap-2 px-3 py-2.5 min-h-[44px] text-sm border rounded-lg transition-colors ${
-                                    activeFiltersCount > 0
-                                        ? "bg-nearby-accent text-white border-nearby-accent"
-                                        : "border-[var(--card-border)] text-[var(--foreground)] hover:bg-[var(--hover-bg)]"
-                                }`}
+                                className="gap-2"
                             >
                                 <Filter size={16} />
                                 <span className="hidden sm:inline">Filtros</span>
                                 {activeFiltersCount > 0 && (
-                                    <span className="bg-white text-nearby-accent text-xs font-bold px-1.5 py-0.5 rounded-full">
+                                    <Badge variant="secondary" size="sm" className="ml-1">
                                         {activeFiltersCount}
-                                    </span>
+                                    </Badge>
                                 )}
-                            </button>
+                            </Button>
                             
                             {showFilters && (
-                                <div className="absolute right-0 top-full mt-2 w-72 bg-[var(--card-bg)] rounded-lg shadow-lg border border-[var(--card-border)] z-50 p-4">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <h4 className="font-semibold text-sm text-[var(--foreground)]">Filtros</h4>
+                                <div className="absolute right-0 top-full mt-2 w-80 bg-[var(--card-bg)] rounded-xl shadow-xl border border-[var(--card-border)] z-50 p-4 animate-in fade-in-0 zoom-in-95">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h4 className="font-semibold text-[var(--foreground)]">Filtros</h4>
                                         {activeFiltersCount > 0 && (
-                                            <button
-                                                type="button"
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
                                                 onClick={clearFilters}
-                                                className="text-xs text-red-600 hover:text-red-700"
+                                                className="text-error-red hover:text-error-red"
                                             >
                                                 Limpiar todo
-                                            </button>
+                                            </Button>
                                         )}
                                     </div>
-                                    <div className="space-y-3">
+                                    <div className="space-y-4">
                                         {filterableColumns.map(col => (
                                             <div key={String(col.key)}>
-                                                <label className="block text-xs font-medium text-[var(--muted-text)] mb-1">
+                                                <label className="block text-xs font-medium text-[var(--muted-text)] mb-2">
                                                     {col.header}
                                                 </label>
                                                 <select
                                                     value={filters[String(col.key)] || ""}
                                                     onChange={(e) => handleFilterChange(String(col.key), e.target.value)}
-                                                    className="w-full px-3 py-2.5 min-h-[44px] text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-nearby-accent/20"
+                                                    className="w-full h-10 px-3 text-sm bg-[var(--input-bg)] text-[var(--foreground)] border-2 border-[var(--input-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-all"
                                                 >
                                                     <option value="">Todos</option>
                                                     {col.filterOptions?.map(opt => (
@@ -327,18 +316,19 @@ export function DataTable<T>({
                     {/* Column Selector */}
                     {hideableColumns.length > 0 && (
                         <div className="relative" ref={columnRef}>
-                            <button
-                                type="button"
+                            <Button
+                                variant="outline"
+                                size="sm"
                                 onClick={() => setShowColumnSelector(!showColumnSelector)}
-                                className="flex items-center gap-2 px-3 py-2.5 min-h-[44px] text-sm border border-[var(--card-border)] text-[var(--foreground)] rounded-lg hover:bg-[var(--hover-bg)] transition-colors"
+                                className="gap-2"
                             >
                                 <Columns size={16} />
                                 <span className="hidden sm:inline">Columnas</span>
-                            </button>
+                            </Button>
                             
                             {showColumnSelector && (
-                                <div className="absolute right-0 top-full mt-2 w-56 bg-[var(--card-bg)] rounded-lg shadow-lg border border-[var(--card-border)] z-50 p-2">
-                                    <div className="text-xs font-semibold text-[var(--muted-text)] px-2 py-1 mb-1">
+                                <div className="absolute right-0 top-full mt-2 w-60 bg-[var(--card-bg)] rounded-xl shadow-xl border border-[var(--card-border)] z-50 p-2 animate-in fade-in-0 zoom-in-95">
+                                    <div className="text-xs font-semibold text-[var(--muted-text)] px-3 py-2 uppercase tracking-wider">
                                         Mostrar columnas
                                     </div>
                                     {hideableColumns.map(col => (
@@ -346,15 +336,16 @@ export function DataTable<T>({
                                             key={String(col.key)}
                                             type="button"
                                             onClick={() => toggleColumn(String(col.key))}
-                                            className="w-full flex items-center gap-2 px-2 py-2.5 min-h-[44px] text-sm text-[var(--foreground)] hover:bg-[var(--hover-bg)] rounded transition-colors"
+                                            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-[var(--foreground)] hover:bg-[var(--hover-bg)] rounded-lg transition-colors"
                                         >
-                                            <div className={`w-4 h-4 rounded border flex items-center justify-center ${
+                                            <div className={cn(
+                                                "w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all",
                                                 visibleColumns.includes(String(col.key))
                                                     ? "bg-nearby-accent border-nearby-accent"
                                                     : "border-[var(--input-border)]"
-                                            }`}>
+                                            )}>
                                                 {visibleColumns.includes(String(col.key)) && (
-                                                    <Check size={12} className="text-white" />
+                                                    <Check size={14} className="text-white" />
                                                 )}
                                             </div>
                                             <span>{col.header}</span>
@@ -367,42 +358,43 @@ export function DataTable<T>({
                     
                     {/* Save Button */}
                     {showSaveButton && onSavePreferences && hasChanges && (
-                        <button
-                            type="button"
+                        <Button
+                            variant="primary"
+                            size="sm"
                             onClick={handleSave}
-                            disabled={isSaving}
-                            className="flex items-center gap-2 px-3 py-2.5 min-h-[44px] text-sm bg-nearby-accent text-white rounded-lg hover:bg-nearby-accent/90 transition-colors disabled:opacity-50"
+                            loading={isSaving}
+                            className="gap-2"
                         >
                             <Save size={16} />
-                            <span className="hidden sm:inline">{isSaving ? "Guardando..." : "Guardar vista"}</span>
-                            <span className="sm:hidden">{isSaving ? "..." : "Guardar"}</span>
-                        </button>
+                            <span className="hidden sm:inline">Guardar vista</span>
+                        </Button>
                     )}
                 </div>
             </div>
             
             {/* Active Filters Display */}
             {activeFiltersCount > 0 && (
-                <div className="px-4 py-2 bg-[var(--hover-bg)] border-b border-[var(--card-border)] flex flex-wrap items-center gap-2">
-                    <span className="text-xs text-[var(--muted-text)]">Filtros activos:</span>
+                <div className="px-4 py-3 bg-[var(--hover-bg)] border-b border-[var(--card-border)] flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-medium text-[var(--muted-text)]">Filtros activos:</span>
                     {Object.entries(filters).map(([key, value]) => {
                         const column = columns.find(c => String(c.key) === key);
                         const option = column?.filterOptions?.find(o => o.value === value);
                         return (
-                            <span
+                            <Badge
                                 key={key}
-                                className="inline-flex items-center gap-1 px-2 py-1 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-full text-xs text-[var(--foreground)]"
+                                variant="secondary"
+                                className="gap-1.5 pr-1.5"
                             >
                                 <span className="font-medium">{column?.header}:</span>
                                 <span>{option?.label || value}</span>
                                 <button
                                     type="button"
                                     onClick={() => handleFilterChange(key, "")}
-                                    className="ml-1 text-[var(--muted-text)] hover:text-[var(--foreground)]"
+                                    className="ml-0.5 p-0.5 rounded-full hover:bg-[var(--card-border)] transition-colors"
                                 >
                                     <X size={12} />
                                 </button>
-                            </span>
+                            </Badge>
                         );
                     })}
                 </div>
@@ -412,8 +404,8 @@ export function DataTable<T>({
             <div className="block md:hidden">
                 {sortedData.length === 0 ? (
                     emptyState || (
-                        <div className="py-12 text-center text-[var(--muted-text)] text-sm">
-                            No hay datos disponibles
+                        <div className="py-16 text-center">
+                            <div className="text-[var(--muted-text)] text-sm">No hay datos disponibles</div>
                         </div>
                     )
                 ) : (
@@ -422,22 +414,25 @@ export function DataTable<T>({
                             {sortedData.map((item, index) => (
                                 <motion.div
                                     key={keyExtractor(item)}
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0 }}
                                     transition={{ delay: index * 0.02 }}
                                     onClick={() => onRowClick?.(item)}
-                                    className={`p-4 ${
-                                        onRowClick 
-                                            ? "cursor-pointer hover:bg-[var(--hover-bg)] active:bg-[var(--hover-bg)] transition-colors" 
-                                            : ""
-                                    }`}
+                                    className={cn(
+                                        "p-4",
+                                        onRowClick && "cursor-pointer hover:bg-[var(--hover-bg)] active:bg-[var(--hover-bg)] transition-colors"
+                                    )}
                                 >
-                                    <div className="space-y-2">
+                                    <div className="space-y-2.5">
                                         {displayColumns.slice(0, 4).map((column, colIndex) => (
                                             <div 
                                                 key={`${keyExtractor(item)}-${String(column.key)}`}
-                                                className={colIndex === 0 ? "font-medium text-[var(--foreground)]" : "flex justify-between text-sm"}
+                                                className={cn(
+                                                    colIndex === 0 
+                                                        ? "font-semibold text-[var(--foreground)] text-base" 
+                                                        : "flex justify-between text-sm"
+                                                )}
                                             >
                                                 {colIndex === 0 ? (
                                                     column.render 
@@ -446,7 +441,7 @@ export function DataTable<T>({
                                                 ) : (
                                                     <>
                                                         <span className="text-[var(--muted-text)]">{column.header}</span>
-                                                        <span className="text-[var(--foreground)]">
+                                                        <span className="text-[var(--foreground)] font-medium">
                                                             {column.render 
                                                                 ? column.render(item) 
                                                                 : String((item as Record<string, unknown>)[String(column.key)] ?? "")}
@@ -455,6 +450,12 @@ export function DataTable<T>({
                                                 )}
                                             </div>
                                         ))}
+                                        {displayColumns.length > 4 && (
+                                            <div className="flex items-center gap-1 text-xs text-[var(--muted-text)]">
+                                                <MoreHorizontal size={14} />
+                                                <span>+{displayColumns.length - 4} campos más</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </motion.div>
                             ))}
@@ -466,22 +467,27 @@ export function DataTable<T>({
             {/* Desktop Table View */}
             <div className="hidden md:block overflow-x-auto">
                 <table className="w-full">
-                    <thead className="bg-[var(--hover-bg)] border-b border-[var(--card-border)]">
-                        <tr>
+                    <thead>
+                        <tr className="bg-[var(--hover-bg)]">
                             {displayColumns.map((column) => (
                                 <th
                                     key={String(column.key)}
-                                    className={`px-4 py-3 text-left text-xs font-semibold text-[var(--muted-text)] uppercase tracking-wider ${
-                                        column.sortable ? "cursor-pointer hover:bg-[var(--card-border)]/50 transition-colors select-none" : ""
-                                    } ${column.className || ""}`}
+                                    className={cn(
+                                        "px-4 py-3.5 text-left text-xs font-semibold text-[var(--muted-text)] uppercase tracking-wider border-b border-[var(--card-border)]",
+                                        column.sortable && "cursor-pointer hover:bg-[var(--card-border)]/30 transition-colors select-none",
+                                        column.className
+                                    )}
                                     onClick={() => column.sortable && handleSort(String(column.key))}
                                 >
-                                    <div className="flex items-center gap-1">
+                                    <div className="flex items-center gap-1.5">
                                         {column.header}
                                         {column.sortable && sortKey === String(column.key) && (
-                                            sortDirection === "asc" 
-                                                ? <ChevronUp size={14} /> 
-                                                : <ChevronDown size={14} />
+                                            <span className="text-nearby-accent">
+                                                {sortDirection === "asc" 
+                                                    ? <ChevronUp size={14} /> 
+                                                    : <ChevronDown size={14} />
+                                                }
+                                            </span>
                                         )}
                                     </div>
                                 </th>
@@ -494,8 +500,8 @@ export function DataTable<T>({
                                 <tr>
                                     <td colSpan={displayColumns.length}>
                                         {emptyState || (
-                                            <div className="py-12 text-center text-[var(--muted-text)] text-sm">
-                                                No hay datos disponibles
+                                            <div className="py-16 text-center">
+                                                <div className="text-[var(--muted-text)] text-sm">No hay datos disponibles</div>
                                             </div>
                                         )}
                                     </td>
@@ -507,18 +513,20 @@ export function DataTable<T>({
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
                                         exit={{ opacity: 0 }}
-                                        transition={{ delay: index * 0.02 }}
+                                        transition={{ delay: index * 0.015 }}
                                         onClick={() => onRowClick?.(item)}
-                                        className={`${
-                                            onRowClick 
-                                                ? "cursor-pointer hover:bg-[var(--hover-bg)] transition-colors" 
-                                                : ""
-                                        }`}
+                                        className={cn(
+                                            "group",
+                                            onRowClick && "cursor-pointer hover:bg-[var(--hover-bg)] transition-colors"
+                                        )}
                                     >
                                         {displayColumns.map((column) => (
                                             <td
                                                 key={`${keyExtractor(item)}-${String(column.key)}`}
-                                                className={`px-4 py-3 text-sm text-[var(--foreground)] ${column.className || ""}`}
+                                                className={cn(
+                                                    "px-4 py-4 text-sm text-[var(--foreground)]",
+                                                    column.className
+                                                )}
                                             >
                                                 {column.render 
                                                     ? column.render(item) 
@@ -535,8 +543,10 @@ export function DataTable<T>({
             </div>
             
             {/* Footer with count */}
-            <div className="px-4 py-2 border-t border-[var(--card-border)] bg-[var(--hover-bg)] text-xs text-[var(--muted-text)]">
-                {sortedData.length} de {data.length} registros
+            <div className="px-4 py-3 border-t border-[var(--card-border)] bg-[var(--hover-bg)] flex items-center justify-between">
+                <span className="text-xs text-[var(--muted-text)]">
+                    Mostrando <span className="font-semibold text-[var(--foreground)]">{sortedData.length}</span> de <span className="font-semibold text-[var(--foreground)]">{data.length}</span> registros
+                </span>
             </div>
         </div>
     );

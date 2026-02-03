@@ -1,326 +1,163 @@
-"use client";
+"use client"
 
-import { useState, useRef, useEffect, useMemo, ReactNode } from "react";
-import { ChevronDown, Search, X, Check } from "lucide-react";
+import * as React from "react"
+import * as SelectPrimitive from "@radix-ui/react-select"
+import { Check, ChevronDown, ChevronUp } from "lucide-react"
+import { cn } from "@/lib/utils"
 
-export interface SelectOption {
-    value: string;
-    label: string;
-    description?: string;
-    icon?: ReactNode;
-    disabled?: boolean;
-}
+const Select = SelectPrimitive.Root
 
-interface SelectProps {
-    options: SelectOption[];
-    value: string | null;
-    onChange: (value: string | null) => void;
-    placeholder?: string;
-    label?: string;
-    error?: string;
-    helperText?: string;
-    searchable?: boolean;
-    searchPlaceholder?: string;
-    clearable?: boolean;
-    disabled?: boolean;
-    emptyMessage?: string;
-    className?: string;
-}
+const SelectGroup = SelectPrimitive.Group
 
-export function Select({
-    options,
-    value,
-    onChange,
-    placeholder = "Seleccionar...",
-    label,
-    error,
-    helperText,
-    searchable = false,
-    searchPlaceholder = "Buscar...",
-    clearable = false,
-    disabled = false,
-    emptyMessage = "No se encontraron opciones",
-    className = "",
-}: SelectProps) {
-    const [isOpen, setIsOpen] = useState(false);
-    const [searchTerm, setSearchTerm] = useState("");
-    const containerRef = useRef<HTMLDivElement>(null);
-    const searchInputRef = useRef<HTMLInputElement>(null);
+const SelectValue = SelectPrimitive.Value
 
-    // Filter options based on search
-    const filteredOptions = useMemo(() => {
-        if (!searchTerm.trim()) return options;
-        const term = searchTerm.toLowerCase();
-        return options.filter(
-            (opt) =>
-                opt.label.toLowerCase().includes(term) ||
-                opt.description?.toLowerCase().includes(term)
-        );
-    }, [options, searchTerm]);
+const SelectTrigger = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> & {
+    error?: boolean
+  }
+>(({ className, children, error, ...props }, ref) => (
+  <SelectPrimitive.Trigger
+    ref={ref}
+    className={cn(
+      "flex h-11 w-full items-center justify-between rounded-xl border-2 bg-[var(--input-bg)] px-4 py-2.5 text-base text-[var(--foreground)] transition-all duration-200 placeholder:text-[var(--muted-text)] focus:outline-none focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+      error
+        ? "border-error-red focus:ring-error-red/20 focus:border-error-red"
+        : "border-[var(--input-border)] hover:border-[var(--muted-text)]",
+      className
+    )}
+    {...props}
+  >
+    {children}
+    <SelectPrimitive.Icon asChild>
+      <ChevronDown className="h-4 w-4 opacity-50" />
+    </SelectPrimitive.Icon>
+  </SelectPrimitive.Trigger>
+))
+SelectTrigger.displayName = SelectPrimitive.Trigger.displayName
 
-    // Get selected option
-    const selectedOption = useMemo(() => {
-        return options.find((opt) => opt.value === value) || null;
-    }, [options, value]);
+const SelectScrollUpButton = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.ScrollUpButton>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollUpButton>
+>(({ className, ...props }, ref) => (
+  <SelectPrimitive.ScrollUpButton
+    ref={ref}
+    className={cn(
+      "flex cursor-default items-center justify-center py-1",
+      className
+    )}
+    {...props}
+  >
+    <ChevronUp className="h-4 w-4" />
+  </SelectPrimitive.ScrollUpButton>
+))
+SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName
 
-    // Close on click outside
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-                setIsOpen(false);
-                setSearchTerm("");
-            }
-        };
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
+const SelectScrollDownButton = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.ScrollDownButton>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.ScrollDownButton>
+>(({ className, ...props }, ref) => (
+  <SelectPrimitive.ScrollDownButton
+    ref={ref}
+    className={cn(
+      "flex cursor-default items-center justify-center py-1",
+      className
+    )}
+    {...props}
+  >
+    <ChevronDown className="h-4 w-4" />
+  </SelectPrimitive.ScrollDownButton>
+))
+SelectScrollDownButton.displayName =
+  SelectPrimitive.ScrollDownButton.displayName
 
-    // Focus search input when opening
-    useEffect(() => {
-        if (isOpen && searchable && searchInputRef.current) {
-            searchInputRef.current.focus();
-        }
-    }, [isOpen, searchable]);
+const SelectContent = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
+>(({ className, children, position = "popper", ...props }, ref) => (
+  <SelectPrimitive.Portal>
+    <SelectPrimitive.Content
+      ref={ref}
+      className={cn(
+        "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] text-[var(--foreground)] shadow-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+        position === "popper" &&
+          "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
+        className
+      )}
+      position={position}
+      {...props}
+    >
+      <SelectScrollUpButton />
+      <SelectPrimitive.Viewport
+        className={cn(
+          "p-1.5",
+          position === "popper" &&
+            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
+        )}
+      >
+        {children}
+      </SelectPrimitive.Viewport>
+      <SelectScrollDownButton />
+    </SelectPrimitive.Content>
+  </SelectPrimitive.Portal>
+))
+SelectContent.displayName = SelectPrimitive.Content.displayName
 
-    const handleSelect = (optionValue: string) => {
-        onChange(optionValue);
-        setIsOpen(false);
-        setSearchTerm("");
-    };
+const SelectLabel = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Label>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Label>
+>(({ className, ...props }, ref) => (
+  <SelectPrimitive.Label
+    ref={ref}
+    className={cn("px-3 py-2 text-xs font-semibold text-[var(--muted-text)] uppercase tracking-wider", className)}
+    {...props}
+  />
+))
+SelectLabel.displayName = SelectPrimitive.Label.displayName
 
-    const handleClear = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        onChange(null);
-    };
+const SelectItem = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Item>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
+>(({ className, children, ...props }, ref) => (
+  <SelectPrimitive.Item
+    ref={ref}
+    className={cn(
+      "relative flex w-full cursor-pointer select-none items-center rounded-lg py-2.5 pl-8 pr-3 text-sm outline-none focus:bg-[var(--hover-bg)] focus:text-[var(--foreground)] data-[disabled]:pointer-events-none data-[disabled]:opacity-50 transition-colors",
+      className
+    )}
+    {...props}
+  >
+    <span className="absolute left-2 flex h-4 w-4 items-center justify-center">
+      <SelectPrimitive.ItemIndicator>
+        <Check className="h-4 w-4 text-nearby-accent" />
+      </SelectPrimitive.ItemIndicator>
+    </span>
+    <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+  </SelectPrimitive.Item>
+))
+SelectItem.displayName = SelectPrimitive.Item.displayName
 
-    const handleToggle = () => {
-        if (!disabled) {
-            setIsOpen(!isOpen);
-            if (!isOpen) {
-                setSearchTerm("");
-            }
-        }
-    };
+const SelectSeparator = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Separator>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Separator>
+>(({ className, ...props }, ref) => (
+  <SelectPrimitive.Separator
+    ref={ref}
+    className={cn("-mx-1 my-1.5 h-px bg-[var(--card-border)]", className)}
+    {...props}
+  />
+))
+SelectSeparator.displayName = SelectPrimitive.Separator.displayName
 
-    return (
-        <div className={`w-full ${className}`} ref={containerRef}>
-            {label && (
-                <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
-                    {label}
-                </label>
-            )}
-
-            <div className="relative">
-                {/* Trigger Button */}
-                <button
-                    type="button"
-                    onClick={handleToggle}
-                    disabled={disabled}
-                    className={`
-                        flex items-center justify-between w-full
-                        px-3 py-3 sm:py-2.5 min-h-[44px]
-                        text-base sm:text-sm text-left
-                        bg-[var(--input-bg)] border rounded-lg
-                        transition-all duration-200
-                        focus:outline-none focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent
-                        disabled:opacity-50 disabled:cursor-not-allowed
-                        ${error
-                            ? "border-error-red"
-                            : "border-[var(--input-border)] hover:border-[var(--muted-text)]"
-                        }
-                        ${isOpen ? "ring-2 ring-nearby-accent/20 border-nearby-accent" : ""}
-                    `}
-                >
-                    <span className={selectedOption ? "text-[var(--foreground)]" : "text-[var(--muted-text)]"}>
-                        {selectedOption ? (
-                            <span className="flex items-center gap-2">
-                                {selectedOption.icon}
-                                {selectedOption.label}
-                            </span>
-                        ) : (
-                            placeholder
-                        )}
-                    </span>
-
-                    <div className="flex items-center gap-1">
-                        {clearable && selectedOption && (
-                            <button
-                                type="button"
-                                onClick={handleClear}
-                                className="p-1 text-[var(--muted-text)] hover:text-[var(--foreground)] rounded"
-                            >
-                                <X size={14} />
-                            </button>
-                        )}
-                        <ChevronDown
-                            size={18}
-                            className={`text-[var(--muted-text)] transition-transform ${isOpen ? "rotate-180" : ""}`}
-                        />
-                    </div>
-                </button>
-
-                {/* Dropdown */}
-                {isOpen && (
-                    <div className="absolute z-50 mt-1 w-full bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-lg overflow-hidden">
-                        {/* Search Input */}
-                        {searchable && (
-                            <div className="p-2 border-b border-[var(--card-border)]">
-                                <div className="relative">
-                                    <Search
-                                        size={14}
-                                        className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--muted-text)]"
-                                    />
-                                    <input
-                                        ref={searchInputRef}
-                                        type="text"
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        placeholder={searchPlaceholder}
-                                        className="w-full pl-8 pr-8 py-2 text-sm bg-[var(--input-bg)] border border-[var(--input-border)] rounded-md focus:outline-none focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent text-[var(--foreground)] placeholder:text-[var(--muted-text)]"
-                                    />
-                                    {searchTerm && (
-                                        <button
-                                            type="button"
-                                            onClick={() => setSearchTerm("")}
-                                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--muted-text)] hover:text-[var(--foreground)]"
-                                        >
-                                            <X size={14} />
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Options List */}
-                        <div className="max-h-60 overflow-y-auto">
-                            {filteredOptions.length > 0 ? (
-                                filteredOptions.map((option) => (
-                                    <button
-                                        key={option.value}
-                                        type="button"
-                                        onClick={() => !option.disabled && handleSelect(option.value)}
-                                        disabled={option.disabled}
-                                        className={`
-                                            w-full px-3 py-2.5 text-left text-sm min-h-[44px]
-                                            flex items-center justify-between
-                                            transition-colors
-                                            ${option.disabled
-                                                ? "opacity-50 cursor-not-allowed"
-                                                : "hover:bg-[var(--hover-bg)]"
-                                            }
-                                            ${value === option.value
-                                                ? "bg-nearby-accent/10 text-[var(--accent-on-dark)]"
-                                                : "text-[var(--foreground)]"
-                                            }
-                                        `}
-                                    >
-                                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                                            {option.icon}
-                                            <div className="flex-1 min-w-0">
-                                                <div className="truncate">{option.label}</div>
-                                                {option.description && (
-                                                    <div className="text-xs text-[var(--muted-text)] truncate">
-                                                        {option.description}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                        {value === option.value && (
-                                            <Check size={16} className="text-[var(--accent-on-dark)] flex-shrink-0" />
-                                        )}
-                                    </button>
-                                ))
-                            ) : (
-                                <div className="px-3 py-4 text-sm text-[var(--muted-text)] text-center">
-                                    {emptyMessage}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {error && <p className="mt-1.5 text-xs text-error-red">{error}</p>}
-            {!error && helperText && (
-                <p className="mt-1.5 text-xs text-[var(--muted-text)]">{helperText}</p>
-            )}
-        </div>
-    );
-}
-
-// Native select for simpler use cases
-interface NativeSelectProps {
-    options: SelectOption[];
-    value: string;
-    onChange: (value: string) => void;
-    label?: string;
-    error?: string;
-    helperText?: string;
-    disabled?: boolean;
-    className?: string;
-    placeholder?: string;
-}
-
-export function NativeSelect({
-    options,
-    value,
-    onChange,
-    label,
-    error,
-    helperText,
-    disabled = false,
-    className = "",
-    placeholder,
-}: NativeSelectProps) {
-    return (
-        <div className={`w-full ${className}`}>
-            {label && (
-                <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
-                    {label}
-                </label>
-            )}
-
-            <select
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                disabled={disabled}
-                className={`
-                    w-full px-3 py-3 sm:py-2.5 min-h-[44px]
-                    text-base sm:text-sm
-                    bg-[var(--input-bg)] text-[var(--foreground)]
-                    border rounded-lg appearance-none
-                    transition-all duration-200
-                    focus:outline-none focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent
-                    disabled:opacity-50 disabled:cursor-not-allowed
-                    ${error
-                        ? "border-error-red"
-                        : "border-[var(--input-border)] hover:border-[var(--muted-text)]"
-                    }
-                `}
-                style={{
-                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                    backgroundPosition: "right 0.5rem center",
-                    backgroundRepeat: "no-repeat",
-                    backgroundSize: "1.5em 1.5em",
-                    paddingRight: "2.5rem",
-                }}
-            >
-                {placeholder && (
-                    <option value="" disabled>
-                        {placeholder}
-                    </option>
-                )}
-                {options.map((option) => (
-                    <option key={option.value} value={option.value} disabled={option.disabled}>
-                        {option.label}
-                    </option>
-                ))}
-            </select>
-
-            {error && <p className="mt-1.5 text-xs text-error-red">{error}</p>}
-            {!error && helperText && (
-                <p className="mt-1.5 text-xs text-[var(--muted-text)]">{helperText}</p>
-            )}
-        </div>
-    );
+export {
+  Select,
+  SelectGroup,
+  SelectValue,
+  SelectTrigger,
+  SelectContent,
+  SelectLabel,
+  SelectItem,
+  SelectSeparator,
+  SelectScrollUpButton,
+  SelectScrollDownButton,
 }
