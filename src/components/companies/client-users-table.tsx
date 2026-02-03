@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, X, Loader2, Users, ChevronDown, Pencil, Trash2, Search, Download } from "lucide-react";
+import { Plus, X, Loader2, Users, ChevronDown, Pencil, Trash2, Search, Download, Filter } from "lucide-react";
 import { createClientUser, updateClientUser, deleteClientUser, updateClientUserStatus } from "@/actions/client-users";
 import type { ClientUser } from "@prisma/client";
+
+type StatusFilter = "ACTIVE" | "INACTIVE" | "ALL";
 
 interface ClientUsersTableProps {
     companyId: string;
@@ -26,12 +28,25 @@ export function ClientUsersTable({ companyId, clientUsers: initialClientUsers }:
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
+    const [statusFilter, setStatusFilter] = useState<StatusFilter>("ACTIVE");
 
-    // Filter users by search term
-    const filteredUsers = clientUsers.filter(user => 
-        user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Count by status
+    const counts = useMemo(() => {
+        const total = clientUsers.length;
+        const active = clientUsers.filter(u => u.status === "ACTIVE").length;
+        const inactive = clientUsers.filter(u => u.status === "INACTIVE").length;
+        return { total, active, inactive };
+    }, [clientUsers]);
+
+    // Filter users by search term and status
+    const filteredUsers = useMemo(() => {
+        return clientUsers.filter(user => {
+            const matchesSearch = user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                user.email.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesStatus = statusFilter === "ALL" || user.status === statusFilter;
+            return matchesSearch && matchesStatus;
+        });
+    }, [clientUsers, searchTerm, statusFilter]);
 
     // Sync with props when they change
     useEffect(() => {
@@ -217,15 +232,41 @@ export function ClientUsersTable({ companyId, clientUsers: initialClientUsers }:
 
     return (
         <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <h3 className="text-md font-semibold text-nearby-dark flex items-center gap-2">
-                    <Users size={18} />
-                    Usuarios
-                    <span className="text-sm font-normal text-gray-500">
-                        ({filteredUsers.length}{searchTerm ? ` de ${clientUsers.length}` : ""})
-                    </span>
-                </h3>
+            {/* Header with title and counts */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-md font-semibold text-[var(--foreground)] flex items-center gap-2">
+                        <Users size={18} />
+                        Usuarios
+                    </h3>
+                    <div className="flex items-center gap-1.5 text-xs">
+                        <span className="px-2 py-0.5 rounded-full bg-[var(--hover-bg)] text-[var(--muted-text)]">
+                            Total: {counts.total}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-success-green/10 text-success-green">
+                            Activos: {counts.active}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
+                            Inactivos: {counts.inactive}
+                        </span>
+                    </div>
+                </div>
                 <div className="flex items-center gap-2">
+                    {/* Status Filter */}
+                    <div className="relative">
+                        <Filter size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+                            className="pl-8 pr-7 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-nearby-accent focus:border-nearby-accent appearance-none bg-white cursor-pointer"
+                        >
+                            <option value="ACTIVE">Activos</option>
+                            <option value="INACTIVE">Inactivos</option>
+                            <option value="ALL">Todos</option>
+                        </select>
+                        <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    </div>
+                    {/* Search */}
                     <div className="relative">
                         <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                         <input
@@ -233,7 +274,7 @@ export function ClientUsersTable({ companyId, clientUsers: initialClientUsers }:
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder="Buscar..."
-                            className="pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-nearby-accent focus:border-nearby-accent w-40"
+                            className="pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-nearby-accent focus:border-nearby-accent w-32 sm:w-40"
                         />
                     </div>
                     <button
