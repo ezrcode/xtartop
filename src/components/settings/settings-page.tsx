@@ -213,8 +213,8 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
     };
 
     return (
-        <div className="min-h-screen bg-[var(--background)] py-6 sm:py-8">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-[var(--background)] py-6 sm:py-8 overflow-x-hidden">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden">
                 <div className="mb-6 sm:mb-8">
                     <h1 className="text-2xl sm:text-3xl font-bold text-[var(--foreground)]">Configuración</h1>
                     <p className="text-sm sm:text-base text-[var(--muted-text)] mt-1 sm:mt-2">
@@ -546,79 +546,73 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                             )}
 
                             {/* Members List */}
-                            <div className="space-y-3">
+                            <div className="space-y-3 overflow-hidden">
                                 <h3 className="text-sm font-medium text-[var(--foreground)]">Miembros Activos</h3>
                                 
                                 {/* Owner */}
-                                <div className="flex items-center gap-3 p-3 border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)]">
-                                    <div className="shrink-0">
-                                        {workspace.owner.photoUrl ? (
-                                            <img
-                                                src={workspace.owner.photoUrl}
-                                                alt={workspace.owner.name || ""}
-                                                className="h-10 w-10 rounded-full object-cover"
-                                            />
-                                        ) : (
-                                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-dark flex items-center justify-center text-white font-semibold text-sm">
-                                                {getInitials(workspace.owner.name, workspace.owner.email)}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 p-3 border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] overflow-hidden">
+                                    {workspace.owner.photoUrl ? (
+                                        <img
+                                            src={workspace.owner.photoUrl}
+                                            alt={workspace.owner.name || ""}
+                                            className="h-9 w-9 rounded-full object-cover flex-shrink-0"
+                                        />
+                                    ) : (
+                                        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-dark flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
+                                            {getInitials(workspace.owner.name, workspace.owner.email)}
+                                        </div>
+                                    )}
+                                    <div className="min-w-0 flex-1">
                                         <p className="text-sm font-medium text-[var(--foreground)] truncate">
                                             {workspace.owner.name || workspace.owner.email}
                                         </p>
                                         <p className="text-xs text-[var(--muted-text)] truncate">{workspace.owner.email}</p>
                                     </div>
-                                    <Badge variant="secondary" className="shrink-0">Owner</Badge>
+                                    <Badge variant="secondary" className="flex-shrink-0 text-xs">Owner</Badge>
                                 </div>
 
                                 {/* Members */}
                                 {workspace.members.map((member) => (
-                                    <div key={member.id} className="flex items-center gap-3 p-3 border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)]">
-                                        <div className="shrink-0">
-                                            {member.user.photoUrl ? (
-                                                <img
-                                                    src={member.user.photoUrl}
-                                                    alt={member.user.name || ""}
-                                                    className="h-10 w-10 rounded-full object-cover"
-                                                />
-                                            ) : (
-                                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-dark flex items-center justify-center text-white font-semibold text-sm">
-                                                    {getInitials(member.user.name, member.user.email)}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
+                                    <div key={member.id} className="flex items-center gap-2 p-3 border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] overflow-hidden">
+                                        {member.user.photoUrl ? (
+                                            <img
+                                                src={member.user.photoUrl}
+                                                alt={member.user.name || ""}
+                                                className="h-9 w-9 rounded-full object-cover flex-shrink-0"
+                                            />
+                                        ) : (
+                                            <div className="h-9 w-9 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-dark flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
+                                                {getInitials(member.user.name, member.user.email)}
+                                            </div>
+                                        )}
+                                        <div className="min-w-0 flex-1">
                                             <p className="text-sm font-medium text-[var(--foreground)] truncate">
                                                 {member.user.name || member.user.email}
                                             </p>
                                             <p className="text-xs text-[var(--muted-text)] truncate">{member.user.email}</p>
                                         </div>
-                                        <div className="shrink-0 flex items-center gap-2">
-                                            <Badge variant={member.role === 'ADMIN' ? 'info' : 'success'}>
-                                                {member.role}
-                                            </Badge>
-                                            <button
-                                                onClick={() => handleRemoveMember(member.id)}
-                                                disabled={removingId === member.id || member.user.id === workspace.owner.id}
-                                                className="text-error-red hover:text-red-700 disabled:opacity-50 p-1"
-                                                title={member.user.id === workspace.owner.id ? "No se puede eliminar al Owner" : "Eliminar"}
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
+                                        <Badge variant={member.role === 'ADMIN' ? 'info' : 'success'} className="flex-shrink-0 text-xs">
+                                            {member.role}
+                                        </Badge>
+                                        <button
+                                            onClick={() => handleRemoveMember(member.id)}
+                                            disabled={removingId === member.id || member.user.id === workspace.owner.id}
+                                            className="text-error-red hover:text-red-700 disabled:opacity-50 p-1 flex-shrink-0"
+                                            title={member.user.id === workspace.owner.id ? "No se puede eliminar al Owner" : "Eliminar"}
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
                                     </div>
                                 ))}
                             </div>
 
                             {/* Pending Invitations */}
                             {workspace.invitations.length > 0 && (
-                                <div className="mt-6 space-y-3">
+                                <div className="mt-6 space-y-3 overflow-hidden">
                                     <h3 className="text-sm font-medium text-[var(--foreground)]">Invitaciones Pendientes</h3>
                                     {workspace.invitations.map((invitation) => (
-                                        <div key={invitation.id} className="flex items-center gap-3 p-3 border border-dashed border-[var(--card-border)] rounded-xl bg-[var(--hover-bg)]">
-                                            <div className="shrink-0 h-10 w-10 rounded-full bg-[var(--card-border)] flex items-center justify-center text-[var(--muted-text)]">
+                                        <div key={invitation.id} className="flex items-center gap-2 p-3 border border-dashed border-[var(--card-border)] rounded-xl bg-[var(--hover-bg)] overflow-hidden">
+                                            <div className="flex-shrink-0 h-9 w-9 rounded-full bg-[var(--card-border)] flex items-center justify-center text-[var(--muted-text)]">
                                                 <Mail size={18} />
                                             </div>
                                             <div className="flex-1 min-w-0">
@@ -627,16 +621,14 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                                     Por {invitation.inviter.name || invitation.inviter.email}
                                                 </p>
                                             </div>
-                                            <div className="shrink-0 flex items-center gap-2">
-                                                <Badge variant="warning">Pendiente</Badge>
-                                                <button
-                                                    onClick={() => handleRevokeInvitation(invitation.id)}
-                                                    disabled={revokingId === invitation.id}
-                                                    className="text-error-red hover:text-red-700 disabled:opacity-50 p-1"
-                                                >
-                                                    <X size={16} />
-                                                </button>
-                                            </div>
+                                            <Badge variant="warning" className="flex-shrink-0 text-xs">Pendiente</Badge>
+                                            <button
+                                                onClick={() => handleRevokeInvitation(invitation.id)}
+                                                disabled={revokingId === invitation.id}
+                                                className="text-error-red hover:text-red-700 disabled:opacity-50 p-1 flex-shrink-0"
+                                            >
+                                                <X size={16} />
+                                            </button>
                                         </div>
                                     ))}
                                 </div>
