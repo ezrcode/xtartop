@@ -223,25 +223,23 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                 </div>
 
                 <Tabs defaultValue="workspace" value={activeTab} onValueChange={(v) => setActiveTab(v as Tab)} className="w-full">
-                    {/* Tabs - iOS optimized with horizontal scroll */}
-                    <TabsList variant="underline" className="w-full justify-start mb-6 border-[var(--card-border)]">
-                        <TabsTrigger value="workspace" variant="underline">
+                    {/* Tabs - iOS optimized: icons only on mobile */}
+                    <TabsList variant="underline" className="w-full justify-between sm:justify-start mb-6 border-[var(--card-border)]">
+                        <TabsTrigger value="workspace" variant="underline" className="flex-1 sm:flex-none">
                             <Building2 size={18} />
-                            <span className="hidden sm:inline">Espacio de trabajo</span>
-                            <span className="sm:hidden">Espacio</span>
+                            <span className="hidden sm:inline">Espacio</span>
                         </TabsTrigger>
-                        <TabsTrigger value="team" variant="underline">
+                        <TabsTrigger value="team" variant="underline" className="flex-1 sm:flex-none">
                             <Users2 size={18} />
-                            <span>Equipo</span>
+                            <span className="hidden sm:inline">Equipo</span>
                         </TabsTrigger>
-                        <TabsTrigger value="contract" variant="underline">
+                        <TabsTrigger value="contract" variant="underline" className="flex-1 sm:flex-none">
                             <FileText size={18} />
-                            <span>Contrato</span>
+                            <span className="hidden sm:inline">Contrato</span>
                         </TabsTrigger>
-                        <TabsTrigger value="integrations" variant="underline">
+                        <TabsTrigger value="integrations" variant="underline" className="flex-1 sm:flex-none">
                             <Cloud size={18} />
                             <span className="hidden sm:inline">Integraciones</span>
-                            <span className="sm:hidden">Integr.</span>
                         </TabsTrigger>
                     </TabsList>
 
@@ -249,8 +247,11 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                     <TabsContent value="workspace" className="mt-0">
                     <div className="space-y-6">
                         {/* Workspace Info */}
-                        <div className="bg-white shadow-sm rounded-lg border border-graphite-gray p-6">
-                            <h2 className="text-lg font-semibold text-nearby-dark mb-6">Información del Workspace</h2>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Información del Workspace</CardTitle>
+                            </CardHeader>
+                            <CardContent>
                             
                             <form action={workspaceAction} className="space-y-6">
                                 {workspaceState?.message && (
@@ -271,100 +272,84 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                                 />
                                 <input type="hidden" name="logoUrl" value={logoUrl || ""} />
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                                    <div>
-                                        <label htmlFor="name" className="block text-sm font-medium text-dark-slate mb-1.5 sm:mb-2">
-                                            Nombre del Workspace
-                                        </label>
-                                        <input
+                                {/* Form fields - stacked on mobile, grid on desktop */}
+                                <div className="space-y-4 sm:grid sm:grid-cols-2 sm:gap-4 sm:space-y-0">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="name">Nombre del Workspace</Label>
+                                        <Input
                                             type="text"
                                             name="name"
                                             id="name"
                                             defaultValue={workspace.name}
                                             required
-                                            className="w-full px-3 py-3 sm:py-2 text-base sm:text-sm border border-graphite-gray rounded-lg sm:rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                            error={!!workspaceState?.errors?.name}
                                         />
                                         {workspaceState?.errors?.name && (
-                                            <p className="mt-1 text-sm text-error-red">{workspaceState.errors.name}</p>
+                                            <p className="text-sm text-error-red">{workspaceState.errors.name}</p>
                                         )}
                                     </div>
 
-                                    <div>
-                                        <label htmlFor="legalName" className="block text-sm font-medium text-dark-slate mb-1.5 sm:mb-2">
-                                            Nombre o Razón Social
-                                        </label>
-                                        <input
+                                    <div className="space-y-2">
+                                        <Label htmlFor="legalName">Nombre o Razón Social</Label>
+                                        <Input
                                             type="text"
                                             name="legalName"
                                             id="legalName"
                                             defaultValue={workspace.legalName || ''}
-                                            className="w-full px-3 py-3 sm:py-2 text-base sm:text-sm border border-graphite-gray rounded-lg sm:rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                         />
                                     </div>
 
-                                    <div>
-                                        <label htmlFor="rnc" className="block text-sm font-medium text-dark-slate mb-1.5 sm:mb-2">
-                                            RNC
-                                        </label>
-                                        <input
+                                    <div className="space-y-2">
+                                        <Label htmlFor="rnc">RNC</Label>
+                                        <Input
                                             type="text"
                                             name="rnc"
                                             id="rnc"
                                             defaultValue={workspace.rnc || ''}
                                             placeholder="000-0000000-0"
-                                            className="w-full px-3 py-3 sm:py-2 text-base sm:text-sm border border-graphite-gray rounded-lg sm:rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                         />
                                     </div>
 
-                                    <div>
-                                        <label htmlFor="phone" className="block text-sm font-medium text-dark-slate mb-1.5 sm:mb-2">
-                                            Teléfono
-                                        </label>
-                                        <input
+                                    <div className="space-y-2">
+                                        <Label htmlFor="phone">Teléfono</Label>
+                                        <Input
                                             type="tel"
                                             name="phone"
                                             id="phone"
                                             defaultValue={workspace.phone || ''}
                                             placeholder="+1 (809) 000-0000"
-                                            className="w-full px-3 py-3 sm:py-2 text-base sm:text-sm border border-graphite-gray rounded-lg sm:rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                         />
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label htmlFor="address" className="block text-sm font-medium text-dark-slate mb-1.5 sm:mb-2">
-                                        Dirección
-                                    </label>
+                                <div className="space-y-2 mt-4">
+                                    <Label htmlFor="address">Dirección</Label>
                                     <textarea
                                         name="address"
                                         id="address"
-                                        rows={3}
+                                        rows={2}
                                         defaultValue={workspace.address || ''}
                                         placeholder="Calle, Número, Sector, Ciudad, País"
-                                        className="w-full px-3 py-3 sm:py-2 text-base sm:text-sm border border-graphite-gray rounded-lg sm:rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                        className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors resize-none"
                                     />
                                 </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-dark-slate mb-2">
-                                        Plan
-                                    </label>
-                                    <div className="px-3 py-2 bg-gray-50 border border-graphite-gray rounded-md text-sm text-dark-slate">
-                                        {workspace.subscription?.plan || "FREE"}
+                                <div className="space-y-2 mt-4">
+                                    <Label>Plan</Label>
+                                    <div className="px-3 py-2.5 bg-[var(--hover-bg)] border border-[var(--card-border)] rounded-xl text-sm text-[var(--foreground)]">
+                                        <Badge variant="primary">{workspace.subscription?.plan || "FREE"}</Badge>
                                     </div>
                                 </div>
 
-                                <div className="flex justify-end">
-                                    <button
-                                        type="submit"
-                                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900 transition-colors"
-                                    >
-                                        <Save size={16} className="mr-2" />
+                                <div className="flex justify-end pt-4">
+                                    <Button type="submit">
+                                        <Save size={16} />
                                         Guardar Cambios
-                                    </button>
+                                    </Button>
                                 </div>
                             </form>
-                        </div>
+                            </CardContent>
+                        </Card>
                     </div>
                     </TabsContent>
 

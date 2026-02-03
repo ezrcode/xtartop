@@ -48,12 +48,12 @@ const TabsTrigger = React.forwardRef<
     ref={ref}
     className={cn(
       // Base styles
-      "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all",
+      "inline-flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap text-xs sm:text-sm font-medium transition-all",
       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nearby-accent focus-visible:ring-offset-2",
       "disabled:pointer-events-none disabled:opacity-50",
-      // Touch-friendly sizing
-      "min-h-[44px] px-4 py-2",
-      // Icon sizing
+      // Touch-friendly sizing - more compact on mobile
+      "min-h-[40px] sm:min-h-[44px] px-2 sm:px-4 py-2",
+      // Icon sizing - smaller on mobile
       "[&_svg]:size-4 [&_svg]:shrink-0",
       // Variant styles
       {

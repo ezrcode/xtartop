@@ -263,25 +263,23 @@ export function ProfileForm({ user, emailConfig }: ProfileFormProps) {
 
                 <Card>
                     <Tabs defaultValue="profile" className="w-full">
-                        {/* Tabs Navigation - iOS optimized with horizontal scroll */}
-                        <TabsList variant="underline" className="w-full justify-start px-4 sm:px-6">
-                            <TabsTrigger value="profile" variant="underline">
+                        {/* Tabs Navigation - iOS optimized: icons only on mobile */}
+                        <TabsList variant="underline" className="w-full justify-between sm:justify-start px-2 sm:px-6">
+                            <TabsTrigger value="profile" variant="underline" className="flex-1 sm:flex-none">
                                 <User size={16} />
-                                <span className="hidden sm:inline">Información</span>
-                                <span className="sm:hidden">Perfil</span>
+                                <span className="hidden sm:inline">Perfil</span>
                             </TabsTrigger>
-                            <TabsTrigger value="password" variant="underline">
+                            <TabsTrigger value="password" variant="underline" className="flex-1 sm:flex-none">
                                 <Lock size={16} />
-                                <span>Contraseña</span>
+                                <span className="hidden sm:inline">Contraseña</span>
                             </TabsTrigger>
-                            <TabsTrigger value="email" variant="underline">
+                            <TabsTrigger value="email" variant="underline" className="flex-1 sm:flex-none">
                                 <Mail size={16} />
-                                <span>Email</span>
+                                <span className="hidden sm:inline">Email</span>
                             </TabsTrigger>
-                            <TabsTrigger value="preferences" variant="underline">
+                            <TabsTrigger value="preferences" variant="underline" className="flex-1 sm:flex-none">
                                 <Settings size={16} />
                                 <span className="hidden sm:inline">Preferencias</span>
-                                <span className="sm:hidden">Prefs</span>
                             </TabsTrigger>
                         </TabsList>
 
