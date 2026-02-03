@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
-import { BillingType, CountType } from "@prisma/client";
+import { BillingType, CountType, CalculatedBase } from "@prisma/client";
 import {
     getSubscriptionBilling,
     updateBillingSettings,
@@ -35,6 +35,8 @@ interface SubscriptionItemWithQuantity {
     price: { toString(): string };
     countType: CountType;
     manualQuantity: number | null;
+    calculatedBase: CalculatedBase | null;
+    calculatedSubtract: number | null;
     calculatedQuantity: number;
     subtotal: number;
 }
@@ -218,7 +220,11 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                                                         <span className="text-dark-slate">{item.calculatedQuantity}</span>
                                                         {item.countType !== "MANUAL" && (
                                                             <span className="ml-1 text-xs text-gray-400">
-                                                                ({item.countType === "ACTIVE_PROJECTS" ? "Proy." : "Usr."})
+                                                                ({item.countType === "ACTIVE_PROJECTS" 
+                                                                    ? "Proy." 
+                                                                    : item.countType === "ACTIVE_USERS" 
+                                                                        ? "Usr." 
+                                                                        : `${item.calculatedBase === "USERS" ? "Usr" : "Proy"}-${item.calculatedSubtract || 0}`})
                                                             </span>
                                                         )}
                                                     </td>
@@ -365,6 +371,8 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
     const [selectedPrice, setSelectedPrice] = useState<PriceOption | null>(null);
     const [countType, setCountType] = useState<CountType>(item?.countType || "MANUAL");
     const [manualQuantity, setManualQuantity] = useState(item?.manualQuantity?.toString() || "");
+    const [calculatedBase, setCalculatedBase] = useState<CalculatedBase>(item?.calculatedBase || "PROJECTS");
+    const [calculatedSubtract, setCalculatedSubtract] = useState(item?.calculatedSubtract?.toString() || "0");
 
     // Load ADMCloud items
     useEffect(() => {
@@ -513,6 +521,12 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
             return;
         }
 
+        if (countType === "CALCULATED" && parseInt(calculatedSubtract) < 0) {
+            console.log("[SubscriptionItemModal] Invalid subtract value, showing error");
+            setError("El valor a restar debe ser mayor o igual a 0");
+            return;
+        }
+
         setSaving(true);
         setError(null);
 
@@ -524,6 +538,8 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                 price: selectedPrice.price,
                 countType,
                 manualQuantity: countType === "MANUAL" ? parseInt(manualQuantity) : undefined,
+                calculatedBase: countType === "CALCULATED" ? calculatedBase : undefined,
+                calculatedSubtract: countType === "CALCULATED" ? parseInt(calculatedSubtract) || 0 : undefined,
             };
             
             console.log("[SubscriptionItemModal] Saving data:", data);
@@ -657,34 +673,73 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                                 <option value="MANUAL">Manual</option>
                                 <option value="ACTIVE_PROJECTS">Proyectos activos</option>
                                 <option value="ACTIVE_USERS">Usuarios activos</option>
+                                <option value="CALCULATED">Calculado (base - valor)</option>
                             </select>
                         </div>
 
-                        {/* Quantity */}
-                        <div>
-                            <label className="block text-sm font-medium text-[var(--foreground)] mb-1">
-                                Cantidad
-                            </label>
-                            <input
-                                type="number"
-                                min={0}
-                                value={countType === "MANUAL" ? manualQuantity : ""}
-                                onChange={(e) => setManualQuantity(e.target.value)}
-                                disabled={countType !== "MANUAL"}
-                                placeholder={countType !== "MANUAL" ? "Se calculará automáticamente" : ""}
-                                className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] placeholder:text-[var(--muted-text)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:opacity-50 disabled:cursor-not-allowed"
-                            />
-                            {countType === "ACTIVE_PROJECTS" && (
-                                <p className="text-xs text-[var(--muted-text)] mt-1">
-                                    Se totalizarán los proyectos con estado &ldquo;Activo&rdquo;
+                        {/* Calculated type fields */}
+                        {countType === "CALCULATED" && (
+                            <div className="space-y-4 p-4 bg-[var(--hover-bg)] rounded-lg border border-[var(--card-border)]">
+                                <div>
+                                    <label className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                                        Base de cálculo
+                                    </label>
+                                    <select
+                                        value={calculatedBase}
+                                        onChange={(e) => setCalculatedBase(e.target.value as CalculatedBase)}
+                                        className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                    >
+                                        <option value="PROJECTS">Proyectos activos</option>
+                                        <option value="USERS">Usuarios activos</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                                        Restar valor
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min={0}
+                                        value={calculatedSubtract}
+                                        onChange={(e) => setCalculatedSubtract(e.target.value)}
+                                        placeholder="Ej: 5"
+                                        className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] placeholder:text-[var(--muted-text)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                    />
+                                </div>
+                                <p className="text-xs text-[var(--muted-text)]">
+                                    Fórmula: ({calculatedBase === "USERS" ? "Usuarios activos" : "Proyectos activos"}) - {calculatedSubtract || 0} = Cantidad
                                 </p>
-                            )}
-                            {countType === "ACTIVE_USERS" && (
-                                <p className="text-xs text-[var(--muted-text)] mt-1">
-                                    Se totalizarán los usuarios con estado &ldquo;Activo&rdquo;
+                            </div>
+                        )}
+
+                        {/* Quantity (for MANUAL only) */}
+                        {countType === "MANUAL" && (
+                            <div>
+                                <label className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                                    Cantidad
+                                </label>
+                                <input
+                                    type="number"
+                                    min={0}
+                                    value={manualQuantity}
+                                    onChange={(e) => setManualQuantity(e.target.value)}
+                                    placeholder="Ingrese la cantidad"
+                                    className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] placeholder:text-[var(--muted-text)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                />
+                            </div>
+                        )}
+
+                        {/* Info for automatic count types */}
+                        {(countType === "ACTIVE_PROJECTS" || countType === "ACTIVE_USERS") && (
+                            <div className="p-3 bg-[var(--hover-bg)] rounded-lg border border-[var(--card-border)]">
+                                <p className="text-xs text-[var(--muted-text)]">
+                                    {countType === "ACTIVE_PROJECTS" 
+                                        ? "Se totalizarán los proyectos con estado \"Activo\""
+                                        : "Se totalizarán los usuarios con estado \"Activo\""
+                                    }
                                 </p>
-                            )}
-                        </div>
+                            </div>
+                        )}
 
                         <div className="flex justify-end gap-3 pt-4">
                             <button

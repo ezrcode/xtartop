@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getCurrentWorkspace } from "./workspace";
-import { BillingType, CountType } from "@prisma/client";
+import { BillingType, CountType, CalculatedBase } from "@prisma/client";
 
 // Get or create subscription billing for a company
 export async function getSubscriptionBilling(companyId: string) {
@@ -63,6 +63,13 @@ export async function getSubscriptionBilling(companyId: string) {
             quantity = company.projects.length;
         } else if (item.countType === "ACTIVE_USERS") {
             quantity = company.clientUsers.length;
+        } else if (item.countType === "CALCULATED") {
+            // Fórmula: (usuarios o proyectos) - valor base
+            const base = item.calculatedBase === "USERS" 
+                ? company.clientUsers.length 
+                : company.projects.length;
+            const subtract = item.calculatedSubtract || 0;
+            quantity = Math.max(0, base - subtract); // No permitir negativos
         }
 
         return {
@@ -142,6 +149,8 @@ export async function addSubscriptionItem(
         price: number;
         countType: CountType;
         manualQuantity?: number;
+        calculatedBase?: CalculatedBase;
+        calculatedSubtract?: number;
     }
 ) {
     const session = await auth();
@@ -191,6 +200,8 @@ export async function addSubscriptionItem(
             price: data.price,
             countType: data.countType,
             manualQuantity: data.countType === "MANUAL" ? (data.manualQuantity || 0) : null,
+            calculatedBase: data.countType === "CALCULATED" ? data.calculatedBase : null,
+            calculatedSubtract: data.countType === "CALCULATED" ? (data.calculatedSubtract || 0) : null,
         },
     });
 
@@ -208,6 +219,8 @@ export async function updateSubscriptionItem(
         price: number;
         countType: CountType;
         manualQuantity?: number;
+        calculatedBase?: CalculatedBase;
+        calculatedSubtract?: number;
     }
 ) {
     const session = await auth();
@@ -246,6 +259,8 @@ export async function updateSubscriptionItem(
             price: data.price,
             countType: data.countType,
             manualQuantity: data.countType === "MANUAL" ? (data.manualQuantity || 0) : null,
+            calculatedBase: data.countType === "CALCULATED" ? data.calculatedBase : null,
+            calculatedSubtract: data.countType === "CALCULATED" ? (data.calculatedSubtract || 0) : null,
         },
     });
 

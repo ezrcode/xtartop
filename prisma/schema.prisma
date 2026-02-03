@@ -501,6 +501,12 @@ enum CountType {
   MANUAL            // Cantidad manual
   ACTIVE_PROJECTS   // Totaliza proyectos activos
   ACTIVE_USERS      // Totaliza usuarios activos
+  CALCULATED        // Fórmula: (usuarios o proyectos) - valor base
+}
+
+enum CalculatedBase {
+  PROJECTS          // Usa proyectos activos como base
+  USERS             // Usa usuarios activos como base
 }
 
 model SubscriptionBilling {
@@ -530,6 +536,10 @@ model SubscriptionItem {
   // Quantity configuration
   countType             CountType    @default(MANUAL)
   manualQuantity        Int?         // Cantidad manual (si countType es MANUAL)
+  
+  // Calculated type configuration (cuando countType es CALCULATED)
+  calculatedBase        CalculatedBase?  // Base: proyectos o usuarios
+  calculatedSubtract    Int?             // Valor entero a restar
   
   createdAt             DateTime     @default(now())
   updatedAt             DateTime     @updatedAt
