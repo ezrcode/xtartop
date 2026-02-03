@@ -463,27 +463,27 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
                     <TabsContent value="team" className="mt-0">
                     <div className="space-y-6">
                         {/* Team Management */}
-                        <Card>
-                            <CardContent className="pt-6">
-                            {/* Header - stacked on mobile */}
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-                                <div>
-                                    <h2 className="text-lg font-semibold text-[var(--foreground)]">Equipo</h2>
-                                    <p className="text-sm text-[var(--muted-text)] mt-1">
-                                        {totalMembers} de 5 miembros (Plan FREE)
-                                    </p>
+                        <Card className="overflow-hidden">
+                            <CardHeader>
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                    <div>
+                                        <CardTitle className="text-lg">Equipo</CardTitle>
+                                        <p className="text-sm text-[var(--muted-text)] mt-1">
+                                            {totalMembers} de 5 miembros (Plan FREE)
+                                        </p>
+                                    </div>
+                                    {canAddMembers && (
+                                        <Button
+                                            onClick={() => setShowInviteForm(!showInviteForm)}
+                                            className="w-full sm:w-auto"
+                                        >
+                                            <UserPlus size={16} />
+                                            Invitar
+                                        </Button>
+                                    )}
                                 </div>
-                                {canAddMembers && (
-                                    <Button
-                                        onClick={() => setShowInviteForm(!showInviteForm)}
-                                        className="w-full sm:w-auto"
-                                    >
-                                        <UserPlus size={16} />
-                                        Invitar Miembro
-                                    </Button>
-                                )}
-                            </div>
-
+                            </CardHeader>
+                            <CardContent>
                             {/* Invite Form */}
                             {showInviteForm && (
                                 <form action={invitationAction} className="mb-6 p-4 bg-[var(--hover-bg)] rounded-xl border border-[var(--card-border)]">
