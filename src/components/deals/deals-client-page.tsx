@@ -20,7 +20,7 @@ import {
 } from "@dnd-kit/core";
 import { updateDealStatus } from "@/actions/deals";
 import { saveTablePreferences } from "@/actions/table-preferences";
-import { DataTable, Column, TablePreferences } from "@/components/ui/data-table";
+import { DataTable, Column, TablePreferences, ItemsPerPage } from "@/components/ui/data-table";
 
 type DealWithRelations = Deal & {
     company?: Company | null;
@@ -32,6 +32,7 @@ interface DealsClientPageProps {
     deals: DealWithRelations[];
     defaultView?: "table" | "kanban";
     initialTablePreferences?: TablePreferences | null;
+    itemsPerPage?: ItemsPerPage;
 }
 
 const dealStatusConfig: Record<DealStatus, { label: string; color: string }> = {
@@ -232,7 +233,7 @@ function KanbanColumn({ status, deals }: { status: DealStatus, deals: DealWithRe
 }
 
 // Deals Table Component using DataTable
-function DealsTable({ deals, initialPreferences }: { deals: DealWithRelations[], initialPreferences?: TablePreferences | null }) {
+function DealsTable({ deals, initialPreferences, itemsPerPage = 10 }: { deals: DealWithRelations[], initialPreferences?: TablePreferences | null, itemsPerPage?: ItemsPerPage }) {
     const router = useRouter();
 
     const formatCurrency = (value: number | string) => {
@@ -397,6 +398,8 @@ function DealsTable({ deals, initialPreferences }: { deals: DealWithRelations[],
                     searchKeys={["name"]}
                     initialPreferences={initialPreferences || undefined}
                     onSavePreferences={handleSavePreferences}
+                    paginated
+                    itemsPerPage={itemsPerPage}
                 />
             </div>
 
@@ -466,7 +469,7 @@ function DealsTable({ deals, initialPreferences }: { deals: DealWithRelations[],
     );
 }
 
-export function DealsClientPage({ deals: initialDeals, defaultView = "table", initialTablePreferences }: DealsClientPageProps) {
+export function DealsClientPage({ deals: initialDeals, defaultView = "table", initialTablePreferences, itemsPerPage = 10 }: DealsClientPageProps) {
     const [viewMode, setViewMode] = useState<"table" | "kanban">(defaultView);
     const [deals, setDeals] = useState<DealWithRelations[]>(initialDeals);
     const [activeDeal, setActiveDeal] = useState<DealWithRelations | null>(null);
@@ -583,7 +586,7 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table", in
 
                 {/* Table View */}
                 {viewMode === "table" && (
-                    <DealsTable deals={deals} initialPreferences={initialTablePreferences} />
+                    <DealsTable deals={deals} initialPreferences={initialTablePreferences} itemsPerPage={itemsPerPage} />
                 )}
 
                 {/* Kanban View - Optimizado para móvil */}

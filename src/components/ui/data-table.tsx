@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode, useState, useMemo, useEffect, useCallback, useRef } from "react";
-import { ChevronUp, ChevronDown, Search, Filter, Columns, Check, X, Save, MoreHorizontal } from "lucide-react";
+import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Search, Filter, Columns, Check, X, Save, MoreHorizontal } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
@@ -15,6 +15,8 @@ export interface TablePreferences {
     filters?: Record<string, string>;
     searchTerm?: string;
 }
+
+export type ItemsPerPage = 10 | 25 | 50;
 
 export interface Column<T> {
     key: keyof T | string;
@@ -40,6 +42,9 @@ interface DataTableProps<T> {
     initialPreferences?: TablePreferences;
     onSavePreferences?: (prefs: TablePreferences) => Promise<void>;
     showSaveButton?: boolean;
+    // Pagination
+    paginated?: boolean;
+    itemsPerPage?: ItemsPerPage;
 }
 
 export function DataTable<T>({
@@ -54,6 +59,8 @@ export function DataTable<T>({
     initialPreferences,
     onSavePreferences,
     showSaveButton = true,
+    paginated = true,
+    itemsPerPage = 10,
 }: DataTableProps<T>) {
     const [sortKey, setSortKey] = useState<string | null>(initialPreferences?.sortKey || null);
     const [sortDirection, setSortDirection] = useState<"asc" | "desc">(initialPreferences?.sortDirection || "asc");
@@ -72,6 +79,7 @@ export function DataTable<T>({
     const [showColumnSelector, setShowColumnSelector] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
     
     const filterRef = useRef<HTMLDivElement>(null);
     const columnRef = useRef<HTMLDivElement>(null);
@@ -219,6 +227,23 @@ export function DataTable<T>({
             return 0;
         });
     }, [filteredData, sortKey, sortDirection]);
+
+    // Pagination calculations
+    const totalPages = useMemo(() => {
+        if (!paginated) return 1;
+        return Math.ceil(sortedData.length / itemsPerPage);
+    }, [sortedData.length, itemsPerPage, paginated]);
+
+    const paginatedData = useMemo(() => {
+        if (!paginated) return sortedData;
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        return sortedData.slice(startIndex, startIndex + itemsPerPage);
+    }, [sortedData, currentPage, itemsPerPage, paginated]);
+
+    // Reset page when filters/search change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery, filters]);
 
     const displayColumns = useMemo(() => {
         return columns.filter(col => visibleColumns.includes(String(col.key)));
@@ -402,7 +427,7 @@ export function DataTable<T>({
             
             {/* Mobile Card View */}
             <div className="block md:hidden">
-                {sortedData.length === 0 ? (
+                {paginatedData.length === 0 ? (
                     emptyState || (
                         <div className="py-16 text-center">
                             <div className="text-[var(--muted-text)] text-sm">No hay datos disponibles</div>
@@ -411,7 +436,7 @@ export function DataTable<T>({
                 ) : (
                     <div className="divide-y divide-[var(--card-border)]">
                         <AnimatePresence>
-                            {sortedData.map((item, index) => (
+                            {paginatedData.map((item, index) => (
                                 <motion.div
                                     key={keyExtractor(item)}
                                     initial={{ opacity: 0, y: 10 }}
@@ -496,7 +521,7 @@ export function DataTable<T>({
                     </thead>
                     <tbody className="divide-y divide-[var(--card-border)]">
                         <AnimatePresence>
-                            {sortedData.length === 0 ? (
+                            {paginatedData.length === 0 ? (
                                 <tr>
                                     <td colSpan={displayColumns.length}>
                                         {emptyState || (
@@ -507,7 +532,7 @@ export function DataTable<T>({
                                     </td>
                                 </tr>
                             ) : (
-                                sortedData.map((item, index) => (
+                                paginatedData.map((item, index) => (
                                     <motion.tr
                                         key={keyExtractor(item)}
                                         initial={{ opacity: 0 }}
@@ -542,11 +567,106 @@ export function DataTable<T>({
                 </table>
             </div>
             
-            {/* Footer with count */}
-            <div className="px-4 py-3 border-t border-[var(--card-border)] bg-[var(--hover-bg)] flex items-center justify-between">
+            {/* Footer with count and pagination */}
+            <div className="px-4 py-3 border-t border-[var(--card-border)] bg-[var(--hover-bg)] flex flex-col sm:flex-row items-center justify-between gap-3">
                 <span className="text-xs text-[var(--muted-text)]">
-                    Mostrando <span className="font-semibold text-[var(--foreground)]">{sortedData.length}</span> de <span className="font-semibold text-[var(--foreground)]">{data.length}</span> registros
+                    {paginated ? (
+                        <>
+                            Mostrando <span className="font-semibold text-[var(--foreground)]">{Math.min((currentPage - 1) * itemsPerPage + 1, sortedData.length)}</span>
+                            {" - "}
+                            <span className="font-semibold text-[var(--foreground)]">{Math.min(currentPage * itemsPerPage, sortedData.length)}</span>
+                            {" de "}
+                            <span className="font-semibold text-[var(--foreground)]">{sortedData.length}</span>
+                            {sortedData.length !== data.length && (
+                                <> (filtrados de {data.length})</>
+                            )}
+                        </>
+                    ) : (
+                        <>
+                            Mostrando <span className="font-semibold text-[var(--foreground)]">{sortedData.length}</span> de <span className="font-semibold text-[var(--foreground)]">{data.length}</span> registros
+                        </>
+                    )}
                 </span>
+                
+                {/* Pagination Controls */}
+                {paginated && totalPages > 1 && (
+                    <div className="flex items-center gap-1">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setCurrentPage(1)}
+                            disabled={currentPage === 1}
+                            className="h-8 w-8 p-0"
+                            title="Primera página"
+                        >
+                            <ChevronLeft size={14} />
+                            <ChevronLeft size={14} className="-ml-2" />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                            disabled={currentPage === 1}
+                            className="h-8 w-8 p-0"
+                            title="Anterior"
+                        >
+                            <ChevronLeft size={16} />
+                        </Button>
+                        
+                        <div className="flex items-center gap-1 px-2">
+                            {/* Page numbers */}
+                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                let pageNum: number;
+                                if (totalPages <= 5) {
+                                    pageNum = i + 1;
+                                } else if (currentPage <= 3) {
+                                    pageNum = i + 1;
+                                } else if (currentPage >= totalPages - 2) {
+                                    pageNum = totalPages - 4 + i;
+                                } else {
+                                    pageNum = currentPage - 2 + i;
+                                }
+                                
+                                return (
+                                    <Button
+                                        key={pageNum}
+                                        variant={currentPage === pageNum ? "primary" : "ghost"}
+                                        size="sm"
+                                        onClick={() => setCurrentPage(pageNum)}
+                                        className={cn(
+                                            "h-8 w-8 p-0 text-xs",
+                                            currentPage === pageNum && "pointer-events-none"
+                                        )}
+                                    >
+                                        {pageNum}
+                                    </Button>
+                                );
+                            })}
+                        </div>
+                        
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                            disabled={currentPage === totalPages}
+                            className="h-8 w-8 p-0"
+                            title="Siguiente"
+                        >
+                            <ChevronRight size={16} />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setCurrentPage(totalPages)}
+                            disabled={currentPage === totalPages}
+                            className="h-8 w-8 p-0"
+                            title="Última página"
+                        >
+                            <ChevronRight size={14} />
+                            <ChevronRight size={14} className="-ml-2" />
+                        </Button>
+                    </div>
+                )}
             </div>
         </div>
     );

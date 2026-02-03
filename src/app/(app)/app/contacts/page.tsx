@@ -1,5 +1,6 @@
 import { getContacts } from "@/actions/contacts";
 import { getTablePreferences } from "@/actions/table-preferences";
+import { getUserItemsPerPage } from "@/actions/profile";
 import { ContactsTable } from "@/components/contacts/contacts-table";
 import Link from "next/link";
 import { Plus } from "lucide-react";
@@ -8,9 +9,10 @@ import { Plus } from "lucide-react";
 export const revalidate = 30;
 
 export default async function ContactsPage() {
-    const [contacts, preferences] = await Promise.all([
+    const [contacts, preferences, itemsPerPage] = await Promise.all([
         getContacts(),
         getTablePreferences("contacts"),
+        getUserItemsPerPage(),
     ]);
 
     return (
@@ -34,7 +36,7 @@ export default async function ContactsPage() {
                 </div>
 
                 {/* Contacts Table */}
-                <ContactsTable contacts={contacts} initialPreferences={preferences} />
+                <ContactsTable contacts={contacts} initialPreferences={preferences} itemsPerPage={itemsPerPage as 10 | 25 | 50} />
             </div>
         </div>
     );

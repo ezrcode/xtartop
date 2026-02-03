@@ -114,6 +114,7 @@ model User {
   userType        UserType           @default(INTERNAL)
   dealsViewPref   DealViewPreference @default(TABLE)
   themePreference ThemePreference    @default(LIGHT)
+  itemsPerPage    Int                @default(10)
   
   // Table Preferences (sorting, filters, visible columns per table)
   tablePreferences Json?

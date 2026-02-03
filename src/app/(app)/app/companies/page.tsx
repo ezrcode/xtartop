@@ -1,5 +1,6 @@
 import { getCompanies } from "@/actions/companies";
 import { getTablePreferences } from "@/actions/table-preferences";
+import { getUserItemsPerPage } from "@/actions/profile";
 import { CompaniesTable } from "@/components/companies/companies-table";
 import Link from "next/link";
 import { Plus } from "lucide-react";
@@ -8,9 +9,10 @@ import { Plus } from "lucide-react";
 export const revalidate = 30;
 
 export default async function CompaniesPage() {
-    const [companies, preferences] = await Promise.all([
+    const [companies, preferences, itemsPerPage] = await Promise.all([
         getCompanies(),
         getTablePreferences("companies"),
+        getUserItemsPerPage(),
     ]);
 
     return (
@@ -34,7 +36,7 @@ export default async function CompaniesPage() {
                 </div>
 
                 {/* Companies Table */}
-                <CompaniesTable companies={companies} initialPreferences={preferences} />
+                <CompaniesTable companies={companies} initialPreferences={preferences} itemsPerPage={itemsPerPage as 10 | 25 | 50} />
             </div>
         </div>
     );

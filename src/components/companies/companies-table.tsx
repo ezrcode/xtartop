@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Building2, Plus } from "lucide-react";
-import { DataTable, Column, TablePreferences } from "@/components/ui/data-table";
+import { DataTable, Column, TablePreferences, ItemsPerPage } from "@/components/ui/data-table";
 import { saveTablePreferences } from "@/actions/table-preferences";
 import { CompanyStatus } from "@prisma/client";
 
@@ -25,6 +25,7 @@ interface Company {
 interface CompaniesTableProps {
     companies: Company[];
     initialPreferences: TablePreferences | null;
+    itemsPerPage?: 10 | 25 | 50;
 }
 
 const statusConfig: Record<CompanyStatus, { label: string; className: string }> = {
@@ -35,7 +36,7 @@ const statusConfig: Record<CompanyStatus, { label: string; className: string }> 
     INACTIVA: { label: "Inactiva", className: "bg-gray-100 text-gray-600" },
 };
 
-export function CompaniesTable({ companies, initialPreferences }: CompaniesTableProps) {
+export function CompaniesTable({ companies, initialPreferences, itemsPerPage = 10 }: CompaniesTableProps) {
     const router = useRouter();
 
     const columns: Column<Company>[] = [
@@ -183,6 +184,8 @@ export function CompaniesTable({ companies, initialPreferences }: CompaniesTable
                     searchKeys={["name", "city", "country"]}
                     initialPreferences={initialPreferences || undefined}
                     onSavePreferences={handleSavePreferences}
+                    paginated
+                    itemsPerPage={itemsPerPage}
                 />
             </div>
 

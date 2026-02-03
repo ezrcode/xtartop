@@ -65,6 +65,7 @@ export async function getUser() {
             photoUrl: true,
             dealsViewPref: true,
             themePreference: true,
+            itemsPerPage: true,
             createdAt: true,
         },
     });
@@ -246,4 +247,48 @@ export async function getUserThemePreference(): Promise<ThemePreference> {
     });
 
     return user?.themePreference ?? "LIGHT";
+}
+
+// Update items per page preference
+export async function updateItemsPerPage(itemsPerPage: number): Promise<{ success: boolean; error?: string }> {
+    const session = await auth();
+    if (!session?.user?.email) {
+        return { success: false, error: "No autenticado" };
+    }
+
+    // Validate allowed values
+    if (![10, 25, 50].includes(itemsPerPage)) {
+        return { success: false, error: "Valor no permitido" };
+    }
+
+    try {
+        await prisma.user.update({
+            where: { email: session.user.email },
+            data: { itemsPerPage },
+        });
+
+        revalidatePath("/app");
+        revalidatePath("/app/companies");
+        revalidatePath("/app/contacts");
+        revalidatePath("/app/deals");
+        return { success: true };
+    } catch (error) {
+        console.error("Error updating items per page:", error);
+        return { success: false, error: "Error al actualizar la preferencia" };
+    }
+}
+
+// Get user items per page preference
+export async function getUserItemsPerPage(): Promise<number> {
+    const session = await auth();
+    if (!session?.user?.email) {
+        return 10;
+    }
+
+    const user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        select: { itemsPerPage: true },
+    });
+
+    return user?.itemsPerPage ?? 10;
 }

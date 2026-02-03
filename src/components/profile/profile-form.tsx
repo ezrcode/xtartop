@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useFormState } from "react-dom";
 import { User, Lock, Settings, Save, Mail } from "lucide-react";
-import { updateProfile, updatePassword, updatePreferences, ProfileState, PasswordState, PreferencesState } from "@/actions/profile";
+import { updateProfile, updatePassword, updatePreferences, updateItemsPerPage, ProfileState, PasswordState, PreferencesState } from "@/actions/profile";
 import { DealViewPreference, ThemePreference } from "@prisma/client";
 import { EmailConfigTab } from "../settings/email-config-tab";
 import { ImageUpload } from "../ui/image-upload";
@@ -22,6 +22,7 @@ interface ProfileFormProps {
         photoUrl: string | null;
         dealsViewPref: DealViewPreference;
         themePreference: ThemePreference;
+        itemsPerPage: number;
         createdAt: Date;
     };
     emailConfig: {
@@ -167,6 +168,25 @@ function PasswordTab() {
 function PreferencesTab({ user }: { user: ProfileFormProps['user'] }) {
     const initialPreferencesState: PreferencesState = { message: "", errors: {} };
     const [preferencesState, preferencesAction] = useFormState(updatePreferences, initialPreferencesState);
+    const [itemsPerPage, setItemsPerPage] = useState(user.itemsPerPage);
+    const [savingItemsPerPage, setSavingItemsPerPage] = useState(false);
+    const [itemsPerPageMessage, setItemsPerPageMessage] = useState<string | null>(null);
+
+    const handleItemsPerPageChange = async (value: number) => {
+        setItemsPerPage(value);
+        setSavingItemsPerPage(true);
+        setItemsPerPageMessage(null);
+        
+        const result = await updateItemsPerPage(value);
+        
+        if (result.success) {
+            setItemsPerPageMessage("Guardado");
+            setTimeout(() => setItemsPerPageMessage(null), 2000);
+        } else {
+            setItemsPerPageMessage(result.error || "Error");
+        }
+        setSavingItemsPerPage(false);
+    };
 
     return (
         <div className="space-y-8">
@@ -178,6 +198,43 @@ function PreferencesTab({ user }: { user: ProfileFormProps['user'] }) {
                 <ThemeToggle initialTheme={user.themePreference} variant="buttons" />
                 <p className="mt-2 text-xs text-[var(--muted-text)]">
                     Selecciona &quot;Auto&quot; para que el tema cambie según la configuración de tu dispositivo.
+                </p>
+            </div>
+
+            {/* Items Per Page Preference */}
+            <div className="border-t border-[var(--card-border)] pt-6">
+                <label className="block text-sm font-medium text-[var(--foreground)] mb-3">
+                    Items por Página en Tablas
+                </label>
+                <div className="flex items-center gap-3">
+                    <div className="flex rounded-lg border border-[var(--card-border)] overflow-hidden">
+                        {[10, 25, 50].map((value) => (
+                            <button
+                                key={value}
+                                type="button"
+                                onClick={() => handleItemsPerPageChange(value)}
+                                disabled={savingItemsPerPage}
+                                className={`px-4 py-2 text-sm font-medium transition-colors ${
+                                    itemsPerPage === value
+                                        ? "bg-nearby-accent text-white"
+                                        : "bg-[var(--card-bg)] text-[var(--foreground)] hover:bg-[var(--hover-bg)]"
+                                } ${savingItemsPerPage ? "opacity-50 cursor-not-allowed" : ""}`}
+                            >
+                                {value}
+                            </button>
+                        ))}
+                    </div>
+                    {savingItemsPerPage && (
+                        <span className="text-xs text-[var(--muted-text)]">Guardando...</span>
+                    )}
+                    {itemsPerPageMessage && !savingItemsPerPage && (
+                        <span className={`text-xs ${itemsPerPageMessage === "Guardado" ? "text-success-green" : "text-error-red"}`}>
+                            {itemsPerPageMessage}
+                        </span>
+                    )}
+                </div>
+                <p className="mt-2 text-xs text-[var(--muted-text)]">
+                    Número de registros a mostrar por página en las tablas de Empresas, Contactos y Negocios.
                 </p>
             </div>
 

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { DataTable, Column, TablePreferences } from "@/components/ui/data-table";
+import { DataTable, Column, TablePreferences, ItemsPerPage } from "@/components/ui/data-table";
 import { saveTablePreferences } from "@/actions/table-preferences";
 import { ContactStatus } from "@prisma/client";
 
@@ -22,6 +22,7 @@ interface Contact {
 interface ContactsTableProps {
     contacts: Contact[];
     initialPreferences: TablePreferences | null;
+    itemsPerPage?: ItemsPerPage;
 }
 
 const statusConfig: Record<ContactStatus, { label: string; className: string }> = {
@@ -32,7 +33,7 @@ const statusConfig: Record<ContactStatus, { label: string; className: string }> 
     DESCARTADO: { label: "Descartado", className: "bg-gray-100 text-gray-800" },
 };
 
-export function ContactsTable({ contacts, initialPreferences }: ContactsTableProps) {
+export function ContactsTable({ contacts, initialPreferences, itemsPerPage = 10 }: ContactsTableProps) {
     const router = useRouter();
 
     const columns: Column<Contact>[] = [
@@ -160,6 +161,8 @@ export function ContactsTable({ contacts, initialPreferences }: ContactsTablePro
                     searchKeys={["fullName", "email"]}
                     initialPreferences={initialPreferences || undefined}
                     onSavePreferences={handleSavePreferences}
+                    paginated
+                    itemsPerPage={itemsPerPage}
                 />
             </div>
 

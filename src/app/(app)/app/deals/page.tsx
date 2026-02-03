@@ -19,18 +19,20 @@ export default async function DealsPage() {
         getDeals(),
         prisma.user.findUnique({
             where: { email: session.user.email },
-            select: { dealsViewPref: true },
+            select: { dealsViewPref: true, itemsPerPage: true },
         }),
         getTablePreferences("deals"),
     ]);
 
     const defaultView = user?.dealsViewPref === "KANBAN" ? "kanban" : "table";
+    const itemsPerPage = (user?.itemsPerPage || 10) as 10 | 25 | 50;
 
     return (
         <DealsClientPage 
             deals={deals} 
             defaultView={defaultView} 
             initialTablePreferences={tablePreferences}
+            itemsPerPage={itemsPerPage}
         />
     );
 }
