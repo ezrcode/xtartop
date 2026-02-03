@@ -32,6 +32,7 @@ interface CompanyFormProps {
     company?: CompanyWithTerms;
     contacts: Contact[];
     isEditMode?: boolean;
+    userRole?: 'OWNER' | 'ADMIN' | 'MEMBER' | 'VIEWER' | null;
 }
 
 function SubmitButton({ actionName, label, mobileLabel, loadingLabel, icon: Icon, variant = "primary" }: {
@@ -93,7 +94,8 @@ function DeleteButton() {
     );
 }
 
-export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFormProps) {
+export function CompanyForm({ company, contacts, isEditMode = false, userRole = null }: CompanyFormProps) {
+    const isAdmin = userRole === 'OWNER' || userRole === 'ADMIN';
     const formRef = useRef<HTMLFormElement>(null);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<"general" | "contacts" | "subscription" | "invoices" | "tickets">("general");
@@ -117,6 +119,9 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
         quoteFileUrl: company?.quoteFileUrl || "",
         initialProjects: company?.initialProjects?.toString() || "0",
         initialUsers: company?.initialUsers?.toString() || "0",
+        // Contract data fields (editable by admin in Subscription tab)
+        legalName: company?.legalName || "",
+        fiscalAddress: company?.fiscalAddress || "",
     });
 
     const updateField = (field: keyof typeof formData, value: string) => {
@@ -349,6 +354,8 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                 <input type="hidden" name="quoteFileUrl" value={formData.quoteFileUrl} />
                                 <input type="hidden" name="initialProjects" value={formData.initialProjects} />
                                 <input type="hidden" name="initialUsers" value={formData.initialUsers} />
+                                <input type="hidden" name="legalName" value={formData.legalName} />
+                                <input type="hidden" name="fiscalAddress" value={formData.fiscalAddress} />
                                 
                                 {state?.message && (
                                     <div className={`p-4 rounded-md ${
@@ -377,7 +384,7 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                         <div className="grid grid-cols-1 gap-4 sm:gap-y-5 sm:gap-x-4 sm:grid-cols-6">
                                             <div className="sm:col-span-6">
                                                 <label htmlFor="name-input" className="block text-sm font-medium text-dark-slate mb-1.5">
-                                                    Nombre o Razón Social <span className="text-error-red">*</span>
+                                                    Nombre <span className="text-error-red">*</span>
                                                 </label>
                                                 <input
                                                     type="text"
@@ -393,16 +400,17 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                             </div>
 
                                             <div className="sm:col-span-3">
-                                                <label htmlFor="taxId-input" className="block text-sm font-medium text-dark-slate mb-1.5">
-                                                    RNC / Tax ID
+                                                <label htmlFor="taxId-display" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                    RNC
                                                 </label>
                                                 <input
                                                     type="text"
-                                                    id="taxId-input"
-                                                    value={formData.taxId}
-                                                    onChange={(e) => updateField("taxId", e.target.value)}
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                    id="taxId-display"
+                                                    value={formData.taxId || ""}
+                                                    readOnly
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm bg-gray-50 text-gray-600 cursor-not-allowed"
                                                 />
+                                                <p className="mt-1 text-xs text-gray-500">Editable en la pestaña Suscripción</p>
                                             </div>
 
                                             <div className="sm:col-span-3">
@@ -662,32 +670,68 @@ export function CompanyForm({ company, contacts, isEditMode = false }: CompanyFo
                                                 Datos para el Contrato
                                             </h3>
                                             <p className="text-sm text-dark-slate mb-4">
-                                                Estos datos son completados por el cliente a través del portal de onboarding.
+                                                {isAdmin 
+                                                    ? "Estos datos pueden ser editados por administradores o completados por el cliente a través del portal de onboarding."
+                                                    : "Estos datos son completados por el cliente a través del portal de onboarding."
+                                                }
                                             </p>
                                             <div className="grid grid-cols-1 gap-4">
                                                 <div>
-                                                    <label className="block text-sm font-medium text-dark-slate mb-1">
+                                                    <label htmlFor="legalName-input" className="block text-sm font-medium text-dark-slate mb-1">
                                                         Razón Social
                                                     </label>
-                                                    <div className="px-3 py-2 border border-graphite-gray rounded-md bg-white text-sm">
-                                                        {company.legalName || <span className="text-gray-400 italic">Pendiente</span>}
-                                                    </div>
+                                                    {isAdmin ? (
+                                                        <input
+                                                            type="text"
+                                                            id="legalName-input"
+                                                            value={formData.legalName}
+                                                            onChange={(e) => updateField("legalName", e.target.value)}
+                                                            placeholder="Nombre legal de la empresa"
+                                                            className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                                        />
+                                                    ) : (
+                                                        <div className="px-3 py-2 border border-graphite-gray rounded-md bg-gray-50 text-sm">
+                                                            {formData.legalName || <span className="text-gray-400 italic">Pendiente</span>}
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm font-medium text-dark-slate mb-1">
+                                                    <label htmlFor="taxId-input" className="block text-sm font-medium text-dark-slate mb-1">
                                                         RNC
                                                     </label>
-                                                    <div className="px-3 py-2 border border-graphite-gray rounded-md bg-white text-sm">
-                                                        {company.taxId || <span className="text-gray-400 italic">Pendiente</span>}
-                                                    </div>
+                                                    {isAdmin ? (
+                                                        <input
+                                                            type="text"
+                                                            id="taxId-input"
+                                                            value={formData.taxId}
+                                                            onChange={(e) => updateField("taxId", e.target.value)}
+                                                            placeholder="Ej: 1-23-45678-9"
+                                                            className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                                        />
+                                                    ) : (
+                                                        <div className="px-3 py-2 border border-graphite-gray rounded-md bg-gray-50 text-sm">
+                                                            {formData.taxId || <span className="text-gray-400 italic">Pendiente</span>}
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm font-medium text-dark-slate mb-1">
+                                                    <label htmlFor="fiscalAddress-input" className="block text-sm font-medium text-dark-slate mb-1">
                                                         Dirección Fiscal
                                                     </label>
-                                                    <div className="px-3 py-2 border border-graphite-gray rounded-md bg-white text-sm">
-                                                        {company.fiscalAddress || <span className="text-gray-400 italic">Pendiente</span>}
-                                                    </div>
+                                                    {isAdmin ? (
+                                                        <textarea
+                                                            id="fiscalAddress-input"
+                                                            value={formData.fiscalAddress}
+                                                            onChange={(e) => updateField("fiscalAddress", e.target.value)}
+                                                            placeholder="Dirección fiscal de la empresa"
+                                                            rows={2}
+                                                            className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent resize-none"
+                                                        />
+                                                    ) : (
+                                                        <div className="px-3 py-2 border border-graphite-gray rounded-md bg-gray-50 text-sm">
+                                                            {formData.fiscalAddress || <span className="text-gray-400 italic">Pendiente</span>}
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 
                                                 {/* Cotización - Editables solo por admin antes de aceptar contrato */}

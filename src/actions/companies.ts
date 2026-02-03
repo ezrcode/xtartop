@@ -38,6 +38,9 @@ const CompanySchema = z.object({
     initialUsers: z.number().int().min(0).optional(),
     quoteId: z.string().optional(),
     quoteFileUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+    // Contract data fields
+    legalName: z.string().optional(),
+    fiscalAddress: z.string().optional(),
 });
 
 export type CompanyState = {
@@ -162,6 +165,9 @@ export async function createCompanyAction(prevState: CompanyState | undefined, f
         initialUsers: initialUsersValue ? parseInt(initialUsersValue as string, 10) : 0,
         quoteId: formData.get("quoteId") || "",
         quoteFileUrl: formData.get("quoteFileUrl") || "",
+        // Contract data fields
+        legalName: formData.get("legalName") || "",
+        fiscalAddress: formData.get("fiscalAddress") || "",
     };
 
     const validatedFields = CompanySchema.safeParse(rawData);
@@ -221,6 +227,9 @@ export async function updateCompanyAction(id: string, prevState: CompanyState | 
         initialUsers: initialUsersValue ? parseInt(initialUsersValue as string, 10) : undefined,
         quoteId: formData.get("quoteId") || "",
         quoteFileUrl: formData.get("quoteFileUrl") || "",
+        // Contract data fields
+        legalName: formData.get("legalName") || "",
+        fiscalAddress: formData.get("fiscalAddress") || "",
     };
 
     const validatedFields = CompanySchema.safeParse(rawData);

@@ -62,7 +62,7 @@ export function CompaniesTable({ companies, initialPreferences }: CompaniesTable
         },
         {
             key: "name",
-            header: "Nombre o Razón Social",
+            header: "Nombre",
             sortable: true,
             hideable: false,
             render: (company) => (
