@@ -17,6 +17,7 @@ const ContactSchema = z.object({
     instagramUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
     linkedinUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
     status: z.nativeEnum(ContactStatus),
+    receivesInvoices: z.boolean().optional(),
 });
 
 export type ContactState = {
@@ -167,6 +168,7 @@ export async function createContactAction(prevState: ContactState | undefined, f
         instagramUrl: formData.get("instagramUrl"),
         linkedinUrl: formData.get("linkedinUrl"),
         status: formData.get("status"),
+        receivesInvoices: formData.get("receivesInvoices") === "on",
     };
 
     const validatedFields = ContactSchema.safeParse(rawData);
@@ -183,6 +185,7 @@ export async function createContactAction(prevState: ContactState | undefined, f
         contact = await prisma.contact.create({
             data: {
                 ...validatedFields.data,
+                receivesInvoices: validatedFields.data.receivesInvoices || false,
                 createdById: user.id,
                 workspaceId: workspace.id,
             },
@@ -215,6 +218,7 @@ export async function updateContactAction(id: string, prevState: ContactState | 
         instagramUrl: formData.get("instagramUrl"),
         linkedinUrl: formData.get("linkedinUrl"),
         status: formData.get("status"),
+        receivesInvoices: formData.get("receivesInvoices") === "on",
     };
 
     const validatedFields = ContactSchema.safeParse(rawData);
@@ -229,7 +233,10 @@ export async function updateContactAction(id: string, prevState: ContactState | 
     try {
         await prisma.contact.update({
             where: { id },
-            data: validatedFields.data,
+            data: {
+                ...validatedFields.data,
+                receivesInvoices: validatedFields.data.receivesInvoices || false,
+            },
         });
     } catch (error) {
         console.error("Database Error:", error);

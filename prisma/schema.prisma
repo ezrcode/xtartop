@@ -171,6 +171,14 @@ model Workspace {
   clickUpListId        String?  // ID de la lista de tickets
   clickUpClientFieldId String?  // ID del campo personalizado "Cliente"
   
+  // Automatic Billing Configuration
+  billingEnabled       Boolean  @default(false)  // Enable automatic billing
+  billingEmailsCC      String?  // CC emails (comma separated)
+  billingEmailsBCC     String?  // BCC emails (comma separated)
+  billingEmailSubject  String?  // Email subject template
+  billingEmailBody     String?  @db.Text  // Email body template
+  billingFromUserId    String?  // User ID to use for sending emails
+  
   createdAt        DateTime @default(now())
   ownerId     String
   owner       User     @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
@@ -182,6 +190,7 @@ model Workspace {
   companies    Company[]
   deals        Deal[]
   activities   Activity[]
+  billingHistory BillingHistory[]
 }
 
 model WorkspaceMember {
@@ -273,6 +282,7 @@ model Company {
   projects             Project[]
   clientUsers          ClientUser[]
   subscriptionBilling  SubscriptionBilling?
+  billingHistory       BillingHistory[]
 }
 
 enum ContactStatus {
@@ -308,6 +318,9 @@ model Contact {
   instagramUrl String?
   linkedinUrl  String?
   status       ContactStatus @default(PROSPECTO)
+  
+  // Billing preferences
+  receivesInvoices Boolean @default(false) // Receives invoices/proformas automatically
 
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -546,4 +559,61 @@ model SubscriptionItem {
   updatedAt             DateTime     @updatedAt
   
   @@index([subscriptionBillingId])
+}
+
+// Billing History - Records of sent invoices/proformas
+enum BillingHistoryStatus {
+  PENDING      // Pending to send
+  SENT         // Successfully sent
+  FAILED       // Send failed
+  CANCELLED    // Manually cancelled
+}
+
+model BillingHistory {
+  id              String               @id @default(cuid())
+  
+  companyId       String
+  company         Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  workspaceId     String
+  workspace       Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  
+  // ADMCloud document reference
+  admCloudDocId   String?              // Document ID in ADMCloud
+  proformaNumber  String?              // Proforma number (e.g., "PRO-00123")
+  
+  // Timing
+  generatedAt     DateTime             @default(now())
+  sentAt          DateTime?
+  
+  // Recipients
+  recipients      String               @db.Text  // JSON array of recipient emails
+  ccRecipients    String?              @db.Text  // JSON array of CC emails
+  
+  // Document
+  pdfUrl          String?              // URL of generated PDF (Vercel Blob)
+  
+  // Status
+  status          BillingHistoryStatus @default(PENDING)
+  errorMessage    String?              @db.Text
+  
+  // Billing period
+  billingMonth    Int                  // Month of billing (1-12)
+  billingYear     Int                  // Year of billing
+  
+  // Amounts
+  subtotal        Decimal              @default(0)
+  taxAmount       Decimal              @default(0)
+  totalAmount     Decimal              @default(0)
+  currency        Currency             @default(USD)
+  
+  // Items snapshot (JSON for historical record)
+  itemsSnapshot   String?              @db.Text  // JSON array of items at time of billing
+  
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  
+  @@index([companyId])
+  @@index([workspaceId])
+  @@index([billingMonth, billingYear])
 }

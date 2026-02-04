@@ -324,6 +324,27 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
                                         )}
                                     </div>
                                 </div>
+
+                                <div className="border-t border-graphite-gray pt-5">
+                                    <h3 className="text-base sm:text-lg font-medium text-dark-slate mb-4">Facturación</h3>
+                                    <div className="flex items-start gap-3">
+                                        <input
+                                            type="checkbox"
+                                            id="receivesInvoices"
+                                            name="receivesInvoices"
+                                            defaultChecked={contact?.receivesInvoices || false}
+                                            className="mt-1 h-4 w-4 rounded border-graphite-gray text-nearby-accent focus:ring-nearby-accent/20"
+                                        />
+                                        <div>
+                                            <label htmlFor="receivesInvoices" className="text-sm font-medium text-dark-slate cursor-pointer">
+                                                Recibe facturas y proformas
+                                            </label>
+                                            <p className="text-xs text-gray-500 mt-0.5">
+                                                Este contacto recibirá automáticamente las facturas y proformas de su empresa
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

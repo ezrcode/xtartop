@@ -129,6 +129,76 @@ export interface AdmCloudApiResponse<T> {
     error?: string;
 }
 
+// Quote/Proforma interfaces
+export interface AdmCloudQuoteItem {
+    ItemID: string;           // ID del artículo
+    Description?: string;     // Descripción (opcional, se toma del artículo)
+    Quantity: number;         // Cantidad
+    UnitPrice?: number;       // Precio unitario (opcional, se toma del artículo)
+    DiscountPercent?: number; // Descuento en porcentaje
+}
+
+export interface AdmCloudQuoteRequest {
+    RelationshipID: string;   // ID del cliente
+    DocDate?: string;         // Fecha del documento (ISO format)
+    CurrencyID?: string;      // Moneda (USD, DOP, etc.)
+    Notes?: string;           // Notas/Observaciones
+    Reference?: string;       // Referencia (ej: tasa de cambio)
+    PaymentTermsID?: string;  // ID de términos de pago
+    SalesRepID?: string;      // ID del vendedor
+    Items: AdmCloudQuoteItem[]; // Líneas de la cotización
+}
+
+export interface AdmCloudQuote {
+    ID: string;
+    DocID?: string;           // Número de documento (PRO-00123)
+    DocDate?: string;
+    DocDateString?: string;
+    RelationshipID?: string;
+    RelationshipName?: string;
+    CurrencyID?: string;
+    Reference?: string;       // Tasa de cambio
+    Notes?: string;
+    
+    // Totales
+    CalculatedSubTotalAmount?: number;
+    CalculatedDiscountAmount?: number;
+    CalculatedNetAmount?: number;
+    CalculatedTaxAmount?: number;
+    CalculatedTotalAmount?: number;
+    SubtotalAmount?: number;
+    TotalAmount?: number;
+    
+    // Items
+    Items?: AdmCloudQuoteItemResponse[];
+    
+    // Additional metadata
+    Status?: string;
+    CreationDate?: string;
+    PaymentTermsID?: string;
+    PaymentTermName?: string;
+    ExpirationDays?: number;
+    
+    // Nested objects that might be returned
+    Relationship?: AdmCloudCustomer;
+    [key: string]: unknown;
+}
+
+export interface AdmCloudQuoteItemResponse {
+    ID?: string;
+    ItemID?: string;
+    ItemCode?: string;
+    Name?: string;
+    Description?: string;
+    Quantity?: number;
+    Price?: number;
+    UnitPrice?: number;
+    Extended?: number;        // Quantity * Price
+    DiscountPercent?: number;
+    DiscountAmount?: number;
+    TaxAmount?: number;
+}
+
 class AdmCloudClient {
     private config: AdmCloudConfig | null = null;
 
@@ -365,6 +435,43 @@ class AdmCloudClient {
             '/PriceList',
             {},
             { skip: "0" }
+        );
+        if (!response.success) {
+            return { success: false, error: response.error };
+        }
+        return { success: true, data: this.normalizeList(response.data) };
+    }
+
+    /**
+     * Crear cotización/proforma en AdmCloud
+     */
+    async createQuote(data: AdmCloudQuoteRequest): Promise<AdmCloudApiResponse<AdmCloudQuote>> {
+        const response = await this.request<AdmCloudQuote>(
+            '/Quotes',
+            {
+                method: 'POST',
+                body: JSON.stringify(data),
+            }
+        );
+        return response;
+    }
+
+    /**
+     * Obtener cotización por ID
+     */
+    async getQuote(id: string): Promise<AdmCloudApiResponse<AdmCloudQuote>> {
+        const response = await this.request<AdmCloudQuote>(`/Quotes/${id}`);
+        return response;
+    }
+
+    /**
+     * Obtener cotizaciones de un cliente
+     */
+    async getQuotesByCustomer(relationshipId: string): Promise<AdmCloudApiResponse<AdmCloudQuote[]>> {
+        const response = await this.request<AdmCloudQuote[] | AdmCloudQuote>(
+            '/Quotes',
+            {},
+            { RelationshipID: relationshipId, skip: "0" }
         );
         if (!response.success) {
             return { success: false, error: response.error };

@@ -16,6 +16,7 @@ import {
 import type { Workspace, WorkspaceMember, Invitation, User, Subscription } from "@prisma/client";
 import { AdmCloudConfigTab } from "./admcloud-config-tab";
 import { ClickUpConfigTab } from "./clickup-config-tab";
+import { BillingConfigTab } from "./billing-config-tab";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
@@ -50,6 +51,13 @@ type WorkspaceWithDetails = Workspace & {
     clickUpWorkspaceId?: string | null;
     clickUpListId?: string | null;
     clickUpClientFieldId?: string | null;
+    // Billing config
+    billingEnabled?: boolean;
+    billingEmailsCC?: string | null;
+    billingEmailsBCC?: string | null;
+    billingEmailSubject?: string | null;
+    billingEmailBody?: string | null;
+    billingFromUserId?: string | null;
     _count: {
         contacts: number;
         companies: number;
@@ -57,8 +65,16 @@ type WorkspaceWithDetails = Workspace & {
     };
 };
 
+type WorkspaceUser = {
+    id: string;
+    name: string | null;
+    email: string;
+    emailConfigured: boolean;
+};
+
 interface SettingsPageProps {
     workspace: WorkspaceWithDetails;
+    workspaceUsers?: WorkspaceUser[];
 }
 
 function getDefaultContractTemplate(): string {
@@ -149,7 +165,7 @@ function getDefaultContractTemplate(): string {
 
 type Tab = 'workspace' | 'team' | 'contract' | 'integrations';
 
-export function SettingsPage({ workspace }: SettingsPageProps) {
+export function SettingsPage({ workspace, workspaceUsers = [] }: SettingsPageProps) {
     const [activeTab, setActiveTab] = useState<Tab>('workspace');
     const [showInviteForm, setShowInviteForm] = useState(false);
     const [revokingId, setRevokingId] = useState<string | null>(null);
@@ -637,6 +653,17 @@ export function SettingsPage({ workspace }: SettingsPageProps) {
 
                     {/* Tab Content: Integrations */}
                     <TabsContent value="integrations" className="mt-0 space-y-6">
+                        <BillingConfigTab
+                            currentConfig={{
+                                enabled: workspace.billingEnabled || false,
+                                emailsCC: workspace.billingEmailsCC || null,
+                                emailsBCC: workspace.billingEmailsBCC || null,
+                                emailSubject: workspace.billingEmailSubject || null,
+                                emailBody: workspace.billingEmailBody || null,
+                                fromUserId: workspace.billingFromUserId || null,
+                            }}
+                            availableUsers={workspaceUsers}
+                        />
                         <AdmCloudConfigTab 
                             currentConfig={{
                                 enabled: workspace.admCloudEnabled || false,
