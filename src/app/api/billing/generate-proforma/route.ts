@@ -12,6 +12,7 @@ import { createAdmCloudClient, type AdmCloudQuoteRequest } from "@/lib/admcloud/
 import { renderToBuffer } from "@react-pdf/renderer";
 import { createProformaPDF, addBusinessDays, DEFAULT_BANK_INFO, type ProformaData } from "@/lib/billing/pdf-generator";
 import { put } from "@vercel/blob";
+import { getCurrentWorkspace } from "@/actions/workspace";
 
 export async function POST(request: NextRequest) {
     // Verify authentication
@@ -28,24 +29,12 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "companyId es requerido" }, { status: 400 });
         }
 
-        // Get user and workspace
-        const user = await prisma.user.findUnique({
-            where: { email: session.user.email },
-            include: {
-                memberships: {
-                    include: {
-                        workspace: true,
-                    },
-                    take: 1,
-                },
-            },
-        });
+        // Get workspace using the existing helper
+        const workspace = await getCurrentWorkspace();
 
-        if (!user || user.memberships.length === 0) {
-            return NextResponse.json({ error: "Usuario sin workspace" }, { status: 400 });
+        if (!workspace) {
+            return NextResponse.json({ error: "Workspace no encontrado" }, { status: 400 });
         }
-
-        const workspace = user.memberships[0].workspace;
 
         // Get company with billing data
         const company = await prisma.company.findFirst({
