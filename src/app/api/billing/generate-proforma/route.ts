@@ -139,10 +139,15 @@ export async function POST(request: NextRequest) {
                     DocDate: today.toISOString(),
                     CurrencyID: "USD",
                     Notes: `Proforma manual - ${currentMonth}/${currentYear}`,
-                    Items: calculatedItems.map((item) => ({
+                    // Términos de pago y etapa de ventas predeterminados
+                    ...(workspace.admCloudDefaultPaymentTermId && { PaymentTermID: workspace.admCloudDefaultPaymentTermId }),
+                    ...(workspace.admCloudDefaultSalesStageId && { SalesStageID: workspace.admCloudDefaultSalesStageId }),
+                    // Items con orden preservado
+                    Items: calculatedItems.map((item, index) => ({
                         ItemID: item.admCloudItemId,
                         Quantity: item.calculatedQuantity,
                         Price: Number(item.price),
+                        RowOrder: index + 1,
                     })),
                 };
 

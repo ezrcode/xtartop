@@ -123,6 +123,10 @@ export async function saveAdmCloudSettings(
     const role = formData.get("role")?.toString().trim() || "Administradores";
     const defaultPriceListId = formData.get("defaultPriceListId")?.toString().trim() || "";
     const defaultPriceListName = formData.get("defaultPriceListName")?.toString().trim() || "";
+    const defaultPaymentTermId = formData.get("defaultPaymentTermId")?.toString().trim() || "";
+    const defaultPaymentTermName = formData.get("defaultPaymentTermName")?.toString().trim() || "";
+    const defaultSalesStageId = formData.get("defaultSalesStageId")?.toString().trim() || "";
+    const defaultSalesStageNam = formData.get("defaultSalesStageNam")?.toString().trim() || "";
 
     // Validar campos si está habilitado
     if (enabled) {
@@ -160,6 +164,10 @@ export async function saveAdmCloudSettings(
             admCloudRole: enabled ? role : null,
             admCloudDefaultPriceListId: enabled && defaultPriceListId ? defaultPriceListId : null,
             admCloudDefaultPriceListName: enabled && defaultPriceListName ? defaultPriceListName : null,
+            admCloudDefaultPaymentTermId: enabled && defaultPaymentTermId ? defaultPaymentTermId : null,
+            admCloudDefaultPaymentTermName: enabled && defaultPaymentTermName ? defaultPaymentTermName : null,
+            admCloudDefaultSalesStageId: enabled && defaultSalesStageId ? defaultSalesStageId : null,
+            admCloudDefaultStageName: enabled && defaultSalesStageNam ? defaultSalesStageNam : null,
         }
     });
 

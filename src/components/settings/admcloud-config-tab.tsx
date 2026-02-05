@@ -5,7 +5,7 @@ import { useFormState, useFormStatus } from "react-dom";
 import { Save, Loader2, Cloud, CloudOff, CheckCircle, XCircle, ExternalLink, RefreshCw } from "lucide-react";
 import { saveAdmCloudSettings, type AdmCloudSettingsState } from "@/actions/admcloud";
 
-interface PriceListOption {
+interface SelectOption {
     id: string;
     name: string;
 }
@@ -20,6 +20,10 @@ interface AdmCloudConfigTabProps {
         role: string | null;
         defaultPriceListId: string | null;
         defaultPriceListName: string | null;
+        defaultPaymentTermId: string | null;
+        defaultPaymentTermName: string | null;
+        defaultSalesStageId: string | null;
+        defaultSalesStageNam: string | null;
     };
 }
 
@@ -49,10 +53,18 @@ function SubmitButton() {
 
 export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
     const [enabled, setEnabled] = useState(currentConfig.enabled);
-    const [priceLists, setPriceLists] = useState<PriceListOption[]>([]);
+    const [priceLists, setPriceLists] = useState<SelectOption[]>([]);
+    const [paymentTerms, setPaymentTerms] = useState<SelectOption[]>([]);
+    const [salesStages, setSalesStages] = useState<SelectOption[]>([]);
     const [loadingPriceLists, setLoadingPriceLists] = useState(false);
+    const [loadingPaymentTerms, setLoadingPaymentTerms] = useState(false);
+    const [loadingSalesStages, setLoadingSalesStages] = useState(false);
     const [selectedPriceListId, setSelectedPriceListId] = useState(currentConfig.defaultPriceListId || "");
     const [selectedPriceListName, setSelectedPriceListName] = useState(currentConfig.defaultPriceListName || "");
+    const [selectedPaymentTermId, setSelectedPaymentTermId] = useState(currentConfig.defaultPaymentTermId || "");
+    const [selectedPaymentTermName, setSelectedPaymentTermName] = useState(currentConfig.defaultPaymentTermName || "");
+    const [selectedSalesStageId, setSelectedSalesStageId] = useState(currentConfig.defaultSalesStageId || "");
+    const [selectedStageName, setSelectedStageName] = useState(currentConfig.defaultSalesStageNam || "");
     
     const initialState: AdmCloudSettingsState = { message: "" };
     const [state, formAction] = useFormState(saveAdmCloudSettings, initialState);
@@ -75,14 +87,57 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
         }
     };
 
+    // Load payment terms
+    const loadPaymentTerms = async () => {
+        if (!enabled || !currentConfig.appId || !currentConfig.username) return;
+        
+        setLoadingPaymentTerms(true);
+        try {
+            const response = await fetch("/api/admcloud/payment-terms");
+            const data = await response.json();
+            if (data.paymentTerms && Array.isArray(data.paymentTerms)) {
+                setPaymentTerms(data.paymentTerms);
+            }
+        } catch (error) {
+            console.error("Error loading payment terms:", error);
+        } finally {
+            setLoadingPaymentTerms(false);
+        }
+    };
+
+    // Load sales stages
+    const loadSalesStages = async () => {
+        if (!enabled || !currentConfig.appId || !currentConfig.username) return;
+        
+        setLoadingSalesStages(true);
+        try {
+            const response = await fetch("/api/admcloud/sales-stages");
+            const data = await response.json();
+            if (data.salesStages && Array.isArray(data.salesStages)) {
+                setSalesStages(data.salesStages);
+            }
+        } catch (error) {
+            console.error("Error loading sales stages:", error);
+        } finally {
+            setLoadingSalesStages(false);
+        }
+    };
+
+    // Load all options when config is enabled
+    const loadAllOptions = () => {
+        loadPriceLists();
+        loadPaymentTerms();
+        loadSalesStages();
+    };
+
     useEffect(() => {
         if (enabled && currentConfig.appId && currentConfig.username) {
-            loadPriceLists();
+            loadAllOptions();
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [enabled, currentConfig.appId, currentConfig.username]);
 
-    // Update the selected name when the id changes
+    // Update the selected names when the ids change
     useEffect(() => {
         if (selectedPriceListId && priceLists.length > 0) {
             const found = priceLists.find(p => p.id === selectedPriceListId);
@@ -93,6 +148,28 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
             setSelectedPriceListName("");
         }
     }, [selectedPriceListId, priceLists]);
+
+    useEffect(() => {
+        if (selectedPaymentTermId && paymentTerms.length > 0) {
+            const found = paymentTerms.find(p => p.id === selectedPaymentTermId);
+            if (found) {
+                setSelectedPaymentTermName(found.name);
+            }
+        } else if (!selectedPaymentTermId) {
+            setSelectedPaymentTermName("");
+        }
+    }, [selectedPaymentTermId, paymentTerms]);
+
+    useEffect(() => {
+        if (selectedSalesStageId && salesStages.length > 0) {
+            const found = salesStages.find(p => p.id === selectedSalesStageId);
+            if (found) {
+                setSelectedStageName(found.name);
+            }
+        } else if (!selectedSalesStageId) {
+            setSelectedStageName("");
+        }
+    }, [selectedSalesStageId, salesStages]);
 
     return (
         <div className="space-y-6">
@@ -286,6 +363,101 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                 <p className="mt-1 text-xs text-gray-500">
                                     Al seleccionar artículos con múltiples precios, esta lista se usará por defecto
                                 </p>
+                            </div>
+
+                            {/* Quote Defaults Section */}
+                            <div className="mt-6 pt-4 border-t border-graphite-gray">
+                                <h3 className="text-sm font-medium text-dark-slate mb-4">
+                                    Configuración para Cotizaciones/Proformas
+                                </h3>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* Payment Terms Selector */}
+                                    <div>
+                                        <div className="flex items-center justify-between mb-2">
+                                            <label htmlFor="defaultPaymentTermId" className="block text-sm font-medium text-dark-slate">
+                                                Términos de pago
+                                            </label>
+                                            <button
+                                                type="button"
+                                                onClick={loadPaymentTerms}
+                                                disabled={loadingPaymentTerms}
+                                                className="text-xs text-nearby-accent hover:text-nearby-accent-600 flex items-center gap-1"
+                                            >
+                                                <RefreshCw size={12} className={loadingPaymentTerms ? "animate-spin" : ""} />
+                                                Actualizar
+                                            </button>
+                                        </div>
+                                        <input type="hidden" name="defaultPaymentTermId" value={selectedPaymentTermId} />
+                                        <input type="hidden" name="defaultPaymentTermName" value={selectedPaymentTermName} />
+                                        <select
+                                            id="defaultPaymentTermId"
+                                            value={selectedPaymentTermId}
+                                            onChange={(e) => setSelectedPaymentTermId(e.target.value)}
+                                            disabled={loadingPaymentTerms || paymentTerms.length === 0}
+                                            className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:opacity-50"
+                                        >
+                                            <option value="">
+                                                {loadingPaymentTerms 
+                                                    ? "Cargando..." 
+                                                    : paymentTerms.length === 0 
+                                                        ? "Guarda config primero" 
+                                                        : "Seleccionar términos de pago"}
+                                            </option>
+                                            {paymentTerms.map((term) => (
+                                                <option key={term.id} value={term.id}>
+                                                    {term.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            Ej: 5 días laborales
+                                        </p>
+                                    </div>
+
+                                    {/* Sales Stage Selector */}
+                                    <div>
+                                        <div className="flex items-center justify-between mb-2">
+                                            <label htmlFor="defaultSalesStageId" className="block text-sm font-medium text-dark-slate">
+                                                Etapa de ventas
+                                            </label>
+                                            <button
+                                                type="button"
+                                                onClick={loadSalesStages}
+                                                disabled={loadingSalesStages}
+                                                className="text-xs text-nearby-accent hover:text-nearby-accent-600 flex items-center gap-1"
+                                            >
+                                                <RefreshCw size={12} className={loadingSalesStages ? "animate-spin" : ""} />
+                                                Actualizar
+                                            </button>
+                                        </div>
+                                        <input type="hidden" name="defaultSalesStageId" value={selectedSalesStageId} />
+                                        <input type="hidden" name="defaultSalesStageNam" value={selectedStageName} />
+                                        <select
+                                            id="defaultSalesStageId"
+                                            value={selectedSalesStageId}
+                                            onChange={(e) => setSelectedSalesStageId(e.target.value)}
+                                            disabled={loadingSalesStages || salesStages.length === 0}
+                                            className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:opacity-50"
+                                        >
+                                            <option value="">
+                                                {loadingSalesStages 
+                                                    ? "Cargando..." 
+                                                    : salesStages.length === 0 
+                                                        ? "Guarda config primero" 
+                                                        : "Seleccionar etapa"}
+                                            </option>
+                                            {salesStages.map((stage) => (
+                                                <option key={stage.id} value={stage.id}>
+                                                    {stage.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            Ej: ENVIADA
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}

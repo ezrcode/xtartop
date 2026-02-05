@@ -163,6 +163,10 @@ model Workspace {
   admCloudRole     String?  // Rol (ej: "Administradores")
   admCloudDefaultPriceListId   String?  // Lista de precios predeterminada
   admCloudDefaultPriceListName String?  // Nombre de lista de precios predeterminada
+  admCloudDefaultPaymentTermId   String?  // Términos de pago predeterminados para cotizaciones
+  admCloudDefaultPaymentTermName String?  // Nombre de términos de pago
+  admCloudDefaultSalesStageId    String?  // Etapa de ventas predeterminada para cotizaciones
+  admCloudDefaultStageName       String?  // Nombre de etapa de ventas
   
   // ClickUp Integration Settings
   clickUpEnabled       Boolean  @default(false)

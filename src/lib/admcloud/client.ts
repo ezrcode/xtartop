@@ -136,6 +136,7 @@ export interface AdmCloudQuoteItem {
     Quantity: number;         // Cantidad
     Price?: number;           // Precio unitario (campo correcto según API ADMCloud)
     DiscountPercent?: number; // Descuento en porcentaje
+    RowOrder?: number;        // Orden de la línea (para mantener orden de items)
 }
 
 export interface AdmCloudQuoteRequest {
@@ -144,9 +145,26 @@ export interface AdmCloudQuoteRequest {
     CurrencyID?: string;      // Moneda (USD, DOP, etc.)
     Notes?: string;           // Notas/Observaciones
     Reference?: string;       // Referencia (ej: tasa de cambio)
-    PaymentTermsID?: string;  // ID de términos de pago
+    PaymentTermID?: string;   // ID de términos de pago (campo correcto: PaymentTermID, no PaymentTermsID)
+    SalesStageID?: string;    // ID de etapa de ventas
     SalesRepID?: string;      // ID del vendedor
     Items: AdmCloudQuoteItem[]; // Líneas de la cotización
+}
+
+// PaymentTerm interface
+export interface AdmCloudPaymentTerm {
+    ID: string;
+    Name: string;
+    Description?: string;
+    Days?: number;
+}
+
+// SalesStage interface
+export interface AdmCloudSalesStage {
+    ID: string;
+    Name: string;
+    Description?: string;
+    Order?: number;
 }
 
 export interface AdmCloudQuote {
@@ -472,6 +490,36 @@ class AdmCloudClient {
             '/Quotes',
             {},
             { RelationshipID: relationshipId, skip: "0" }
+        );
+        if (!response.success) {
+            return { success: false, error: response.error };
+        }
+        return { success: true, data: this.normalizeList(response.data) };
+    }
+
+    /**
+     * Obtener términos de pago
+     */
+    async getPaymentTerms(): Promise<AdmCloudApiResponse<AdmCloudPaymentTerm[]>> {
+        const response = await this.request<AdmCloudPaymentTerm[] | AdmCloudPaymentTerm>(
+            '/PaymentTerms',
+            {},
+            { skip: "0" }
+        );
+        if (!response.success) {
+            return { success: false, error: response.error };
+        }
+        return { success: true, data: this.normalizeList(response.data) };
+    }
+
+    /**
+     * Obtener etapas de ventas
+     */
+    async getSalesStages(): Promise<AdmCloudApiResponse<AdmCloudSalesStage[]>> {
+        const response = await this.request<AdmCloudSalesStage[] | AdmCloudSalesStage>(
+            '/SalesStages',
+            {},
+            { skip: "0" }
         );
         if (!response.success) {
             return { success: false, error: response.error };

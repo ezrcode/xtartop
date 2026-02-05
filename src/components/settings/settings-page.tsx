@@ -674,6 +674,10 @@ export function SettingsPage({ workspace, workspaceUsers = [] }: SettingsPagePro
                                 role: workspace.admCloudRole || null,
                                 defaultPriceListId: workspace.admCloudDefaultPriceListId || null,
                                 defaultPriceListName: workspace.admCloudDefaultPriceListName || null,
+                                defaultPaymentTermId: workspace.admCloudDefaultPaymentTermId || null,
+                                defaultPaymentTermName: workspace.admCloudDefaultPaymentTermName || null,
+                                defaultSalesStageId: workspace.admCloudDefaultSalesStageId || null,
+                                defaultSalesStageNam: workspace.admCloudDefaultStageName || null,
                             }}
                         />
                         <ClickUpConfigTab 
