@@ -11,16 +11,7 @@ import {
     View,
     StyleSheet,
     Image,
-    Font,
 } from "@react-pdf/renderer";
-
-// Register fonts (optional, but improves appearance)
-Font.register({
-    family: "Helvetica",
-    fonts: [
-        { src: "https://fonts.gstatic.com/s/helveticaneue/v70/1Ptsg8LbS2YAu48YLAPZe5QgOZE4d3N8.woff2" },
-    ],
-});
 
 // Define styles
 const styles = StyleSheet.create({

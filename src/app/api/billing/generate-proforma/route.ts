@@ -189,8 +189,17 @@ export async function POST(request: NextRequest) {
         };
 
         // Render PDF to buffer
-        const pdfDocument = createProformaPDF(proformaData);
-        const pdfBuffer = await renderToBuffer(pdfDocument);
+        let pdfBuffer: Buffer;
+        try {
+            const pdfDocument = createProformaPDF(proformaData);
+            pdfBuffer = await renderToBuffer(pdfDocument);
+        } catch (pdfError) {
+            console.error("Error generating PDF:", pdfError);
+            return NextResponse.json({
+                success: false,
+                error: `Error al generar PDF: ${pdfError instanceof Error ? pdfError.message : "Error desconocido"}`,
+            }, { status: 500 });
+        }
 
         // Upload PDF to Vercel Blob
         const timestamp = Date.now();
