@@ -132,9 +132,9 @@ export interface AdmCloudApiResponse<T> {
 // Quote/Proforma interfaces
 export interface AdmCloudQuoteItem {
     ItemID: string;           // ID del artículo
-    Description?: string;     // Descripción (opcional, se toma del artículo)
+    Name?: string;            // Descripción/Nombre (opcional, se toma del artículo)
     Quantity: number;         // Cantidad
-    UnitPrice?: number;       // Precio unitario (opcional, se toma del artículo)
+    Price?: number;           // Precio unitario (campo correcto según API ADMCloud)
     DiscountPercent?: number; // Descuento en porcentaje
 }
 

@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
                     Items: calculatedItems.map((item) => ({
                         ItemID: item.admCloudItemId,
                         Quantity: item.calculatedQuantity,
-                        UnitPrice: Number(item.price),
+                        Price: Number(item.price),
                     })),
                 };
 
