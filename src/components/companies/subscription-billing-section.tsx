@@ -68,7 +68,14 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
     const [editingItem, setEditingItem] = useState<SubscriptionItemWithQuantity | null>(null);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<string | null>(null);
     const [generatingProforma, setGeneratingProforma] = useState(false);
-    const [proformaResult, setProformaResult] = useState<{ success: boolean; pdfUrl?: string; error?: string } | null>(null);
+    const [proformaResult, setProformaResult] = useState<{ 
+        success: boolean; 
+        pdfUrl?: string; 
+        error?: string;
+        admCloudCreated?: boolean;
+        admCloudError?: string;
+        proformaNumber?: string;
+    } | null>(null);
 
     const loadBillingData = useCallback(async () => {
         try {
@@ -141,7 +148,13 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
             const data = await response.json();
             
             if (data.success) {
-                setProformaResult({ success: true, pdfUrl: data.pdfUrl });
+                setProformaResult({ 
+                    success: true, 
+                    pdfUrl: data.pdfUrl,
+                    admCloudCreated: data.admCloudCreated,
+                    admCloudError: data.admCloudError,
+                    proformaNumber: data.proformaNumber,
+                });
             } else {
                 setProformaResult({ success: false, error: data.error });
             }
@@ -248,20 +261,47 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
 
                     {/* Proforma generation result */}
                     {proformaResult && (
-                        <div className={`p-3 rounded-lg text-sm ${proformaResult.success ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"}`}>
+                        <div className={`p-3 rounded-lg text-sm space-y-2 ${
+                            proformaResult.success 
+                                ? proformaResult.admCloudCreated 
+                                    ? "bg-green-50 border border-green-200" 
+                                    : "bg-amber-50 border border-amber-200"
+                                : "bg-red-50 border border-red-200"
+                        }`}>
                             {proformaResult.success ? (
-                                <div className="flex items-center justify-between">
-                                    <span className="text-green-800">Proforma generada exitosamente</span>
-                                    <a
-                                        href={proformaResult.pdfUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center text-green-700 hover:text-green-900 font-medium"
-                                    >
-                                        <Download size={14} className="mr-1" />
-                                        Descargar PDF
-                                    </a>
-                                </div>
+                                <>
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            {proformaResult.admCloudCreated ? (
+                                                <span className="text-green-800 font-medium">
+                                                    ✓ Proforma {proformaResult.proformaNumber} creada en ADMCloud
+                                                </span>
+                                            ) : (
+                                                <span className="text-amber-800 font-medium">
+                                                    ⚠ PDF generado localmente (no se creó en ADMCloud)
+                                                </span>
+                                            )}
+                                        </div>
+                                        <a
+                                            href={proformaResult.pdfUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className={`flex items-center font-medium ${
+                                                proformaResult.admCloudCreated 
+                                                    ? "text-green-700 hover:text-green-900" 
+                                                    : "text-amber-700 hover:text-amber-900"
+                                            }`}
+                                        >
+                                            <Download size={14} className="mr-1" />
+                                            Descargar PDF
+                                        </a>
+                                    </div>
+                                    {proformaResult.admCloudError && (
+                                        <p className="text-amber-700 text-xs">
+                                            Razón: {proformaResult.admCloudError}
+                                        </p>
+                                    )}
+                                </>
                             ) : (
                                 <span className="text-red-800">{proformaResult.error}</span>
                             )}

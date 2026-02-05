@@ -234,31 +234,115 @@ export async function GET(request: NextRequest) {
                     const taxAmount = 0; // Assuming tax included or configured elsewhere
                     const total = subtotal + taxAmount;
 
-                    // Create quote in ADMCloud if enabled
+                    // Create quote in ADMCloud - REQUIRED for automatic billing
                     let admCloudDocId: string | null = null;
                     let proformaNumber = `PRO-${currentYear}${String(currentMonth).padStart(2, "0")}-${company.id.slice(-6)}`;
 
-                    if (admCloudClient && company.admCloudRelationshipId) {
-                        const quoteRequest: AdmCloudQuoteRequest = {
-                            RelationshipID: company.admCloudRelationshipId,
-                            DocDate: today.toISOString(),
-                            CurrencyID: "USD",
-                            Notes: `Facturación mensual automática - ${currentMonth}/${currentYear}`,
-                            Items: calculatedItems.map((item) => ({
-                                ItemID: item.admCloudItemId,
-                                Quantity: item.calculatedQuantity,
-                                UnitPrice: Number(item.price),
-                            })),
-                        };
-
-                        const quoteResult = await admCloudClient.createQuote(quoteRequest);
+                    // Check if ADMCloud is properly configured for this company
+                    if (!admCloudClient) {
+                        const errorMsg = "ADMCloud no está configurado en el workspace";
+                        console.error(`${company.name}: ${errorMsg}`);
                         
-                        if (quoteResult.success && quoteResult.data) {
-                            admCloudDocId = quoteResult.data.ID;
-                            proformaNumber = quoteResult.data.DocID || proformaNumber;
-                        } else {
-                            console.error(`Failed to create quote in ADMCloud for ${company.name}: ${quoteResult.error}`);
-                        }
+                        await prisma.billingHistory.create({
+                            data: {
+                                companyId: company.id,
+                                workspaceId: workspace.id,
+                                billingMonth: currentMonth,
+                                billingYear: currentYear,
+                                status: "FAILED",
+                                errorMessage: errorMsg,
+                                recipients: JSON.stringify(company.contacts.map(c => c.email)),
+                                subtotal,
+                                taxAmount,
+                                totalAmount: total,
+                            },
+                        });
+                        
+                        results.failed++;
+                        results.details.push({
+                            companyId: company.id,
+                            companyName: company.name,
+                            status: "failed",
+                            error: errorMsg,
+                        });
+                        continue;
+                    }
+
+                    if (!company.admCloudRelationshipId) {
+                        const errorMsg = "La empresa no tiene RelationshipID de ADMCloud configurado";
+                        console.error(`${company.name}: ${errorMsg}`);
+                        
+                        await prisma.billingHistory.create({
+                            data: {
+                                companyId: company.id,
+                                workspaceId: workspace.id,
+                                billingMonth: currentMonth,
+                                billingYear: currentYear,
+                                status: "FAILED",
+                                errorMessage: errorMsg,
+                                recipients: JSON.stringify(company.contacts.map(c => c.email)),
+                                subtotal,
+                                taxAmount,
+                                totalAmount: total,
+                            },
+                        });
+                        
+                        results.failed++;
+                        results.details.push({
+                            companyId: company.id,
+                            companyName: company.name,
+                            status: "failed",
+                            error: errorMsg,
+                        });
+                        continue;
+                    }
+
+                    // Create quote in ADMCloud
+                    const quoteRequest: AdmCloudQuoteRequest = {
+                        RelationshipID: company.admCloudRelationshipId,
+                        DocDate: today.toISOString(),
+                        CurrencyID: "USD",
+                        Notes: `Facturación mensual automática - ${currentMonth}/${currentYear}`,
+                        Items: calculatedItems.map((item) => ({
+                            ItemID: item.admCloudItemId,
+                            Quantity: item.calculatedQuantity,
+                            UnitPrice: Number(item.price),
+                        })),
+                    };
+
+                    const quoteResult = await admCloudClient.createQuote(quoteRequest);
+                    
+                    if (quoteResult.success && quoteResult.data) {
+                        admCloudDocId = quoteResult.data.ID;
+                        proformaNumber = quoteResult.data.DocID || proformaNumber;
+                    } else {
+                        // ADMCloud creation failed - this is a critical error for automatic billing
+                        const errorMsg = `Error al crear cotización en ADMCloud: ${quoteResult.error || "Error desconocido"}`;
+                        console.error(`${company.name}: ${errorMsg}`);
+                        
+                        await prisma.billingHistory.create({
+                            data: {
+                                companyId: company.id,
+                                workspaceId: workspace.id,
+                                billingMonth: currentMonth,
+                                billingYear: currentYear,
+                                status: "FAILED",
+                                errorMessage: errorMsg,
+                                recipients: JSON.stringify(company.contacts.map(c => c.email)),
+                                subtotal,
+                                taxAmount,
+                                totalAmount: total,
+                            },
+                        });
+                        
+                        results.failed++;
+                        results.details.push({
+                            companyId: company.id,
+                            companyName: company.name,
+                            status: "failed",
+                            error: errorMsg,
+                        });
+                        continue;
                     }
 
                     // Generate PDF

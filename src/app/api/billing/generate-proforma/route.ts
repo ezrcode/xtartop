@@ -118,18 +118,22 @@ export async function POST(request: NextRequest) {
             workspace.admCloudPassword;
 
         let admCloudDocId: string | null = null;
+        let admCloudCreated = false;
+        let admCloudError: string | null = null;
         let proformaNumber = `PRO-${currentYear}${String(currentMonth).padStart(2, "0")}-${company.id.slice(-6)}-M`;
 
         if (admCloudEnabled) {
-            const admCloudClient = createAdmCloudClient({
-                appId: workspace.admCloudAppId!,
-                username: workspace.admCloudUsername!,
-                password: workspace.admCloudPassword!,
-                company: workspace.admCloudCompany || "",
-                role: workspace.admCloudRole || "Administradores",
-            });
+            if (!company.admCloudRelationshipId) {
+                admCloudError = "La empresa no tiene RelationshipID de ADMCloud configurado";
+            } else {
+                const admCloudClient = createAdmCloudClient({
+                    appId: workspace.admCloudAppId!,
+                    username: workspace.admCloudUsername!,
+                    password: workspace.admCloudPassword!,
+                    company: workspace.admCloudCompany || "",
+                    role: workspace.admCloudRole || "Administradores",
+                });
 
-            if (company.admCloudRelationshipId) {
                 const quoteRequest: AdmCloudQuoteRequest = {
                     RelationshipID: company.admCloudRelationshipId,
                     DocDate: today.toISOString(),
@@ -147,11 +151,14 @@ export async function POST(request: NextRequest) {
                 if (quoteResult.success && quoteResult.data) {
                     admCloudDocId = quoteResult.data.ID;
                     proformaNumber = quoteResult.data.DocID || proformaNumber;
+                    admCloudCreated = true;
                 } else {
-                    console.error(`Failed to create quote in ADMCloud: ${quoteResult.error}`);
-                    // Continue anyway - we'll still generate the PDF locally
+                    admCloudError = quoteResult.error || "Error desconocido al crear cotización";
+                    console.error(`Failed to create quote in ADMCloud: ${admCloudError}`);
                 }
             }
+        } else {
+            admCloudError = "ADMCloud no está configurado en el workspace";
         }
 
         // Generate PDF
@@ -235,6 +242,8 @@ export async function POST(request: NextRequest) {
             success: true,
             proformaNumber,
             admCloudDocId,
+            admCloudCreated,
+            admCloudError,
             pdfUrl: blob.url,
             total,
             itemsCount: calculatedItems.length,
