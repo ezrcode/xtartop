@@ -524,11 +524,12 @@ enum CalculatedBase {
 }
 
 model SubscriptionBilling {
-  id           String      @id @default(cuid())
-  companyId    String      @unique
-  company      Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  billingType  BillingType @default(STANDARD)
-  billingDay   Int         @default(1) // Día del mes para generar factura (1-31)
+  id                 String      @id @default(cuid())
+  companyId          String      @unique
+  company            Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  billingType        BillingType @default(STANDARD)
+  autoBillingEnabled Boolean     @default(false) // Habilitar cobro automático
+  billingDay         Int         @default(1) // Día del mes para generar factura (1-31)
   
   items        SubscriptionItem[]
   

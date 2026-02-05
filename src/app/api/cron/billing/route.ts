@@ -69,6 +69,7 @@ export async function GET(request: NextRequest) {
                         status: "CLIENTE",
                         subscriptionBilling: {
                             billingDay: currentDay,
+                            autoBillingEnabled: true, // Solo procesar empresas con cobro automático habilitado
                         },
                     },
                     include: {

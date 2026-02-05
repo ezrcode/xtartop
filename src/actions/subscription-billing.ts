@@ -47,6 +47,7 @@ export async function getSubscriptionBilling(companyId: string) {
             data: {
                 companyId,
                 billingType: "STANDARD",
+                autoBillingEnabled: false,
                 billingDay: 1,
             },
             include: {
@@ -90,11 +91,12 @@ export async function getSubscriptionBilling(companyId: string) {
     };
 }
 
-// Update billing type and billing day
+// Update billing type, billing day, and auto billing enabled
 export async function updateBillingSettings(
     companyId: string,
     billingType: BillingType,
-    billingDay: number
+    billingDay: number,
+    autoBillingEnabled?: boolean
 ) {
     const session = await auth();
     if (!session?.user?.email) {
@@ -121,17 +123,65 @@ export async function updateBillingSettings(
     // Validate billingDay (1-31)
     const validBillingDay = Math.min(Math.max(1, billingDay), 31);
 
+    // Prepare update data
+    const updateData: {
+        billingType: BillingType;
+        billingDay: number;
+        autoBillingEnabled?: boolean;
+    } = {
+        billingType,
+        billingDay: validBillingDay,
+    };
+
+    if (autoBillingEnabled !== undefined) {
+        updateData.autoBillingEnabled = autoBillingEnabled;
+    }
+
     // Update or create billing settings
     await prisma.subscriptionBilling.upsert({
         where: { companyId },
-        update: {
-            billingType,
-            billingDay: validBillingDay,
-        },
+        update: updateData,
         create: {
             companyId,
             billingType,
             billingDay: validBillingDay,
+            autoBillingEnabled: autoBillingEnabled ?? false,
+        },
+    });
+
+    revalidatePath(`/app/companies/${companyId}`);
+    return { success: true };
+}
+
+// Toggle auto billing enabled
+export async function toggleAutoBilling(companyId: string, enabled: boolean) {
+    const session = await auth();
+    if (!session?.user?.email) {
+        throw new Error("No autorizado");
+    }
+
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) {
+        throw new Error("Workspace no encontrado");
+    }
+
+    // Verify company belongs to workspace
+    const company = await prisma.company.findFirst({
+        where: {
+            id: companyId,
+            workspaceId: workspace.id,
+        },
+    });
+
+    if (!company) {
+        throw new Error("Empresa no encontrada");
+    }
+
+    // Update auto billing setting
+    await prisma.subscriptionBilling.update({
+        where: { companyId },
+        data: {
+            autoBillingEnabled: enabled,
         },
     });
 

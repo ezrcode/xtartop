@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, FileText, Download } from "lucide-react";
 import { BillingType, CountType, CalculatedBase } from "@prisma/client";
 import {
     getSubscriptionBilling,
@@ -10,6 +10,7 @@ import {
     addSubscriptionItem,
     updateSubscriptionItem,
     deleteSubscriptionItem,
+    toggleAutoBilling,
 } from "@/actions/subscription-billing";
 import { formatMoney } from "@/lib/format";
 
@@ -44,6 +45,7 @@ interface SubscriptionItemWithQuantity {
 interface SubscriptionBillingData {
     id: string;
     billingType: BillingType;
+    autoBillingEnabled: boolean;
     billingDay: number;
     items: SubscriptionItemWithQuantity[];
     total: number;
@@ -60,10 +62,13 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [billingType, setBillingType] = useState<BillingType>("STANDARD");
+    const [autoBillingEnabled, setAutoBillingEnabled] = useState(false);
     const [billingDay, setBillingDay] = useState(1);
     const [modalOpen, setModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<SubscriptionItemWithQuantity | null>(null);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<string | null>(null);
+    const [generatingProforma, setGeneratingProforma] = useState(false);
+    const [proformaResult, setProformaResult] = useState<{ success: boolean; pdfUrl?: string; error?: string } | null>(null);
 
     const loadBillingData = useCallback(async () => {
         try {
@@ -72,6 +77,7 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
             if (data) {
                 setBilling(data);
                 setBillingType(data.billingType);
+                setAutoBillingEnabled(data.autoBillingEnabled);
                 setBillingDay(data.billingDay);
             }
         } catch (error) {
@@ -107,6 +113,43 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
             console.error("Error updating billing day:", error);
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleAutoBillingChange = async (enabled: boolean) => {
+        setAutoBillingEnabled(enabled);
+        setSaving(true);
+        try {
+            await toggleAutoBilling(companyId, enabled);
+        } catch (error) {
+            console.error("Error updating auto billing:", error);
+            setAutoBillingEnabled(!enabled); // Revert on error
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleGenerateProforma = async () => {
+        setGeneratingProforma(true);
+        setProformaResult(null);
+        try {
+            const response = await fetch("/api/billing/generate-proforma", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ companyId }),
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                setProformaResult({ success: true, pdfUrl: data.pdfUrl });
+            } else {
+                setProformaResult({ success: false, error: data.error });
+            }
+        } catch (error) {
+            console.error("Error generating proforma:", error);
+            setProformaResult({ success: false, error: "Error al generar la proforma" });
+        } finally {
+            setGeneratingProforma(false);
         }
     };
 
@@ -157,31 +200,73 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                     Cobro de suscripción
                 </h3>
                 
-                {/* Radio buttons for billing type */}
+                {/* Radio buttons for billing type and manual proforma button */}
                 <div className="space-y-4">
-                    <div className="flex items-center space-x-4">
-                        <label className="flex items-center cursor-pointer">
-                            <input
-                                type="radio"
-                                name="billingType"
-                                checked={billingType === "STANDARD"}
-                                onChange={() => handleBillingTypeChange("STANDARD")}
-                                className="w-4 h-4 text-nearby-accent border-gray-300 focus:ring-nearby-accent"
-                            />
-                            <span className="ml-2 text-sm font-medium text-dark-slate">Estándar</span>
-                        </label>
-                        <label className="flex items-center cursor-pointer">
-                            <input
-                                type="radio"
-                                name="billingType"
-                                checked={billingType === "CUSTOM"}
-                                onChange={() => handleBillingTypeChange("CUSTOM")}
-                                className="w-4 h-4 text-nearby-accent border-gray-300 focus:ring-nearby-accent"
-                            />
-                            <span className="ml-2 text-sm font-medium text-dark-slate">Personalizado</span>
-                        </label>
-                        {saving && <Loader2 className="animate-spin text-nearby-accent" size={16} />}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                        <div className="flex items-center space-x-4">
+                            <label className="flex items-center cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="billingType"
+                                    checked={billingType === "STANDARD"}
+                                    onChange={() => handleBillingTypeChange("STANDARD")}
+                                    className="w-4 h-4 text-nearby-accent border-gray-300 focus:ring-nearby-accent"
+                                />
+                                <span className="ml-2 text-sm font-medium text-dark-slate">Estándar</span>
+                            </label>
+                            <label className="flex items-center cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="billingType"
+                                    checked={billingType === "CUSTOM"}
+                                    onChange={() => handleBillingTypeChange("CUSTOM")}
+                                    className="w-4 h-4 text-nearby-accent border-gray-300 focus:ring-nearby-accent"
+                                />
+                                <span className="ml-2 text-sm font-medium text-dark-slate">Personalizado</span>
+                            </label>
+                        </div>
+                        
+                        {/* Manual proforma button */}
+                        <div className="flex items-center gap-2 sm:ml-auto">
+                            {saving && <Loader2 className="animate-spin text-nearby-accent" size={16} />}
+                            <button
+                                type="button"
+                                onClick={handleGenerateProforma}
+                                disabled={generatingProforma || !billing?.items.length}
+                                className="flex items-center px-3 py-1.5 text-sm font-medium text-white bg-nearby-accent hover:bg-nearby-accent/90 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Generar proforma manualmente"
+                            >
+                                {generatingProforma ? (
+                                    <Loader2 className="animate-spin mr-2" size={14} />
+                                ) : (
+                                    <FileText size={14} className="mr-2" />
+                                )}
+                                Generar proforma manual
+                            </button>
+                        </div>
                     </div>
+
+                    {/* Proforma generation result */}
+                    {proformaResult && (
+                        <div className={`p-3 rounded-lg text-sm ${proformaResult.success ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"}`}>
+                            {proformaResult.success ? (
+                                <div className="flex items-center justify-between">
+                                    <span className="text-green-800">Proforma generada exitosamente</span>
+                                    <a
+                                        href={proformaResult.pdfUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center text-green-700 hover:text-green-900 font-medium"
+                                    >
+                                        <Download size={14} className="mr-1" />
+                                        Descargar PDF
+                                    </a>
+                                </div>
+                            ) : (
+                                <span className="text-red-800">{proformaResult.error}</span>
+                            )}
+                        </div>
+                    )}
 
                     {/* Standard billing items table */}
                     {billingType === "STANDARD" && (
@@ -272,22 +357,44 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                 </div>
             </div>
 
-            {/* Billing day and total */}
+            {/* Auto billing toggle, billing day and total */}
             <div className="border-t border-graphite-gray pt-4 space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div className="flex items-center space-x-3">
-                        <label className="text-sm font-medium text-dark-slate whitespace-nowrap">
-                            Día de cobro:
+                    <div className="flex items-center gap-6">
+                        {/* Auto billing toggle */}
+                        <label className="flex items-center cursor-pointer">
+                            <div className="relative">
+                                <input
+                                    type="checkbox"
+                                    checked={autoBillingEnabled}
+                                    onChange={(e) => handleAutoBillingChange(e.target.checked)}
+                                    className="sr-only"
+                                />
+                                <div className={`block w-10 h-6 rounded-full transition-colors ${autoBillingEnabled ? "bg-nearby-accent" : "bg-gray-300"}`}></div>
+                                <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${autoBillingEnabled ? "translate-x-4" : ""}`}></div>
+                            </div>
+                            <span className="ml-3 text-sm font-medium text-dark-slate">
+                                Cobro automático
+                            </span>
                         </label>
-                        <select
-                            value={billingDay}
-                            onChange={(e) => handleBillingDayChange(parseInt(e.target.value))}
-                            className="w-20 px-2 py-1.5 text-sm border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
-                        >
-                            {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
-                                <option key={day} value={day}>{day}</option>
-                            ))}
-                        </select>
+
+                        {/* Billing day - only show if auto billing is enabled */}
+                        {autoBillingEnabled && (
+                            <div className="flex items-center space-x-3">
+                                <label className="text-sm font-medium text-dark-slate whitespace-nowrap">
+                                    Día de cobro:
+                                </label>
+                                <select
+                                    value={billingDay}
+                                    onChange={(e) => handleBillingDayChange(parseInt(e.target.value))}
+                                    className="w-20 px-2 py-1.5 text-sm border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                >
+                                    {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+                                        <option key={day} value={day}>{day}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
                     </div>
                     
                     <div className="flex items-center space-x-3 bg-gray-50 px-4 py-2 rounded-lg">
