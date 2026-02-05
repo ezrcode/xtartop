@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import Link from "next/link";
-import { Save, Trash2, ArrowLeft, Loader2, ChevronDown, Search, X, Building2, Users, CreditCard, FileText, Ticket } from "lucide-react";
+import { Save, Trash2, ArrowLeft, Loader2, ChevronDown, Search, X, Building2, Users, CreditCard, FileText, Ticket, History } from "lucide-react";
 import { createCompanyAction, updateCompanyAction, deleteCompany, CompanyState } from "@/actions/companies";
 import { Company, Contact, CompanyStatus, ClientInvitation, Project, ClientUser } from "@prisma/client";
 import { CompanyActivitiesClient } from "../activities/company-activities-client";
@@ -15,6 +15,7 @@ import { PdfUpload } from "../ui/pdf-upload";
 import { InvoicesTab } from "./invoices-tab";
 import { SubscriptionBillingSection } from "./subscription-billing-section";
 import { TicketsTab } from "./tickets-tab";
+import { BillingHistoryTab } from "./billing-history-tab";
 
 type CompanyWithTerms = Company & { 
     primaryContact?: Contact | null;
@@ -98,7 +99,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
     const isAdmin = userRole === 'OWNER' || userRole === 'ADMIN';
     const formRef = useRef<HTMLFormElement>(null);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState<"general" | "contacts" | "subscription" | "invoices" | "tickets">("general");
+    const [activeTab, setActiveTab] = useState<"general" | "contacts" | "subscription" | "invoices" | "tickets" | "proformas">("general");
     const [pendingAction, setPendingAction] = useState<string | null>(null);
     
     // Controlled form fields - persist values across tab switches
@@ -331,6 +332,18 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                 >
                                     <Ticket size={16} className="shrink-0" />
                                     <span className="hidden sm:inline">Tickets</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTab("proformas")}
+                                    className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 py-3 px-2 sm:px-4 border-b-2 font-medium text-xs sm:text-sm transition-colors ${
+                                        activeTab === "proformas"
+                                            ? "border-nearby-accent text-nearby-accent"
+                                            : "border-transparent text-[var(--muted-text)] hover:text-[var(--foreground)]"
+                                    }`}
+                                >
+                                    <History size={16} className="shrink-0" />
+                                    <span className="hidden sm:inline">Proformas</span>
                                 </button>
                             </nav>
                         </div>
@@ -849,6 +862,11 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                     companyName={company.name}
                                     clickUpClientName={company.clickUpClientName || null}
                                 />
+                            )}
+
+                            {/* Tab Content: Proformas History */}
+                            {activeTab === "proformas" && company && (
+                                <BillingHistoryTab companyId={company.id} />
                             )}
                         </form>
                     </div>
