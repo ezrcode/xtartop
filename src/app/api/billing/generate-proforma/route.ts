@@ -134,6 +134,18 @@ export async function POST(request: NextRequest) {
                     role: workspace.admCloudRole || "Administradores",
                 });
 
+                // Obtener datos del cliente de ADMCloud (direcciones y contactos)
+                const customerResult = await admCloudClient.getCustomer(company.admCloudRelationshipId);
+                const admCloudCustomer = customerResult.success ? customerResult.data : null;
+                
+                // Obtener dirección de facturación predeterminada
+                const billingAddress = admCloudCustomer?.Addresses?.find(a => a.DefaultBillingAddress) 
+                    || admCloudCustomer?.Addresses?.[0];
+                
+                // Obtener primer contacto (o el que tiene IncludeInQuoteEMails)
+                const contact = admCloudCustomer?.Contacts?.find(c => c.IncludeInQuoteEMails) 
+                    || admCloudCustomer?.Contacts?.[0];
+
                 const quoteRequest: AdmCloudQuoteRequest = {
                     RelationshipID: company.admCloudRelationshipId,
                     DocDate: today.toISOString(),
@@ -142,6 +154,21 @@ export async function POST(request: NextRequest) {
                     // Términos de pago y etapa de ventas predeterminados
                     ...(workspace.admCloudDefaultPaymentTermId && { PaymentTermID: workspace.admCloudDefaultPaymentTermId }),
                     ...(workspace.admCloudDefaultSalesStageId && { SalesStageID: workspace.admCloudDefaultSalesStageId }),
+                    // Contacto de ADMCloud
+                    ...(contact?.ID && { ContactID: contact.ID }),
+                    // Dirección de facturación de ADMCloud
+                    ...(billingAddress && {
+                        BillToAddressID: billingAddress.ID,
+                        BillToName: billingAddress.Name || admCloudCustomer?.Name,
+                        BillToAddress1: billingAddress.Address1,
+                        BillToAddress2: billingAddress.Address2,
+                        BillToCity: billingAddress.City,
+                        BillToState: billingAddress.State,
+                        BillToPostalCode: billingAddress.PostalCode,
+                        BillToPhone: billingAddress.Phone1,
+                        BillToContact: billingAddress.Contact || contact?.FullName,
+                        BillToCountryID: billingAddress.CountryID,
+                    }),
                     // Items con orden preservado
                     Items: calculatedItems.map((item, index) => ({
                         ItemID: item.admCloudItemId,

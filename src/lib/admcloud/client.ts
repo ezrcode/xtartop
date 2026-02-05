@@ -20,6 +20,42 @@ export interface AdmCloudConfig {
     role: string;
 }
 
+// Dirección de cliente en ADMCloud
+export interface AdmCloudAddress {
+    ID: string;
+    RelationshipID?: string;
+    Name?: string;
+    Address1?: string;
+    Address2?: string;
+    City?: string;
+    State?: string;
+    PostalCode?: string;
+    CountryID?: string;
+    CountryName?: string;
+    Phone1?: string;
+    Phone2?: string;
+    Contact?: string;
+    DefaultBillingAddress?: boolean;
+    DefaultShipppingAddress?: boolean;
+    FullName?: string;
+}
+
+// Contacto de cliente en ADMCloud
+export interface AdmCloudContact {
+    ID: string;
+    RelationshipID?: string;
+    FirstName?: string;
+    LastName?: string;
+    FullName?: string;
+    EMail?: string;
+    Phone1?: string;
+    Phone2?: string;
+    Mobile?: string;
+    Position?: string;
+    IncludeInQuoteEMails?: boolean;
+    IncludeInInvoiceEMails?: boolean;
+}
+
 export interface AdmCloudCustomer {
     ID: string;
     FiscalID: string;
@@ -36,6 +72,9 @@ export interface AdmCloudCustomer {
     WebSite?: string;
     IsActive?: boolean;
     CreationDate?: string;
+    // Direcciones y contactos
+    Addresses?: AdmCloudAddress[];
+    Contacts?: AdmCloudContact[];
 }
 
 export interface AdmCloudInvoice {
@@ -148,6 +187,22 @@ export interface AdmCloudQuoteRequest {
     PaymentTermID?: string;   // ID de términos de pago (campo correcto: PaymentTermID, no PaymentTermsID)
     SalesStageID?: string;    // ID de etapa de ventas
     SalesRepID?: string;      // ID del vendedor
+    
+    // Contacto (de ADMCloud)
+    ContactID?: string;       // ID del contacto en ADMCloud
+    
+    // Dirección de facturación (de ADMCloud)
+    BillToAddressID?: string;  // ID de la dirección
+    BillToName?: string;
+    BillToAddress1?: string;
+    BillToAddress2?: string;
+    BillToCity?: string;
+    BillToState?: string;
+    BillToPostalCode?: string;
+    BillToPhone?: string;
+    BillToContact?: string;
+    BillToCountryID?: string;
+    
     Items: AdmCloudQuoteItem[]; // Líneas de la cotización
 }
 
