@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import Link from "next/link";
-import { Save, Trash2, ArrowLeft, Loader2, ChevronDown, Search, X, Building2, Users, CreditCard, FileText, Ticket, History } from "lucide-react";
+import { Save, Trash2, ArrowLeft, Loader2, ChevronDown, Search, X, Building2, Users, CreditCard, Ticket } from "lucide-react";
 import { createCompanyAction, updateCompanyAction, deleteCompany, CompanyState } from "@/actions/companies";
 import { Company, Contact, CompanyStatus, ClientInvitation, Project, ClientUser } from "@prisma/client";
 import { CompanyActivitiesClient } from "../activities/company-activities-client";
@@ -99,7 +99,8 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
     const isAdmin = userRole === 'OWNER' || userRole === 'ADMIN';
     const formRef = useRef<HTMLFormElement>(null);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState<"general" | "contacts" | "subscription" | "invoices" | "tickets" | "proformas">("general");
+    const [activeTab, setActiveTab] = useState<"general" | "contacts" | "subscription" | "tickets">("general");
+    const [subscriptionSection, setSubscriptionSection] = useState<"contract" | "billing" | "proformas" | "invoices">("contract");
     const [pendingAction, setPendingAction] = useState<string | null>(null);
     
     // Controlled form fields - persist values across tab switches
@@ -311,18 +312,6 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={() => setActiveTab("invoices")}
-                                    className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 py-3 px-2 sm:px-4 border-b-2 font-medium text-xs sm:text-sm transition-colors ${
-                                        activeTab === "invoices"
-                                            ? "border-nearby-accent text-nearby-accent"
-                                            : "border-transparent text-[var(--muted-text)] hover:text-[var(--foreground)]"
-                                    }`}
-                                >
-                                    <FileText size={16} className="shrink-0" />
-                                    <span className="hidden sm:inline">Facturación</span>
-                                </button>
-                                <button
-                                    type="button"
                                     onClick={() => setActiveTab("tickets")}
                                     className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 py-3 px-2 sm:px-4 border-b-2 font-medium text-xs sm:text-sm transition-colors ${
                                         activeTab === "tickets"
@@ -332,18 +321,6 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                 >
                                     <Ticket size={16} className="shrink-0" />
                                     <span className="hidden sm:inline">Tickets</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setActiveTab("proformas")}
-                                    className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 py-3 px-2 sm:px-4 border-b-2 font-medium text-xs sm:text-sm transition-colors ${
-                                        activeTab === "proformas"
-                                            ? "border-nearby-accent text-nearby-accent"
-                                            : "border-transparent text-[var(--muted-text)] hover:text-[var(--foreground)]"
-                                    }`}
-                                >
-                                    <History size={16} className="shrink-0" />
-                                    <span className="hidden sm:inline">Proformas</span>
                                 </button>
                             </nav>
                         </div>
@@ -674,186 +651,244 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                     />
                                 )}
 
-                                {/* Tab Content: Subscription - Contract Data + Projects */}
+                                {/* Tab Content: Subscription */}
                                 {activeTab === "subscription" && company && (
-                                    <div className="space-y-6">
-                                        {/* Company Data for Contract */}
-                                        <div>
-                                            <h3 className="text-md font-semibold text-nearby-dark mb-3">
-                                                Datos para el Contrato
-                                            </h3>
-                                            <p className="text-sm text-dark-slate mb-4">
-                                                {isAdmin 
-                                                    ? "Estos datos pueden ser editados por administradores o completados por el cliente a través del portal de onboarding."
-                                                    : "Estos datos son completados por el cliente a través del portal de onboarding."
-                                                }
-                                            </p>
-                                            <div className="grid grid-cols-1 gap-4">
+                                    <div className="space-y-4">
+                                        {/* Sub-navigation */}
+                                        <div className="flex flex-wrap gap-2 p-1 bg-[var(--hover-bg)] rounded-lg">
+                                            <button
+                                                type="button"
+                                                onClick={() => setSubscriptionSection("contract")}
+                                                className={`flex-1 sm:flex-none px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                                                    subscriptionSection === "contract"
+                                                        ? "bg-white dark:bg-[var(--card-bg)] text-[var(--foreground)] shadow-sm"
+                                                        : "text-[var(--muted-text)] hover:text-[var(--foreground)]"
+                                                }`}
+                                            >
+                                                Contrato
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setSubscriptionSection("billing")}
+                                                className={`flex-1 sm:flex-none px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                                                    subscriptionSection === "billing"
+                                                        ? "bg-white dark:bg-[var(--card-bg)] text-[var(--foreground)] shadow-sm"
+                                                        : "text-[var(--muted-text)] hover:text-[var(--foreground)]"
+                                                }`}
+                                            >
+                                                Cobro mensual
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setSubscriptionSection("proformas")}
+                                                className={`flex-1 sm:flex-none px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                                                    subscriptionSection === "proformas"
+                                                        ? "bg-white dark:bg-[var(--card-bg)] text-[var(--foreground)] shadow-sm"
+                                                        : "text-[var(--muted-text)] hover:text-[var(--foreground)]"
+                                                }`}
+                                            >
+                                                Proformas
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setSubscriptionSection("invoices")}
+                                                className={`flex-1 sm:flex-none px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                                                    subscriptionSection === "invoices"
+                                                        ? "bg-white dark:bg-[var(--card-bg)] text-[var(--foreground)] shadow-sm"
+                                                        : "text-[var(--muted-text)] hover:text-[var(--foreground)]"
+                                                }`}
+                                            >
+                                                Facturas
+                                            </button>
+                                        </div>
+
+                                        {/* Section: Contract */}
+                                        {subscriptionSection === "contract" && (
+                                            <div className="space-y-6">
+                                                {/* Company Data for Contract */}
                                                 <div>
-                                                    <label htmlFor="legalName-input" className="block text-sm font-medium text-dark-slate mb-1">
-                                                        Razón Social
-                                                    </label>
-                                                    {isAdmin ? (
-                                                        <input
-                                                            type="text"
-                                                            id="legalName-input"
-                                                            value={formData.legalName}
-                                                            onChange={(e) => updateField("legalName", e.target.value)}
-                                                            placeholder="Nombre legal de la empresa"
-                                                            className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
-                                                        />
-                                                    ) : (
-                                                        <div className="px-3 py-2 border border-graphite-gray rounded-md bg-gray-50 text-sm">
-                                                            {formData.legalName || <span className="text-gray-400 italic">Pendiente</span>}
+                                                    <h3 className="text-md font-semibold text-[var(--foreground)] mb-3">
+                                                        Datos para el Contrato
+                                                    </h3>
+                                                    <p className="text-sm text-[var(--muted-text)] mb-4">
+                                                        {isAdmin 
+                                                            ? "Estos datos pueden ser editados por administradores o completados por el cliente a través del portal de onboarding."
+                                                            : "Estos datos son completados por el cliente a través del portal de onboarding."
+                                                        }
+                                                    </p>
+                                                    <div className="grid grid-cols-1 gap-4">
+                                                        <div>
+                                                            <label htmlFor="legalName-input" className="block text-sm font-medium text-dark-slate mb-1">
+                                                                Razón Social
+                                                            </label>
+                                                            {isAdmin ? (
+                                                                <input
+                                                                    type="text"
+                                                                    id="legalName-input"
+                                                                    value={formData.legalName}
+                                                                    onChange={(e) => updateField("legalName", e.target.value)}
+                                                                    placeholder="Nombre legal de la empresa"
+                                                                    className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                                                />
+                                                            ) : (
+                                                                <div className="px-3 py-2 border border-graphite-gray rounded-md bg-gray-50 text-sm">
+                                                                    {formData.legalName || <span className="text-gray-400 italic">Pendiente</span>}
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                    )}
-                                                </div>
-                                                <div>
-                                                    <label htmlFor="taxId-input" className="block text-sm font-medium text-dark-slate mb-1">
-                                                        RNC
-                                                    </label>
-                                                    {isAdmin ? (
-                                                        <input
-                                                            type="text"
-                                                            id="taxId-input"
-                                                            value={formData.taxId}
-                                                            onChange={(e) => updateField("taxId", e.target.value)}
-                                                            placeholder="Ej: 1-23-45678-9"
-                                                            className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
-                                                        />
-                                                    ) : (
-                                                        <div className="px-3 py-2 border border-graphite-gray rounded-md bg-gray-50 text-sm">
-                                                            {formData.taxId || <span className="text-gray-400 italic">Pendiente</span>}
+                                                        <div>
+                                                            <label htmlFor="taxId-input" className="block text-sm font-medium text-dark-slate mb-1">
+                                                                RNC
+                                                            </label>
+                                                            {isAdmin ? (
+                                                                <input
+                                                                    type="text"
+                                                                    id="taxId-input"
+                                                                    value={formData.taxId}
+                                                                    onChange={(e) => updateField("taxId", e.target.value)}
+                                                                    placeholder="Ej: 1-23-45678-9"
+                                                                    className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                                                />
+                                                            ) : (
+                                                                <div className="px-3 py-2 border border-graphite-gray rounded-md bg-gray-50 text-sm">
+                                                                    {formData.taxId || <span className="text-gray-400 italic">Pendiente</span>}
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                    )}
-                                                </div>
-                                                <div>
-                                                    <label htmlFor="fiscalAddress-input" className="block text-sm font-medium text-dark-slate mb-1">
-                                                        Dirección Fiscal
-                                                    </label>
-                                                    {isAdmin ? (
-                                                        <textarea
-                                                            id="fiscalAddress-input"
-                                                            value={formData.fiscalAddress}
-                                                            onChange={(e) => updateField("fiscalAddress", e.target.value)}
-                                                            placeholder="Dirección fiscal de la empresa"
-                                                            rows={2}
-                                                            className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent resize-none"
-                                                        />
-                                                    ) : (
-                                                        <div className="px-3 py-2 border border-graphite-gray rounded-md bg-gray-50 text-sm">
-                                                            {formData.fiscalAddress || <span className="text-gray-400 italic">Pendiente</span>}
+                                                        <div>
+                                                            <label htmlFor="fiscalAddress-input" className="block text-sm font-medium text-dark-slate mb-1">
+                                                                Dirección Fiscal
+                                                            </label>
+                                                            {isAdmin ? (
+                                                                <textarea
+                                                                    id="fiscalAddress-input"
+                                                                    value={formData.fiscalAddress}
+                                                                    onChange={(e) => updateField("fiscalAddress", e.target.value)}
+                                                                    placeholder="Dirección fiscal de la empresa"
+                                                                    rows={2}
+                                                                    className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent resize-none"
+                                                                />
+                                                            ) : (
+                                                                <div className="px-3 py-2 border border-graphite-gray rounded-md bg-gray-50 text-sm">
+                                                                    {formData.fiscalAddress || <span className="text-gray-400 italic">Pendiente</span>}
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                    )}
-                                                </div>
-                                                
-                                                {/* Cotización - Editables solo por admin antes de aceptar contrato */}
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                    <div>
-                                                        <label htmlFor="quoteId-input" className="block text-sm font-medium text-dark-slate mb-1">
-                                                            Id. Cotización
-                                                        </label>
-                                                        <input
-                                                            type="text"
-                                                            id="quoteId-input"
-                                                            placeholder="Ej: COT-001"
-                                                            value={formData.quoteId}
-                                                            onChange={(e) => updateField("quoteId", e.target.value)}
-                                                            disabled={company.termsAccepted}
-                                                            className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:bg-gray-100 disabled:cursor-not-allowed"
-                                                        />
-                                                        {company.termsAccepted && (
-                                                            <p className="text-xs text-gray-500 mt-1">No editable después de aceptar contrato</p>
-                                                        )}
-                                                    </div>
-                                                    <div>
-                                                        <PdfUpload
-                                                            currentFile={formData.quoteFileUrl || null}
-                                                            onFileChange={(url) => updateField("quoteFileUrl", url || "")}
-                                                            category="quote"
-                                                            folder="quotes"
-                                                            label="Cotización (PDF)"
-                                                            disabled={company.termsAccepted}
-                                                        />
-                                                        {company.termsAccepted && (
-                                                            <p className="text-xs text-gray-500 mt-1">No editable después de aceptar contrato</p>
-                                                        )}
+                                                        
+                                                        {/* Cotización - Editables solo por admin antes de aceptar contrato */}
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                            <div>
+                                                                <label htmlFor="quoteId-input" className="block text-sm font-medium text-dark-slate mb-1">
+                                                                    Id. Cotización
+                                                                </label>
+                                                                <input
+                                                                    type="text"
+                                                                    id="quoteId-input"
+                                                                    placeholder="Ej: COT-001"
+                                                                    value={formData.quoteId}
+                                                                    onChange={(e) => updateField("quoteId", e.target.value)}
+                                                                    disabled={company.termsAccepted}
+                                                                    className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                                                />
+                                                                {company.termsAccepted && (
+                                                                    <p className="text-xs text-gray-500 mt-1">No editable después de aceptar contrato</p>
+                                                                )}
+                                                            </div>
+                                                            <div>
+                                                                <PdfUpload
+                                                                    currentFile={formData.quoteFileUrl || null}
+                                                                    onFileChange={(url) => updateField("quoteFileUrl", url || "")}
+                                                                    category="quote"
+                                                                    folder="quotes"
+                                                                    label="Cotización (PDF)"
+                                                                    disabled={company.termsAccepted}
+                                                                />
+                                                                {company.termsAccepted && (
+                                                                    <p className="text-xs text-gray-500 mt-1">No editable después de aceptar contrato</p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Proyectos y Usuarios Iniciales - Editables antes de enviar invitación */}
+                                                        <div className="grid grid-cols-2 gap-4">
+                                                            <div>
+                                                                <label htmlFor="initialProjects-input" className="block text-sm font-medium text-dark-slate mb-1">
+                                                                    Proyectos iniciales
+                                                                </label>
+                                                                <input
+                                                                    type="number"
+                                                                    id="initialProjects-input"
+                                                                    min={0}
+                                                                    value={formData.initialProjects}
+                                                                    onChange={(e) => updateField("initialProjects", e.target.value)}
+                                                                    disabled={company.termsAccepted}
+                                                                    className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                                                />
+                                                                {company.termsAccepted && (
+                                                                    <p className="text-xs text-gray-500 mt-1">No editable después de aceptar contrato</p>
+                                                                )}
+                                                            </div>
+                                                            <div>
+                                                                <label htmlFor="initialUsers-input" className="block text-sm font-medium text-dark-slate mb-1">
+                                                                    Usuarios iniciales
+                                                                </label>
+                                                                <input
+                                                                    type="number"
+                                                                    id="initialUsers-input"
+                                                                    min={0}
+                                                                    value={formData.initialUsers}
+                                                                    onChange={(e) => updateField("initialUsers", e.target.value)}
+                                                                    disabled={company.termsAccepted}
+                                                                    className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                                                />
+                                                                {company.termsAccepted && (
+                                                                    <p className="text-xs text-gray-500 mt-1">No editable después de aceptar contrato</p>
+                                                                )}
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
 
-                                                {/* Proyectos y Usuarios Iniciales - Editables antes de enviar invitación */}
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    <div>
-                                                        <label htmlFor="initialProjects-input" className="block text-sm font-medium text-dark-slate mb-1">
-                                                            Proyectos iniciales
-                                                        </label>
-                                                        <input
-                                                            type="number"
-                                                            id="initialProjects-input"
-                                                            min={0}
-                                                            value={formData.initialProjects}
-                                                            onChange={(e) => updateField("initialProjects", e.target.value)}
-                                                            disabled={company.termsAccepted}
-                                                            className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:bg-gray-100 disabled:cursor-not-allowed"
-                                                        />
-                                                        {company.termsAccepted && (
-                                                            <p className="text-xs text-gray-500 mt-1">No editable después de aceptar contrato</p>
-                                                        )}
-                                                    </div>
-                                                    <div>
-                                                        <label htmlFor="initialUsers-input" className="block text-sm font-medium text-dark-slate mb-1">
-                                                            Usuarios iniciales
-                                                        </label>
-                                                        <input
-                                                            type="number"
-                                                            id="initialUsers-input"
-                                                            min={0}
-                                                            value={formData.initialUsers}
-                                                            onChange={(e) => updateField("initialUsers", e.target.value)}
-                                                            disabled={company.termsAccepted}
-                                                            className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:bg-gray-100 disabled:cursor-not-allowed"
-                                                        />
-                                                        {company.termsAccepted && (
-                                                            <p className="text-xs text-gray-500 mt-1">No editable después de aceptar contrato</p>
-                                                        )}
-                                                    </div>
+                                                {/* Projects Table */}
+                                                <div className="border-t border-graphite-gray pt-6">
+                                                    <ProjectsTable 
+                                                        companyId={company.id} 
+                                                        projects={company.projects || []} 
+                                                    />
+                                                </div>
+
+                                                {/* Client Users Table */}
+                                                <div className="border-t border-graphite-gray pt-6">
+                                                    <ClientUsersTable 
+                                                        companyId={company.id} 
+                                                        clientUsers={company.clientUsers || []} 
+                                                    />
                                                 </div>
                                             </div>
-                                        </div>
+                                        )}
 
-                                        {/* Projects Table */}
-                                        <div className="border-t border-graphite-gray pt-6">
-                                            <ProjectsTable 
-                                                companyId={company.id} 
-                                                projects={company.projects || []} 
-                                            />
-                                        </div>
-
-                                        {/* Client Users Table */}
-                                        <div className="border-t border-graphite-gray pt-6">
-                                            <ClientUsersTable 
-                                                companyId={company.id} 
-                                                clientUsers={company.clientUsers || []} 
-                                            />
-                                        </div>
-
-                                        {/* Subscription Billing Section */}
-                                        <div className="border-t border-graphite-gray pt-6">
+                                        {/* Section: Billing */}
+                                        {subscriptionSection === "billing" && (
                                             <SubscriptionBillingSection companyId={company.id} />
-                                        </div>
+                                        )}
+
+                                        {/* Section: Proformas */}
+                                        {subscriptionSection === "proformas" && (
+                                            <BillingHistoryTab companyId={company.id} />
+                                        )}
+
+                                        {/* Section: Invoices */}
+                                        {subscriptionSection === "invoices" && (
+                                            <InvoicesTab
+                                                companyId={company.id}
+                                                companyName={company.name}
+                                                taxId={company.taxId}
+                                                admCloudRelationshipId={company.admCloudRelationshipId || null}
+                                                admCloudLastSync={company.admCloudLastSync || null}
+                                            />
+                                        )}
                                     </div>
                                 )}
-
-                            {/* Tab Content: Invoices */}
-                            {activeTab === "invoices" && company && (
-                                <InvoicesTab
-                                    companyId={company.id}
-                                    companyName={company.name}
-                                    taxId={company.taxId}
-                                    admCloudRelationshipId={company.admCloudRelationshipId || null}
-                                    admCloudLastSync={company.admCloudLastSync || null}
-                                />
-                            )}
 
                             {/* Tab Content: Tickets */}
                             {activeTab === "tickets" && company && (
@@ -862,11 +897,6 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                     companyName={company.name}
                                     clickUpClientName={company.clickUpClientName || null}
                                 />
-                            )}
-
-                            {/* Tab Content: Proformas History */}
-                            {activeTab === "proformas" && company && (
-                                <BillingHistoryTab companyId={company.id} />
                             )}
                         </form>
                     </div>
