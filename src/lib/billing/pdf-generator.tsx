@@ -29,7 +29,6 @@ const styles = StyleSheet.create({
     logo: {
         width: 150,
         maxHeight: 60,
-        objectFit: "contain",
     },
     companyInfo: {
         textAlign: "right",
@@ -129,7 +128,6 @@ const styles = StyleSheet.create({
         marginTop: 15,
         borderWidth: 1,
         borderColor: "#ddd",
-        borderRadius: 0,
     },
     panelHeader: {
         backgroundColor: "#f5f5f5",
