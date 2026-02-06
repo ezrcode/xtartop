@@ -1,4 +1,5 @@
 import { getDeal, getCompanies, getContacts } from "@/actions/deals";
+import { getActiveBusinessLines } from "@/actions/business-lines";
 import { DealForm } from "@/components/deals/deal-form";
 import { getWorkspaceWithMembers } from "@/actions/workspace";
 import { notFound } from "next/navigation";
@@ -16,10 +17,11 @@ export default async function EditDealPage({
     const { id } = await params;
     
     // Don't fetch activities here - let Suspense handle it
-    const [deal, companies, contacts, workspace] = await Promise.all([
+    const [deal, companies, contacts, businessLines, workspace] = await Promise.all([
         getDeal(id),
         getCompanies(),
         getContacts(),
+        getActiveBusinessLines(),
         getWorkspaceWithMembers(),
     ]);
 
@@ -32,7 +34,8 @@ export default async function EditDealPage({
             <DealForm 
                 deal={deal} 
                 companies={companies} 
-                contacts={contacts} 
+                contacts={contacts}
+                businessLines={businessLines}
                 isEditMode={true} 
                 workspace={workspace ? {
                     legalName: workspace.legalName,

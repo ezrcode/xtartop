@@ -1,4 +1,5 @@
 import { getCompanies, getContacts } from "@/actions/deals";
+import { getActiveBusinessLines } from "@/actions/business-lines";
 import { DealForm } from "@/components/deals/deal-form";
 import { ClientOnly } from "@/components/client-only";
 
@@ -6,14 +7,20 @@ import { ClientOnly } from "@/components/client-only";
 export const revalidate = 120;
 
 export default async function NewDealPage() {
-    const [companies, contacts] = await Promise.all([
+    const [companies, contacts, businessLines] = await Promise.all([
         getCompanies(),
         getContacts(),
+        getActiveBusinessLines(),
     ]);
 
     return (
         <ClientOnly>
-            <DealForm companies={companies} contacts={contacts} isEditMode={false} />
+            <DealForm 
+                companies={companies} 
+                contacts={contacts} 
+                businessLines={businessLines}
+                isEditMode={false} 
+            />
         </ClientOnly>
     );
 }

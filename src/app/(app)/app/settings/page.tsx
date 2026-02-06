@@ -1,5 +1,6 @@
 import { getWorkspaceWithMembers, getUserWorkspaceRole } from "@/actions/workspace";
 import { getWorkspaceUsersWithEmail } from "@/actions/billing-config";
+import { getBusinessLines } from "@/actions/business-lines";
 import { SettingsPage } from "@/components/settings/settings-page";
 import { redirect } from "next/navigation";
 
@@ -7,10 +8,11 @@ import { redirect } from "next/navigation";
 export const revalidate = 120;
 
 export default async function Settings() {
-    const [workspace, userRole, workspaceUsers] = await Promise.all([
+    const [workspace, userRole, workspaceUsers, businessLines] = await Promise.all([
         getWorkspaceWithMembers(),
         getUserWorkspaceRole(),
         getWorkspaceUsersWithEmail(),
+        getBusinessLines(),
     ]);
 
     if (!workspace) {
@@ -22,6 +24,6 @@ export default async function Settings() {
         redirect("/app");
     }
 
-    return <SettingsPage workspace={workspace} workspaceUsers={workspaceUsers} />;
+    return <SettingsPage workspace={workspace} workspaceUsers={workspaceUsers} businessLines={businessLines} />;
 }
 

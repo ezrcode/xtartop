@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useFormState } from "react-dom";
-import { Save, UserPlus, Mail, Trash2, X, Building2, Users2, FileText, Loader2, Cloud } from "lucide-react";
+import { Save, UserPlus, Mail, Trash2, X, Building2, Users2, FileText, Loader2, Cloud, Settings2 } from "lucide-react";
 import { ImageUpload } from "../ui/image-upload";
 import {
     updateWorkspace,
@@ -13,10 +13,11 @@ import {
     WorkspaceState,
     InvitationState
 } from "@/actions/workspace";
-import type { Workspace, WorkspaceMember, Invitation, User, Subscription } from "@prisma/client";
+import type { Workspace, WorkspaceMember, Invitation, User, Subscription, BusinessLine } from "@prisma/client";
 import { AdmCloudConfigTab } from "./admcloud-config-tab";
 import { ClickUpConfigTab } from "./clickup-config-tab";
 import { BillingConfigTab } from "./billing-config-tab";
+import { BusinessLinesSection } from "./business-lines-section";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
@@ -75,6 +76,7 @@ type WorkspaceUser = {
 interface SettingsPageProps {
     workspace: WorkspaceWithDetails;
     workspaceUsers?: WorkspaceUser[];
+    businessLines?: BusinessLine[];
 }
 
 function getDefaultContractTemplate(): string {
@@ -163,9 +165,9 @@ function getDefaultContractTemplate(): string {
 <p>He leído y acepto los Términos y Condiciones de Uso de la plataforma Nearby CRM y la Cotización N° <strong>{{ID_COTIZACION}}</strong> vinculada a mi cuenta. Entiendo que esta aceptación digital tiene la misma validez legal que una firma manuscrita de acuerdo con la legislación vigente.</p>`;
 }
 
-type Tab = 'workspace' | 'team' | 'contract' | 'integrations';
+type Tab = 'workspace' | 'general' | 'team' | 'contract' | 'integrations';
 
-export function SettingsPage({ workspace, workspaceUsers = [] }: SettingsPageProps) {
+export function SettingsPage({ workspace, workspaceUsers = [], businessLines = [] }: SettingsPageProps) {
     const [activeTab, setActiveTab] = useState<Tab>('workspace');
     const [showInviteForm, setShowInviteForm] = useState(false);
     const [revokingId, setRevokingId] = useState<string | null>(null);
@@ -244,6 +246,10 @@ export function SettingsPage({ workspace, workspaceUsers = [] }: SettingsPagePro
                         <TabsTrigger value="workspace" variant="underline" className="flex-1 sm:flex-none">
                             <Building2 size={18} />
                             <span className="hidden sm:inline">Espacio</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="general" variant="underline" className="flex-1 sm:flex-none">
+                            <Settings2 size={18} />
+                            <span className="hidden sm:inline">General</span>
                         </TabsTrigger>
                         <TabsTrigger value="team" variant="underline" className="flex-1 sm:flex-none">
                             <Users2 size={18} />
@@ -367,6 +373,13 @@ export function SettingsPage({ workspace, workspaceUsers = [] }: SettingsPagePro
                             </CardContent>
                         </Card>
                     </div>
+                    </TabsContent>
+
+                    {/* Tab Content: General (Business Lines, etc.) */}
+                    <TabsContent value="general" className="mt-0">
+                        <div className="space-y-6">
+                            <BusinessLinesSection businessLines={businessLines} />
+                        </div>
                     </TabsContent>
 
                     {/* Tab Content: Contract */}

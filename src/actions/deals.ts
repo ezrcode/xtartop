@@ -15,6 +15,7 @@ const DealSchema = z.object({
     arr: z.string().optional().transform((val) => val ? parseFloat(val) : null),
     companyId: z.string().nullish(),
     contactId: z.string().nullish(),
+    businessLineId: z.string().nullish(),
     type: z.enum(["CLIENTE_NUEVO", "UPSELLING"]).nullable().optional(),
     status: z.enum([
         "PROSPECCION",
@@ -35,6 +36,7 @@ export type DealState = {
         arr?: string[];
         companyId?: string[];
         contactId?: string[];
+        businessLineId?: string[];
         type?: string[];
         status?: string[];
     };
@@ -85,6 +87,7 @@ export async function getDeal(id: string) {
         include: {
             company: true,
             contact: true,
+            businessLine: true,
             createdBy: {
                 select: {
                     id: true,
@@ -144,6 +147,7 @@ export async function createDealAction(prevState: DealState | undefined, formDat
         arr: formData.get("arr") || "",
         companyId: formData.get("companyId") === "null" ? null : formData.get("companyId") || null,
         contactId: formData.get("contactId") === "null" ? null : formData.get("contactId") || null,
+        businessLineId: formData.get("businessLineId") === "null" ? null : formData.get("businessLineId") || null,
         type: formData.get("type") === "null" ? null : formData.get("type") || null,
         status: formData.get("status"),
     };
@@ -159,9 +163,11 @@ export async function createDealAction(prevState: DealState | undefined, formDat
 
     let deal;
     try {
+        const { businessLineId, ...dealData } = validatedFields.data;
         deal = await prisma.deal.create({
             data: {
-                ...validatedFields.data,
+                ...dealData,
+                businessLineId: businessLineId || null,
                 workspaceId: workspace.id,
                 createdById: user.id,
             },
@@ -192,6 +198,7 @@ export async function updateDealAction(id: string, prevState: DealState | undefi
         arr: formData.get("arr") || "",
         companyId: formData.get("companyId") === "null" ? null : formData.get("companyId") || null,
         contactId: formData.get("contactId") === "null" ? null : formData.get("contactId") || null,
+        businessLineId: formData.get("businessLineId") === "null" ? null : formData.get("businessLineId") || null,
         type: formData.get("type") === "null" ? null : formData.get("type") || null,
         status: formData.get("status"),
     };
@@ -206,9 +213,13 @@ export async function updateDealAction(id: string, prevState: DealState | undefi
     }
 
     try {
+        const { businessLineId, ...dealData } = validatedFields.data;
         await prisma.deal.update({
             where: { id },
-            data: validatedFields.data,
+            data: {
+                ...dealData,
+                businessLineId: businessLineId || null,
+            },
         });
     } catch (error) {
         console.error("Database Error:", error);

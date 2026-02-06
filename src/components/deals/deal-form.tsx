@@ -5,7 +5,7 @@ import { useFormState, useFormStatus } from "react-dom";
 import Link from "next/link";
 import { Save, Trash2, ArrowLeft, Loader2 } from "lucide-react";
 import { createDealAction, updateDealAction, deleteDeal, DealState } from "@/actions/deals";
-import { Deal, Company, Contact, DealStatus, DealType, User } from "@prisma/client";
+import { Deal, Company, Contact, DealStatus, DealType, User, BusinessLine } from "@prisma/client";
 import { ActivitiesWithSuspense } from "../activities/activities-with-suspense";
 import { QuotesTable } from "../quotes/quotes-table";
 
@@ -14,9 +14,11 @@ interface DealFormProps {
         company?: Company | null; 
         contact?: Contact | null;
         createdBy?: Pick<User, 'id' | 'name' | 'email'> | null;
+        businessLine?: BusinessLine | null;
     };
     companies: Company[];
     contacts: Contact[];
+    businessLines?: BusinessLine[];
     isEditMode?: boolean;
     workspace?: {
         legalName?: string | null;
@@ -86,7 +88,7 @@ function DeleteButton() {
     );
 }
 
-export function DealForm({ deal, companies, contacts, isEditMode = false, workspace }: DealFormProps) {
+export function DealForm({ deal, companies, contacts, businessLines = [], isEditMode = false, workspace }: DealFormProps) {
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<"general" | "quotes">("general");
 
@@ -253,8 +255,8 @@ export function DealForm({ deal, companies, contacts, isEditMode = false, worksp
                                                 </select>
                                             </div>
 
-                                            {/* Tipo de Negocio y Estado */}
-                                            <div className="sm:col-span-3">
+                                            {/* Tipo de Negocio, LoB y Estado */}
+                                            <div className="sm:col-span-2">
                                                 <label htmlFor="type" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     Tipo de Negocio
                                                 </label>
@@ -270,7 +272,26 @@ export function DealForm({ deal, companies, contacts, isEditMode = false, worksp
                                                 </select>
                                             </div>
 
-                                            <div className="sm:col-span-3">
+                                            <div className="sm:col-span-2">
+                                                <label htmlFor="businessLineId" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                    LoB
+                                                </label>
+                                                <select
+                                                    id="businessLineId"
+                                                    name="businessLineId"
+                                                    defaultValue={deal?.businessLineId || "null"}
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
+                                                >
+                                                    <option value="null">Sin línea</option>
+                                                    {businessLines.map((bl) => (
+                                                        <option key={bl.id} value={bl.id}>
+                                                            {bl.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            <div className="sm:col-span-2">
                                                 <label htmlFor="status" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     Estado <span className="text-error-red">*</span>
                                                 </label>
