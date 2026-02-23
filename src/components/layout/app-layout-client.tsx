@@ -26,10 +26,11 @@ interface AppLayoutClientProps {
         themePreference?: ThemePreference;
     };
     userRole: 'OWNER' | 'ADMIN' | 'MEMBER' | 'VIEWER' | null;
+    currentExchangeRate?: number | null;
     children: React.ReactNode;
 }
 
-export function AppLayoutClient({ user, userRole, children }: AppLayoutClientProps) {
+export function AppLayoutClient({ user, userRole, currentExchangeRate = null, children }: AppLayoutClientProps) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -80,6 +81,7 @@ export function AppLayoutClient({ user, userRole, children }: AppLayoutClientPro
                 <Suspense fallback={<TopbarSkeleton />}>
                     <Topbar 
                         user={user} 
+                        currentExchangeRate={currentExchangeRate}
                         onMenuClick={() => setIsMobileMenuOpen(true)}
                     />
                 </Suspense>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { User, LogOut, Menu } from "lucide-react";
+import { User, LogOut, Menu, Banknote } from "lucide-react";
 import { logout } from "@/actions/auth";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { ThemePreference } from "@prisma/client";
@@ -24,10 +24,11 @@ interface TopbarProps {
         photoUrl?: string | null;
         themePreference?: ThemePreference;
     };
+    currentExchangeRate?: number | null;
     onMenuClick: () => void;
 }
 
-export function Topbar({ user, onMenuClick }: TopbarProps) {
+export function Topbar({ user, currentExchangeRate = null, onMenuClick }: TopbarProps) {
     // Obtener iniciales para el avatar
     const getInitials = () => {
         if (user.name) {
@@ -42,6 +43,13 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
         }
         return "U";
     };
+
+    const formattedRate = currentExchangeRate !== null
+        ? currentExchangeRate.toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        })
+        : null;
 
     return (
         <header className="sticky top-0 z-40 bg-[var(--card-bg)]/80 backdrop-blur-xl border-b border-[var(--card-border)]">
@@ -61,6 +69,28 @@ export function Topbar({ user, onMenuClick }: TopbarProps) {
 
                 {/* Right side - Theme Toggle & User Profile */}
                 <div className="flex items-center gap-3">
+                    {/* Exchange Rate Pill */}
+                    {formattedRate && (
+                        <div className={cn(
+                            "hidden sm:flex items-center gap-2",
+                            "px-3 py-1.5 rounded-full border",
+                            "bg-gradient-to-r from-nearby-accent/10 via-nearby-accent/5 to-transparent",
+                            "border-nearby-accent/30 text-[var(--foreground)] shadow-sm"
+                        )}>
+                            <div className="h-6 w-6 rounded-full bg-nearby-accent/15 flex items-center justify-center">
+                                <Banknote size={13} className="text-nearby-accent" />
+                            </div>
+                            <div className="leading-tight">
+                                <p className="text-[10px] uppercase tracking-wide text-[var(--muted-text)]">
+                                    Tasa actual
+                                </p>
+                                <p className="text-xs font-semibold">
+                                    {formattedRate}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Theme Toggle (icon only) */}
                     <ThemeToggle 
                         initialTheme={user.themePreference || "LIGHT"} 

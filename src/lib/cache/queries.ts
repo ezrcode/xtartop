@@ -73,3 +73,15 @@ export const getCachedUserWithRole = cache(async (email: string) => {
     return null;
 });
 
+/**
+ * Cached function to get latest exchange rate for a workspace
+ * Used in app layout topbar
+ */
+export const getCachedLatestExchangeRate = cache(async (workspaceId: string) => {
+    return await prisma.exchangeRate.findFirst({
+        where: { workspaceId },
+        orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+        select: { rate: true },
+    });
+});
+

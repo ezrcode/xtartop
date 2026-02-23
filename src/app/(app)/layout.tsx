@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { AppLayoutClient } from "@/components/layout/app-layout-client";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { getCachedUserWithRole } from "@/lib/cache/queries";
+import { getCachedLatestExchangeRate, getCachedUserWithRole } from "@/lib/cache/queries";
 
 export default async function AppLayout({
     children,
@@ -17,11 +17,15 @@ export default async function AppLayout({
 
     // Get user with workspace role using cached function
     const userWithRole = await getCachedUserWithRole(session.user.email);
+    const latestExchangeRate = userWithRole?.workspaceId
+        ? await getCachedLatestExchangeRate(userWithRole.workspaceId)
+        : null;
 
     return (
         <AppLayoutClient 
             user={userWithRole?.user || session.user}
             userRole={userWithRole?.role || null}
+            currentExchangeRate={latestExchangeRate ? Number(latestExchangeRate.rate) : null}
         >
             {children}
         </AppLayoutClient>
