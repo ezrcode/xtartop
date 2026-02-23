@@ -37,143 +37,145 @@ export function QuotePDFTemplate({
         return new Intl.NumberFormat("es-DO", {
             style: "currency",
             currency: currency === "USD" ? "USD" : "DOP",
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
         }).format(value);
     };
 
     const formatDate = (date: string | Date) => {
-        return new Date(date).toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
+        return new Date(date).toLocaleDateString("es-ES", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
         });
     };
 
-    const getStatusLabel = (status: string) => {
-        const labels: Record<string, string> = {
-            BORRADOR: "Borrador",
-            ACTIVA: "Activa",
-            RECHAZADA: "Rechazada",
-            APROBADA: "Aprobada",
-        };
-        return labels[status] || status;
-    };
+    const taxLabel = quote.taxType === "INCLUIDOS" ? "Incluidos" : "No incluidos";
+    const hasOneTime = totals.oneTime > 0;
+    const hasMonthly = totals.monthly > 0;
+    const grandTotal = totals.oneTime + totals.monthly;
 
     return (
-        <div 
-            id="quote-pdf-content" 
+        <div
+            id="quote-pdf-content"
             style={{
-                width: '210mm',
-                minHeight: '297mm',
-                padding: '20mm',
-                backgroundColor: '#ffffff',
+                width: "210mm",
+                minHeight: "297mm",
+                padding: "12mm 10mm",
+                backgroundColor: "#ffffff",
                 fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
-                color: '#000000',
-                position: 'absolute',
-                left: '-9999px',
-                top: '0',
-                fontSize: '9pt',
-                lineHeight: '1.4',
+                color: "#000000",
+                position: "absolute",
+                left: "-9999px",
+                top: "0",
+                fontSize: "8.5pt",
+                lineHeight: "1.4",
             }}
         >
-            {/* Header - Centered Design */}
-            <div style={{ textAlign: 'center', marginBottom: '28px', paddingBottom: '18px', borderBottom: '1px solid #d1d5db' }}>
-                {/* Logo Section */}
-                {workspace?.logoUrl ? (
-                    <div style={{ marginBottom: '12px' }}>
-                        <img 
-                            src={workspace.logoUrl} 
-                            alt="Logo" 
-                            style={{ 
-                                maxHeight: '50px', 
-                                maxWidth: '180px', 
-                                objectFit: 'contain',
-                                margin: '0 auto',
-                                display: 'block'
+            {/* Header */}
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    marginBottom: "8px",
+                    gap: "12px",
+                }}
+            >
+                <div style={{ width: "45%" }}>
+                    {workspace?.logoUrl ? (
+                        <img
+                            src={workspace.logoUrl}
+                            alt="Logo"
+                            style={{
+                                maxHeight: "52px",
+                                maxWidth: "190px",
+                                objectFit: "contain",
                             }}
                         />
+                    ) : (
+                        <div style={{ fontSize: "10pt", fontWeight: 700, marginBottom: "4px" }}>
+                            {workspace?.legalName || "NEARBY CRM"}
+                        </div>
+                    )}
+                </div>
+                <div style={{ width: "55%", textAlign: "right", fontSize: "8pt", lineHeight: "1.5" }}>
+                    <div style={{ fontWeight: 700, fontSize: "9pt", marginBottom: "2px" }}>
+                        {workspace?.legalName || "NEARBY CRM"}
                     </div>
-                ) : null}
-                
-                {/* Company Name */}
-                {workspace?.legalName && (
-                    <h1 style={{ 
-                        fontSize: '11pt', 
-                        fontWeight: '600', 
-                        color: '#111827', 
-                        margin: workspace?.logoUrl ? '8px 0 6px 0' : '0 0 6px 0', 
-                        letterSpacing: '0.5px', 
-                        textTransform: 'uppercase' 
-                    }}>
-                        {workspace.legalName}
-                    </h1>
-                )}
-                
-                {/* Company Details */}
-                <div style={{ fontSize: '8pt', color: '#6b7280', lineHeight: '1.5' }}>
                     {workspace?.rnc && (
-                        <div style={{ margin: '2px 0' }}>RNC: {workspace.rnc}</div>
+                        <div>RNC: {workspace.rnc}</div>
                     )}
                     {workspace?.address && (
-                        <div style={{ margin: '2px 0' }}>{workspace.address}</div>
+                        <div>{workspace.address}</div>
                     )}
+                    <div>República Dominicana</div>
                     {workspace?.phone && (
-                        <div style={{ margin: '2px 0' }}>Tel: {workspace.phone}</div>
+                        <div>Tel: {workspace.phone}</div>
                     )}
                 </div>
             </div>
 
-            {/* Quote Title */}
-            <div style={{ textAlign: 'center', marginBottom: '22px' }}>
-                <h2 style={{ fontSize: '14pt', fontWeight: '300', color: '#111827', margin: '0 0 6px 0', letterSpacing: '3px', textTransform: 'uppercase' }}>
-                    Cotización
-                </h2>
-                <div style={{ fontSize: '9pt', fontWeight: '500', color: '#6b7280', letterSpacing: '1.5px' }}>
-                    No. {String(quote.number).padStart(3, "0")}
+            {/* Divider 1 */}
+            <div style={{ height: "12px", backgroundColor: "#c9d9de", margin: "10px 0" }} />
+
+            {/* Main details */}
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginBottom: "8px",
+                    gap: "10px",
+                }}
+            >
+                <div style={{ width: "58%" }}>
+                    <div style={{ marginBottom: "3px" }}>
+                        <span style={{ fontWeight: 700, display: "inline-block", width: "95px" }}>Cotización Nro.:</span>
+                        <span>{String(quote.number).padStart(3, "0")}</span>
+                    </div>
+                    <div style={{ marginBottom: "3px" }}>
+                        <span style={{ fontWeight: 700, display: "inline-block", width: "95px" }}>Cliente:</span>
+                        <span>{companyName}</span>
+                    </div>
+                    <div style={{ marginBottom: "3px" }}>
+                        <span style={{ fontWeight: 700, display: "inline-block", width: "95px" }}>Atención:</span>
+                        <span>{contactName || "-"}</span>
+                    </div>
+                    <div style={{ marginBottom: "3px" }}>
+                        <span style={{ fontWeight: 700, display: "inline-block", width: "95px" }}>Moneda:</span>
+                        <span>{quote.currency}</span>
+                    </div>
+                </div>
+                <div style={{ width: "42%", textAlign: "right" }}>
+                    <div style={{ marginBottom: "3px" }}>
+                        <span style={{ fontWeight: 700 }}>Fecha de emisión:</span> {formatDate(quote.date)}
+                    </div>
+                    <div style={{ marginBottom: "3px" }}>
+                        <span style={{ fontWeight: 700 }}>Validez:</span> {quote.validity}
+                    </div>
+                    <div style={{ marginBottom: "3px" }}>
+                        <span style={{ fontWeight: 700 }}>Impuestos:</span> {taxLabel}
+                    </div>
                 </div>
             </div>
 
-            {/* Client & Details - Clean Design */}
-            <div style={{ marginBottom: '28px', padding: '14px 16px', backgroundColor: '#c9d9ef', border: '1px solid #d1d5db' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '8.5pt' }}>
-                    <tbody>
-                        <tr>
-                            <td style={{ padding: '5px 8px', fontWeight: '600', color: '#374151', width: '18%', textTransform: 'uppercase', fontSize: '7.5pt', letterSpacing: '0.5px' }}>Cliente</td>
-                            <td style={{ padding: '5px 8px', color: '#111827', fontWeight: '500' }}>{companyName}</td>
-                            <td style={{ padding: '5px 8px', fontWeight: '600', color: '#374151', width: '15%', textTransform: 'uppercase', fontSize: '7.5pt', letterSpacing: '0.5px', textAlign: 'right' }}>Fecha</td>
-                            <td style={{ padding: '5px 8px', color: '#111827', textAlign: 'right', width: '18%' }}>{formatDate(quote.date)}</td>
-                        </tr>
-                        <tr>
-                            <td style={{ padding: '5px 8px', fontWeight: '600', color: '#374151', textTransform: 'uppercase', fontSize: '7.5pt', letterSpacing: '0.5px' }}>Atención</td>
-                            <td style={{ padding: '5px 8px', color: '#111827' }}>{contactName}</td>
-                            <td style={{ padding: '5px 8px', fontWeight: '600', color: '#374151', textTransform: 'uppercase', fontSize: '7.5pt', letterSpacing: '0.5px', textAlign: 'right' }}>Validez</td>
-                            <td style={{ padding: '5px 8px', color: '#111827', textAlign: 'right' }}>{quote.validity}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            {/* Divider 2 */}
+            <div style={{ height: "12px", backgroundColor: "#c9d9de", margin: "10px 0" }} />
 
-            {/* Proposal Description */}
+            {/* Proposal description */}
             {quote.proposalDescription && (
-                <div style={{ marginBottom: '24px' }}>
-                    <h3 style={{ 
-                        fontSize: '9pt', 
-                        fontWeight: '600', 
-                        color: '#111827', 
-                        margin: '0 0 10px 0',
-                        textTransform: 'uppercase',
-                        letterSpacing: '1px',
-                        borderBottom: '1px solid #e5e7eb',
-                        paddingBottom: '6px'
+                <div style={{ marginBottom: "14px" }}>
+                    <div style={{
+                        fontSize: "9pt",
+                        fontWeight: 700,
+                        marginBottom: "6px",
                     }}>
                         Descripción de la Propuesta
-                    </h3>
-                    <div style={{ 
-                        padding: '12px 0', 
-                        whiteSpace: 'pre-wrap',
-                        fontSize: '8.5pt',
-                        lineHeight: '1.6',
-                        color: '#374151',
-                        textAlign: 'justify'
+                    </div>
+                    <div style={{
+                        whiteSpace: "pre-wrap",
+                        fontSize: "8.2pt",
+                        lineHeight: "1.55",
                     }}>
                         {quote.proposalDescription}
                     </div>
@@ -181,78 +183,52 @@ export function QuotePDFTemplate({
             )}
 
             {/* Products Table */}
-            <div style={{ marginBottom: '24px' }}>
-                <h3 style={{ 
-                    fontSize: '9pt', 
-                    fontWeight: '600', 
-                    color: '#111827', 
-                    margin: '0 0 10px 0',
-                    textTransform: 'uppercase',
-                    letterSpacing: '1px',
-                    borderBottom: '1px solid #e5e7eb',
-                    paddingBottom: '6px'
-                }}>
-                    Productos y Servicios
-                </h3>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '8.5pt' }}>
+            <div style={{ marginBottom: "14px" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "8pt" }}>
                     <thead>
-                        <tr style={{ borderBottom: '2px solid #111827' }}>
-                            <th style={{ 
-                                padding: '8px 6px', 
-                                textAlign: 'left', 
-                                color: '#111827', 
-                                fontWeight: '600',
-                                fontSize: '7.5pt',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.5px'
+                        <tr style={{ backgroundColor: "#ffffff" }}>
+                            <th style={{
+                                padding: "8px 6px",
+                                textAlign: "left",
+                                border: "1px solid #dddddd",
+                                fontWeight: 700,
+                                width: "40%",
                             }}>
                                 Descripción
                             </th>
-                            <th style={{ 
-                                padding: '8px 6px', 
-                                textAlign: 'center', 
-                                color: '#111827', 
-                                fontWeight: '600',
-                                fontSize: '7.5pt',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.5px',
-                                width: '60px'
+                            <th style={{
+                                padding: "8px 6px",
+                                textAlign: "right",
+                                border: "1px solid #dddddd",
+                                fontWeight: 700,
+                                width: "12%",
                             }}>
                                 Cant.
                             </th>
-                            <th style={{ 
-                                padding: '8px 6px', 
-                                textAlign: 'right', 
-                                color: '#111827', 
-                                fontWeight: '600',
-                                fontSize: '7.5pt',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.5px',
-                                width: '80px'
+                            <th style={{
+                                padding: "8px 6px",
+                                textAlign: "right",
+                                border: "1px solid #dddddd",
+                                fontWeight: 700,
+                                width: "16%",
                             }}>
                                 P. Unit.
                             </th>
-                            <th style={{ 
-                                padding: '8px 6px', 
-                                textAlign: 'center', 
-                                color: '#111827', 
-                                fontWeight: '600',
-                                fontSize: '7.5pt',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.5px',
-                                width: '75px'
+                            <th style={{
+                                padding: "8px 6px",
+                                textAlign: "center",
+                                border: "1px solid #dddddd",
+                                fontWeight: 700,
+                                width: "14%",
                             }}>
                                 Frec.
                             </th>
-                            <th style={{ 
-                                padding: '8px 6px', 
-                                textAlign: 'right', 
-                                color: '#111827', 
-                                fontWeight: '600',
-                                fontSize: '7.5pt',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.5px',
-                                width: '80px'
+                            <th style={{
+                                padding: "8px 6px",
+                                textAlign: "right",
+                                border: "1px solid #dddddd",
+                                fontWeight: 700,
+                                width: "18%",
                             }}>
                                 Total
                             </th>
@@ -260,35 +236,20 @@ export function QuotePDFTemplate({
                     </thead>
                     <tbody>
                         {items.map((item, index) => (
-                            <tr 
-                                key={index} 
-                                style={{ 
-                                    borderBottom: '1px solid #e5e7eb'
-                                }}
-                            >
-                                <td style={{ padding: '10px 6px', color: '#374151' }}>
+                            <tr key={index}>
+                                <td style={{ padding: "8px 6px", border: "1px solid #dddddd" }}>
                                     {item.name}
                                 </td>
-                                <td style={{ padding: '10px 6px', textAlign: 'center', color: '#6b7280' }}>
-                                    {item.quantity}
+                                <td style={{ padding: "8px 6px", textAlign: "right", border: "1px solid #dddddd" }}>
+                                    {item.quantity.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </td>
-                                <td style={{ padding: '10px 6px', textAlign: 'right', color: '#6b7280' }}>
+                                <td style={{ padding: "8px 6px", textAlign: "right", border: "1px solid #dddddd" }}>
                                     {formatCurrency(item.price, quote.currency)}
                                 </td>
-                                <td style={{ padding: '10px 6px', textAlign: 'center', fontSize: '7pt' }}>
-                                    <span style={{
-                                        padding: '3px 6px',
-                                        backgroundColor: item.frequency === 'MENSUAL' ? '#dbeafe' : '#f3f4f6',
-                                        color: item.frequency === 'MENSUAL' ? '#1e40af' : '#6b7280',
-                                        borderRadius: '3px',
-                                        fontWeight: '500',
-                                        textTransform: 'uppercase',
-                                        letterSpacing: '0.3px'
-                                    }}>
-                                        {item.frequency === 'MENSUAL' ? 'Mens.' : 'Único'}
-                                    </span>
+                                <td style={{ padding: "8px 6px", textAlign: "center", border: "1px solid #dddddd" }}>
+                                    {item.frequency === "MENSUAL" ? "Mensual" : "Pago único"}
                                 </td>
-                                <td style={{ padding: '10px 6px', textAlign: 'right', fontWeight: '600', color: '#111827' }}>
+                                <td style={{ padding: "8px 6px", textAlign: "right", border: "1px solid #dddddd" }}>
                                     {formatCurrency(item.netPrice, quote.currency)}
                                 </td>
                             </tr>
@@ -298,93 +259,83 @@ export function QuotePDFTemplate({
             </div>
 
             {/* Totals */}
-            <div style={{ 
-                marginBottom: '24px',
-                paddingTop: '8px',
-                borderTop: '2px solid #111827'
-            }}>
-                <table style={{ width: '100%', fontSize: '8.5pt' }}>
-                    <tbody>
-                        {totals.oneTime > 0 && (
-                            <tr>
-                                <td style={{ padding: '8px 6px', textAlign: 'right', color: '#6b7280', fontSize: '8pt', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                    Total Pago Único:
-                                </td>
-                                <td style={{ padding: '8px 6px', textAlign: 'right', fontWeight: '600', color: '#111827', fontSize: '10pt', width: '120px' }}>
-                                    {formatCurrency(totals.oneTime, quote.currency)}
-                                </td>
-                            </tr>
-                        )}
-                        {totals.monthly > 0 && (
-                            <tr>
-                                <td style={{ padding: '8px 6px', textAlign: 'right', color: '#6b7280', fontSize: '8pt', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                    Total Mensual:
-                                </td>
-                                <td style={{ padding: '8px 6px', textAlign: 'right', fontWeight: '600', color: '#2563eb', fontSize: '10pt', width: '120px' }}>
-                                    {formatCurrency(totals.monthly, quote.currency)}
-                                </td>
-                            </tr>
-                        )}
-                        <tr style={{ borderTop: '1px solid #e5e7eb' }}>
-                            <td style={{ padding: '12px 6px', textAlign: 'right', color: '#111827', fontSize: '9pt', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                {totals.monthly > 0 ? 'Total General:' : 'Total:'}
-                            </td>
-                            <td style={{ padding: '12px 6px', textAlign: 'right', fontWeight: '700', color: '#111827', fontSize: '12pt', width: '120px' }}>
-                                {formatCurrency(totals.oneTime + totals.monthly, quote.currency)}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "14px" }}>
+                <div style={{ width: "250px" }}>
+                    {hasOneTime && (
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
+                            <span style={{ fontWeight: 700 }}>Total pago único:</span>
+                            <span style={{ textAlign: "right" }}>{formatCurrency(totals.oneTime, quote.currency)}</span>
+                        </div>
+                    )}
+                    {hasMonthly && (
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
+                            <span style={{ fontWeight: 700 }}>Total mensual:</span>
+                            <span style={{ textAlign: "right" }}>{formatCurrency(totals.monthly, quote.currency)}</span>
+                        </div>
+                    )}
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
+                        <span style={{ fontWeight: 700 }}>Impuestos:</span>
+                        <span style={{ textAlign: "right" }}>{taxLabel}</span>
+                    </div>
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            marginTop: "4px",
+                            paddingTop: "4px",
+                            borderTop: "1px solid #dddddd",
+                            fontWeight: 700,
+                        }}
+                    >
+                        <span>Total {quote.currency}:</span>
+                        <span style={{ textAlign: "right" }}>{formatCurrency(grandTotal, quote.currency)}</span>
+                    </div>
+                </div>
             </div>
 
-            {/* Terms Grid */}
+            {/* Divider 3 */}
+            <div style={{ height: "12px", backgroundColor: "#c9d9de", margin: "10px 0" }} />
+
+            {/* Terms / extra fields */}
             {(quote.paymentConditions || quote.deliveryTime) && (
-                <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: '1fr 1fr', 
-                    gap: '16px', 
-                    marginBottom: '24px',
-                    padding: '12px',
-                    backgroundColor: '#c9d9ef',
-                    border: '1px solid #d1d5db'
-                }}>
+                <div style={{ marginTop: "10px", marginBottom: "10px" }}>
                     {quote.paymentConditions && (
-                        <div>
-                            <h4 style={{ fontSize: '7.5pt', fontWeight: '600', color: '#111827', margin: '0 0 6px 0', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                Condiciones de Pago
-                            </h4>
-                            <p style={{ fontSize: '8pt', color: '#374151', lineHeight: '1.5', margin: 0 }}>
+                        <div style={{ marginBottom: "10px" }}>
+                            <div style={{ fontSize: "9pt", fontWeight: 700, marginBottom: "5px" }}>
+                                Condiciones de pago
+                            </div>
+                            <div style={{ whiteSpace: "pre-wrap", fontSize: "8.2pt", lineHeight: "1.55" }}>
                                 {quote.paymentConditions}
-                            </p>
+                            </div>
                         </div>
                     )}
                     {quote.deliveryTime && (
                         <div>
-                            <h4 style={{ fontSize: '7.5pt', fontWeight: '600', color: '#111827', margin: '0 0 6px 0', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                Tiempo de Entrega
-                            </h4>
-                            <p style={{ fontSize: '8pt', color: '#374151', lineHeight: '1.5', margin: 0 }}>
+                            <div style={{ fontSize: "9pt", fontWeight: 700, marginBottom: "5px" }}>
+                                Tiempo de entrega
+                            </div>
+                            <div style={{ whiteSpace: "pre-wrap", fontSize: "8.2pt", lineHeight: "1.55" }}>
                                 {quote.deliveryTime}
-                            </p>
+                            </div>
                         </div>
                     )}
                 </div>
             )}
 
             {/* Footer */}
-            <div style={{ 
-                borderTop: '1px solid #e5e7eb', 
-                paddingTop: '16px',
-                marginTop: 'auto',
-                textAlign: 'center'
+            <div style={{
+                borderTop: "1px solid #e5e7eb",
+                paddingTop: "10px",
+                marginTop: "12px",
+                textAlign: "center",
             }}>
-                <div style={{ fontSize: '7pt', color: '#9ca3af', lineHeight: '1.6' }}>
-                    <div style={{ marginBottom: '4px' }}>
-                        <span style={{ textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '500' }}>Impuestos:</span> {quote.taxType === 'INCLUIDOS' ? 'Incluidos' : 'No incluidos'}
-                        {' • '}
-                        <span style={{ textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '500' }}>Moneda:</span> {quote.currency === 'USD' ? 'USD' : 'DOP'}
+                <div style={{ fontSize: "7pt", color: "#6b7280", lineHeight: "1.6" }}>
+                    <div style={{ marginBottom: "4px" }}>
+                        <span style={{ fontWeight: 600 }}>Impuestos:</span> {taxLabel}
+                        {" • "}
+                        <span style={{ fontWeight: 600 }}>Moneda:</span> {quote.currency}
                     </div>
-                    <div style={{ fontStyle: 'italic', color: '#6b7280' }}>
+                    <div style={{ fontStyle: "italic" }}>
                         Esta cotización es válida por {quote.validity}
                     </div>
                 </div>
