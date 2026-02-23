@@ -10,8 +10,11 @@ import { ThemePreference } from "@prisma/client";
 // Loading fallback para el topbar
 function TopbarSkeleton() {
     return (
-        <div className="h-16 bg-[var(--card-bg)] border-b border-[var(--card-border)] animate-pulse">
-            <div className="h-full flex items-center justify-end px-4">
+        <div
+            className="bg-[var(--card-bg)] border-b border-[var(--card-border)] animate-pulse"
+            style={{ paddingTop: "env(safe-area-inset-top)" }}
+        >
+            <div className="h-16 flex items-center justify-end px-4">
                 <div className="h-8 w-8 rounded-full bg-[var(--hover-bg)]" />
             </div>
         </div>

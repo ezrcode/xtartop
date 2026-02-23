@@ -52,7 +52,10 @@ export function Topbar({ user, currentExchangeRate = null, onMenuClick }: Topbar
         : null;
 
     return (
-        <header className="sticky top-0 z-40 bg-[var(--card-bg)]/80 backdrop-blur-xl border-b border-[var(--card-border)]">
+        <header
+            className="sticky top-0 z-40 bg-[var(--card-bg)]/80 backdrop-blur-xl border-b border-[var(--card-border)]"
+            style={{ paddingTop: "env(safe-area-inset-top)" }}
+        >
             <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
                 {/* Left side - Mobile Menu Button */}
                 <div className="flex items-center flex-1">
