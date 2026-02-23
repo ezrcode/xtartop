@@ -285,6 +285,12 @@ export function addBusinessDays(date: Date, days: number): Date {
 function ProformaContent({ data }: { data: ProformaData }) {
     const hasDiscount = data.discount > 0;
     const netAmount = data.subtotal - data.discount;
+    const exchangeRateDisplay = data.exchangeRate
+        ? Number(data.exchangeRate).toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+          })
+        : "-";
 
     return (
         <Page size="A4" style={styles.page}>
@@ -407,13 +413,13 @@ function ProformaContent({ data }: { data: ProformaData }) {
                         <Text style={styles.totalsLabel}>Impuesto:</Text>
                         <Text style={styles.totalsValue}>{formatMoney(data.taxAmount)}</Text>
                     </View>
-                    <View style={styles.totalsRow}>
-                        <Text style={styles.totalsLabel}>Tasa:</Text>
-                        <Text style={styles.totalsValue}>{data.exchangeRate || "-"}</Text>
-                    </View>
                     <View style={styles.totalsFinalRow}>
                         <Text style={styles.totalsLabel}>Total {data.currency}:</Text>
                         <Text style={styles.totalsValue}>{formatMoney(data.total)}</Text>
+                    </View>
+                    <View style={styles.totalsRow}>
+                        <Text style={styles.totalsLabel}>Tasa:</Text>
+                        <Text style={styles.totalsValue}>{exchangeRateDisplay}</Text>
                     </View>
                 </View>
             </View>
