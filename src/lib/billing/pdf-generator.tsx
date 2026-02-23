@@ -1,6 +1,7 @@
 /**
  * Generador de PDF para Proformas/Cotizaciones
- * Replica el template de ADMCloud usando @react-pdf/renderer
+ * Replica el diseño exacto de las proformas de ADMCloud (IronPdf)
+ * usando @react-pdf/renderer
  */
 
 import React from "react";
@@ -13,191 +14,218 @@ import {
     Image,
 } from "@react-pdf/renderer";
 
-// Define styles
+const TEAL = "#C9D9DE";
+const BORDER = "#DDDDDD";
+const BLACK = "#000000";
+
 const styles = StyleSheet.create({
     page: {
-        padding: 40,
-        fontSize: 10,
+        paddingTop: 30,
+        paddingBottom: 30,
+        paddingHorizontal: 36,
+        fontSize: 9,
         fontFamily: "Helvetica",
-        color: "#333",
+        color: BLACK,
     },
+
+    // ── Header ──────────────────────────────────────────────
     header: {
         flexDirection: "row",
         justifyContent: "space-between",
-        marginBottom: 20,
+        alignItems: "flex-start",
+        marginBottom: 6,
     },
     logo: {
-        width: 150,
-        maxHeight: 60,
+        width: 160,
+        maxHeight: 55,
     },
     companyInfo: {
         textAlign: "right",
-        fontSize: 9,
+        fontSize: 8,
+        lineHeight: 1.5,
     },
     companyName: {
-        fontSize: 11,
-        fontWeight: "bold",
-        marginBottom: 4,
+        fontSize: 9,
+        fontFamily: "Helvetica-Bold",
+        marginBottom: 2,
     },
+
+    // ── Divider (barra de color teal llena) ──────────────────
     divider: {
-        borderBottomWidth: 3,
-        borderBottomColor: "#c9d9de",
-        marginVertical: 15,
+        height: 12,
+        backgroundColor: TEAL,
+        marginVertical: 10,
     },
+
+    // ── Info section (proforma + dates) ─────────────────────
     infoSection: {
         flexDirection: "row",
         justifyContent: "space-between",
-        marginBottom: 15,
+        marginBottom: 6,
     },
     infoColumn: {
         width: "55%",
     },
     infoColumnRight: {
-        width: "40%",
-        textAlign: "right",
+        width: "42%",
+        alignItems: "flex-end",
     },
     infoRow: {
         flexDirection: "row",
-        marginBottom: 3,
+        marginBottom: 2,
+        fontSize: 8,
     },
     infoLabel: {
-        fontWeight: "bold",
-        width: 100,
+        fontFamily: "Helvetica-Bold",
+        width: 110,
+        fontSize: 8,
     },
     infoValue: {
         flex: 1,
+        fontSize: 8,
     },
+    infoRowRight: {
+        flexDirection: "row",
+        marginBottom: 2,
+        fontSize: 8,
+    },
+    infoLabelRight: {
+        fontFamily: "Helvetica-Bold",
+        fontSize: 8,
+        marginRight: 6,
+    },
+    infoValueRight: {
+        fontSize: 8,
+    },
+
+    // ── Table ────────────────────────────────────────────────
     table: {
-        marginTop: 10,
-        marginBottom: 15,
+        marginTop: 4,
+        marginBottom: 6,
     },
     tableHeader: {
         flexDirection: "row",
-        backgroundColor: "#f5f5f5",
         borderWidth: 1,
-        borderColor: "#ddd",
-        paddingVertical: 8,
-        paddingHorizontal: 5,
+        borderColor: BORDER,
+        paddingVertical: 7,
+        paddingHorizontal: 6,
+        backgroundColor: "#FFFFFF",
     },
     tableHeaderCell: {
-        fontWeight: "bold",
-        fontSize: 9,
+        fontFamily: "Helvetica-Bold",
+        fontSize: 8,
     },
     tableRow: {
         flexDirection: "row",
         borderLeftWidth: 1,
         borderRightWidth: 1,
         borderBottomWidth: 1,
-        borderColor: "#ddd",
-        paddingVertical: 6,
-        paddingHorizontal: 5,
+        borderColor: BORDER,
+        paddingVertical: 8,
+        paddingHorizontal: 6,
     },
     tableCell: {
-        fontSize: 9,
+        fontSize: 8,
     },
-    colConcept: { width: "50%" },
-    colQty: { width: "15%", textAlign: "right" },
-    colPrice: { width: "17.5%", textAlign: "right" },
-    colTotal: { width: "17.5%", textAlign: "right" },
+    colConcept: { width: "33.3%" },
+    colQty: { width: "13.9%", textAlign: "right" },
+    colPrice: { width: "28.1%", textAlign: "right" },
+    colTotal: { width: "24.7%", textAlign: "right" },
+
+    // ── Totals ───────────────────────────────────────────────
     totalsSection: {
         flexDirection: "row",
         justifyContent: "flex-end",
-        marginTop: 10,
+        marginTop: 8,
     },
-    totalsLabels: {
-        width: 120,
-        textAlign: "right",
-        paddingRight: 10,
-    },
-    totalsValues: {
-        width: 100,
-        textAlign: "right",
+    totalsTable: {
+        width: 240,
     },
     totalsRow: {
-        marginBottom: 3,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginBottom: 2,
+        fontFamily: "Helvetica-Bold",
+        fontSize: 8,
     },
-    totalsFinal: {
-        fontWeight: "bold",
-        fontSize: 11,
-        marginTop: 5,
-        paddingTop: 5,
+    totalsLabel: {
+        textAlign: "right",
+        paddingRight: 12,
+    },
+    totalsValue: {
+        textAlign: "right",
+        width: 80,
+    },
+    totalsFinalRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginTop: 3,
+        paddingTop: 3,
         borderTopWidth: 1,
-        borderTopColor: "#ddd",
-    },
-    panel: {
-        marginTop: 15,
-        borderWidth: 1,
-        borderColor: "#ddd",
-    },
-    panelHeader: {
-        backgroundColor: "#f5f5f5",
-        padding: 8,
-        borderBottomWidth: 1,
-        borderBottomColor: "#ddd",
-    },
-    panelHeaderText: {
-        fontWeight: "bold",
-        fontSize: 10,
-    },
-    panelBody: {
-        padding: 10,
-    },
-    panelText: {
+        borderTopColor: BORDER,
+        fontFamily: "Helvetica-Bold",
         fontSize: 9,
+    },
+
+    // ── Sections (Observaciones, Bank Info) ──────────────────
+    sectionTitle: {
+        fontFamily: "Helvetica-Bold",
+        fontSize: 9,
+        marginBottom: 6,
+    },
+    sectionBody: {
+        fontSize: 8,
+        lineHeight: 1.6,
+    },
+    sectionGap: {
+        marginTop: 14,
+    },
+    bankGroup: {
+        marginTop: 6,
+    },
+    bankName: {
+        fontFamily: "Helvetica-Bold",
+        fontSize: 8,
+    },
+    bankAccount: {
+        fontSize: 8,
         lineHeight: 1.5,
     },
-    bankInfo: {
-        marginTop: 10,
-    },
-    bankRow: {
-        marginBottom: 2,
-    },
-    footer: {
-        position: "absolute",
-        bottom: 30,
-        left: 40,
-        right: 40,
-        textAlign: "center",
+    closingNote: {
+        marginTop: 8,
         fontSize: 8,
-        color: "#666",
     },
 });
 
-// Interfaces
+// ── Interfaces ──────────────────────────────────────────────
+
 export interface ProformaData {
-    // Document info
     documentNumber: string;
     documentDate: Date;
     expirationDate: Date;
     currency: "USD" | "DOP";
     exchangeRate?: string;
 
-    // Company (provider) info
     providerName: string;
     providerLogo?: string;
     providerAddress: string;
     providerPhone: string;
     providerRNC: string;
 
-    // Client info
     clientName: string;
     clientRNC: string;
     clientAddress: string;
     clientContact: string;
 
-    // Items
     items: ProformaItem[];
 
-    // Totals
     subtotal: number;
     discount: number;
     taxAmount: number;
     total: number;
 
-    // Additional
     notes?: string;
-    
-    // Bank info
+
     bankInfo?: {
         beneficiary: string;
         rnc: string;
@@ -219,9 +247,13 @@ export interface ProformaItem {
     total: number;
 }
 
-// Helper functions
+// ── Helpers ─────────────────────────────────────────────────
+
 function formatDate(date: Date): string {
-    const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+    const months = [
+        "ene.", "feb.", "mar.", "abr.", "may.", "jun.",
+        "jul.", "ago.", "sep.", "oct.", "nov.", "dic.",
+    ];
     const day = date.getDate().toString().padStart(2, "0");
     const month = months[date.getMonth()];
     const year = date.getFullYear();
@@ -235,11 +267,9 @@ function formatMoney(amount: number): string {
     });
 }
 
-// Add business days (skipping weekends)
 export function addBusinessDays(date: Date, days: number): Date {
     const result = new Date(date);
     let added = 0;
-    
     while (added < days) {
         result.setDate(result.getDate() + 1);
         const dayOfWeek = result.getDay();
@@ -247,336 +277,210 @@ export function addBusinessDays(date: Date, days: number): Date {
             added++;
         }
     }
-    
     return result;
 }
 
-// PDF Document Component
+// ── Shared content (single source of truth) ─────────────────
+
+function ProformaContent({ data }: { data: ProformaData }) {
+    const hasDiscount = data.discount > 0;
+    const netAmount = data.subtotal - data.discount;
+
+    return (
+        <Page size="A4" style={styles.page}>
+            {/* ─── Header ─── */}
+            <View style={styles.header}>
+                <View>
+                    {data.providerLogo ? (
+                        <Image src={data.providerLogo} style={styles.logo} />
+                    ) : (
+                        <Text style={styles.companyName}>{data.providerName}</Text>
+                    )}
+                </View>
+                <View style={styles.companyInfo}>
+                    <Text style={styles.companyName}>{data.providerName}</Text>
+                    {data.providerAddress ? <Text>{data.providerAddress}</Text> : null}
+                    <Text>República Dominicana</Text>
+                    {data.providerPhone ? <Text>{data.providerPhone}</Text> : null}
+                </View>
+            </View>
+
+            {/* ─── Divider 1 ─── */}
+            <View style={styles.divider} />
+
+            {/* ─── Info Section ─── */}
+            <View style={styles.infoSection}>
+                <View style={styles.infoColumn}>
+                    <View style={styles.infoRow}>
+                        <Text style={styles.infoLabel}>Proforma Nro.:</Text>
+                        <Text style={styles.infoValue}>{data.documentNumber}</Text>
+                    </View>
+                    <View style={styles.infoRow}>
+                        <Text style={styles.infoLabel}>Cliente:</Text>
+                        <Text style={styles.infoValue}>{data.clientName}</Text>
+                    </View>
+                    <View style={styles.infoRow}>
+                        <Text style={styles.infoLabel}>RNC:</Text>
+                        <Text style={styles.infoValue}>{data.clientRNC}</Text>
+                    </View>
+                    {data.clientAddress ? (
+                        <View style={styles.infoRow}>
+                            <Text style={styles.infoLabel}>Dirección:</Text>
+                            <Text style={styles.infoValue}>{data.clientAddress}</Text>
+                        </View>
+                    ) : null}
+                    {data.clientContact ? (
+                        <View style={styles.infoRow}>
+                            <Text style={styles.infoLabel}>Contacto:</Text>
+                            <Text style={styles.infoValue}>{data.clientContact}</Text>
+                        </View>
+                    ) : null}
+                </View>
+                <View style={styles.infoColumnRight}>
+                    <View style={styles.infoRowRight}>
+                        <Text style={styles.infoLabelRight}>Fecha de emisión:</Text>
+                        <Text style={styles.infoValueRight}>{formatDate(data.documentDate)}</Text>
+                    </View>
+                    <View style={styles.infoRowRight}>
+                        <Text style={styles.infoLabelRight}>Fecha de vencimiento:</Text>
+                        <Text style={styles.infoValueRight}>{formatDate(data.expirationDate)}</Text>
+                    </View>
+                </View>
+            </View>
+
+            {/* ─── Divider 2 ─── */}
+            <View style={styles.divider} />
+
+            {/* ─── Items Table ─── */}
+            <View style={styles.table}>
+                <View style={styles.tableHeader}>
+                    <Text style={[styles.tableHeaderCell, styles.colConcept]}>Concepto</Text>
+                    <Text style={[styles.tableHeaderCell, styles.colQty]}>Cantidad</Text>
+                    <Text style={[styles.tableHeaderCell, styles.colPrice]}>
+                        Precio unitario ({data.currency})
+                    </Text>
+                    <Text style={[styles.tableHeaderCell, styles.colTotal]}>
+                        Precio total ({data.currency})
+                    </Text>
+                </View>
+
+                {data.items.map((item, index) => (
+                    <View key={index} style={styles.tableRow}>
+                        <Text style={[styles.tableCell, styles.colConcept]}>{item.name}</Text>
+                        <Text style={[styles.tableCell, styles.colQty]}>
+                            {formatMoney(item.quantity)}
+                        </Text>
+                        <Text style={[styles.tableCell, styles.colPrice]}>
+                            {formatMoney(item.unitPrice)}
+                        </Text>
+                        <Text style={[styles.tableCell, styles.colTotal]}>
+                            {formatMoney(item.total)}
+                        </Text>
+                    </View>
+                ))}
+            </View>
+
+            {/* ─── Totals ─── */}
+            <View style={styles.totalsSection}>
+                <View style={styles.totalsTable}>
+                    <View style={styles.totalsRow}>
+                        <Text style={styles.totalsLabel}>Subtotal:</Text>
+                        <Text style={styles.totalsValue}>{formatMoney(data.subtotal)}</Text>
+                    </View>
+                    {hasDiscount && (
+                        <>
+                            <View style={styles.totalsRow}>
+                                <Text style={styles.totalsLabel}>Descuento:</Text>
+                                <Text style={styles.totalsValue}>
+                                    {formatMoney(data.discount)}
+                                </Text>
+                            </View>
+                            <View style={styles.totalsRow}>
+                                <Text style={styles.totalsLabel}>Neto:</Text>
+                                <Text style={styles.totalsValue}>
+                                    {formatMoney(netAmount)}
+                                </Text>
+                            </View>
+                        </>
+                    )}
+                    <View style={styles.totalsRow}>
+                        <Text style={styles.totalsLabel}>Impuesto:</Text>
+                        <Text style={styles.totalsValue}>{formatMoney(data.taxAmount)}</Text>
+                    </View>
+                    <View style={styles.totalsFinalRow}>
+                        <Text style={styles.totalsLabel}>Total {data.currency}:</Text>
+                        <Text style={styles.totalsValue}>{formatMoney(data.total)}</Text>
+                    </View>
+                    {data.exchangeRate && (
+                        <View style={styles.totalsRow}>
+                            <Text style={styles.totalsLabel}>Tasa:</Text>
+                            <Text style={styles.totalsValue}>{data.exchangeRate}</Text>
+                        </View>
+                    )}
+                </View>
+            </View>
+
+            {/* ─── Divider 3 ─── */}
+            <View style={styles.divider} />
+
+            {/* ─── Observaciones ─── */}
+            {data.notes ? (
+                <View style={styles.sectionGap}>
+                    <Text style={styles.sectionTitle}>Observaciones</Text>
+                    <Text style={styles.sectionBody}>{data.notes}</Text>
+                </View>
+            ) : null}
+
+            {/* ─── Bank Info ─── */}
+            {data.bankInfo && (
+                <View style={styles.sectionGap}>
+                    <Text style={styles.sectionTitle}>
+                        Favor realizar el pago a nombre de:
+                    </Text>
+                    <Text style={styles.sectionBody}>
+                        {data.bankInfo.beneficiary} | {data.bankInfo.rnc}
+                    </Text>
+
+                    {data.bankInfo.banks.map((bank, bankIndex) => (
+                        <View key={bankIndex} style={styles.bankGroup}>
+                            <Text style={styles.bankName}>{bank.name}</Text>
+                            {bank.accounts.map((account, accIndex) => (
+                                <Text key={accIndex} style={styles.bankAccount}>
+                                    {account.currency}: {account.number} | {account.type}
+                                </Text>
+                            ))}
+                        </View>
+                    ))}
+
+                    <Text style={styles.closingNote}>
+                        Al validar el pago se enviará factura con NCF de forma inmediata
+                    </Text>
+                </View>
+            )}
+        </Page>
+    );
+}
+
+// ── Exported components ─────────────────────────────────────
+
 export function ProformaPDF({ data }: { data: ProformaData }) {
-    const hasDiscount = data.discount > 0;
-    const netAmount = data.subtotal - data.discount;
-
     return (
         <Document>
-            <Page size="LETTER" style={styles.page}>
-                {/* Header */}
-                <View style={styles.header}>
-                    <View>
-                        {data.providerLogo ? (
-                            <Image src={data.providerLogo} style={styles.logo} />
-                        ) : (
-                            <Text style={styles.companyName}>{data.providerName}</Text>
-                        )}
-                    </View>
-                    <View style={styles.companyInfo}>
-                        <Text style={styles.companyName}>{data.providerName}</Text>
-                        <Text>{data.providerAddress}</Text>
-                        <Text>República Dominicana</Text>
-                        <Text>{data.providerPhone}</Text>
-                    </View>
-                </View>
-
-                <View style={styles.divider} />
-
-                {/* Document & Client Info */}
-                <View style={styles.infoSection}>
-                    <View style={styles.infoColumn}>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>Proforma Nro.:</Text>
-                            <Text style={styles.infoValue}>{data.documentNumber}</Text>
-                        </View>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>Cliente:</Text>
-                            <Text style={styles.infoValue}>{data.clientName}</Text>
-                        </View>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>RNC:</Text>
-                            <Text style={styles.infoValue}>{data.clientRNC}</Text>
-                        </View>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>Dirección:</Text>
-                            <Text style={styles.infoValue}>{data.clientAddress}</Text>
-                        </View>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>Contacto:</Text>
-                            <Text style={styles.infoValue}>{data.clientContact}</Text>
-                        </View>
-                    </View>
-                    <View style={styles.infoColumnRight}>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>Fecha de emisión:</Text>
-                            <Text>{formatDate(data.documentDate)}</Text>
-                        </View>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>Fecha de vencimiento:</Text>
-                            <Text>{formatDate(data.expirationDate)}</Text>
-                        </View>
-                    </View>
-                </View>
-
-                <View style={styles.divider} />
-
-                {/* Items Table */}
-                <View style={styles.table}>
-                    {/* Header */}
-                    <View style={styles.tableHeader}>
-                        <Text style={[styles.tableHeaderCell, styles.colConcept]}>Concepto</Text>
-                        <Text style={[styles.tableHeaderCell, styles.colQty]}>Cantidad</Text>
-                        <Text style={[styles.tableHeaderCell, styles.colPrice]}>Precio unitario ({data.currency})</Text>
-                        <Text style={[styles.tableHeaderCell, styles.colTotal]}>Precio total ({data.currency})</Text>
-                    </View>
-                    
-                    {/* Rows */}
-                    {data.items.map((item, index) => (
-                        <View key={index} style={styles.tableRow}>
-                            <Text style={[styles.tableCell, styles.colConcept]}>{item.name}</Text>
-                            <Text style={[styles.tableCell, styles.colQty]}>{formatMoney(item.quantity)}</Text>
-                            <Text style={[styles.tableCell, styles.colPrice]}>{formatMoney(item.unitPrice)}</Text>
-                            <Text style={[styles.tableCell, styles.colTotal]}>{formatMoney(item.total)}</Text>
-                        </View>
-                    ))}
-                </View>
-
-                {/* Totals */}
-                <View style={styles.totalsSection}>
-                    <View style={styles.totalsLabels}>
-                        <Text style={styles.totalsRow}>Subtotal:</Text>
-                        {hasDiscount && (
-                            <>
-                                <Text style={styles.totalsRow}>Descuento:</Text>
-                                <Text style={styles.totalsRow}>Neto:</Text>
-                            </>
-                        )}
-                        <Text style={styles.totalsRow}>Impuesto:</Text>
-                        <Text style={[styles.totalsRow, styles.totalsFinal]}>Total {data.currency}:</Text>
-                        {data.exchangeRate && (
-                            <Text style={styles.totalsRow}>Tasa:</Text>
-                        )}
-                    </View>
-                    <View style={styles.totalsValues}>
-                        <Text style={styles.totalsRow}>{formatMoney(data.subtotal)}</Text>
-                        {hasDiscount && (
-                            <>
-                                <Text style={styles.totalsRow}>{formatMoney(data.discount)}</Text>
-                                <Text style={styles.totalsRow}>{formatMoney(netAmount)}</Text>
-                            </>
-                        )}
-                        <Text style={styles.totalsRow}>{formatMoney(data.taxAmount)}</Text>
-                        <Text style={[styles.totalsRow, styles.totalsFinal]}>{formatMoney(data.total)}</Text>
-                        {data.exchangeRate && (
-                            <Text style={styles.totalsRow}>{data.exchangeRate}</Text>
-                        )}
-                    </View>
-                </View>
-
-                <View style={styles.divider} />
-
-                {/* Notes Panel */}
-                {data.notes && (
-                    <View style={styles.panel}>
-                        <View style={styles.panelHeader}>
-                            <Text style={styles.panelHeaderText}>Observaciones</Text>
-                        </View>
-                        <View style={styles.panelBody}>
-                            <Text style={styles.panelText}>{data.notes}</Text>
-                        </View>
-                    </View>
-                )}
-
-                {/* Bank Info Panel */}
-                {data.bankInfo && (
-                    <View style={styles.panel}>
-                        <View style={styles.panelHeader}>
-                            <Text style={styles.panelHeaderText}>Favor realizar el pago a nombre de:</Text>
-                        </View>
-                        <View style={styles.panelBody}>
-                            <Text style={styles.panelText}>{data.bankInfo.beneficiary} | {data.bankInfo.rnc}</Text>
-                            
-                            {data.bankInfo.banks.map((bank, bankIndex) => (
-                                <View key={bankIndex} style={styles.bankInfo}>
-                                    <Text style={[styles.panelText, { fontWeight: "bold" }]}>{bank.name}</Text>
-                                    {bank.accounts.map((account, accIndex) => (
-                                        <Text key={accIndex} style={styles.panelText}>
-                                            {account.currency}: {account.number} | {account.type}
-                                        </Text>
-                                    ))}
-                                </View>
-                            ))}
-                            
-                            <Text style={[styles.panelText, { marginTop: 10 }]}>
-                                Al validar el pago se enviará factura con NCF de forma inmediata
-                            </Text>
-                        </View>
-                    </View>
-                )}
-            </Page>
+            <ProformaContent data={data} />
         </Document>
     );
 }
 
-// Factory function for creating the PDF document (for renderToBuffer)
-// Returns a ReactElement that can be passed to renderToBuffer
 export function createProformaPDF(data: ProformaData): React.ReactElement {
-    const hasDiscount = data.discount > 0;
-    const netAmount = data.subtotal - data.discount;
-
     return (
         <Document>
-            <Page size="LETTER" style={styles.page}>
-                {/* Header */}
-                <View style={styles.header}>
-                    <View>
-                        {data.providerLogo ? (
-                            <Image src={data.providerLogo} style={styles.logo} />
-                        ) : (
-                            <Text style={styles.companyName}>{data.providerName}</Text>
-                        )}
-                    </View>
-                    <View style={styles.companyInfo}>
-                        <Text style={styles.companyName}>{data.providerName}</Text>
-                        <Text>{data.providerAddress}</Text>
-                        <Text>República Dominicana</Text>
-                        <Text>{data.providerPhone}</Text>
-                    </View>
-                </View>
-
-                <View style={styles.divider} />
-
-                {/* Document & Client Info */}
-                <View style={styles.infoSection}>
-                    <View style={styles.infoColumn}>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>Proforma Nro.:</Text>
-                            <Text style={styles.infoValue}>{data.documentNumber}</Text>
-                        </View>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>Cliente:</Text>
-                            <Text style={styles.infoValue}>{data.clientName}</Text>
-                        </View>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>RNC:</Text>
-                            <Text style={styles.infoValue}>{data.clientRNC}</Text>
-                        </View>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>Dirección:</Text>
-                            <Text style={styles.infoValue}>{data.clientAddress}</Text>
-                        </View>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>Contacto:</Text>
-                            <Text style={styles.infoValue}>{data.clientContact}</Text>
-                        </View>
-                    </View>
-                    <View style={styles.infoColumnRight}>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>Fecha de emisión:</Text>
-                            <Text>{formatDate(data.documentDate)}</Text>
-                        </View>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>Fecha de vencimiento:</Text>
-                            <Text>{formatDate(data.expirationDate)}</Text>
-                        </View>
-                    </View>
-                </View>
-
-                <View style={styles.divider} />
-
-                {/* Items Table */}
-                <View style={styles.table}>
-                    <View style={styles.tableHeader}>
-                        <Text style={[styles.tableHeaderCell, styles.colConcept]}>Concepto</Text>
-                        <Text style={[styles.tableHeaderCell, styles.colQty]}>Cantidad</Text>
-                        <Text style={[styles.tableHeaderCell, styles.colPrice]}>Precio unitario ({data.currency})</Text>
-                        <Text style={[styles.tableHeaderCell, styles.colTotal]}>Precio total ({data.currency})</Text>
-                    </View>
-                    
-                    {data.items.map((item, index) => (
-                        <View key={index} style={styles.tableRow}>
-                            <Text style={[styles.tableCell, styles.colConcept]}>{item.name}</Text>
-                            <Text style={[styles.tableCell, styles.colQty]}>{formatMoney(item.quantity)}</Text>
-                            <Text style={[styles.tableCell, styles.colPrice]}>{formatMoney(item.unitPrice)}</Text>
-                            <Text style={[styles.tableCell, styles.colTotal]}>{formatMoney(item.total)}</Text>
-                        </View>
-                    ))}
-                </View>
-
-                {/* Totals */}
-                <View style={styles.totalsSection}>
-                    <View style={styles.totalsLabels}>
-                        <Text style={styles.totalsRow}>Subtotal:</Text>
-                        {hasDiscount && (
-                            <>
-                                <Text style={styles.totalsRow}>Descuento:</Text>
-                                <Text style={styles.totalsRow}>Neto:</Text>
-                            </>
-                        )}
-                        <Text style={styles.totalsRow}>Impuesto:</Text>
-                        <Text style={[styles.totalsRow, styles.totalsFinal]}>Total {data.currency}:</Text>
-                        {data.exchangeRate && (
-                            <Text style={styles.totalsRow}>Tasa:</Text>
-                        )}
-                    </View>
-                    <View style={styles.totalsValues}>
-                        <Text style={styles.totalsRow}>{formatMoney(data.subtotal)}</Text>
-                        {hasDiscount && (
-                            <>
-                                <Text style={styles.totalsRow}>{formatMoney(data.discount)}</Text>
-                                <Text style={styles.totalsRow}>{formatMoney(netAmount)}</Text>
-                            </>
-                        )}
-                        <Text style={styles.totalsRow}>{formatMoney(data.taxAmount)}</Text>
-                        <Text style={[styles.totalsRow, styles.totalsFinal]}>{formatMoney(data.total)}</Text>
-                        {data.exchangeRate && (
-                            <Text style={styles.totalsRow}>{data.exchangeRate}</Text>
-                        )}
-                    </View>
-                </View>
-
-                <View style={styles.divider} />
-
-                {/* Notes Panel */}
-                {data.notes && (
-                    <View style={styles.panel}>
-                        <View style={styles.panelHeader}>
-                            <Text style={styles.panelHeaderText}>Observaciones</Text>
-                        </View>
-                        <View style={styles.panelBody}>
-                            <Text style={styles.panelText}>{data.notes}</Text>
-                        </View>
-                    </View>
-                )}
-
-                {/* Bank Info Panel */}
-                {data.bankInfo && (
-                    <View style={styles.panel}>
-                        <View style={styles.panelHeader}>
-                            <Text style={styles.panelHeaderText}>Favor realizar el pago a nombre de:</Text>
-                        </View>
-                        <View style={styles.panelBody}>
-                            <Text style={styles.panelText}>{data.bankInfo.beneficiary} | {data.bankInfo.rnc}</Text>
-                            
-                            {data.bankInfo.banks.map((bank, bankIndex) => (
-                                <View key={bankIndex} style={styles.bankInfo}>
-                                    <Text style={[styles.panelText, { fontWeight: "bold" }]}>{bank.name}</Text>
-                                    {bank.accounts.map((account, accIndex) => (
-                                        <Text key={accIndex} style={styles.panelText}>
-                                            {account.currency}: {account.number} | {account.type}
-                                        </Text>
-                                    ))}
-                                </View>
-                            ))}
-                            
-                            <Text style={[styles.panelText, { marginTop: 10 }]}>
-                                Al validar el pago se enviará factura con NCF de forma inmediata
-                            </Text>
-                        </View>
-                    </View>
-                )}
-            </Page>
+            <ProformaContent data={data} />
         </Document>
     );
 }
 
-// Default bank info for NEARBY
+// ── Default bank info ───────────────────────────────────────
+
 export const DEFAULT_BANK_INFO = {
     beneficiary: "NEARBY PROPTECH SOLUTIONS SAS",
     rnc: "1-32-53017-9",
