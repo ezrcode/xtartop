@@ -104,6 +104,11 @@ export async function GET(request: NextRequest) {
             // Skip if no companies due for billing
             if (workspace.companies.length === 0) continue;
 
+            const latestExchangeRate = await prisma.exchangeRate.findFirst({
+                where: { workspaceId: workspace.id },
+                orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+            });
+
             // Get sender user
             const senderUser = await prisma.user.findUnique({
                 where: { id: workspace.billingFromUserId! },
@@ -379,6 +384,7 @@ export async function GET(request: NextRequest) {
                         discount: 0,
                         taxAmount,
                         total,
+                        exchangeRate: latestExchangeRate ? Number(latestExchangeRate.rate).toFixed(4) : undefined,
                         
                         notes: "",
                         bankInfo: DEFAULT_BANK_INFO,

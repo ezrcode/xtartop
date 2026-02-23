@@ -407,16 +407,14 @@ function ProformaContent({ data }: { data: ProformaData }) {
                         <Text style={styles.totalsLabel}>Impuesto:</Text>
                         <Text style={styles.totalsValue}>{formatMoney(data.taxAmount)}</Text>
                     </View>
+                    <View style={styles.totalsRow}>
+                        <Text style={styles.totalsLabel}>Tasa:</Text>
+                        <Text style={styles.totalsValue}>{data.exchangeRate || "-"}</Text>
+                    </View>
                     <View style={styles.totalsFinalRow}>
                         <Text style={styles.totalsLabel}>Total {data.currency}:</Text>
                         <Text style={styles.totalsValue}>{formatMoney(data.total)}</Text>
                     </View>
-                    {data.exchangeRate && (
-                        <View style={styles.totalsRow}>
-                            <Text style={styles.totalsLabel}>Tasa:</Text>
-                            <Text style={styles.totalsValue}>{data.exchangeRate}</Text>
-                        </View>
-                    )}
                 </View>
             </View>
 

@@ -196,6 +196,7 @@ model Workspace {
   activities   Activity[]
   billingHistory BillingHistory[]
   businessLines  BusinessLine[]
+  exchangeRates  ExchangeRate[]
 }
 
 model WorkspaceMember {
@@ -645,4 +646,20 @@ model BillingHistory {
   @@index([companyId])
   @@index([workspaceId])
   @@index([billingMonth, billingYear])
+}
+
+model ExchangeRate {
+  id          String   @id @default(cuid())
+  date        DateTime @default(now())
+  rate        Decimal
+  notes       String?  @db.Text
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([workspaceId])
+  @@index([workspaceId, date])
 }

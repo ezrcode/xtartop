@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useFormState } from "react-dom";
-import { Save, UserPlus, Mail, Trash2, X, Building2, Users2, FileText, Loader2, Cloud, Settings2 } from "lucide-react";
+import { Save, UserPlus, Mail, Trash2, X, Building2, Users2, FileText, Loader2, Cloud, Settings2, DollarSign } from "lucide-react";
 import { ImageUpload } from "../ui/image-upload";
 import {
     updateWorkspace,
@@ -13,11 +13,12 @@ import {
     WorkspaceState,
     InvitationState
 } from "@/actions/workspace";
-import type { Workspace, WorkspaceMember, Invitation, User, Subscription, BusinessLine } from "@prisma/client";
+import type { Workspace, WorkspaceMember, Invitation, User, Subscription, BusinessLine, ExchangeRate } from "@prisma/client";
 import { AdmCloudConfigTab } from "./admcloud-config-tab";
 import { ClickUpConfigTab } from "./clickup-config-tab";
 import { BillingConfigTab } from "./billing-config-tab";
 import { BusinessLinesSection } from "./business-lines-section";
+import { ExchangeRatesSection } from "./exchange-rates-section";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
@@ -77,6 +78,7 @@ interface SettingsPageProps {
     workspace: WorkspaceWithDetails;
     workspaceUsers?: WorkspaceUser[];
     businessLines?: BusinessLine[];
+    exchangeRates?: ExchangeRate[];
 }
 
 function getDefaultContractTemplate(): string {
@@ -165,9 +167,9 @@ function getDefaultContractTemplate(): string {
 <p>He leído y acepto los Términos y Condiciones de Uso de la plataforma Nearby CRM y la Cotización N° <strong>{{ID_COTIZACION}}</strong> vinculada a mi cuenta. Entiendo que esta aceptación digital tiene la misma validez legal que una firma manuscrita de acuerdo con la legislación vigente.</p>`;
 }
 
-type Tab = 'workspace' | 'general' | 'team' | 'contract' | 'integrations';
+type Tab = 'workspace' | 'general' | 'exchangeRates' | 'team' | 'contract' | 'integrations';
 
-export function SettingsPage({ workspace, workspaceUsers = [], businessLines = [] }: SettingsPageProps) {
+export function SettingsPage({ workspace, workspaceUsers = [], businessLines = [], exchangeRates = [] }: SettingsPageProps) {
     const [activeTab, setActiveTab] = useState<Tab>('workspace');
     const [showInviteForm, setShowInviteForm] = useState(false);
     const [revokingId, setRevokingId] = useState<string | null>(null);
@@ -254,6 +256,10 @@ export function SettingsPage({ workspace, workspaceUsers = [], businessLines = [
                         <TabsTrigger value="team" variant="underline" className="flex-1 sm:flex-none">
                             <Users2 size={18} />
                             <span className="hidden sm:inline">Equipo</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="exchangeRates" variant="underline" className="flex-1 sm:flex-none">
+                            <DollarSign size={18} />
+                            <span className="hidden sm:inline">Tasa</span>
                         </TabsTrigger>
                         <TabsTrigger value="contract" variant="underline" className="flex-1 sm:flex-none">
                             <FileText size={18} />
@@ -379,6 +385,13 @@ export function SettingsPage({ workspace, workspaceUsers = [], businessLines = [
                     <TabsContent value="general" className="mt-0">
                         <div className="space-y-6">
                             <BusinessLinesSection businessLines={businessLines} />
+                        </div>
+                    </TabsContent>
+
+                    {/* Tab Content: Exchange Rates */}
+                    <TabsContent value="exchangeRates" className="mt-0">
+                        <div className="space-y-6">
+                            <ExchangeRatesSection exchangeRates={exchangeRates} />
                         </div>
                     </TabsContent>
 

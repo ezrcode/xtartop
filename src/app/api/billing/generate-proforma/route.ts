@@ -36,6 +36,11 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "Workspace no encontrado" }, { status: 400 });
         }
 
+        const latestExchangeRate = await prisma.exchangeRate.findFirst({
+            where: { workspaceId: workspace.id },
+            orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+        });
+
         // Get company with billing data
         const company = await prisma.company.findFirst({
             where: {
@@ -222,6 +227,7 @@ export async function POST(request: NextRequest) {
             discount: 0,
             taxAmount,
             total,
+            exchangeRate: latestExchangeRate ? Number(latestExchangeRate.rate).toFixed(4) : undefined,
             
             notes: "",
             bankInfo: DEFAULT_BANK_INFO,
