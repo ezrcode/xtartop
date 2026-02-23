@@ -191,16 +191,68 @@ export async function updateDealAction(id: string, prevState: DealState | undefi
     const session = await auth();
     if (!session?.user?.email) redirect("/login");
 
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) redirect("/login");
+
+    const existingDeal = await prisma.deal.findFirst({
+        where: {
+            id,
+            workspaceId: workspace.id,
+        },
+        select: {
+            name: true,
+            value: true,
+            mrr: true,
+            arr: true,
+            companyId: true,
+            contactId: true,
+            businessLineId: true,
+            type: true,
+            status: true,
+        },
+    });
+
+    if (!existingDeal) {
+        return { message: "Negocio no encontrado." };
+    }
+
+    const nameValue = formData.get("name");
+    const valueValue = formData.get("value");
+    const mrrValue = formData.get("mrr");
+    const arrValue = formData.get("arr");
+    const companyIdValue = formData.get("companyId");
+    const contactIdValue = formData.get("contactId");
+    const businessLineIdValue = formData.get("businessLineId");
+    const typeValue = formData.get("type");
+    const statusValue = formData.get("status");
+
     const rawData = {
-        name: formData.get("name"),
-        value: formData.get("value") || "0",
-        mrr: formData.get("mrr") || "",
-        arr: formData.get("arr") || "",
-        companyId: formData.get("companyId") === "null" ? null : formData.get("companyId") || null,
-        contactId: formData.get("contactId") === "null" ? null : formData.get("contactId") || null,
-        businessLineId: formData.get("businessLineId") === "null" ? null : formData.get("businessLineId") || null,
-        type: formData.get("type") === "null" ? null : formData.get("type") || null,
-        status: formData.get("status"),
+        // Allow partial submits (e.g. from tabbed UI) by falling back to current persisted values.
+        name: typeof nameValue === "string" ? nameValue : existingDeal.name,
+        value: typeof valueValue === "string" ? valueValue : String(existingDeal.value ?? 0),
+        mrr: typeof mrrValue === "string" ? mrrValue : existingDeal.mrr ? String(existingDeal.mrr) : "",
+        arr: typeof arrValue === "string" ? arrValue : existingDeal.arr ? String(existingDeal.arr) : "",
+        companyId: companyIdValue === null
+            ? existingDeal.companyId
+            : companyIdValue === "null"
+                ? null
+                : companyIdValue || null,
+        contactId: contactIdValue === null
+            ? existingDeal.contactId
+            : contactIdValue === "null"
+                ? null
+                : contactIdValue || null,
+        businessLineId: businessLineIdValue === null
+            ? existingDeal.businessLineId
+            : businessLineIdValue === "null"
+                ? null
+                : businessLineIdValue || null,
+        type: typeValue === null
+            ? existingDeal.type
+            : typeValue === "null"
+                ? null
+                : typeValue || null,
+        status: typeof statusValue === "string" ? statusValue : existingDeal.status,
     };
 
     const validatedFields = DealSchema.safeParse(rawData);
