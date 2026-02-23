@@ -139,14 +139,14 @@ export function QuoteModal({
         const formData = new FormData();
         
         // Get values from inputs by ID
-        const dateInput = document.getElementById('date') as HTMLInputElement;
-        const validityInput = document.getElementById('validity') as HTMLSelectElement;
-        const currencyInput = document.getElementById('currency') as HTMLSelectElement;
-        const proposalInput = document.getElementById('proposalDescription') as HTMLTextAreaElement;
-        const paymentInput = document.getElementById('paymentConditions') as HTMLTextAreaElement;
-        const deliveryInput = document.getElementById('deliveryTime') as HTMLInputElement;
-        const taxInput = document.getElementById('taxType') as HTMLSelectElement;
-        const statusInput = document.getElementById('status') as HTMLSelectElement;
+        const dateInput = document.getElementById('quote-date') as HTMLInputElement;
+        const validityInput = document.getElementById('quote-validity') as HTMLSelectElement;
+        const currencyInput = document.getElementById('quote-currency') as HTMLSelectElement;
+        const proposalInput = document.getElementById('quote-proposalDescription') as HTMLTextAreaElement;
+        const paymentInput = document.getElementById('quote-paymentConditions') as HTMLTextAreaElement;
+        const deliveryInput = document.getElementById('quote-deliveryTime') as HTMLInputElement;
+        const taxInput = document.getElementById('quote-taxType') as HTMLSelectElement;
+        const statusInput = document.getElementById('quote-status') as HTMLSelectElement;
         
         // Append all values
         if (dateInput) formData.append('date', dateInput.value);
@@ -307,25 +307,23 @@ export function QuoteModal({
                         {/* Date, Validity, Currency */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
-                                <label htmlFor="date" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                <label htmlFor="quote-date" className="block text-sm font-medium text-dark-slate mb-1.5">
                                     Fecha *
                                 </label>
                                 <input
                                     type="date"
-                                    name="date"
-                                    id="date"
+                                    id="quote-date"
                                     defaultValue={quote?.date ? new Date(quote.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]}
                                     required
                                     className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                 />
                             </div>
                             <div>
-                                <label htmlFor="validity" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                <label htmlFor="quote-validity" className="block text-sm font-medium text-dark-slate mb-1.5">
                                     Validez *
                                 </label>
                                 <select
-                                    name="validity"
-                                    id="validity"
+                                    id="quote-validity"
                                     defaultValue={quote?.validity || "30 días"}
                                     required
                                     className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
@@ -336,12 +334,11 @@ export function QuoteModal({
                                 </select>
                             </div>
                             <div>
-                                <label htmlFor="currency" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                <label htmlFor="quote-currency" className="block text-sm font-medium text-dark-slate mb-1.5">
                                     Moneda *
                                 </label>
                                 <select
-                                    name="currency"
-                                    id="currency"
+                                    id="quote-currency"
                                     defaultValue={quote?.currency || "USD"}
                                     required
                                     className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
@@ -466,12 +463,11 @@ export function QuoteModal({
 
                         {/* Proposal Description */}
                         <div>
-                            <label htmlFor="proposalDescription" className="block text-sm font-medium text-dark-slate mb-1.5">
+                            <label htmlFor="quote-proposalDescription" className="block text-sm font-medium text-dark-slate mb-1.5">
                                 Descripción de la Propuesta
                             </label>
                             <textarea
-                                name="proposalDescription"
-                                id="proposalDescription"
+                                id="quote-proposalDescription"
                                 rows={6}
                                 defaultValue={quote?.proposalDescription || ""}
                                 placeholder="Describa los detalles de la propuesta..."
@@ -482,12 +478,11 @@ export function QuoteModal({
                         {/* Payment Conditions, Delivery Time */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label htmlFor="paymentConditions" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                <label htmlFor="quote-paymentConditions" className="block text-sm font-medium text-dark-slate mb-1.5">
                                     Condiciones de Pago
                                 </label>
                                 <textarea
-                                    name="paymentConditions"
-                                    id="paymentConditions"
+                                    id="quote-paymentConditions"
                                     rows={2}
                                     defaultValue={quote?.paymentConditions || ""}
                                     placeholder="Ej: 50% adelanto, 50% contra entrega"
@@ -495,13 +490,12 @@ export function QuoteModal({
                                 />
                             </div>
                             <div>
-                                <label htmlFor="deliveryTime" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                <label htmlFor="quote-deliveryTime" className="block text-sm font-medium text-dark-slate mb-1.5">
                                     Tiempo de Entrega
                                 </label>
                                 <input
                                     type="text"
-                                    name="deliveryTime"
-                                    id="deliveryTime"
+                                    id="quote-deliveryTime"
                                     defaultValue={quote?.deliveryTime || ""}
                                     placeholder="Ej: 15 días hábiles"
                                     className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
@@ -512,12 +506,11 @@ export function QuoteModal({
                         {/* Tax Type & Status */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label htmlFor="taxType" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                <label htmlFor="quote-taxType" className="block text-sm font-medium text-dark-slate mb-1.5">
                                     Impuestos *
                                 </label>
                                 <select
-                                    name="taxType"
-                                    id="taxType"
+                                    id="quote-taxType"
                                     defaultValue={quote?.taxType || "INCLUIDOS"}
                                     required
                                     className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
@@ -527,12 +520,11 @@ export function QuoteModal({
                                 </select>
                             </div>
                             <div>
-                                <label htmlFor="status" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                <label htmlFor="quote-status" className="block text-sm font-medium text-dark-slate mb-1.5">
                                     Estado *
                                 </label>
                                 <select
-                                    name="status"
-                                    id="status"
+                                    id="quote-status"
                                     defaultValue={quote?.status || "BORRADOR"}
                                     required
                                     className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"

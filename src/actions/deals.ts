@@ -157,7 +157,7 @@ export async function createDealAction(prevState: DealState | undefined, formDat
     if (!validatedFields.success) {
         return {
             errors: validatedFields.error.flatten().fieldErrors,
-            message: "Missing Fields. Failed to Create Deal.",
+            message: "Faltan campos obligatorios para crear el negocio. Revisa los datos e inténtalo de nuevo.",
         };
     }
 
@@ -174,7 +174,7 @@ export async function createDealAction(prevState: DealState | undefined, formDat
         });
     } catch (error) {
         console.error("Database Error:", error);
-        return { message: "Database Error: Failed to Create Deal." };
+        return { message: "Ocurrió un error al crear el negocio. Inténtalo nuevamente." };
     }
 
     revalidatePath("/app/deals");
@@ -213,7 +213,7 @@ export async function updateDealAction(id: string, prevState: DealState | undefi
     });
 
     if (!existingDeal) {
-        return { message: "Negocio no encontrado." };
+        return { message: "No se encontró el negocio que intentas actualizar." };
     }
 
     const nameValue = formData.get("name");
@@ -260,7 +260,7 @@ export async function updateDealAction(id: string, prevState: DealState | undefi
     if (!validatedFields.success) {
         return {
             errors: validatedFields.error.flatten().fieldErrors,
-            message: "Missing Fields. Failed to Update Deal.",
+            message: "Faltan campos obligatorios para actualizar el negocio. Revisa los datos e inténtalo de nuevo.",
         };
     }
 
@@ -275,7 +275,7 @@ export async function updateDealAction(id: string, prevState: DealState | undefi
         });
     } catch (error) {
         console.error("Database Error:", error);
-        return { message: "Database Error: Failed to Update Deal." };
+        return { message: "Ocurrió un error al actualizar el negocio. Inténtalo nuevamente." };
     }
 
     revalidatePath("/app/deals");
@@ -287,7 +287,7 @@ export async function updateDealAction(id: string, prevState: DealState | undefi
         redirect("/app/deals");
     }
 
-    return { message: "Deal updated successfully." };
+    return { message: "Negocio actualizado correctamente." };
 }
 
 export async function deleteDeal(id: string) {
