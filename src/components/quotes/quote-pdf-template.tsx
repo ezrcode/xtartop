@@ -141,10 +141,6 @@ export function QuotePDFTemplate({
                         <span style={{ fontWeight: 700, display: "inline-block", width: "95px" }}>Atención:</span>
                         <span>{contactName || "-"}</span>
                     </div>
-                    <div style={{ marginBottom: "3px" }}>
-                        <span style={{ fontWeight: 700, display: "inline-block", width: "95px" }}>Moneda:</span>
-                        <span>{quote.currency}</span>
-                    </div>
                 </div>
                 <div style={{ width: "42%", textAlign: "right" }}>
                     <div style={{ marginBottom: "3px" }}>
@@ -152,9 +148,6 @@ export function QuotePDFTemplate({
                     </div>
                     <div style={{ marginBottom: "3px" }}>
                         <span style={{ fontWeight: 700 }}>Validez:</span> {quote.validity}
-                    </div>
-                    <div style={{ marginBottom: "3px" }}>
-                        <span style={{ fontWeight: 700 }}>Impuestos:</span> {taxLabel}
                     </div>
                 </div>
             </div>
