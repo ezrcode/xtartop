@@ -30,12 +30,16 @@ export async function createEmailTransporter(userId: string) {
 export async function sendEmailWithGmail({
     userId,
     to,
+    cc,
+    bcc,
     subject,
     body,
     attachments,
 }: {
     userId: string;
     to: string;
+    cc?: string | string[];
+    bcc?: string | string[];
     subject: string;
     body: string;
     attachments?: { filename: string; path: string }[];
@@ -54,6 +58,8 @@ export async function sendEmailWithGmail({
         const mailOptions = {
             from: `"${user?.emailFromName || "CRM"}" <${user?.emailFromAddress}>`,
             to,
+            cc,
+            bcc,
             subject,
             html: body,
             attachments,
@@ -80,6 +86,8 @@ export async function sendEmailWithGmail({
 export async function sendEmail({
     user,
     to,
+    cc,
+    bcc,
     subject,
     body,
     attachments,
@@ -90,6 +98,8 @@ export async function sendEmail({
         emailPassword: string;
     };
     to: string;
+    cc?: string | string[];
+    bcc?: string | string[];
     subject: string;
     body: string;
     attachments?: { filename: string; path: string }[];
@@ -106,6 +116,8 @@ export async function sendEmail({
         const mailOptions = {
             from: `"${user.emailFromName}" <${user.emailFromAddress}>`,
             to,
+            cc,
+            bcc,
             subject,
             html: body,
             attachments,

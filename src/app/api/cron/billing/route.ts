@@ -432,6 +432,7 @@ export async function GET(request: NextRequest) {
                     // Send emails
                     const recipientEmails = company.contacts.map(c => c.email);
                     const ccEmails = workspace.billingEmailsCC?.split(",").map(e => e.trim()).filter(Boolean) || [];
+                    const bccEmails = workspace.billingEmailsBCC?.split(",").map(e => e.trim()).filter(Boolean) || [];
 
                     // Send to each recipient individually
                     let emailSent = false;
@@ -443,6 +444,8 @@ export async function GET(request: NextRequest) {
                                 emailPassword: senderUser.emailPassword!,
                             },
                             to: recipientEmail,
+                            cc: ccEmails.length > 0 ? ccEmails : undefined,
+                            bcc: bccEmails.length > 0 ? bccEmails : undefined,
                             subject: emailSubject,
                             body: emailBody,
                             attachments: [{
