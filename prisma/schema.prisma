@@ -304,6 +304,11 @@ enum DealType {
   UPSELLING
 }
 
+enum DealRecurrence {
+  ONETIME_PROJECT
+  SUSCRIPCION
+}
+
 enum DealStatus {
   PROSPECCION
   CALIFICACION
@@ -366,13 +371,15 @@ model ClientInvitation {
 }
 
 model Deal {
-  id     String     @id @default(cuid())
-  name   String
-  value  Decimal    @default(0)
-  mrr    Decimal?
-  arr    Decimal?
-  type   DealType?
-  status DealStatus @default(PROSPECCION)
+  id          String         @id @default(cuid())
+  name        String
+  description String?        @db.Text
+  value       Decimal        @default(0)
+  mrr         Decimal?
+  arr         Decimal?
+  type        DealType?
+  recurrence  DealRecurrence @default(ONETIME_PROJECT)
+  status      DealStatus     @default(PROSPECCION)
 
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)

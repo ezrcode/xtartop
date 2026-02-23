@@ -8,6 +8,8 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { QuoteStatus, Currency, TaxType, PaymentFrequency } from "@prisma/client";
 
+const UNIQUE_FINAL_STATUSES: QuoteStatus[] = ["ACTIVA", "APROBADA"];
+
 const QuoteItemSchema = z.object({
     id: z.string().optional(),
     name: z.string().min(1, "El nombre es requerido"),
@@ -174,6 +176,22 @@ export async function createQuoteAction(
 
     console.log('Validated fields:', validatedFields.data);
 
+    if (UNIQUE_FINAL_STATUSES.includes(validatedFields.data.status)) {
+        const existingFinalQuote = await prisma.quote.findFirst({
+            where: {
+                dealId: deal.id,
+                status: { in: UNIQUE_FINAL_STATUSES },
+            },
+            select: { id: true, number: true, status: true },
+        });
+
+        if (existingFinalQuote) {
+            return {
+                message: `Ya existe una cotización ${existingFinalQuote.status === "APROBADA" ? "aprobada" : "activa"} (#${String(existingFinalQuote.number).padStart(3, "0")}) para este negocio. Solo puede haber una cotización activa o aprobada a la vez.`,
+            };
+        }
+    }
+
     // Calculate totals
     let totalOneTime = 0;
     let totalMonthly = 0;
@@ -256,6 +274,7 @@ export async function updateQuoteAction(
         },
         select: {
             dealId: true,
+            number: true,
         },
     });
 
@@ -294,6 +313,23 @@ export async function updateQuoteAction(
             errors: validatedFields.error.flatten().fieldErrors,
             message: "Campos inválidos. Por favor revise el formulario.",
         };
+    }
+
+    if (UNIQUE_FINAL_STATUSES.includes(validatedFields.data.status)) {
+        const existingFinalQuote = await prisma.quote.findFirst({
+            where: {
+                dealId: existingQuote.dealId,
+                status: { in: UNIQUE_FINAL_STATUSES },
+                id: { not: quoteId },
+            },
+            select: { id: true, number: true, status: true },
+        });
+
+        if (existingFinalQuote) {
+            return {
+                message: `No se puede actualizar la cotización #${String(existingQuote.number).padStart(3, "0")} a ${validatedFields.data.status === "APROBADA" ? "aprobada" : "activa"} porque ya existe otra cotización ${existingFinalQuote.status === "APROBADA" ? "aprobada" : "activa"} (#${String(existingFinalQuote.number).padStart(3, "0")}) en este negocio.`,
+            };
+        }
     }
 
     // Calculate totals

@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { DealStatus, DealType } from "@prisma/client";
+import { DealStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -10,13 +10,13 @@ import { getCurrentWorkspace } from "./workspace";
 
 const DealSchema = z.object({
     name: z.string().min(1, "Deal name is required"),
+    description: z.string().optional(),
     value: z.string().transform((val) => parseFloat(val) || 0),
-    mrr: z.string().optional().transform((val) => val ? parseFloat(val) : null),
-    arr: z.string().optional().transform((val) => val ? parseFloat(val) : null),
     companyId: z.string().nullish(),
     contactId: z.string().nullish(),
     businessLineId: z.string().nullish(),
     type: z.enum(["CLIENTE_NUEVO", "UPSELLING"]).nullable().optional(),
+    recurrence: z.enum(["ONETIME_PROJECT", "SUSCRIPCION"]),
     status: z.enum([
         "PROSPECCION",
         "CALIFICACION",
@@ -31,13 +31,13 @@ const DealSchema = z.object({
 export type DealState = {
     errors?: {
         name?: string[];
+        description?: string[];
         value?: string[];
-        mrr?: string[];
-        arr?: string[];
         companyId?: string[];
         contactId?: string[];
         businessLineId?: string[];
         type?: string[];
+        recurrence?: string[];
         status?: string[];
     };
     message?: string;
@@ -142,13 +142,13 @@ export async function createDealAction(prevState: DealState | undefined, formDat
 
     const rawData = {
         name: formData.get("name"),
+        description: formData.get("description") || undefined,
         value: formData.get("value") || "0",
-        mrr: formData.get("mrr") || "",
-        arr: formData.get("arr") || "",
         companyId: formData.get("companyId") === "null" ? null : formData.get("companyId") || null,
         contactId: formData.get("contactId") === "null" ? null : formData.get("contactId") || null,
         businessLineId: formData.get("businessLineId") === "null" ? null : formData.get("businessLineId") || null,
         type: formData.get("type") === "null" ? null : formData.get("type") || null,
+        recurrence: formData.get("recurrence") || "ONETIME_PROJECT",
         status: formData.get("status"),
     };
 
@@ -201,13 +201,13 @@ export async function updateDealAction(id: string, prevState: DealState | undefi
         },
         select: {
             name: true,
+            description: true,
             value: true,
-            mrr: true,
-            arr: true,
             companyId: true,
             contactId: true,
             businessLineId: true,
             type: true,
+            recurrence: true,
             status: true,
         },
     });
@@ -217,21 +217,20 @@ export async function updateDealAction(id: string, prevState: DealState | undefi
     }
 
     const nameValue = formData.get("name");
+    const descriptionValue = formData.get("description");
     const valueValue = formData.get("value");
-    const mrrValue = formData.get("mrr");
-    const arrValue = formData.get("arr");
     const companyIdValue = formData.get("companyId");
     const contactIdValue = formData.get("contactId");
     const businessLineIdValue = formData.get("businessLineId");
     const typeValue = formData.get("type");
+    const recurrenceValue = formData.get("recurrence");
     const statusValue = formData.get("status");
 
     const rawData = {
         // Allow partial submits (e.g. from tabbed UI) by falling back to current persisted values.
         name: typeof nameValue === "string" ? nameValue : existingDeal.name,
+        description: typeof descriptionValue === "string" ? descriptionValue : (existingDeal.description ?? undefined),
         value: typeof valueValue === "string" ? valueValue : String(existingDeal.value ?? 0),
-        mrr: typeof mrrValue === "string" ? mrrValue : existingDeal.mrr ? String(existingDeal.mrr) : "",
-        arr: typeof arrValue === "string" ? arrValue : existingDeal.arr ? String(existingDeal.arr) : "",
         companyId: companyIdValue === null
             ? existingDeal.companyId
             : companyIdValue === "null"
@@ -252,6 +251,9 @@ export async function updateDealAction(id: string, prevState: DealState | undefi
             : typeValue === "null"
                 ? null
                 : typeValue || null,
+        recurrence: recurrenceValue === null
+            ? existingDeal.recurrence
+            : recurrenceValue || "ONETIME_PROJECT",
         status: typeof statusValue === "string" ? statusValue : existingDeal.status,
     };
 

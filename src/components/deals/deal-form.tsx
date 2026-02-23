@@ -5,12 +5,15 @@ import { useFormState, useFormStatus } from "react-dom";
 import Link from "next/link";
 import { Save, Trash2, ArrowLeft, Loader2 } from "lucide-react";
 import { createDealAction, updateDealAction, deleteDeal, DealState } from "@/actions/deals";
-import { Deal, Company, Contact, DealStatus, DealType, User, BusinessLine } from "@prisma/client";
+import { Deal, Company, Contact, User, BusinessLine } from "@prisma/client";
 import { ActivitiesWithSuspense } from "../activities/activities-with-suspense";
 import { QuotesTable } from "../quotes/quotes-table";
 
 interface DealFormProps {
-    deal?: Deal & { 
+    deal?: (Deal & {
+        description?: string | null;
+        recurrence?: "ONETIME_PROJECT" | "SUSCRIPCION" | null;
+    }) & {
         company?: Company | null; 
         contact?: Contact | null;
         createdBy?: Pick<User, 'id' | 'name' | 'email'> | null;
@@ -216,6 +219,24 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                                 )}
                                             </div>
 
+                                            {/* Descripción */}
+                                            <div className="sm:col-span-6">
+                                                <label htmlFor="description" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                    Descripción
+                                                </label>
+                                                <textarea
+                                                    name="description"
+                                                    id="description"
+                                                    rows={5}
+                                                    defaultValue={deal?.description || ""}
+                                                    placeholder="Describe brevemente el contexto, alcance y objetivos del negocio..."
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors resize-y"
+                                                />
+                                                {state?.errors?.description && (
+                                                    <p className="mt-1.5 text-xs text-error-red">{state.errors.description}</p>
+                                                )}
+                                            </div>
+
                                             {/* Empresa y Contacto */}
                                             <div className="sm:col-span-3">
                                                 <label htmlFor="companyId" className="block text-sm font-medium text-dark-slate mb-1.5">
@@ -255,7 +276,26 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                                 </select>
                                             </div>
 
-                                            {/* Tipo de Negocio, LoB y Estado */}
+                                            {/* Recurrencia, tipo y estado */}
+                                            <div className="sm:col-span-2">
+                                                <label htmlFor="recurrence" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                    Recurrencia <span className="text-error-red">*</span>
+                                                </label>
+                                                <select
+                                                    id="recurrence"
+                                                    name="recurrence"
+                                                    defaultValue={deal?.recurrence || "ONETIME_PROJECT"}
+                                                    required
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
+                                                >
+                                                    <option value="ONETIME_PROJECT">Onetime Project</option>
+                                                    <option value="SUSCRIPCION">Suscripción</option>
+                                                </select>
+                                                {state?.errors?.recurrence && (
+                                                    <p className="mt-1.5 text-xs text-error-red">{state.errors.recurrence}</p>
+                                                )}
+                                            </div>
+
                                             <div className="sm:col-span-2">
                                                 <label htmlFor="type" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     Tipo de Negocio
@@ -269,25 +309,6 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                                     <option value="null">Seleccionar tipo</option>
                                                     <option value="CLIENTE_NUEVO">Cliente nuevo</option>
                                                     <option value="UPSELLING">Upselling</option>
-                                                </select>
-                                            </div>
-
-                                            <div className="sm:col-span-2">
-                                                <label htmlFor="businessLineId" className="block text-sm font-medium text-dark-slate mb-1.5">
-                                                    LoB
-                                                </label>
-                                                <select
-                                                    id="businessLineId"
-                                                    name="businessLineId"
-                                                    defaultValue={deal?.businessLineId || "null"}
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
-                                                >
-                                                    <option value="null">Sin línea</option>
-                                                    {businessLines.map((bl) => (
-                                                        <option key={bl.id} value={bl.id}>
-                                                            {bl.name}
-                                                        </option>
-                                                    ))}
                                                 </select>
                                             </div>
 
@@ -312,8 +333,8 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                                 </select>
                                             </div>
 
-                                            {/* Valor, MRR, ARR - debajo de Tipo */}
-                                            <div className="sm:col-span-2">
+                                            {/* Valor y LoB */}
+                                            <div className="sm:col-span-3">
                                                 <label htmlFor="value" className="block text-sm font-medium text-dark-slate mb-1.5">
                                                     Valor del Negocio
                                                 </label>
@@ -332,42 +353,23 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                                 </div>
                                             </div>
 
-                                            <div className="sm:col-span-2">
-                                                <label htmlFor="mrr" className="block text-sm font-medium text-dark-slate mb-1.5">
-                                                    MRR
+                                            <div className="sm:col-span-3">
+                                                <label htmlFor="businessLineId" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                    LoB
                                                 </label>
-                                                <div className="relative rounded-lg shadow-sm">
-                                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                        <span className="text-gray-500 text-base sm:text-sm">$</span>
-                                                    </div>
-                                                    <input
-                                                        type="number"
-                                                        name="mrr"
-                                                        id="mrr"
-                                                        step="0.01"
-                                                        defaultValue={deal?.mrr ? deal.mrr.toString() : ""}
-                                                        className="block w-full pl-7 pr-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div className="sm:col-span-2">
-                                                <label htmlFor="arr" className="block text-sm font-medium text-dark-slate mb-1.5">
-                                                    ARR
-                                                </label>
-                                                <div className="relative rounded-lg shadow-sm">
-                                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                        <span className="text-gray-500 text-base sm:text-sm">$</span>
-                                                    </div>
-                                                    <input
-                                                        type="number"
-                                                        name="arr"
-                                                        id="arr"
-                                                        step="0.01"
-                                                        defaultValue={deal?.arr ? deal.arr.toString() : ""}
-                                                        className="block w-full pl-7 pr-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
-                                                    />
-                                                </div>
+                                                <select
+                                                    id="businessLineId"
+                                                    name="businessLineId"
+                                                    defaultValue={deal?.businessLineId || "null"}
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
+                                                >
+                                                    <option value="null">Sin línea</option>
+                                                    {businessLines.map((bl) => (
+                                                        <option key={bl.id} value={bl.id}>
+                                                            {bl.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
                                             </div>
                                         </div>
 
