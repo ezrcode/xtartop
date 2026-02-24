@@ -66,6 +66,12 @@ enum PaymentFrequency {
   MENSUAL
 }
 
+enum ProjectRateUnit {
+  POR_HORA
+  POR_PROYECTO
+  PAQUETE
+}
+
 enum MemberRole {
   OWNER
   ADMIN
@@ -197,6 +203,7 @@ model Workspace {
   billingHistory BillingHistory[]
   businessLines  BusinessLine[]
   exchangeRates  ExchangeRate[]
+  projectRateReferences ProjectRateReference[]
 }
 
 model WorkspaceMember {
@@ -669,4 +676,27 @@ model ExchangeRate {
 
   @@index([workspaceId])
   @@index([workspaceId, date])
+}
+
+model ProjectRateReference {
+  id             String          @id @default(cuid())
+  name           String
+  category       String?
+  description    String?         @db.Text
+  unit           ProjectRateUnit @default(POR_HORA)
+  hourlyRate     Decimal?
+  referenceHours Int?
+  fixedPrice     Decimal?
+  notes          String?         @db.Text
+  isActive       Boolean         @default(true)
+
+  workspaceId    String
+  workspace      Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  createdById    String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([workspaceId])
+  @@index([workspaceId, isActive])
 }

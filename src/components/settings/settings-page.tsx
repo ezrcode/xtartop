@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useFormState } from "react-dom";
-import { Save, UserPlus, Mail, Trash2, X, Building2, Users2, FileText, Loader2, Cloud, Settings2, DollarSign } from "lucide-react";
+import { Save, UserPlus, Mail, Trash2, X, Building2, Users2, FileText, Loader2, Cloud, Settings2, DollarSign, BriefcaseBusiness } from "lucide-react";
 import { ImageUpload } from "../ui/image-upload";
 import {
     updateWorkspace,
@@ -19,6 +19,7 @@ import { ClickUpConfigTab } from "./clickup-config-tab";
 import { BillingConfigTab } from "./billing-config-tab";
 import { BusinessLinesSection } from "./business-lines-section";
 import { ExchangeRatesSection } from "./exchange-rates-section";
+import { ProjectRateReferencesSection } from "./project-rate-references-section";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
@@ -79,6 +80,18 @@ interface SettingsPageProps {
     workspaceUsers?: WorkspaceUser[];
     businessLines?: BusinessLine[];
     exchangeRates?: ExchangeRate[];
+    projectRateReferences?: Array<{
+        id: string;
+        name: string;
+        category?: string | null;
+        description?: string | null;
+        unit: "POR_HORA" | "POR_PROYECTO" | "PAQUETE";
+        hourlyRate?: unknown;
+        referenceHours?: number | null;
+        fixedPrice?: unknown;
+        notes?: string | null;
+        isActive: boolean;
+    }>;
 }
 
 function getDefaultContractTemplate(): string {
@@ -169,7 +182,13 @@ function getDefaultContractTemplate(): string {
 
 type Tab = 'workspace' | 'general' | 'exchangeRates' | 'team' | 'contract' | 'integrations';
 
-export function SettingsPage({ workspace, workspaceUsers = [], businessLines = [], exchangeRates = [] }: SettingsPageProps) {
+export function SettingsPage({
+    workspace,
+    workspaceUsers = [],
+    businessLines = [],
+    exchangeRates = [],
+    projectRateReferences = [],
+}: SettingsPageProps) {
     const [activeTab, setActiveTab] = useState<Tab>('workspace');
     const [showInviteForm, setShowInviteForm] = useState(false);
     const [revokingId, setRevokingId] = useState<string | null>(null);
@@ -384,7 +403,12 @@ export function SettingsPage({ workspace, workspaceUsers = [], businessLines = [
                     {/* Tab Content: General (Business Lines, etc.) */}
                     <TabsContent value="general" className="mt-0">
                         <div className="space-y-6">
+                            <div className="flex items-center gap-2 text-sm text-[var(--muted-text)]">
+                                <BriefcaseBusiness size={15} />
+                                <span>Configuraciones comerciales para el equipo de ventas.</span>
+                            </div>
                             <BusinessLinesSection businessLines={businessLines} />
+                            <ProjectRateReferencesSection projectRateReferences={projectRateReferences} />
                         </div>
                     </TabsContent>
 

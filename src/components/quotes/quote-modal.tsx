@@ -32,6 +32,18 @@ interface QuoteModalProps {
         phone?: string | null;
         logoUrl?: string | null;
     };
+    projectRateReferences?: Array<{
+        id: string;
+        name: string;
+        category?: string | null;
+        description?: string | null;
+        unit: "POR_HORA" | "POR_PROYECTO" | "PAQUETE";
+        hourlyRate?: unknown;
+        referenceHours?: number | null;
+        fixedPrice?: unknown;
+        notes?: string | null;
+        isActive: boolean;
+    }>;
 }
 
 export function QuoteModal({
@@ -42,6 +54,7 @@ export function QuoteModal({
     contactName = "",
     quote,
     workspace,
+    projectRateReferences = [],
 }: QuoteModalProps) {
     const isEditMode = !!quote;
     
@@ -117,6 +130,17 @@ export function QuoteModal({
             style: "currency",
             currency: currency === "USD" ? "USD" : "DOP",
         }).format(value);
+    };
+
+    const formatUSD = (value: unknown) => {
+        const n = Number(value);
+        if (!Number.isFinite(n) || n <= 0) return "-";
+        return new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }).format(n);
     };
 
     const handleSave = async () => {
@@ -536,6 +560,50 @@ export function QuoteModal({
                                 </select>
                             </div>
                         </div>
+
+                        {/* Reference catalog for sales */}
+                        {projectRateReferences.length > 0 && (
+                            <div className="rounded-lg border border-nearby-accent/30 bg-nearby-accent/5 p-4">
+                                <h3 className="text-sm font-semibold text-nearby-dark mb-1">
+                                    Referencia comercial (solo guía)
+                                </h3>
+                                <p className="text-xs text-gray-600 mb-3">
+                                    Estos valores son referenciales para apoyar la cotización en texto libre.
+                                </p>
+                                <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                                    {projectRateReferences.filter((r) => r.isActive).map((reference) => {
+                                        const hourlyRate = Number(reference.hourlyRate || 0);
+                                        const hours = Number(reference.referenceHours || 0);
+                                        const estimated = hourlyRate > 0 && hours > 0 ? hourlyRate * hours : null;
+
+                                        return (
+                                            <div key={reference.id} className="rounded-md border border-graphite-gray bg-white p-2.5">
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <p className="text-xs font-semibold text-dark-slate truncate">{reference.name}</p>
+                                                    {reference.category && (
+                                                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600">
+                                                            {reference.category}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <p className="text-[11px] text-gray-600 mt-1">
+                                                    Hora: <span className="font-medium text-dark-slate">{formatUSD(reference.hourlyRate)}</span>
+                                                    {" • "}
+                                                    Horas: <span className="font-medium text-dark-slate">{reference.referenceHours || "-"}</span>
+                                                    {" • "}
+                                                    Fijo: <span className="font-medium text-dark-slate">{formatUSD(reference.fixedPrice)}</span>
+                                                </p>
+                                                {estimated !== null && (
+                                                    <p className="text-[11px] text-nearby-accent font-semibold mt-1">
+                                                        Estimado {hours}h: {formatUSD(estimated)}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Actions */}
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-gray-200">

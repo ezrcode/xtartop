@@ -2,6 +2,7 @@ import { getWorkspaceWithMembers, getUserWorkspaceRole } from "@/actions/workspa
 import { getWorkspaceUsersWithEmail } from "@/actions/billing-config";
 import { getBusinessLines } from "@/actions/business-lines";
 import { getExchangeRates } from "@/actions/exchange-rates";
+import { getProjectRateReferences } from "@/actions/project-rate-references";
 import { SettingsPage } from "@/components/settings/settings-page";
 import { redirect } from "next/navigation";
 
@@ -9,12 +10,13 @@ import { redirect } from "next/navigation";
 export const revalidate = 120;
 
 export default async function Settings() {
-    const [workspace, userRole, workspaceUsers, businessLines, exchangeRates] = await Promise.all([
+    const [workspace, userRole, workspaceUsers, businessLines, exchangeRates, projectRateReferences] = await Promise.all([
         getWorkspaceWithMembers(),
         getUserWorkspaceRole(),
         getWorkspaceUsersWithEmail(),
         getBusinessLines(),
         getExchangeRates(),
+        getProjectRateReferences(),
     ]);
 
     if (!workspace) {
@@ -32,6 +34,7 @@ export default async function Settings() {
             workspaceUsers={workspaceUsers}
             businessLines={businessLines}
             exchangeRates={exchangeRates}
+            projectRateReferences={projectRateReferences}
         />
     );
 }
