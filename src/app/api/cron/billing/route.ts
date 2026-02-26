@@ -24,6 +24,10 @@ import { createProformaPDF, addBusinessDays, DEFAULT_BANK_INFO, type ProformaDat
 import { sendEmail } from "@/lib/email/sender";
 import { put } from "@vercel/blob";
 
+function sanitizeForFileName(value: string): string {
+    return value.replace(/[^a-zA-Z0-9-_]/g, "_");
+}
+
 // Verify cron secret for security
 const CRON_SECRET = process.env.CRON_SECRET;
 
@@ -324,7 +328,35 @@ export async function GET(request: NextRequest) {
                     
                     if (quoteResult.success && quoteResult.data) {
                         admCloudDocId = quoteResult.data.ID;
-                        proformaNumber = quoteResult.data.DocID || proformaNumber;
+                        if (!quoteResult.data.DocID) {
+                            const errorMsg = "ADMCloud no devolvió DocID para la cotización/proforma";
+                            console.error(`${company.name}: ${errorMsg}`);
+
+                            await prisma.billingHistory.create({
+                                data: {
+                                    companyId: company.id,
+                                    workspaceId: workspace.id,
+                                    billingMonth: currentMonth,
+                                    billingYear: currentYear,
+                                    status: "FAILED",
+                                    errorMessage: errorMsg,
+                                    recipients: JSON.stringify(company.contacts.map(c => c.email)),
+                                    subtotal,
+                                    taxAmount,
+                                    totalAmount: total,
+                                },
+                            });
+
+                            results.failed++;
+                            results.details.push({
+                                companyId: company.id,
+                                companyName: company.name,
+                                status: "failed",
+                                error: errorMsg,
+                            });
+                            continue;
+                        }
+                        proformaNumber = quoteResult.data.DocID;
                     } else {
                         // ADMCloud creation failed - this is a critical error for automatic billing
                         const errorMsg = `Error al crear cotización en ADMCloud: ${quoteResult.error || "Error desconocido"}`;
@@ -395,7 +427,8 @@ export async function GET(request: NextRequest) {
                     const pdfBuffer = await renderToBuffer(pdfDocument);
 
                     // Upload PDF to Vercel Blob
-                    const pdfFileName = `proformas/${workspace.id}/${company.id}/${currentYear}-${String(currentMonth).padStart(2, "0")}.pdf`;
+                    const docNumberSafe = sanitizeForFileName(proformaNumber);
+                    const pdfFileName = `proformas/${workspace.id}/${company.id}/${docNumberSafe}.pdf`;
                     const blob = await put(pdfFileName, pdfBuffer, {
                         access: "public",
                         contentType: "application/pdf",
@@ -449,7 +482,7 @@ export async function GET(request: NextRequest) {
                             subject: emailSubject,
                             body: emailBody,
                             attachments: [{
-                                filename: `Proforma_${proformaNumber.replace(/[^a-zA-Z0-9]/g, "_")}.pdf`,
+                                filename: `${docNumberSafe}.pdf`,
                                 path: blob.url,
                             }],
                         });

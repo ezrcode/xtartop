@@ -14,6 +14,10 @@ import { createProformaPDF, addBusinessDays, DEFAULT_BANK_INFO, type ProformaDat
 import { put } from "@vercel/blob";
 import { getCurrentWorkspace } from "@/actions/workspace";
 
+function sanitizeForFileName(value: string): string {
+    return value.replace(/[^a-zA-Z0-9-_]/g, "_");
+}
+
 export async function POST(request: NextRequest) {
     // Verify authentication
     const session = await auth();
@@ -187,7 +191,11 @@ export async function POST(request: NextRequest) {
                 
                 if (quoteResult.success && quoteResult.data) {
                     admCloudDocId = quoteResult.data.ID;
-                    proformaNumber = quoteResult.data.DocID || proformaNumber;
+                    if (!quoteResult.data.DocID) {
+                        admCloudError = "ADMCloud no devolvió DocID para la proforma";
+                    } else {
+                        proformaNumber = quoteResult.data.DocID;
+                    }
                     admCloudCreated = true;
                 } else {
                     admCloudError = quoteResult.error || "Error desconocido al crear cotización";
@@ -196,6 +204,13 @@ export async function POST(request: NextRequest) {
             }
         } else {
             admCloudError = "ADMCloud no está configurado en el workspace";
+        }
+
+        if (!admCloudCreated || admCloudError) {
+            return NextResponse.json({
+                success: false,
+                error: admCloudError || "No fue posible obtener el número de documento desde ADMCloud",
+            }, { status: 400 });
         }
 
         // Generate PDF
@@ -247,8 +262,8 @@ export async function POST(request: NextRequest) {
         }
 
         // Upload PDF to Vercel Blob
-        const timestamp = Date.now();
-        const pdfFileName = `proformas/${workspace.id}/${company.id}/${currentYear}-${String(currentMonth).padStart(2, "0")}-manual-${timestamp}.pdf`;
+        const docNumberSafe = sanitizeForFileName(proformaNumber);
+        const pdfFileName = `proformas/${workspace.id}/${company.id}/${docNumberSafe}.pdf`;
         const blob = await put(pdfFileName, pdfBuffer, {
             access: "public",
             contentType: "application/pdf",
