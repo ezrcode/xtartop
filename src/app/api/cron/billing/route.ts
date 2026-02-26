@@ -28,6 +28,27 @@ function sanitizeForFileName(value: string): string {
     return value.replace(/[^a-zA-Z0-9-_]/g, "_");
 }
 
+function extractAdmCloudDocNumber(payload: unknown): string | null {
+    if (!payload || typeof payload !== "object") return null;
+    const data = payload as Record<string, unknown>;
+    const candidates = [
+        data.DocID,
+        data.DocId,
+        data.docID,
+        data.docId,
+        data.TransactionNumber,
+        data.DocumentNumber,
+        data.DocumentNo,
+    ];
+
+    for (const candidate of candidates) {
+        if (typeof candidate === "string" && candidate.trim()) {
+            return candidate.trim();
+        }
+    }
+    return null;
+}
+
 // Verify cron secret for security
 const CRON_SECRET = process.env.CRON_SECRET;
 
@@ -328,35 +349,73 @@ export async function GET(request: NextRequest) {
                     
                     if (quoteResult.success && quoteResult.data) {
                         admCloudDocId = quoteResult.data.ID;
-                        if (!quoteResult.data.DocID) {
-                            const errorMsg = "ADMCloud no devolvió DocID para la cotización/proforma";
-                            console.error(`${company.name}: ${errorMsg}`);
+                        const directDocNumber = extractAdmCloudDocNumber(quoteResult.data);
+                        if (directDocNumber) {
+                            proformaNumber = directDocNumber;
+                        } else if (admCloudDocId) {
+                            // Fallback: some create responses may omit DocID, request quote details by ID.
+                            const quoteDetail = await admCloudClient.getQuote(admCloudDocId);
+                            if (quoteDetail.success && quoteDetail.data) {
+                                const detailDocNumber = extractAdmCloudDocNumber(quoteDetail.data);
+                                if (detailDocNumber) {
+                                    proformaNumber = detailDocNumber;
+                                } else {
+                                    const errorMsg = "ADMCloud creó la cotización/proforma pero no devolvió número de documento (DocID)";
+                                    console.error(`${company.name}: ${errorMsg}`);
 
-                            await prisma.billingHistory.create({
-                                data: {
+                                    await prisma.billingHistory.create({
+                                        data: {
+                                            companyId: company.id,
+                                            workspaceId: workspace.id,
+                                            billingMonth: currentMonth,
+                                            billingYear: currentYear,
+                                            status: "FAILED",
+                                            errorMessage: errorMsg,
+                                            recipients: JSON.stringify(company.contacts.map(c => c.email)),
+                                            subtotal,
+                                            taxAmount,
+                                            totalAmount: total,
+                                        },
+                                    });
+
+                                    results.failed++;
+                                    results.details.push({
+                                        companyId: company.id,
+                                        companyName: company.name,
+                                        status: "failed",
+                                        error: errorMsg,
+                                    });
+                                    continue;
+                                }
+                            } else {
+                                const errorMsg = quoteDetail.error || "No fue posible recuperar DocID desde ADMCloud";
+                                console.error(`${company.name}: ${errorMsg}`);
+
+                                await prisma.billingHistory.create({
+                                    data: {
+                                        companyId: company.id,
+                                        workspaceId: workspace.id,
+                                        billingMonth: currentMonth,
+                                        billingYear: currentYear,
+                                        status: "FAILED",
+                                        errorMessage: errorMsg,
+                                        recipients: JSON.stringify(company.contacts.map(c => c.email)),
+                                        subtotal,
+                                        taxAmount,
+                                        totalAmount: total,
+                                    },
+                                });
+
+                                results.failed++;
+                                results.details.push({
                                     companyId: company.id,
-                                    workspaceId: workspace.id,
-                                    billingMonth: currentMonth,
-                                    billingYear: currentYear,
-                                    status: "FAILED",
-                                    errorMessage: errorMsg,
-                                    recipients: JSON.stringify(company.contacts.map(c => c.email)),
-                                    subtotal,
-                                    taxAmount,
-                                    totalAmount: total,
-                                },
-                            });
-
-                            results.failed++;
-                            results.details.push({
-                                companyId: company.id,
-                                companyName: company.name,
-                                status: "failed",
-                                error: errorMsg,
-                            });
-                            continue;
+                                    companyName: company.name,
+                                    status: "failed",
+                                    error: errorMsg,
+                                });
+                                continue;
+                            }
                         }
-                        proformaNumber = quoteResult.data.DocID;
                     } else {
                         // ADMCloud creation failed - this is a critical error for automatic billing
                         const errorMsg = `Error al crear cotización en ADMCloud: ${quoteResult.error || "Error desconocido"}`;
