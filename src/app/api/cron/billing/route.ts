@@ -28,25 +28,63 @@ function sanitizeForFileName(value: string): string {
     return value.replace(/[^a-zA-Z0-9-_]/g, "_");
 }
 
-function extractAdmCloudDocNumber(payload: unknown): string | null {
-    if (!payload || typeof payload !== "object") return null;
-    const data = payload as Record<string, unknown>;
-    const candidates = [
-        data.DocID,
-        data.DocId,
-        data.docID,
-        data.docId,
-        data.TransactionNumber,
-        data.DocumentNumber,
-        data.DocumentNo,
-    ];
+function findStringFieldDeep(payload: unknown, keys: string[], depth = 0): string | null {
+    if (depth > 3 || payload == null) return null;
 
-    for (const candidate of candidates) {
-        if (typeof candidate === "string" && candidate.trim()) {
-            return candidate.trim();
+    if (typeof payload === "string") {
+        return payload.trim() ? payload.trim() : null;
+    }
+
+    if (Array.isArray(payload)) {
+        for (const item of payload) {
+            const found = findStringFieldDeep(item, keys, depth + 1);
+            if (found) return found;
+        }
+        return null;
+    }
+
+    if (typeof payload !== "object") return null;
+    const data = payload as Record<string, unknown>;
+
+    for (const key of keys) {
+        const value = data[key];
+        if (typeof value === "string" && value.trim()) {
+            return value.trim();
         }
     }
+
+    for (const value of Object.values(data)) {
+        if (value && (typeof value === "object" || Array.isArray(value))) {
+            const found = findStringFieldDeep(value, keys, depth + 1);
+            if (found) return found;
+        }
+    }
+
     return null;
+}
+
+function extractAdmCloudDocNumber(payload: unknown): string | null {
+    return findStringFieldDeep(payload, [
+        "DocID",
+        "DocId",
+        "docID",
+        "docId",
+        "TransactionNumber",
+        "DocumentNumber",
+        "DocumentNo",
+        "Number",
+    ]);
+}
+
+function extractAdmCloudQuoteId(payload: unknown): string | null {
+    return findStringFieldDeep(payload, [
+        "ID",
+        "Id",
+        "id",
+        "QuoteID",
+        "QuoteId",
+        "quoteId",
+    ]);
 }
 
 // Verify cron secret for security
@@ -348,7 +386,7 @@ export async function GET(request: NextRequest) {
                     const quoteResult = await admCloudClient.createQuote(quoteRequest);
                     
                     if (quoteResult.success && quoteResult.data) {
-                        admCloudDocId = quoteResult.data.ID;
+                        admCloudDocId = extractAdmCloudQuoteId(quoteResult.data);
                         const directDocNumber = extractAdmCloudDocNumber(quoteResult.data);
                         if (directDocNumber) {
                             proformaNumber = directDocNumber;
@@ -415,6 +453,33 @@ export async function GET(request: NextRequest) {
                                 });
                                 continue;
                             }
+                        } else {
+                            const errorMsg = "ADMCloud no devolvió ID ni DocID para la cotización/proforma";
+                            console.error(`${company.name}: ${errorMsg}`);
+
+                            await prisma.billingHistory.create({
+                                data: {
+                                    companyId: company.id,
+                                    workspaceId: workspace.id,
+                                    billingMonth: currentMonth,
+                                    billingYear: currentYear,
+                                    status: "FAILED",
+                                    errorMessage: errorMsg,
+                                    recipients: JSON.stringify(company.contacts.map(c => c.email)),
+                                    subtotal,
+                                    taxAmount,
+                                    totalAmount: total,
+                                },
+                            });
+
+                            results.failed++;
+                            results.details.push({
+                                companyId: company.id,
+                                companyName: company.name,
+                                status: "failed",
+                                error: errorMsg,
+                            });
+                            continue;
                         }
                     } else {
                         // ADMCloud creation failed - this is a critical error for automatic billing
