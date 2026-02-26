@@ -28,43 +28,52 @@ function sanitizeForFileName(value: string): string {
     return value.replace(/[^a-zA-Z0-9-_]/g, "_");
 }
 
-function findStringFieldDeep(payload: unknown, keys: string[], depth = 0): string | null {
-    if (depth > 3 || payload == null) return null;
+function collectStringFieldsDeep(payload: unknown, keys: string[], depth = 0): string[] {
+    if (depth > 3 || payload == null) return [];
+
+    const values: string[] = [];
 
     if (typeof payload === "string") {
-        return payload.trim() ? payload.trim() : null;
+        const v = payload.trim();
+        return v ? [v] : [];
     }
 
     if (Array.isArray(payload)) {
         for (const item of payload) {
-            const found = findStringFieldDeep(item, keys, depth + 1);
-            if (found) return found;
+            values.push(...collectStringFieldsDeep(item, keys, depth + 1));
         }
-        return null;
+        return values;
     }
 
-    if (typeof payload !== "object") return null;
+    if (typeof payload !== "object") return [];
     const data = payload as Record<string, unknown>;
 
     for (const key of keys) {
         const value = data[key];
         if (typeof value === "string" && value.trim()) {
-            return value.trim();
+            values.push(value.trim());
         }
     }
 
     for (const value of Object.values(data)) {
         if (value && (typeof value === "object" || Array.isArray(value))) {
-            const found = findStringFieldDeep(value, keys, depth + 1);
-            if (found) return found;
+            values.push(...collectStringFieldsDeep(value, keys, depth + 1));
         }
     }
 
-    return null;
+    return values;
+}
+
+function isUuidLike(value: string): boolean {
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
+function isValidAdmCloudDocNumber(value: string): boolean {
+    return /^PRF/i.test(value);
 }
 
 function extractAdmCloudDocNumber(payload: unknown): string | null {
-    return findStringFieldDeep(payload, [
+    const rawCandidates = collectStringFieldsDeep(payload, [
         "DocID",
         "DocId",
         "docID",
@@ -74,10 +83,18 @@ function extractAdmCloudDocNumber(payload: unknown): string | null {
         "DocumentNo",
         "Number",
     ]);
+
+    const unique = [...new Set(rawCandidates.map((c) => c.trim()).filter(Boolean))];
+    const withoutUuid = unique.filter((c) => !isUuidLike(c));
+
+    const preferredPrf = withoutUuid.find((c) => isValidAdmCloudDocNumber(c));
+    if (preferredPrf) return preferredPrf;
+
+    return null;
 }
 
 function extractAdmCloudQuoteId(payload: unknown): string | null {
-    return findStringFieldDeep(payload, [
+    const candidates = collectStringFieldsDeep(payload, [
         "ID",
         "Id",
         "id",
@@ -85,6 +102,7 @@ function extractAdmCloudQuoteId(payload: unknown): string | null {
         "QuoteId",
         "quoteId",
     ]);
+    return candidates.length > 0 ? candidates[0] : null;
 }
 
 // Verify cron secret for security
@@ -398,7 +416,7 @@ export async function GET(request: NextRequest) {
                                 if (detailDocNumber) {
                                     proformaNumber = detailDocNumber;
                                 } else {
-                                    const errorMsg = "ADMCloud creó la cotización/proforma pero no devolvió número de documento (DocID)";
+                                    const errorMsg = "ADMCloud creó la cotización/proforma pero no devolvió un número de documento válido (PRF...)";
                                     console.error(`${company.name}: ${errorMsg}`);
 
                                     await prisma.billingHistory.create({
@@ -426,7 +444,7 @@ export async function GET(request: NextRequest) {
                                     continue;
                                 }
                             } else {
-                                const errorMsg = quoteDetail.error || "No fue posible recuperar DocID desde ADMCloud";
+                                const errorMsg = quoteDetail.error || "No fue posible recuperar un número de documento válido (PRF...) desde ADMCloud";
                                 console.error(`${company.name}: ${errorMsg}`);
 
                                 await prisma.billingHistory.create({
@@ -454,7 +472,7 @@ export async function GET(request: NextRequest) {
                                 continue;
                             }
                         } else {
-                            const errorMsg = "ADMCloud no devolvió ID ni DocID para la cotización/proforma";
+                            const errorMsg = "ADMCloud no devolvió un número de documento válido (PRF...) para la cotización/proforma";
                             console.error(`${company.name}: ${errorMsg}`);
 
                             await prisma.billingHistory.create({
