@@ -11,6 +11,7 @@ interface Contact {
     fullName: string;
     email: string;
     mobile: string | null;
+    receivesInvoices: boolean;
     status: ContactStatus;
     createdAt: Date;
     company: {
@@ -90,6 +91,24 @@ export function ContactsTable({ contacts, initialPreferences, itemsPerPage = 10 
             defaultVisible: false,
             render: (contact) => (
                 <span className="text-sm text-dark-slate">{contact.mobile || "-"}</span>
+            ),
+        },
+        {
+            key: "receivesInvoices",
+            header: "Recibe facturas",
+            sortable: true,
+            hideable: true,
+            defaultVisible: false,
+            render: (contact) => (
+                <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        contact.receivesInvoices
+                            ? "bg-success-green/10 text-success-green"
+                            : "bg-gray-100 text-gray-700"
+                    }`}
+                >
+                    {contact.receivesInvoices ? "Sí" : "No"}
+                </span>
             ),
         },
         {
