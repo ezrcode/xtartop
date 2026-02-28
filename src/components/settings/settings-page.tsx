@@ -78,6 +78,12 @@ type WorkspaceUser = {
 interface SettingsPageProps {
     workspace: WorkspaceWithDetails;
     workspaceUsers?: WorkspaceUser[];
+    billingSenderEmailConfig?: {
+        emailConfigured: boolean;
+        emailFromAddress: string | null;
+        emailFromName: string | null;
+        emailPassword: string | null;
+    } | null;
     businessLines?: BusinessLine[];
     exchangeRates?: ExchangeRate[];
     projectRateReferences?: Array<{
@@ -185,6 +191,7 @@ type Tab = 'workspace' | 'general' | 'exchangeRates' | 'team' | 'contract' | 'in
 export function SettingsPage({
     workspace,
     workspaceUsers = [],
+    billingSenderEmailConfig = null,
     businessLines = [],
     exchangeRates = [],
     projectRateReferences = [],
@@ -713,6 +720,7 @@ export function SettingsPage({
                                 fromUserId: workspace.billingFromUserId || null,
                             }}
                             availableUsers={workspaceUsers}
+                            senderEmailConfig={billingSenderEmailConfig}
                         />
                         <AdmCloudConfigTab 
                             currentConfig={{

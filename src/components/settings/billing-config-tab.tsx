@@ -1,13 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import { Save, Loader2, Receipt, Mail, Info } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Save, Loader2, Receipt, Mail, Info, CheckCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Badge } from "../ui/badge";
-import { updateBillingConfig } from "@/actions/billing-config";
+import {
+    updateBillingConfig,
+    getWorkspaceUserEmailConfig,
+    updateWorkspaceUserEmailConfig,
+    testWorkspaceUserEmailConfig,
+} from "@/actions/billing-config";
 
 interface BillingConfigProps {
     currentConfig: {
@@ -24,6 +29,12 @@ interface BillingConfigProps {
         email: string;
         emailConfigured: boolean;
     }[];
+    senderEmailConfig?: {
+        emailConfigured: boolean;
+        emailFromAddress: string | null;
+        emailFromName: string | null;
+        emailPassword: string | null;
+    } | null;
 }
 
 const defaultEmailSubject = "Proforma mensual - {{EMPRESA}} - {{MES}} {{AÑO}}";
@@ -43,9 +54,9 @@ Cualquier consulta, no dude en contactarnos.
 Saludos cordiales,
 {{PROVEEDOR_NOMBRE}}`;
 
-export function BillingConfigTab({ currentConfig, availableUsers }: BillingConfigProps) {
+export function BillingConfigTab({ currentConfig, availableUsers, senderEmailConfig = null }: BillingConfigProps) {
     const [saving, setSaving] = useState(false);
-    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
     const [enabled, setEnabled] = useState(currentConfig.enabled);
     const [emailsCC, setEmailsCC] = useState(currentConfig.emailsCC || "");
@@ -54,7 +65,43 @@ export function BillingConfigTab({ currentConfig, availableUsers }: BillingConfi
     const [emailBody, setEmailBody] = useState(currentConfig.emailBody || defaultEmailBody);
     const [fromUserId, setFromUserId] = useState(currentConfig.fromUserId || "");
 
-    const usersWithEmail = availableUsers.filter(u => u.emailConfigured);
+    const [senderAddress, setSenderAddress] = useState(senderEmailConfig?.emailFromAddress || "");
+    const [senderName, setSenderName] = useState(senderEmailConfig?.emailFromName || "");
+    const [senderPassword, setSenderPassword] = useState(senderEmailConfig?.emailPassword || "");
+    const [senderConfigured, setSenderConfigured] = useState(senderEmailConfig?.emailConfigured || false);
+    const [senderLoading, setSenderLoading] = useState(false);
+    const [senderSaving, setSenderSaving] = useState(false);
+    const [senderTesting, setSenderTesting] = useState(false);
+    const [senderMessage, setSenderMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+    useEffect(() => {
+        async function loadSenderConfig() {
+            if (!fromUserId) {
+                setSenderAddress("");
+                setSenderName("");
+                setSenderPassword("");
+                setSenderConfigured(false);
+                return;
+            }
+
+            setSenderLoading(true);
+            setSenderMessage(null);
+
+            try {
+                const config = await getWorkspaceUserEmailConfig(fromUserId);
+                setSenderAddress(config?.emailFromAddress || "");
+                setSenderName(config?.emailFromName || "");
+                setSenderPassword(config?.emailPassword || "");
+                setSenderConfigured(config?.emailConfigured || false);
+            } catch (error) {
+                setSenderMessage({ type: "error", text: "No fue posible cargar la configuración del remitente" });
+            } finally {
+                setSenderLoading(false);
+            }
+        }
+
+        loadSenderConfig();
+    }, [fromUserId]);
 
     const handleSave = async () => {
         setSaving(true);
@@ -71,15 +118,70 @@ export function BillingConfigTab({ currentConfig, availableUsers }: BillingConfi
             });
 
             if (result.error) {
-                setMessage({ type: 'error', text: result.error });
+                setMessage({ type: "error", text: result.error });
             } else {
-                setMessage({ type: 'success', text: 'Configuración guardada exitosamente' });
+                setMessage({ type: "success", text: "Configuración guardada exitosamente" });
             }
         } catch (err) {
-            setMessage({ type: 'error', text: 'Error al guardar la configuración' });
+            setMessage({ type: "error", text: "Error al guardar la configuración" });
         }
 
         setSaving(false);
+    };
+
+    const handleSaveSenderConfig = async () => {
+        if (!fromUserId) {
+            setSenderMessage({ type: "error", text: "Selecciona un usuario remitente" });
+            return;
+        }
+        if (!senderAddress || !senderName || !senderPassword) {
+            setSenderMessage({ type: "error", text: "Completa correo, nombre y contraseña de aplicación" });
+            return;
+        }
+
+        setSenderSaving(true);
+        setSenderMessage(null);
+
+        try {
+            const result = await updateWorkspaceUserEmailConfig({
+                userId: fromUserId,
+                emailFromAddress: senderAddress,
+                emailFromName: senderName,
+                emailPassword: senderPassword,
+            });
+
+            if (result.error) {
+                setSenderMessage({ type: "error", text: result.error });
+            } else {
+                setSenderConfigured(true);
+                setSenderMessage({ type: "success", text: "Correo remitente guardado correctamente" });
+            }
+        } catch {
+            setSenderMessage({ type: "error", text: "No fue posible guardar el correo remitente" });
+        } finally {
+            setSenderSaving(false);
+        }
+    };
+
+    const handleTestSender = async () => {
+        if (!fromUserId) {
+            setSenderMessage({ type: "error", text: "Selecciona un usuario remitente para probar" });
+            return;
+        }
+
+        setSenderTesting(true);
+        setSenderMessage(null);
+        try {
+            const result = await testWorkspaceUserEmailConfig(fromUserId);
+            setSenderMessage({
+                type: result.success ? "success" : "error",
+                text: result.message,
+            });
+        } catch {
+            setSenderMessage({ type: "error", text: "No fue posible enviar el correo de prueba" });
+        } finally {
+            setSenderTesting(false);
+        }
     };
 
     return (
@@ -99,7 +201,7 @@ export function BillingConfigTab({ currentConfig, availableUsers }: BillingConfi
             </CardHeader>
             <CardContent className="space-y-6">
                 {message && (
-                    <div className={`p-4 rounded-lg text-sm ${message.type === 'success' ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}`}>
+                    <div className={`p-4 rounded-lg text-sm ${message.type === "success" ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}`}>
                         {message.text}
                     </div>
                 )}
@@ -132,7 +234,7 @@ export function BillingConfigTab({ currentConfig, availableUsers }: BillingConfi
                     <>
                         {/* From User Selection */}
                         <div className="space-y-2">
-                            <Label htmlFor="fromUserId">Usuario remitente</Label>
+                            <Label htmlFor="fromUserId">Usuario remitente para facturación</Label>
                             <select
                                 id="fromUserId"
                                 value={fromUserId}
@@ -140,22 +242,132 @@ export function BillingConfigTab({ currentConfig, availableUsers }: BillingConfi
                                 className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                             >
                                 <option value="">Seleccionar usuario...</option>
-                                {usersWithEmail.map((user) => (
+                                {availableUsers.map((user) => (
                                     <option key={user.id} value={user.id}>
                                         {user.name || user.email} ({user.email})
                                     </option>
                                 ))}
                             </select>
                             <p className="text-xs text-[var(--muted-text)]">
-                                Solo se muestran usuarios con email configurado. Los emails se enviarán desde su cuenta.
+                                Selecciona el usuario cuyas credenciales de Gmail se usarán para el envío automático.
                             </p>
-                            {usersWithEmail.length === 0 && (
+                            {availableUsers.length === 0 && (
                                 <div className="flex items-center gap-2 p-3 bg-yellow-50 text-yellow-800 rounded-lg text-sm">
                                     <Info size={16} />
-                                    <span>No hay usuarios con email configurado. Ve a Mi Perfil → Email para configurar.</span>
+                                    <span>No hay usuarios disponibles en este workspace.</span>
                                 </div>
                             )}
                         </div>
+
+                        {/* Sender email config section */}
+                        {fromUserId && (
+                            <div className="space-y-4 p-4 bg-[var(--hover-bg)] rounded-xl border border-[var(--card-border)]">
+                                <div className="flex items-center justify-between gap-3">
+                                    <div>
+                                        <p className="text-sm font-medium text-[var(--foreground)]">
+                                            Correo de salida de facturación
+                                        </p>
+                                        <p className="text-xs text-[var(--muted-text)]">
+                                            Configúralo igual que en Mi Perfil → Email (Gmail + contraseña de aplicación).
+                                        </p>
+                                    </div>
+                                    {senderConfigured && (
+                                        <Badge variant="success" className="w-fit">
+                                            <CheckCircle size={12} className="mr-1" />
+                                            Configurado
+                                        </Badge>
+                                    )}
+                                </div>
+
+                                {senderMessage && (
+                                    <div className={`p-3 rounded-lg text-sm ${senderMessage.type === "success" ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}`}>
+                                        {senderMessage.text}
+                                    </div>
+                                )}
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="billingSenderAddress">Email de Gmail</Label>
+                                    <Input
+                                        id="billingSenderAddress"
+                                        type="email"
+                                        value={senderAddress}
+                                        onChange={(e) => setSenderAddress(e.target.value)}
+                                        placeholder="facturacion@empresa.com"
+                                        disabled={senderLoading}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="billingSenderName">Nombre para mostrar</Label>
+                                    <Input
+                                        id="billingSenderName"
+                                        type="text"
+                                        value={senderName}
+                                        onChange={(e) => setSenderName(e.target.value)}
+                                        placeholder="Facturación Mi Empresa"
+                                        disabled={senderLoading}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="billingSenderPassword">Contraseña de aplicación</Label>
+                                    <Input
+                                        id="billingSenderPassword"
+                                        type="password"
+                                        value={senderPassword}
+                                        onChange={(e) => setSenderPassword(e.target.value)}
+                                        placeholder="•••• •••• •••• ••••"
+                                        className="font-mono"
+                                        disabled={senderLoading}
+                                    />
+                                    <p className="text-xs text-[var(--muted-text)]">
+                                        Genera una en{" "}
+                                        <a
+                                            href="https://myaccount.google.com/apppasswords"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-nearby-accent hover:underline"
+                                        >
+                                            myaccount.google.com/apppasswords
+                                        </a>
+                                    </p>
+                                </div>
+
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <Button onClick={handleSaveSenderConfig} disabled={senderSaving || senderLoading} className="w-full sm:w-auto">
+                                        {senderSaving ? (
+                                            <>
+                                                <Loader2 size={16} className="animate-spin" />
+                                                Guardando...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Mail size={16} />
+                                                Guardar correo remitente
+                                            </>
+                                        )}
+                                    </Button>
+                                    <Button
+                                        variant="secondary"
+                                        onClick={handleTestSender}
+                                        disabled={senderTesting || senderLoading || !senderConfigured}
+                                        className="w-full sm:w-auto"
+                                    >
+                                        {senderTesting ? (
+                                            <>
+                                                <Loader2 size={16} className="animate-spin" />
+                                                Probando...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Mail size={16} />
+                                                Probar envío
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
 
                         {/* CC Emails */}
                         <div className="space-y-2">
