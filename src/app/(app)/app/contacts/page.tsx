@@ -9,11 +9,17 @@ import { Plus, Users } from "lucide-react";
 export const revalidate = 30;
 
 export default async function ContactsPage() {
-    const [contacts, preferences, itemsPerPage] = await Promise.all([
-        getContacts(),
-        getTablePreferences("contacts"),
-        getUserItemsPerPage(),
-    ]);
+    let contacts, preferences, itemsPerPage;
+    try {
+        [contacts, preferences, itemsPerPage] = await Promise.all([
+            getContacts(),
+            getTablePreferences("contacts"),
+            getUserItemsPerPage(),
+        ]);
+    } catch (error) {
+        console.error("[CONTACTS PAGE] Error fetching data:", error);
+        throw error;
+    }
 
     return (
         <div className="min-h-screen bg-[var(--surface-0)] py-6 sm:py-8">
