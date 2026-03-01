@@ -7,19 +7,40 @@ import Link from "next/link";
 import { Plus, Users } from "lucide-react";
 
 export const revalidate = 30;
+export const dynamic = "force-dynamic";
 
 export default async function ContactsPage() {
-    let contacts, preferences, itemsPerPage;
+    console.log("[CONTACTS] Starting page render...");
+    
+    let contacts: Awaited<ReturnType<typeof getContacts>> = [];
+    let preferences: Awaited<ReturnType<typeof getTablePreferences>> = null;
+    let itemsPerPage: number = 10;
+
     try {
-        [contacts, preferences, itemsPerPage] = await Promise.all([
-            getContacts(),
-            getTablePreferences("contacts"),
-            getUserItemsPerPage(),
-        ]);
+        console.log("[CONTACTS] Fetching contacts...");
+        contacts = await getContacts();
+        console.log("[CONTACTS] Got", contacts.length, "contacts");
     } catch (error) {
-        console.error("[CONTACTS PAGE] Error fetching data:", error);
-        throw error;
+        console.error("[CONTACTS] Error fetching contacts:", error);
     }
+
+    try {
+        console.log("[CONTACTS] Fetching preferences...");
+        preferences = await getTablePreferences("contacts");
+        console.log("[CONTACTS] Got preferences:", !!preferences);
+    } catch (error) {
+        console.error("[CONTACTS] Error fetching preferences:", error);
+    }
+
+    try {
+        console.log("[CONTACTS] Fetching itemsPerPage...");
+        itemsPerPage = await getUserItemsPerPage();
+        console.log("[CONTACTS] Got itemsPerPage:", itemsPerPage);
+    } catch (error) {
+        console.error("[CONTACTS] Error fetching itemsPerPage:", error);
+    }
+
+    console.log("[CONTACTS] Rendering JSX...");
 
     return (
         <div className="min-h-screen bg-[var(--surface-0)] py-6 sm:py-8">
