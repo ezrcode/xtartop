@@ -107,6 +107,22 @@ function extractAdmCloudQuoteId(payload: unknown): string | null {
 
 // Verify cron secret for security
 const CRON_SECRET = process.env.CRON_SECRET;
+const BILLING_TIMEZONE = "America/Santo_Domingo";
+
+function getDatePartsInTimeZone(date: Date, timeZone: string): { day: number; month: number; year: number } {
+    const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone,
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+    }).formatToParts(date);
+
+    const day = Number(parts.find((p) => p.type === "day")?.value ?? "0");
+    const month = Number(parts.find((p) => p.type === "month")?.value ?? "0");
+    const year = Number(parts.find((p) => p.type === "year")?.value ?? "0");
+
+    return { day, month, year };
+}
 
 export async function GET(request: NextRequest) {
     // Verify authorization
@@ -116,9 +132,10 @@ export async function GET(request: NextRequest) {
     }
 
     const today = new Date();
-    const currentDay = today.getDate();
-    const currentMonth = today.getMonth() + 1;
-    const currentYear = today.getFullYear();
+    const { day: currentDay, month: currentMonth, year: currentYear } = getDatePartsInTimeZone(
+        today,
+        BILLING_TIMEZONE
+    );
 
     const results: {
         processed: number;
