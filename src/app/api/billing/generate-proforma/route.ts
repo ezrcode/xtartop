@@ -8,14 +8,59 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { createAdmCloudClient, type AdmCloudQuoteRequest } from "@/lib/admcloud/client";
+import { createAdmCloudClient, type AdmCloudPaymentTerm, type AdmCloudQuoteRequest } from "@/lib/admcloud/client";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { createProformaPDF, addBusinessDays, DEFAULT_BANK_INFO, type ProformaData } from "@/lib/billing/pdf-generator";
 import { put } from "@vercel/blob";
 import { getCurrentWorkspace } from "@/actions/workspace";
 
 function sanitizeForFileName(value: string): string {
-    return value.replace(/[^a-zA-Z0-9-_]/g, "_");
+    return value
+        .replace(/[\\/:*?"<>|]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function getBillingPeriodLabel(month: number, year: number): string {
+    return `${String(month).padStart(2, "0")}${year}`;
+}
+
+function buildPdfBaseName(proformaNumber: string, companyShortName: string, month: number, year: number): string {
+    return sanitizeForFileName(`${proformaNumber} ${companyShortName} ${getBillingPeriodLabel(month, year)}`);
+}
+
+function normalizeText(value: string): string {
+    return value
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+}
+
+function resolvePaymentTermConfig(term: Pick<AdmCloudPaymentTerm, "Name" | "Description" | "Days"> | null): {
+    days: number;
+    businessDays: boolean;
+} | null {
+    if (!term) return null;
+
+    const fromDaysField = typeof term.Days === "number" && Number.isFinite(term.Days) && term.Days > 0
+        ? Math.round(term.Days)
+        : null;
+
+    const joinedText = normalizeText(`${term.Name || ""} ${term.Description || ""}`);
+    const fromText = joinedText.match(/(\d{1,3})\s*(dia|dias|day|days)\b/);
+    const parsedDays = fromText ? Number(fromText[1]) : null;
+
+    const days = fromDaysField || parsedDays;
+    if (!days || days <= 0) return null;
+
+    const businessDays = /(habil|habiles|laboral|laborales|business)/.test(joinedText);
+    return { days, businessDays };
+}
+
+function addCalendarDays(date: Date, days: number): Date {
+    const result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
 }
 
 function collectStringFieldsDeep(payload: unknown, keys: string[], depth = 0): string[] {
@@ -207,6 +252,11 @@ export async function POST(request: NextRequest) {
         let admCloudCreated = false;
         let admCloudError: string | null = null;
         let proformaNumber = `PRO-${currentYear}${String(currentMonth).padStart(2, "0")}-${company.id.slice(-6)}-M`;
+        let paymentTermConfig = resolvePaymentTermConfig(
+            workspace.admCloudDefaultPaymentTermName
+                ? { Name: workspace.admCloudDefaultPaymentTermName, Description: undefined, Days: undefined }
+                : null
+        );
 
         if (admCloudEnabled) {
             if (!company.admCloudRelationshipId) {
@@ -219,6 +269,19 @@ export async function POST(request: NextRequest) {
                     company: workspace.admCloudCompany || "",
                     role: workspace.admCloudRole || "Administradores",
                 });
+
+                if (workspace.admCloudDefaultPaymentTermId) {
+                    const paymentTermsResult = await admCloudClient.getPaymentTerms();
+                    if (paymentTermsResult.success && paymentTermsResult.data) {
+                        const selectedTerm = paymentTermsResult.data.find(
+                            (term) => term.ID === workspace.admCloudDefaultPaymentTermId
+                        );
+                        const resolvedTerm = resolvePaymentTermConfig(selectedTerm || null);
+                        if (resolvedTerm) {
+                            paymentTermConfig = resolvedTerm;
+                        }
+                    }
+                }
 
                 // Obtener datos del cliente de ADMCloud (direcciones y contactos)
                 const customerResult = await admCloudClient.getCustomer(company.admCloudRelationshipId);
@@ -304,11 +367,17 @@ export async function POST(request: NextRequest) {
             }, { status: 400 });
         }
 
+        const expirationDate = paymentTermConfig
+            ? paymentTermConfig.businessDays
+                ? addBusinessDays(today, paymentTermConfig.days)
+                : addCalendarDays(today, paymentTermConfig.days)
+            : addBusinessDays(today, 30);
+
         // Generate PDF
         const proformaData: ProformaData = {
             documentNumber: proformaNumber,
             documentDate: today,
-            expirationDate: addBusinessDays(today, 30),
+            expirationDate,
             currency: "USD",
             
             providerName: workspace.legalName || workspace.name,
@@ -353,8 +422,8 @@ export async function POST(request: NextRequest) {
         }
 
         // Upload PDF to Vercel Blob
-        const docNumberSafe = sanitizeForFileName(proformaNumber);
-        const pdfFileName = `proformas/${workspace.id}/${company.id}/${docNumberSafe}.pdf`;
+        const pdfBaseName = buildPdfBaseName(proformaNumber, company.name, currentMonth, currentYear);
+        const pdfFileName = `proformas/${workspace.id}/${company.id}/${pdfBaseName}.pdf`;
         const blob = await put(pdfFileName, pdfBuffer, {
             access: "public",
             contentType: "application/pdf",
