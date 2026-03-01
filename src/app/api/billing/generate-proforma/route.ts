@@ -246,27 +246,35 @@ export async function POST(request: NextRequest) {
         const activeProjects = company.projects.length;
         const activeUsers = company.clientUsers.length;
 
-        const calculatedItems = billing.items.map((item) => {
-            let quantity = item.manualQuantity || 0;
-            
-            if (item.countType === "ACTIVE_PROJECTS") {
-                quantity = activeProjects;
-            } else if (item.countType === "ACTIVE_USERS") {
-                quantity = activeUsers;
-            } else if (item.countType === "CALCULATED") {
-                const base = item.calculatedBase === "USERS" 
-                    ? activeUsers 
-                    : activeProjects;
-                const subtract = item.calculatedSubtract || 0;
-                quantity = Math.max(0, base - subtract);
-            }
+        const calculatedItems = billing.items
+            .map((item) => {
+                let quantity = item.manualQuantity || 0;
+                
+                if (item.countType === "ACTIVE_PROJECTS") {
+                    quantity = activeProjects;
+                } else if (item.countType === "ACTIVE_USERS") {
+                    quantity = activeUsers;
+                } else if (item.countType === "CALCULATED") {
+                    const base = item.calculatedBase === "USERS" 
+                        ? activeUsers 
+                        : activeProjects;
+                    const subtract = item.calculatedSubtract || 0;
+                    quantity = Math.max(0, base - subtract);
+                }
 
-            return {
-                ...item,
-                calculatedQuantity: quantity,
-                subtotal: Number(item.price) * quantity,
-            };
-        });
+                return {
+                    ...item,
+                    calculatedQuantity: quantity,
+                    subtotal: Number(item.price) * quantity,
+                };
+            })
+            .filter((item) => item.calculatedQuantity > 0);
+
+        if (calculatedItems.length === 0) {
+            return NextResponse.json({
+                error: "No hay líneas facturables: todos los ítems tienen cantidad 0",
+            }, { status: 400 });
+        }
 
         const subtotal = calculatedItems.reduce((sum, item) => sum + item.subtotal, 0);
         const taxAmount = 0;
