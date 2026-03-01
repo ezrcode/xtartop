@@ -1,7 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Save, Loader2, Receipt, Mail, Info, CheckCircle } from "lucide-react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import {
+    Save,
+    Loader2,
+    Receipt,
+    Mail,
+    Info,
+    CheckCircle,
+    Bold,
+    Italic,
+    Underline,
+    List,
+    ListOrdered,
+    Link2,
+    ImagePlus,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -54,7 +68,29 @@ Cualquier consulta, no dude en contactarnos.
 Saludos cordiales,
 {{PROVEEDOR_NOMBRE}}`;
 
+function normalizeBodyToHtml(template: string): string {
+    const trimmed = template.trim();
+    if (!trimmed) return "";
+
+    const hasHtmlTags = /<\/?[a-z][\s\S]*>/i.test(trimmed);
+    if (hasHtmlTags) {
+        return template;
+    }
+
+    const escaped = trimmed
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
+    return escaped
+        .split(/\n{2,}/)
+        .map((block) => `<p>${block.replace(/\n/g, "<br/>")}</p>`)
+        .join("");
+}
+
 export function BillingConfigTab({ currentConfig, availableUsers, senderEmailConfig = null }: BillingConfigProps) {
+    const editorRef = useRef<HTMLDivElement | null>(null);
+    const signatureInputRef = useRef<HTMLInputElement | null>(null);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -62,7 +98,9 @@ export function BillingConfigTab({ currentConfig, availableUsers, senderEmailCon
     const [emailsCC, setEmailsCC] = useState(currentConfig.emailsCC || "");
     const [emailsBCC, setEmailsBCC] = useState(currentConfig.emailsBCC || "");
     const [emailSubject, setEmailSubject] = useState(currentConfig.emailSubject || defaultEmailSubject);
-    const [emailBody, setEmailBody] = useState(currentConfig.emailBody || defaultEmailBody);
+    const [emailBody, setEmailBody] = useState(
+        normalizeBodyToHtml(currentConfig.emailBody || defaultEmailBody)
+    );
     const [fromUserId, setFromUserId] = useState(currentConfig.fromUserId || "");
 
     const [senderAddress, setSenderAddress] = useState(senderEmailConfig?.emailFromAddress || "");
@@ -103,17 +141,77 @@ export function BillingConfigTab({ currentConfig, availableUsers, senderEmailCon
         loadSenderConfig();
     }, [fromUserId]);
 
+    const focusEditor = () => {
+        editorRef.current?.focus();
+    };
+
+    const applyCommand = (command: string, value?: string) => {
+        focusEditor();
+        document.execCommand(command, false, value);
+        if (editorRef.current) {
+            setEmailBody(editorRef.current.innerHTML);
+        }
+    };
+
+    const handleInsertLink = () => {
+        const url = window.prompt("Ingresa la URL del enlace (https://...)");
+        if (!url) return;
+        applyCommand("createLink", url);
+    };
+
+    const insertSignatureImage = async (file: File) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("category", "logo");
+        formData.append("folder", "billing-signatures");
+
+        const response = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+        });
+
+        const data = await response.json();
+        if (!response.ok || !data.url) {
+            throw new Error(data.error || "No fue posible subir la imagen");
+        }
+
+        const imgHtml = `<img src="${data.url}" alt="Firma" style="max-width: 220px; height: auto; display: block; margin-top: 8px;" />`;
+        applyCommand("insertHTML", imgHtml);
+    };
+
+    const handleSignatureFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        try {
+            setMessage(null);
+            await insertSignatureImage(file);
+            setMessage({ type: "success", text: "Imagen de firma insertada en la plantilla" });
+        } catch (error) {
+            setMessage({
+                type: "error",
+                text: error instanceof Error ? error.message : "No fue posible insertar la imagen de firma",
+            });
+        } finally {
+            if (signatureInputRef.current) {
+                signatureInputRef.current.value = "";
+            }
+        }
+    };
+
     const handleSave = async () => {
         setSaving(true);
         setMessage(null);
 
         try {
+            const bodyHtml = editorRef.current?.innerHTML || emailBody;
+
             const result = await updateBillingConfig({
                 enabled,
                 emailsCC: emailsCC || null,
                 emailsBCC: emailsBCC || null,
                 emailSubject: emailSubject || defaultEmailSubject,
-                emailBody: emailBody || defaultEmailBody,
+                emailBody: bodyHtml || normalizeBodyToHtml(defaultEmailBody),
                 fromUserId: fromUserId || null,
             });
 
@@ -128,6 +226,12 @@ export function BillingConfigTab({ currentConfig, availableUsers, senderEmailCon
 
         setSaving(false);
     };
+
+    useEffect(() => {
+        if (editorRef.current && !editorRef.current.innerHTML) {
+            editorRef.current.innerHTML = emailBody;
+        }
+    }, [emailBody]);
 
     const handleSaveSenderConfig = async () => {
         if (!fromUserId) {
@@ -411,14 +515,56 @@ export function BillingConfigTab({ currentConfig, availableUsers, senderEmailCon
                         {/* Email Body */}
                         <div className="space-y-2">
                             <Label htmlFor="emailBody">Cuerpo del email</Label>
-                            <textarea
-                                id="emailBody"
-                                value={emailBody}
-                                onChange={(e) => setEmailBody(e.target.value)}
-                                rows={10}
-                                placeholder={defaultEmailBody}
-                                className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors resize-none font-mono"
-                            />
+                            <div className="space-y-2">
+                                <div className="flex flex-wrap items-center gap-2 p-2 border border-[var(--card-border)] rounded-xl bg-[var(--hover-bg)]">
+                                    <Button type="button" variant="secondary" size="sm" onClick={() => applyCommand("bold")}>
+                                        <Bold size={14} />
+                                    </Button>
+                                    <Button type="button" variant="secondary" size="sm" onClick={() => applyCommand("italic")}>
+                                        <Italic size={14} />
+                                    </Button>
+                                    <Button type="button" variant="secondary" size="sm" onClick={() => applyCommand("underline")}>
+                                        <Underline size={14} />
+                                    </Button>
+                                    <Button type="button" variant="secondary" size="sm" onClick={() => applyCommand("insertUnorderedList")}>
+                                        <List size={14} />
+                                    </Button>
+                                    <Button type="button" variant="secondary" size="sm" onClick={() => applyCommand("insertOrderedList")}>
+                                        <ListOrdered size={14} />
+                                    </Button>
+                                    <Button type="button" variant="secondary" size="sm" onClick={handleInsertLink}>
+                                        <Link2 size={14} />
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="secondary"
+                                        size="sm"
+                                        onClick={() => signatureInputRef.current?.click()}
+                                    >
+                                        <ImagePlus size={14} />
+                                        Imagen firma
+                                    </Button>
+                                    <input
+                                        ref={signatureInputRef}
+                                        type="file"
+                                        accept="image/png,image/jpeg,image/webp,image/gif"
+                                        className="hidden"
+                                        onChange={handleSignatureFileChange}
+                                    />
+                                </div>
+
+                                <div
+                                    id="emailBody"
+                                    ref={editorRef}
+                                    contentEditable
+                                    suppressContentEditableWarning
+                                    onInput={(e) => setEmailBody((e.currentTarget as HTMLDivElement).innerHTML)}
+                                    className="min-h-[260px] w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] shadow-sm focus:outline-none focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors overflow-auto"
+                                />
+                                <p className="text-xs text-[var(--muted-text)]">
+                                    Usa Enter para saltos de línea. Puedes aplicar negritas, listas, enlaces e insertar imagen en la firma.
+                                </p>
+                            </div>
                         </div>
 
                         {/* Variables Info */}

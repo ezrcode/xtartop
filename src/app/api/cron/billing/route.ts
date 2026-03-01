@@ -28,6 +28,28 @@ function sanitizeForFileName(value: string): string {
     return value.replace(/[^a-zA-Z0-9-_]/g, "_");
 }
 
+function escapeHtml(value: string): string {
+    return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+}
+
+function normalizeEmailBodyToHtml(template: string): string {
+    const trimmed = template.trim();
+    if (!trimmed) return "";
+
+    const hasHtmlTags = /<\/?[a-z][\s\S]*>/i.test(trimmed);
+    if (hasHtmlTags) {
+        return template;
+    }
+
+    return escapeHtml(trimmed)
+        .split(/\n{2,}/)
+        .map((block) => `<p>${block.replace(/\n/g, "<br/>")}</p>`)
+        .join("");
+}
+
 function collectStringFieldsDeep(payload: unknown, keys: string[], depth = 0): string[] {
     if (depth > 3 || payload == null) return [];
 
@@ -620,6 +642,7 @@ export async function GET(request: NextRequest) {
                         .replace(/\{\{TOTAL\}\}/g, `USD ${total.toLocaleString("en-US", { minimumFractionDigits: 2 })}`)
                         .replace(/\{\{PROVEEDOR_NOMBRE\}\}/g, workspace.legalName || workspace.name)
                         .replace(/\{\{CLIENTE_RNC\}\}/g, company.taxId || "");
+                    const normalizedEmailBody = normalizeEmailBodyToHtml(emailBody);
 
                     // Send emails
                     const recipientEmails = company.contacts.map(c => c.email);
@@ -639,7 +662,7 @@ export async function GET(request: NextRequest) {
                             cc: ccEmails.length > 0 ? ccEmails : undefined,
                             bcc: bccEmails.length > 0 ? bccEmails : undefined,
                             subject: emailSubject,
-                            body: emailBody,
+                            body: normalizedEmailBody,
                             attachments: [{
                                 filename: `${docNumberSafe}.pdf`,
                                 path: blob.url,
