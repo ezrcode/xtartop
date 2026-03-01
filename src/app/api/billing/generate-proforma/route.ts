@@ -25,6 +25,24 @@ function getBillingPeriodLabel(month: number, year: number): string {
     return `${String(month).padStart(2, "0")}${year}`;
 }
 
+function getBillingPeriodText(month: number, year: number): string {
+    const months = [
+        "Enero",
+        "Febrero",
+        "Marzo",
+        "Abril",
+        "Mayo",
+        "Junio",
+        "Julio",
+        "Agosto",
+        "Septiembre",
+        "Octubre",
+        "Noviembre",
+        "Diciembre",
+    ];
+    return `${months[month - 1] || String(month)} ${year}`;
+}
+
 function buildPdfBaseName(proformaNumber: string, companyShortName: string, month: number, year: number): string {
     return sanitizeForFileName(`${proformaNumber} ${companyShortName} ${getBillingPeriodLabel(month, year)}`);
 }
@@ -140,6 +158,18 @@ function extractAdmCloudQuoteId(payload: unknown): string | null {
     return candidates.length > 0 ? candidates[0] : null;
 }
 
+function extractAdmCloudObservation(payload: unknown): string | null {
+    const candidates = collectStringFieldsDeep(payload, [
+        "Notes",
+        "Note",
+        "Observaciones",
+        "Observation",
+        "Comments",
+    ]);
+    const first = candidates.map((value) => value.trim()).find(Boolean);
+    return first || null;
+}
+
 export async function POST(request: NextRequest) {
     // Verify authentication
     const session = await auth();
@@ -252,6 +282,8 @@ export async function POST(request: NextRequest) {
         let admCloudCreated = false;
         let admCloudError: string | null = null;
         let proformaNumber = `PRO-${currentYear}${String(currentMonth).padStart(2, "0")}-${company.id.slice(-6)}-M`;
+        const billingPeriodText = getBillingPeriodText(currentMonth, currentYear);
+        let pdfNotes = billingPeriodText;
         let paymentTermConfig = resolvePaymentTermConfig(
             workspace.admCloudDefaultPaymentTermName
                 ? { Name: workspace.admCloudDefaultPaymentTermName, Description: undefined, Days: undefined }
@@ -299,7 +331,7 @@ export async function POST(request: NextRequest) {
                     RelationshipID: company.admCloudRelationshipId,
                     DocDate: today.toISOString(),
                     CurrencyID: "USD",
-                    Notes: `Proforma manual - ${currentMonth}/${currentYear}`,
+                    Notes: billingPeriodText,
                     // Términos de pago y etapa de ventas predeterminados
                     ...(workspace.admCloudDefaultPaymentTermId && { PaymentTermID: workspace.admCloudDefaultPaymentTermId }),
                     ...(workspace.admCloudDefaultSalesStageId && { SalesStageID: workspace.admCloudDefaultSalesStageId }),
@@ -330,6 +362,10 @@ export async function POST(request: NextRequest) {
                 const quoteResult = await admCloudClient.createQuote(quoteRequest);
                 
                 if (quoteResult.success && quoteResult.data) {
+                    const directObservation = extractAdmCloudObservation(quoteResult.data);
+                    if (directObservation) {
+                        pdfNotes = directObservation;
+                    }
                     admCloudDocId = extractAdmCloudQuoteId(quoteResult.data);
                     const directDocNumber = extractAdmCloudDocNumber(quoteResult.data);
                     if (directDocNumber) {
@@ -338,6 +374,10 @@ export async function POST(request: NextRequest) {
                         // Fallback: some ADMCloud responses omit DocID on create, fetch full quote by ID.
                         const quoteDetail = await admCloudClient.getQuote(admCloudDocId);
                         if (quoteDetail.success && quoteDetail.data) {
+                            const detailObservation = extractAdmCloudObservation(quoteDetail.data);
+                            if (detailObservation) {
+                                pdfNotes = detailObservation;
+                            }
                             const detailDocNumber = extractAdmCloudDocNumber(quoteDetail.data);
                             if (detailDocNumber) {
                                 proformaNumber = detailDocNumber;
@@ -404,7 +444,7 @@ export async function POST(request: NextRequest) {
             total,
             exchangeRate: latestExchangeRate ? Number(latestExchangeRate.rate).toFixed(4) : undefined,
             
-            notes: "",
+            notes: pdfNotes,
             bankInfo: DEFAULT_BANK_INFO,
         };
 
