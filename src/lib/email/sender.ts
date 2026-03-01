@@ -37,7 +37,7 @@ export async function sendEmailWithGmail({
     attachments,
 }: {
     userId: string;
-    to: string;
+    to: string | string[];
     cc?: string | string[];
     bcc?: string | string[];
     subject: string;
@@ -97,7 +97,7 @@ export async function sendEmail({
         emailFromName: string;
         emailPassword: string;
     };
-    to: string;
+    to: string | string[];
     cc?: string | string[];
     bcc?: string | string[];
     subject: string;

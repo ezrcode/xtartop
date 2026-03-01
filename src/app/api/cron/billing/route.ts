@@ -758,30 +758,24 @@ export async function GET(request: NextRequest) {
                     const ccEmails = workspace.billingEmailsCC?.split(",").map(e => e.trim()).filter(Boolean) || [];
                     const bccEmails = workspace.billingEmailsBCC?.split(",").map(e => e.trim()).filter(Boolean) || [];
 
-                    // Send to each recipient individually
-                    let emailSent = false;
-                    for (const recipientEmail of recipientEmails) {
-                        const result = await sendEmail({
-                            user: {
-                                emailFromAddress: senderUser.emailFromAddress!,
-                                emailFromName: senderUser.emailFromName || workspace.name,
-                                emailPassword: senderUser.emailPassword!,
-                            },
-                            to: recipientEmail,
-                            cc: ccEmails.length > 0 ? ccEmails : undefined,
-                            bcc: bccEmails.length > 0 ? bccEmails : undefined,
-                            subject: emailSubject,
-                            body: normalizedEmailBody,
-                            attachments: [{
-                                filename: `${pdfBaseName}.pdf`,
-                                path: blob.url,
-                            }],
-                        });
-
-                        if (result.success) {
-                            emailSent = true;
-                        }
-                    }
+                    // Send one email per company, including all recipients for that client.
+                    const result = await sendEmail({
+                        user: {
+                            emailFromAddress: senderUser.emailFromAddress!,
+                            emailFromName: senderUser.emailFromName || workspace.name,
+                            emailPassword: senderUser.emailPassword!,
+                        },
+                        to: recipientEmails,
+                        cc: ccEmails.length > 0 ? ccEmails : undefined,
+                        bcc: bccEmails.length > 0 ? bccEmails : undefined,
+                        subject: emailSubject,
+                        body: normalizedEmailBody,
+                        attachments: [{
+                            filename: `${pdfBaseName}.pdf`,
+                            path: blob.url,
+                        }],
+                    });
+                    const emailSent = result.success;
 
                     // Record in billing history
                     await prisma.billingHistory.create({
