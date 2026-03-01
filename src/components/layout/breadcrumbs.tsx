@@ -18,17 +18,14 @@ export function Breadcrumbs() {
     const pathname = usePathname();
     const segments = pathname.split("/").filter(Boolean);
 
-    // Don't show breadcrumbs on main app page
     if (segments.length <= 1) return null;
 
     const breadcrumbs = segments.map((segment, index) => {
         const href = "/" + segments.slice(0, index + 1).join("/");
         const isLast = index === segments.length - 1;
         
-        // Try to get friendly name, fallback to segment
         let name = routeNames[segment];
         
-        // If it's an ID (last segment and not in routeNames), show "Detalle"
         if (!name && isLast && !routeNames[segment]) {
             name = "Detalle";
         }
@@ -39,24 +36,24 @@ export function Breadcrumbs() {
     });
 
     return (
-        <nav className="hidden md:flex items-center gap-1 text-sm mb-4">
+        <nav className="hidden md:flex items-center gap-1 text-sm">
             <Link 
                 href="/app" 
-                className="text-gray-400 hover:text-nearby-dark transition-colors p-1"
+                className="text-[var(--muted-text)] hover:text-[var(--foreground)] transition-colors p-1"
             >
-                <Home size={16} />
+                <Home size={15} />
             </Link>
-            {breadcrumbs.map((crumb, index) => (
+            {breadcrumbs.map((crumb) => (
                 <div key={crumb.href} className="flex items-center gap-1">
-                    <ChevronRight size={14} className="text-gray-300" />
+                    <ChevronRight size={13} className="text-[var(--card-border)]" />
                     {crumb.isLast ? (
-                        <span className="text-nearby-dark font-medium px-1">
+                        <span className="text-[var(--foreground)] font-medium px-1 text-sm">
                             {crumb.name}
                         </span>
                     ) : (
                         <Link 
                             href={crumb.href}
-                            className="text-gray-500 hover:text-nearby-dark transition-colors px-1"
+                            className="text-[var(--muted-text)] hover:text-[var(--foreground)] transition-colors px-1 text-sm"
                         >
                             {crumb.name}
                         </Link>

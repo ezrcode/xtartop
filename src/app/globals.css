@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  /* NEARBY Brand Colors - Extended Palette */
+  /* ── Brand Colors ── */
   --color-nearby-dark: #2d3e50;
   --color-nearby-dark-50: #f4f6f8;
   --color-nearby-dark-100: #e3e7eb;
@@ -13,7 +13,7 @@
   --color-nearby-dark-700: #1b2631;
   --color-nearby-dark-800: #121a21;
   --color-nearby-dark-900: #090d11;
-  
+
   --color-nearby-accent: #fc5a34;
   --color-nearby-accent-50: #fff5f2;
   --color-nearby-accent-100: #ffe8e2;
@@ -23,10 +23,10 @@
   --color-nearby-accent-500: #fc5a34;
   --color-nearby-accent-600: #e04020;
   --color-nearby-accent-700: #bc3118;
-  
+
   --color-nearby-light: #c9d9de;
-  
-  /* UI Colors */
+
+  /* ── UI Colors ── */
   --color-soft-gray: #F5F6F7;
   --color-graphite-gray: #D7D9DB;
   --color-dark-slate: #4A4A4A;
@@ -36,7 +36,12 @@
   --color-info-blue: #3B82F6;
   --color-ocean-blue: #3B82F6;
 
-  /* Modern Shadows */
+  /* ── Radius Scale ── */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  /* ── Shadows ── */
   --shadow-xs: 0 1px 2px 0 rgb(45 62 80 / 0.05);
   --shadow-sm: 0 1px 3px 0 rgb(45 62 80 / 0.1), 0 1px 2px -1px rgb(45 62 80 / 0.1);
   --shadow-md: 0 4px 6px -1px rgb(45 62 80 / 0.1), 0 2px 4px -2px rgb(45 62 80 / 0.1);
@@ -45,6 +50,7 @@
   --shadow-glow-accent: 0 0 20px rgb(252 90 52 / 0.25);
   --shadow-glow-success: 0 0 20px rgb(27 196 125 / 0.25);
 
+  /* ── Typography ── */
   --font-sans: var(--font-inter), system-ui, sans-serif;
 }
 
@@ -120,19 +126,24 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Modern Glass Effect */
+/* Glass Effect - adapts to theme */
 .glass {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dark .glass {
+  background: rgba(20, 27, 35, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .glass-dark {
-  background: rgba(45, 62, 80, 0.8);
+  background: rgba(20, 27, 35, 0.8);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* Card Hover Effects */
@@ -305,27 +316,6 @@ body {
   box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--color-nearby-accent);
 }
 
-/* Glass effect for dark mode */
-.glass-dark {
-  background: rgba(20, 27, 35, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-/* Improved glass effect - adapts to theme */
-.glass {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.dark .glass {
-  background: rgba(20, 27, 35, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
 /* Loading skeleton animation with theme support */
 .skeleton-loading {
   background: linear-gradient(
@@ -336,62 +326,4 @@ body {
   );
   background-size: 200% 100%;
   animation: skeleton 1.5s ease-in-out infinite;
-}
-
-/* Badge/chip component utilities */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  border-radius: 9999px;
-  transition: all 0.2s ease;
-}
-
-.badge-primary {
-  background-color: var(--color-nearby-accent);
-  color: white;
-}
-
-.badge-secondary {
-  background-color: var(--hover-bg);
-  color: var(--foreground);
-  border: 1px solid var(--card-border);
-}
-
-.badge-success {
-  background-color: rgba(34, 197, 94, 0.1);
-  color: #22c55e;
-}
-
-.dark .badge-success {
-  background-color: rgba(34, 197, 94, 0.2);
-}
-
-.badge-warning {
-  background-color: rgba(217, 119, 6, 0.1);
-  color: #d97706;
-}
-
-.dark .badge-warning {
-  background-color: rgba(217, 119, 6, 0.2);
-}
-
-.badge-error {
-  background-color: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-}
-
-.dark .badge-error {
-  background-color: rgba(239, 68, 68, 0.2);
-}
-
-.badge-info {
-  background-color: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
-}
-
-.dark .badge-info {
-  background-color: rgba(59, 130, 246, 0.2);
 }

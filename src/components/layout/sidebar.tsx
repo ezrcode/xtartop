@@ -14,6 +14,8 @@ import {
     ChevronRight,
     LogOut,
     X,
+    Search,
+    User,
 } from "lucide-react";
 import { logout } from "@/actions/auth";
 import { cn } from "@/lib/utils";
@@ -21,35 +23,37 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
-const menuItems = [
-    { name: "Inicio", href: "/app", icon: LayoutDashboard },
+const mainMenuItems = [
+    { name: "Dashboard", href: "/app", icon: LayoutDashboard },
     { name: "Contactos", href: "/app/contacts", icon: Users },
     { name: "Empresas", href: "/app/companies", icon: Building2 },
     { name: "Negocios", href: "/app/deals", icon: TrendingUp },
-    { name: "Configuración", href: "/app/settings", icon: Settings, requiresAdmin: true },
+];
+
+const adminMenuItems = [
+    { name: "Configuración", href: "/app/settings", icon: Settings },
 ];
 
 interface SidebarProps {
     userRole: 'OWNER' | 'ADMIN' | 'MEMBER' | 'VIEWER' | null;
+    user: {
+        name?: string | null;
+        email?: string | null;
+        photoUrl?: string | null;
+    };
     isMobileOpen: boolean;
     setIsMobileOpen: (open: boolean) => void;
 }
 
-export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProps) {
+export function Sidebar({ userRole, user, isMobileOpen, setIsMobileOpen }: SidebarProps) {
     const pathname = usePathname();
     const [isCollapsed, setIsCollapsed] = useState(false);
     const sidebarRef = useRef<HTMLDivElement>(null);
 
-    // Filter menu items based on user role
-    const visibleMenuItems = menuItems.filter(item => {
-        if (item.requiresAdmin) {
-            return userRole === 'OWNER' || userRole === 'ADMIN';
-        }
-        return true;
-    });
+    const isAdmin = userRole === 'OWNER' || userRole === 'ADMIN';
 
-    // Load collapsed state from localStorage on mount
     useEffect(() => {
         const stored = localStorage.getItem("sidebarCollapsed");
         if (stored && window.innerWidth >= 768) {
@@ -57,7 +61,6 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
         }
     }, []);
 
-    // Don't collapse on mobile
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth < 768) {
@@ -69,7 +72,6 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Handle click outside to minimize sidebar
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (window.innerWidth >= 768 && !isCollapsed) {
@@ -81,9 +83,7 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
         };
 
         document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
+        return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [isCollapsed]);
 
     const toggleCollapse = () => {
@@ -92,13 +92,26 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
         localStorage.setItem("sidebarCollapsed", JSON.stringify(newState));
     };
 
-    const NavItem = ({ item, isActive }: { item: typeof menuItems[0], isActive: boolean }) => {
+    const getInitials = () => {
+        if (user.name) {
+            const names = user.name.split(" ");
+            if (names.length >= 2) return `${names[0][0]}${names[1][0]}`.toUpperCase();
+            return user.name.substring(0, 2).toUpperCase();
+        }
+        return user.email?.substring(0, 2).toUpperCase() || "U";
+    };
+
+    const openCommandPalette = () => {
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }));
+    };
+
+    const NavItem = ({ item, isActive }: { item: typeof mainMenuItems[0], isActive: boolean }) => {
         const content = (
             <Link
                 href={item.href}
                 onClick={() => setIsMobileOpen(false)}
                 className={cn(
-                    "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200",
+                    "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                     isActive
                         ? "bg-gradient-to-r from-nearby-accent/15 to-nearby-accent/5 text-nearby-accent shadow-sm"
                         : "text-[var(--muted-text)] hover:bg-[var(--hover-bg)] hover:text-[var(--foreground)]",
@@ -118,8 +131,8 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
                 )}>
                     {item.name}
                 </span>
-                {isActive && (
-                    <div className="ml-auto h-2 w-2 rounded-full bg-nearby-accent animate-pulse" />
+                {isActive && !isCollapsed && (
+                    <div className="ml-auto h-1.5 w-1.5 rounded-full bg-nearby-accent" />
                 )}
             </Link>
         );
@@ -156,13 +169,12 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
                 className={cn(
                     "fixed inset-y-0 left-0 z-50 flex flex-col bg-[var(--card-bg)] border-r border-[var(--card-border)] transition-all duration-300 ease-in-out shadow-xl md:shadow-none",
                     isMobileOpen ? "translate-x-0" : "-translate-x-full",
-                    "w-72 md:translate-x-0",
-                    isCollapsed ? "md:w-20" : "md:w-72"
+                    "w-64 md:translate-x-0",
+                    isCollapsed ? "md:w-20" : "md:w-64"
                 )}
             >
                 {/* Header */}
                 <div className="flex items-center justify-between h-16 px-4">
-                    {/* Mobile: Always show full logo */}
                     <div className="md:hidden">
                         <Image 
                             src="/nearby_logo.png" 
@@ -173,7 +185,6 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
                         />
                     </div>
                     
-                    {/* Desktop: Collapsed/Expanded logo */}
                     <div className={cn(
                         "hidden md:flex items-center transition-all duration-300",
                         isCollapsed ? "justify-center w-full" : ""
@@ -194,12 +205,11 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
                                 alt="NEARBY" 
                                 width={150} 
                                 height={40}
-                                className="h-8 w-auto"
+                                className="h-7 w-auto"
                             />
                         )}
                     </div>
                     
-                    {/* Desktop collapse button */}
                     <Button
                         variant="ghost"
                         size="icon-sm"
@@ -212,7 +222,6 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
                         {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
                     </Button>
                     
-                    {/* Mobile close button */}
                     <Button
                         variant="ghost"
                         size="icon-sm"
@@ -223,27 +232,120 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
                     </Button>
                 </div>
 
+                {/* Search trigger */}
+                {!isCollapsed ? (
+                    <div className="px-3 mb-2">
+                        <button
+                            onClick={openCommandPalette}
+                            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[var(--muted-text)] bg-[var(--hover-bg)] rounded-xl border border-[var(--card-border)] hover:border-nearby-accent/30 transition-colors"
+                        >
+                            <Search size={15} />
+                            <span className="flex-1 text-left text-xs">Buscar...</span>
+                            <kbd className="hidden sm:inline text-[10px] font-medium px-1.5 py-0.5 bg-[var(--card-bg)] rounded border border-[var(--card-border)]">
+                                ⌘K
+                            </kbd>
+                        </button>
+                    </div>
+                ) : (
+                    <div className="px-3 mb-2 hidden md:block">
+                        <Tooltip delayDuration={0}>
+                            <TooltipTrigger asChild>
+                                <button
+                                    onClick={openCommandPalette}
+                                    className="w-full flex items-center justify-center p-2.5 text-[var(--muted-text)] bg-[var(--hover-bg)] rounded-xl border border-[var(--card-border)] hover:border-nearby-accent/30 transition-colors"
+                                >
+                                    <Search size={16} />
+                                </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="right">Buscar (⌘K)</TooltipContent>
+                        </Tooltip>
+                    </div>
+                )}
+
                 <Separator className="mx-4" />
 
                 {/* Navigation */}
-                <ScrollArea className="flex-1 px-3 py-4">
-                    <nav className="space-y-1">
-                        {visibleMenuItems.map((item) => {
+                <ScrollArea className="flex-1 px-3 py-3">
+                    {/* Section: Principal */}
+                    {!isCollapsed && (
+                        <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-text)]">
+                            Principal
+                        </p>
+                    )}
+                    <nav className="space-y-0.5">
+                        {mainMenuItems.map((item) => {
                             const isActive = item.href === "/app" 
                                 ? pathname === "/app"
                                 : pathname === item.href || pathname.startsWith(`${item.href}/`);
                             
-                            return (
-                                <NavItem key={item.name} item={item} isActive={isActive} />
-                            );
+                            return <NavItem key={item.name} item={item} isActive={isActive} />;
                         })}
                     </nav>
+
+                    {/* Section: Workspace (Admin only) */}
+                    {isAdmin && (
+                        <>
+                            <Separator className="my-3" />
+                            {!isCollapsed && (
+                                <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-text)]">
+                                    Workspace
+                                </p>
+                            )}
+                            <nav className="space-y-0.5">
+                                {adminMenuItems.map((item) => {
+                                    const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                                    return <NavItem key={item.name} item={item} isActive={isActive} />;
+                                })}
+                            </nav>
+                        </>
+                    )}
                 </ScrollArea>
 
                 <Separator className="mx-4" />
 
-                {/* Footer / Logout */}
-                <div className="p-3">
+                {/* User footer */}
+                <div className="p-3 space-y-1">
+                    {/* Profile link */}
+                    {!isCollapsed ? (
+                        <Link
+                            href="/app/profile"
+                            onClick={() => setIsMobileOpen(false)}
+                            className={cn(
+                                "flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-200 hover:bg-[var(--hover-bg)]",
+                                pathname === "/app/profile" ? "bg-[var(--hover-bg)]" : ""
+                            )}
+                        >
+                            <Avatar size="sm">
+                                <AvatarImage src={user.photoUrl || undefined} alt={user.name || "Profile"} />
+                                <AvatarFallback className="text-[10px]">{getInitials()}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-[var(--foreground)] truncate">
+                                    {user.name || "Usuario"}
+                                </p>
+                                <p className="text-[10px] text-[var(--muted-text)] truncate">
+                                    {user.email}
+                                </p>
+                            </div>
+                        </Link>
+                    ) : (
+                        <Tooltip delayDuration={0}>
+                            <TooltipTrigger asChild className="hidden md:flex">
+                                <Link
+                                    href="/app/profile"
+                                    className="flex items-center justify-center rounded-xl p-2.5 transition-all hover:bg-[var(--hover-bg)]"
+                                >
+                                    <Avatar size="sm">
+                                        <AvatarImage src={user.photoUrl || undefined} alt={user.name || "Profile"} />
+                                        <AvatarFallback className="text-[10px]">{getInitials()}</AvatarFallback>
+                                    </Avatar>
+                                </Link>
+                            </TooltipTrigger>
+                            <TooltipContent side="right">Mi perfil</TooltipContent>
+                        </Tooltip>
+                    )}
+
+                    {/* Logout */}
                     <form action={logout}>
                         <Tooltip delayDuration={0}>
                             <TooltipTrigger asChild>
@@ -251,12 +353,12 @@ export function Sidebar({ userRole, isMobileOpen, setIsMobileOpen }: SidebarProp
                                     type="submit"
                                     onClick={() => setIsMobileOpen(false)}
                                     className={cn(
-                                        "flex items-center gap-3 w-full rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200",
+                                        "flex items-center gap-3 w-full rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
                                         "text-[var(--muted-text)] hover:bg-error-red/10 hover:text-error-red",
                                         isCollapsed && "md:justify-center"
                                     )}
                                 >
-                                    <LogOut size={20} className="shrink-0" />
+                                    <LogOut size={18} className="shrink-0" />
                                     <span className={cn(isCollapsed && "md:hidden")}>
                                         Cerrar sesión
                                     </span>

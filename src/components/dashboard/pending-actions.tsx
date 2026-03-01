@@ -22,8 +22,8 @@ export function PendingActions({
             sublabel: "pendientes",
             count: pendingInvitations,
             icon: Send,
-            color: "text-orange-600",
-            bgColor: "bg-orange-50",
+            color: "text-nearby-accent",
+            bgColor: "bg-nearby-accent/10",
             href: "/app/companies",
         },
         {
@@ -31,8 +31,8 @@ export function PendingActions({
             sublabel: "en borrador",
             count: draftQuotes,
             icon: FileText,
-            color: "text-blue-600",
-            bgColor: "bg-blue-50",
+            color: "text-ocean-blue",
+            bgColor: "bg-info-blue/10",
             href: "/app/deals",
         },
         {
@@ -40,8 +40,8 @@ export function PendingActions({
             sublabel: "pendiente",
             count: pendingOnboarding,
             icon: UserCheck,
-            color: "text-purple-600",
-            bgColor: "bg-purple-50",
+            color: "text-purple-500 dark:text-purple-400",
+            bgColor: "bg-purple-500/10",
             href: "/app/companies",
         },
         {
@@ -49,15 +49,15 @@ export function PendingActions({
             sublabel: "hoy",
             count: todayActivities,
             icon: Activity,
-            color: "text-green-600",
-            bgColor: "bg-green-50",
+            color: "text-success-green",
+            bgColor: "bg-success-green/10",
             href: "/app",
         },
     ];
 
     return (
-        <div className="bg-white rounded-xl border border-graphite-gray p-4 sm:p-5">
-            <h3 className="text-sm font-semibold text-nearby-dark mb-3 sm:mb-4">Acciones Pendientes</h3>
+        <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4 sm:p-5">
+            <h3 className="text-sm font-semibold text-[var(--foreground)] mb-3 sm:mb-4">Acciones Pendientes</h3>
             
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
                 {actions.map((action) => (
@@ -72,8 +72,8 @@ export function PendingActions({
                                 {action.count}
                             </span>
                         </div>
-                        <div className="text-xs font-medium text-gray-700">{action.label}</div>
-                        <div className="text-[10px] text-gray-500">{action.sublabel}</div>
+                        <div className="text-xs font-medium text-[var(--foreground)]">{action.label}</div>
+                        <div className="text-[10px] text-[var(--muted-text)]">{action.sublabel}</div>
                     </Link>
                 ))}
             </div>

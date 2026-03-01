@@ -205,7 +205,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
                                                 id="companyId"
                                                 name="companyId"
                                                 defaultValue={contact?.companyId || "null"}
-                                                className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
+                                                className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-xl shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--input-bg)]"
                                             >
                                                 <option value="null">Sin empresa</option>
                                                 {companies.map((company) => (
@@ -214,6 +214,14 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
                                                     </option>
                                                 ))}
                                             </select>
+                                            {contact?.companyId && contact.companyId !== "null" && (
+                                                <a
+                                                    href={`/app/companies/${contact.companyId}`}
+                                                    className="inline-flex items-center gap-1 text-xs text-nearby-accent hover:underline mt-1.5"
+                                                >
+                                                    Ver empresa →
+                                                </a>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

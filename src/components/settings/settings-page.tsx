@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useFormState } from "react-dom";
-import { Save, UserPlus, Mail, Trash2, X, Building2, Users2, FileText, Loader2, Cloud, Settings2, DollarSign, BriefcaseBusiness } from "lucide-react";
+import { Save, UserPlus, Mail, Trash2, X, Building2, Users2, FileText, Loader2, Cloud, Settings2, DollarSign, BriefcaseBusiness, ChevronRight } from "lucide-react";
 import { ImageUpload } from "../ui/image-upload";
 import {
     updateWorkspace,
@@ -20,7 +20,7 @@ import { BillingConfigTab } from "./billing-config-tab";
 import { BusinessLinesSection } from "./business-lines-section";
 import { ExchangeRatesSection } from "./exchange-rates-section";
 import { ProjectRateReferencesSection } from "./project-rate-references-section";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "../ui/tabs";
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -186,7 +186,37 @@ function getDefaultContractTemplate(): string {
 <p>He leído y acepto los Términos y Condiciones de Uso de la plataforma Nearby CRM y la Cotización N° <strong>{{ID_COTIZACION}}</strong> vinculada a mi cuenta. Entiendo que esta aceptación digital tiene la misma validez legal que una firma manuscrita de acuerdo con la legislación vigente.</p>`;
 }
 
-type Tab = 'workspace' | 'general' | 'exchangeRates' | 'team' | 'contract' | 'integrations';
+type Section = 'workspace' | 'team' | 'contract' | 'business-lines' | 'rate-references' | 'exchange-rates' | 'billing' | 'admcloud' | 'clickup';
+
+const sectionGroups = [
+    {
+        label: "Organización",
+        icon: Building2,
+        items: [
+            { id: "workspace" as Section, label: "Workspace", icon: Building2, description: "Nombre, logo, razón social y datos de la empresa" },
+            { id: "team" as Section, label: "Equipo", icon: Users2, description: "Miembros, invitaciones y roles" },
+            { id: "contract" as Section, label: "Contrato", icon: FileText, description: "Plantilla de términos y condiciones" },
+        ],
+    },
+    {
+        label: "Comercial",
+        icon: BriefcaseBusiness,
+        items: [
+            { id: "business-lines" as Section, label: "Líneas de Negocio", icon: BriefcaseBusiness, description: "Categorías de negocio del equipo de ventas" },
+            { id: "rate-references" as Section, label: "Tarifas Referencia", icon: DollarSign, description: "Catálogo de precios referenciales por proyecto" },
+            { id: "exchange-rates" as Section, label: "Tasa de Cambio", icon: DollarSign, description: "Historial de tasas de cambio USD/DOP" },
+        ],
+    },
+    {
+        label: "Integraciones",
+        icon: Cloud,
+        items: [
+            { id: "billing" as Section, label: "Facturación Automática", icon: Mail, description: "Correo remitente, plantilla y destinatarios" },
+            { id: "admcloud" as Section, label: "ADMCloud", icon: Cloud, description: "Conexión con el ERP de facturación" },
+            { id: "clickup" as Section, label: "ClickUp", icon: Settings2, description: "Integración con gestión de tickets" },
+        ],
+    },
+];
 
 export function SettingsPage({
     workspace,
@@ -196,7 +226,8 @@ export function SettingsPage({
     exchangeRates = [],
     projectRateReferences = [],
 }: SettingsPageProps) {
-    const [activeTab, setActiveTab] = useState<Tab>('workspace');
+    const [activeSection, setActiveSection] = useState<Section>('workspace');
+    const [mobileNavOpen, setMobileNavOpen] = useState(false);
     const [showInviteForm, setShowInviteForm] = useState(false);
     const [revokingId, setRevokingId] = useState<string | null>(null);
     const [removingId, setRemovingId] = useState<string | null>(null);
@@ -258,497 +289,354 @@ export function SettingsPage({
         setSavingContract(false);
     };
 
-    return (
-        <div className="min-h-screen bg-[var(--background)] py-6 sm:py-8 overflow-x-hidden">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden">
-                <div className="mb-6 sm:mb-8">
-                    <h1 className="text-2xl sm:text-3xl font-bold text-[var(--foreground)]">Configuración</h1>
-                    <p className="text-sm sm:text-base text-[var(--muted-text)] mt-1 sm:mt-2">
-                        Gestiona tu workspace, equipo y configuraciones
-                    </p>
-                </div>
+    const currentSectionMeta = sectionGroups.flatMap(g => g.items).find(i => i.id === activeSection);
 
-                <Tabs defaultValue="workspace" value={activeTab} onValueChange={(v) => setActiveTab(v as Tab)} className="w-full">
-                    {/* Tabs - iOS optimized: icons only on mobile */}
-                    <TabsList variant="underline" className="w-full justify-between sm:justify-start mb-6 border-[var(--card-border)]">
-                        <TabsTrigger value="workspace" variant="underline" className="flex-1 sm:flex-none">
-                            <Building2 size={18} />
-                            <span className="hidden sm:inline">Espacio</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="general" variant="underline" className="flex-1 sm:flex-none">
-                            <Settings2 size={18} />
-                            <span className="hidden sm:inline">General</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="team" variant="underline" className="flex-1 sm:flex-none">
-                            <Users2 size={18} />
-                            <span className="hidden sm:inline">Equipo</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="exchangeRates" variant="underline" className="flex-1 sm:flex-none">
-                            <DollarSign size={18} />
-                            <span className="hidden sm:inline">Tasa</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="contract" variant="underline" className="flex-1 sm:flex-none">
-                            <FileText size={18} />
-                            <span className="hidden sm:inline">Contrato</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="integrations" variant="underline" className="flex-1 sm:flex-none">
-                            <Cloud size={18} />
-                            <span className="hidden sm:inline">Integraciones</span>
-                        </TabsTrigger>
-                    </TabsList>
-
-                    {/* Tab Content: Workspace */}
-                    <TabsContent value="workspace" className="mt-0">
-                    <div className="space-y-6">
-                        {/* Workspace Info */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Información del Workspace</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                            
-                            <form action={workspaceAction} className="space-y-6">
-                                {workspaceState?.message && (
-                                    <div className={`p-4 rounded-md ${workspaceState.message.includes("success") ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}`}>
-                                        {workspaceState.message}
-                                    </div>
-                                )}
-
-                                {/* Logo Upload */}
-                                <ImageUpload
-                                    currentImage={workspace.logoUrl}
-                                    onImageChange={(url) => setLogoUrl(url)}
-                                    category="logo"
-                                    folder="logos"
-                                    size="lg"
-                                    shape="square"
-                                    label="Logo de la Empresa"
-                                />
-                                <input type="hidden" name="logoUrl" value={logoUrl || ""} />
-
-                                {/* Form fields - stacked on mobile, grid on desktop */}
-                                <div className="space-y-4 sm:grid sm:grid-cols-2 sm:gap-4 sm:space-y-0">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="name">Nombre del Workspace</Label>
-                                        <Input
-                                            type="text"
-                                            name="name"
-                                            id="name"
-                                            defaultValue={workspace.name}
-                                            required
-                                            error={!!workspaceState?.errors?.name}
-                                        />
-                                        {workspaceState?.errors?.name && (
-                                            <p className="text-sm text-error-red">{workspaceState.errors.name}</p>
-                                        )}
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="legalName">Nombre o Razón Social</Label>
-                                        <Input
-                                            type="text"
-                                            name="legalName"
-                                            id="legalName"
-                                            defaultValue={workspace.legalName || ''}
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="rnc">RNC</Label>
-                                        <Input
-                                            type="text"
-                                            name="rnc"
-                                            id="rnc"
-                                            defaultValue={workspace.rnc || ''}
-                                            placeholder="000-0000000-0"
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="phone">Teléfono</Label>
-                                        <Input
-                                            type="tel"
-                                            name="phone"
-                                            id="phone"
-                                            defaultValue={workspace.phone || ''}
-                                            placeholder="+1 (809) 000-0000"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2 mt-4">
-                                    <Label htmlFor="address">Dirección</Label>
-                                    <textarea
-                                        name="address"
-                                        id="address"
-                                        rows={2}
-                                        defaultValue={workspace.address || ''}
-                                        placeholder="Calle, Número, Sector, Ciudad, País"
-                                        className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors resize-none"
-                                    />
-                                </div>
-
-                                <div className="space-y-2 mt-4">
-                                    <Label>Plan</Label>
-                                    <div className="px-3 py-2.5 bg-[var(--hover-bg)] border border-[var(--card-border)] rounded-xl text-sm text-[var(--foreground)]">
-                                        <Badge variant="primary">{workspace.subscription?.plan || "FREE"}</Badge>
-                                    </div>
-                                </div>
-
-                                <div className="flex justify-end pt-4">
-                                    <Button type="submit">
-                                        <Save size={16} />
-                                        Guardar Cambios
-                                    </Button>
-                                </div>
-                            </form>
-                            </CardContent>
-                        </Card>
-                    </div>
-                    </TabsContent>
-
-                    {/* Tab Content: General (Business Lines, etc.) */}
-                    <TabsContent value="general" className="mt-0">
-                        <div className="space-y-6">
-                            <div className="flex items-center gap-2 text-sm text-[var(--muted-text)]">
-                                <BriefcaseBusiness size={15} />
-                                <span>Configuraciones comerciales para el equipo de ventas.</span>
-                            </div>
-                            <BusinessLinesSection businessLines={businessLines} />
-                            <ProjectRateReferencesSection projectRateReferences={projectRateReferences} />
-                        </div>
-                    </TabsContent>
-
-                    {/* Tab Content: Exchange Rates */}
-                    <TabsContent value="exchangeRates" className="mt-0">
-                        <div className="space-y-6">
-                            <ExchangeRatesSection exchangeRates={exchangeRates} />
-                        </div>
-                    </TabsContent>
-
-                    {/* Tab Content: Contract */}
-                    <TabsContent value="contract" className="mt-0">
-                    <div className="space-y-6">
-                        <div className="bg-white shadow-sm rounded-lg border border-graphite-gray p-6">
-                            <h2 className="text-lg font-semibold text-nearby-dark mb-2">Plantilla del Contrato</h2>
-                            <p className="text-sm text-gray-500 mb-6">
-                                Este es el texto que verán los clientes al aceptar los Términos y Condiciones.
-                                Puedes usar las siguientes variables que se reemplazarán automáticamente:
-                            </p>
-                            
-                            <div className="mb-6 p-4 bg-soft-gray rounded-lg">
-                                <p className="text-sm font-medium text-dark-slate mb-2">Variables disponibles:</p>
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-gray-600">
-                                    <code className="bg-white px-2 py-1 rounded">{"{{CLIENTE_RAZON_SOCIAL}}"}</code>
-                                    <code className="bg-white px-2 py-1 rounded">{"{{CLIENTE_RNC}}"}</code>
-                                    <code className="bg-white px-2 py-1 rounded">{"{{CLIENTE_DIRECCION}}"}</code>
-                                    <code className="bg-white px-2 py-1 rounded">{"{{CLIENTE_REPRESENTANTE}}"}</code>
-                                    <code className="bg-white px-2 py-1 rounded">{"{{PROYECTOS_INICIALES}}"}</code>
-                                    <code className="bg-white px-2 py-1 rounded">{"{{USUARIOS_INICIALES}}"}</code>
-                                    <code className="bg-white px-2 py-1 rounded">{"{{ID_COTIZACION}}"}</code>
-                                    <code className="bg-white px-2 py-1 rounded">{"{{PROVEEDOR_NOMBRE}}"}</code>
-                                    <code className="bg-white px-2 py-1 rounded">{"{{FECHA_ACTUAL}}"}</code>
-                                </div>
-                            </div>
-
-                            {contractMessage && (
-                                <div className={`p-4 rounded-md mb-6 ${contractMessage.type === 'success' ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}`}>
-                                    {contractMessage.text}
+    const renderSectionContent = () => {
+        switch (activeSection) {
+            case 'workspace':
+                return (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Información del Workspace</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                        <form action={workspaceAction} className="space-y-6">
+                            {workspaceState?.message && (
+                                <div className={`p-4 rounded-xl ${workspaceState.message.includes("success") ? "bg-success-green/10 text-success-green" : "bg-error-red/10 text-error-red"}`}>
+                                    {workspaceState.message}
                                 </div>
                             )}
-
-                            <div className="space-y-4">
-                                <div>
-                                    <label htmlFor="contractVersion" className="block text-sm font-medium text-dark-slate mb-2">
-                                        Versión del Contrato
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="contractVersion"
-                                        value={contractVersion}
-                                        onChange={(e) => setContractVersion(e.target.value)}
-                                        placeholder="v1.0"
-                                        className="w-full max-w-xs px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
-                                    />
+                            <ImageUpload currentImage={workspace.logoUrl} onImageChange={(url) => setLogoUrl(url)} category="logo" folder="logos" size="lg" shape="square" label="Logo de la Empresa" />
+                            <input type="hidden" name="logoUrl" value={logoUrl || ""} />
+                            <div className="space-y-4 sm:grid sm:grid-cols-2 sm:gap-4 sm:space-y-0">
+                                <div className="space-y-2">
+                                    <Label htmlFor="name">Nombre del Workspace</Label>
+                                    <Input type="text" name="name" id="name" defaultValue={workspace.name} required error={!!workspaceState?.errors?.name} />
+                                    {workspaceState?.errors?.name && <p className="text-sm text-error-red">{workspaceState.errors.name}</p>}
                                 </div>
-
-                                <div>
-                                    <label htmlFor="contractContent" className="block text-sm font-medium text-dark-slate mb-2">
-                                        Contenido del Contrato (HTML)
-                                    </label>
-                                    <textarea
-                                        id="contractContent"
-                                        value={contractContent}
-                                        onChange={(e) => setContractContent(e.target.value)}
-                                        rows={20}
-                                        className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm font-mono text-xs"
-                                        placeholder="Ingrese el contenido del contrato..."
-                                    />
-                                    <p className="mt-1 text-xs text-gray-500">
-                                        Puedes usar etiquetas HTML para dar formato: &lt;h3&gt;, &lt;p&gt;, &lt;strong&gt;, &lt;ul&gt;, &lt;li&gt;, etc.
-                                    </p>
+                                <div className="space-y-2">
+                                    <Label htmlFor="legalName">Nombre o Razón Social</Label>
+                                    <Input type="text" name="legalName" id="legalName" defaultValue={workspace.legalName || ''} />
                                 </div>
-
-                                <div className="flex justify-between items-center pt-4 border-t border-graphite-gray">
-                                    <button
-                                        type="button"
-                                        onClick={() => setContractContent(getDefaultContractTemplate())}
-                                        className="text-sm text-gray-500 hover:text-gray-700"
-                                    >
-                                        Restaurar plantilla por defecto
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={handleSaveContract}
-                                        disabled={savingContract}
-                                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900 transition-colors disabled:opacity-50"
-                                    >
-                                        {savingContract ? (
-                                            <>
-                                                <Loader2 size={16} className="mr-2 animate-spin" />
-                                                Guardando...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Save size={16} className="mr-2" />
-                                                Guardar Contrato
-                                            </>
-                                        )}
-                                    </button>
+                                <div className="space-y-2">
+                                    <Label htmlFor="rnc">RNC</Label>
+                                    <Input type="text" name="rnc" id="rnc" defaultValue={workspace.rnc || ''} placeholder="000-0000000-0" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="phone">Teléfono</Label>
+                                    <Input type="tel" name="phone" id="phone" defaultValue={workspace.phone || ''} placeholder="+1 (809) 000-0000" />
                                 </div>
                             </div>
-
-                            {/* Preview */}
-                            <div className="mt-8 pt-6 border-t border-graphite-gray">
-                                <h3 className="text-sm font-medium text-dark-slate mb-4">Vista Previa</h3>
-                                <div className="bg-soft-gray border border-graphite-gray rounded-md p-6 max-h-96 overflow-y-auto">
-                                    <div 
-                                        className="prose prose-sm max-w-none"
-                                        dangerouslySetInnerHTML={{ __html: contractContent }}
-                                    />
+                            <div className="space-y-2">
+                                <Label htmlFor="address">Dirección</Label>
+                                <textarea name="address" id="address" rows={2} defaultValue={workspace.address || ''} placeholder="Calle, Número, Sector, Ciudad, País" className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors resize-none" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Plan</Label>
+                                <div className="px-3 py-2.5 bg-[var(--hover-bg)] border border-[var(--card-border)] rounded-xl text-sm text-[var(--foreground)]">
+                                    <Badge variant="primary">{workspace.subscription?.plan || "FREE"}</Badge>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    </TabsContent>
+                            <div className="flex justify-end pt-4">
+                                <Button type="submit"><Save size={16} /> Guardar Cambios</Button>
+                            </div>
+                        </form>
+                        </CardContent>
+                    </Card>
+                );
 
-                    {/* Tab Content: Team */}
-                    <TabsContent value="team" className="mt-0 overflow-hidden">
-                    <div className="space-y-6 overflow-hidden w-full max-w-full">
-                        {/* Team Management */}
-                        <Card className="overflow-hidden w-full max-w-full">
-                            <CardHeader className="overflow-hidden pb-4">
-                                <CardTitle className="text-lg">Equipo</CardTitle>
-                                <p className="text-sm text-[var(--muted-text)] mt-1">
-                                    {totalMembers} de 5 miembros (Plan FREE)
-                                </p>
-                                {canAddMembers && (
-                                    <Button
-                                        onClick={() => setShowInviteForm(!showInviteForm)}
-                                        className="w-full mt-3"
-                                        size="default"
-                                    >
-                                        <UserPlus size={16} />
-                                        Invitar Miembro
-                                    </Button>
-                                )}
-                            </CardHeader>
-                            <CardContent className="overflow-hidden">
-                            {/* Invite Form */}
+            case 'team':
+                return (
+                    <Card className="overflow-hidden">
+                        <CardHeader className="pb-4">
+                            <CardTitle className="text-lg">Equipo</CardTitle>
+                            <p className="text-sm text-[var(--muted-text)] mt-1">{totalMembers} de 5 miembros (Plan FREE)</p>
+                            {canAddMembers && (
+                                <Button onClick={() => setShowInviteForm(!showInviteForm)} className="w-full mt-3" size="default">
+                                    <UserPlus size={16} /> Invitar Miembro
+                                </Button>
+                            )}
+                        </CardHeader>
+                        <CardContent className="overflow-hidden">
                             {showInviteForm && (
                                 <form action={invitationAction} className="mb-6 p-4 bg-[var(--hover-bg)] rounded-xl border border-[var(--card-border)]">
                                     <div className="flex items-start justify-between mb-4">
                                         <h3 className="text-sm font-medium text-[var(--foreground)]">Nueva Invitación</h3>
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowInviteForm(false)}
-                                            className="text-[var(--muted-text)] hover:text-[var(--foreground)] p-1"
-                                        >
-                                            <X size={18} />
-                                        </button>
+                                        <button type="button" onClick={() => setShowInviteForm(false)} className="text-[var(--muted-text)] hover:text-[var(--foreground)] p-1"><X size={18} /></button>
                                     </div>
-
                                     {invitationState?.message && (
-                                        <div className={`p-3 rounded-xl mb-4 text-sm ${invitationState.message.includes("success") ? "bg-success-green/10 text-success-green" : "bg-error-red/10 text-error-red"}`}>
-                                            {invitationState.message}
-                                        </div>
+                                        <div className={`p-3 rounded-xl mb-4 text-sm ${invitationState.message.includes("success") ? "bg-success-green/10 text-success-green" : "bg-error-red/10 text-error-red"}`}>{invitationState.message}</div>
                                     )}
-
-                                    {/* Stacked on mobile */}
                                     <div className="space-y-4">
                                         <div className="space-y-2">
                                             <Label htmlFor="email">Email</Label>
-                                            <Input
-                                                type="email"
-                                                name="email"
-                                                id="email"
-                                                placeholder="miembro@email.com"
-                                                required
-                                                error={!!invitationState?.errors?.email}
-                                            />
-                                            {invitationState?.errors?.email && (
-                                                <p className="text-sm text-error-red">{invitationState.errors.email}</p>
-                                            )}
+                                            <Input type="email" name="email" id="email" placeholder="miembro@email.com" required error={!!invitationState?.errors?.email} />
+                                            {invitationState?.errors?.email && <p className="text-sm text-error-red">{invitationState.errors.email}</p>}
                                         </div>
-
                                         <div className="space-y-2">
                                             <Label htmlFor="role">Rol</Label>
-                                            <select
-                                                name="role"
-                                                id="role"
-                                                defaultValue="MEMBER"
-                                                className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
-                                            >
+                                            <select name="role" id="role" defaultValue="MEMBER" className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors">
                                                 <option value="MEMBER">Miembro</option>
                                                 <option value="ADMIN">Administrador</option>
                                                 <option value="VIEWER">Solo lectura</option>
                                             </select>
                                         </div>
                                     </div>
-
-                                    <div className="mt-4">
-                                        <Button type="submit" className="w-full sm:w-auto">
-                                            <Mail size={16} />
-                                            Enviar Invitación
-                                        </Button>
-                                    </div>
+                                    <div className="mt-4"><Button type="submit" className="w-full sm:w-auto"><Mail size={16} /> Enviar Invitación</Button></div>
                                 </form>
                             )}
-
-                            {/* Members List */}
                             <div className="space-y-3 overflow-hidden">
                                 <h3 className="text-sm font-medium text-[var(--foreground)]">Miembros Activos</h3>
-                                
-                                {/* Owner */}
                                 <div className="flex items-center gap-2 p-3 border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] overflow-hidden">
                                     {workspace.owner.photoUrl ? (
-                                        <img
-                                            src={workspace.owner.photoUrl}
-                                            alt={workspace.owner.name || ""}
-                                            className="h-9 w-9 rounded-full object-cover flex-shrink-0"
-                                        />
+                                        <img src={workspace.owner.photoUrl} alt={workspace.owner.name || ""} className="h-9 w-9 rounded-full object-cover flex-shrink-0" />
                                     ) : (
-                                        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-dark flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
-                                            {getInitials(workspace.owner.name, workspace.owner.email)}
-                                        </div>
+                                        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-dark flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">{getInitials(workspace.owner.name, workspace.owner.email)}</div>
                                     )}
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-sm font-medium text-[var(--foreground)] truncate">
-                                            {workspace.owner.name || workspace.owner.email}
-                                        </p>
+                                        <p className="text-sm font-medium text-[var(--foreground)] truncate">{workspace.owner.name || workspace.owner.email}</p>
                                         <p className="text-xs text-[var(--muted-text)] truncate">{workspace.owner.email}</p>
                                     </div>
                                     <Badge variant="secondary" className="flex-shrink-0 text-xs">Owner</Badge>
                                 </div>
-
-                                {/* Members */}
                                 {workspace.members.map((member) => (
                                     <div key={member.id} className="flex items-center gap-2 p-3 border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] overflow-hidden">
                                         {member.user.photoUrl ? (
-                                            <img
-                                                src={member.user.photoUrl}
-                                                alt={member.user.name || ""}
-                                                className="h-9 w-9 rounded-full object-cover flex-shrink-0"
-                                            />
+                                            <img src={member.user.photoUrl} alt={member.user.name || ""} className="h-9 w-9 rounded-full object-cover flex-shrink-0" />
                                         ) : (
-                                            <div className="h-9 w-9 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-dark flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
-                                                {getInitials(member.user.name, member.user.email)}
-                                            </div>
+                                            <div className="h-9 w-9 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-dark flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">{getInitials(member.user.name, member.user.email)}</div>
                                         )}
                                         <div className="min-w-0 flex-1">
-                                            <p className="text-sm font-medium text-[var(--foreground)] truncate">
-                                                {member.user.name || member.user.email}
-                                            </p>
+                                            <p className="text-sm font-medium text-[var(--foreground)] truncate">{member.user.name || member.user.email}</p>
                                             <p className="text-xs text-[var(--muted-text)] truncate">{member.user.email}</p>
                                         </div>
-                                        <Badge variant={member.role === 'ADMIN' ? 'info' : 'success'} className="flex-shrink-0 text-xs">
-                                            {member.role}
-                                        </Badge>
-                                        <button
-                                            onClick={() => handleRemoveMember(member.id)}
-                                            disabled={removingId === member.id || member.user.id === workspace.owner.id}
-                                            className="text-error-red hover:text-red-700 disabled:opacity-50 p-1 flex-shrink-0"
-                                            title={member.user.id === workspace.owner.id ? "No se puede eliminar al Owner" : "Eliminar"}
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
+                                        <Badge variant={member.role === 'ADMIN' ? 'info' : 'success'} className="flex-shrink-0 text-xs">{member.role}</Badge>
+                                        <button onClick={() => handleRemoveMember(member.id)} disabled={removingId === member.id || member.user.id === workspace.owner.id} className="text-error-red hover:text-red-700 disabled:opacity-50 p-1 flex-shrink-0" title={member.user.id === workspace.owner.id ? "No se puede eliminar al Owner" : "Eliminar"}><Trash2 size={16} /></button>
                                     </div>
                                 ))}
                             </div>
-
-                            {/* Pending Invitations */}
                             {workspace.invitations.length > 0 && (
                                 <div className="mt-6 space-y-3 overflow-hidden">
                                     <h3 className="text-sm font-medium text-[var(--foreground)]">Invitaciones Pendientes</h3>
                                     {workspace.invitations.map((invitation) => (
                                         <div key={invitation.id} className="flex items-center gap-2 p-3 border border-dashed border-[var(--card-border)] rounded-xl bg-[var(--hover-bg)] overflow-hidden">
-                                            <div className="flex-shrink-0 h-9 w-9 rounded-full bg-[var(--card-border)] flex items-center justify-center text-[var(--muted-text)]">
-                                                <Mail size={18} />
-                                            </div>
+                                            <div className="flex-shrink-0 h-9 w-9 rounded-full bg-[var(--card-border)] flex items-center justify-center text-[var(--muted-text)]"><Mail size={18} /></div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-medium text-[var(--foreground)] truncate">{invitation.email}</p>
-                                                <p className="text-xs text-[var(--muted-text)] truncate">
-                                                    Por {invitation.inviter.name || invitation.inviter.email}
-                                                </p>
+                                                <p className="text-xs text-[var(--muted-text)] truncate">Por {invitation.inviter.name || invitation.inviter.email}</p>
                                             </div>
                                             <Badge variant="warning" className="flex-shrink-0 text-xs">Pendiente</Badge>
-                                            <button
-                                                onClick={() => handleRevokeInvitation(invitation.id)}
-                                                disabled={revokingId === invitation.id}
-                                                className="text-error-red hover:text-red-700 disabled:opacity-50 p-1 flex-shrink-0"
-                                            >
-                                                <X size={16} />
-                                            </button>
+                                            <button onClick={() => handleRevokeInvitation(invitation.id)} disabled={revokingId === invitation.id} className="text-error-red hover:text-red-700 disabled:opacity-50 p-1 flex-shrink-0"><X size={16} /></button>
                                         </div>
                                     ))}
                                 </div>
                             )}
-                            </CardContent>
-                        </Card>
-                    </div>
-                    </TabsContent>
+                        </CardContent>
+                    </Card>
+                );
 
-                    {/* Tab Content: Integrations */}
-                    <TabsContent value="integrations" className="mt-0 space-y-6">
-                        <BillingConfigTab
-                            currentConfig={{
-                                enabled: workspace.billingEnabled || false,
-                                emailsCC: workspace.billingEmailsCC || null,
-                                emailsBCC: workspace.billingEmailsBCC || null,
-                                emailSubject: workspace.billingEmailSubject || null,
-                                emailBody: workspace.billingEmailBody || null,
-                                fromUserId: workspace.billingFromUserId || null,
-                            }}
-                            availableUsers={workspaceUsers}
-                            senderEmailConfig={billingSenderEmailConfig}
-                        />
-                        <AdmCloudConfigTab 
-                            currentConfig={{
-                                enabled: workspace.admCloudEnabled || false,
-                                appId: workspace.admCloudAppId || null,
-                                username: workspace.admCloudUsername || null,
-                                password: workspace.admCloudPassword || null,
-                                company: workspace.admCloudCompany || null,
-                                role: workspace.admCloudRole || null,
-                                defaultPriceListId: workspace.admCloudDefaultPriceListId || null,
-                                defaultPriceListName: workspace.admCloudDefaultPriceListName || null,
-                                defaultPaymentTermId: workspace.admCloudDefaultPaymentTermId || null,
-                                defaultPaymentTermName: workspace.admCloudDefaultPaymentTermName || null,
-                                defaultSalesStageId: workspace.admCloudDefaultSalesStageId || null,
-                                defaultSalesStageNam: workspace.admCloudDefaultStageName || null,
-                            }}
-                        />
-                        <ClickUpConfigTab 
-                            currentConfig={{
-                                enabled: workspace.clickUpEnabled || false,
-                                apiToken: workspace.clickUpApiToken || null,
-                                workspaceId: workspace.clickUpWorkspaceId || null,
-                                listId: workspace.clickUpListId || null,
-                                clientFieldId: workspace.clickUpClientFieldId || null,
-                            }}
-                        />
-                    </TabsContent>
-                </Tabs>
+            case 'contract':
+                return (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Plantilla del Contrato</CardTitle>
+                            <p className="text-sm text-[var(--muted-text)]">Texto que verán los clientes al aceptar los Términos y Condiciones.</p>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="mb-6 p-4 bg-[var(--hover-bg)] rounded-xl">
+                                <p className="text-sm font-medium text-[var(--foreground)] mb-2">Variables disponibles:</p>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-[var(--muted-text)]">
+                                    {["CLIENTE_RAZON_SOCIAL","CLIENTE_RNC","CLIENTE_DIRECCION","CLIENTE_REPRESENTANTE","PROYECTOS_INICIALES","USUARIOS_INICIALES","ID_COTIZACION","PROVEEDOR_NOMBRE","FECHA_ACTUAL"].map(v => (
+                                        <code key={v} className="bg-[var(--card-bg)] px-2 py-1 rounded-lg border border-[var(--card-border)]">{`{{${v}}}`}</code>
+                                    ))}
+                                </div>
+                            </div>
+                            {contractMessage && (
+                                <div className={`p-4 rounded-xl mb-6 ${contractMessage.type === 'success' ? "bg-success-green/10 text-success-green" : "bg-error-red/10 text-error-red"}`}>{contractMessage.text}</div>
+                            )}
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="contractVersion">Versión del Contrato</Label>
+                                    <Input type="text" id="contractVersion" value={contractVersion} onChange={(e) => setContractVersion(e.target.value)} placeholder="v1.0" className="max-w-xs" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="contractContent">Contenido del Contrato (HTML)</Label>
+                                    <textarea id="contractContent" value={contractContent} onChange={(e) => setContractContent(e.target.value)} rows={20} className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-xl bg-[var(--input-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors font-mono text-xs resize-none" placeholder="Ingrese el contenido del contrato..." />
+                                    <p className="text-xs text-[var(--muted-text)]">Puedes usar etiquetas HTML para dar formato.</p>
+                                </div>
+                                <div className="flex justify-between items-center pt-4 border-t border-[var(--card-border)]">
+                                    <Button type="button" variant="ghost" onClick={() => setContractContent(getDefaultContractTemplate())}>Restaurar plantilla por defecto</Button>
+                                    <Button type="button" onClick={handleSaveContract} disabled={savingContract}>
+                                        {savingContract ? <><Loader2 size={16} className="animate-spin" /> Guardando...</> : <><Save size={16} /> Guardar Contrato</>}
+                                    </Button>
+                                </div>
+                            </div>
+                            <div className="mt-8 pt-6 border-t border-[var(--card-border)]">
+                                <h3 className="text-sm font-medium text-[var(--foreground)] mb-4">Vista Previa</h3>
+                                <div className="bg-[var(--hover-bg)] border border-[var(--card-border)] rounded-xl p-6 max-h-96 overflow-y-auto">
+                                    <div className="prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: contractContent }} />
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                );
+
+            case 'business-lines':
+                return <BusinessLinesSection businessLines={businessLines} />;
+
+            case 'rate-references':
+                return <ProjectRateReferencesSection projectRateReferences={projectRateReferences} />;
+
+            case 'exchange-rates':
+                return <ExchangeRatesSection exchangeRates={exchangeRates} />;
+
+            case 'billing':
+                return (
+                    <BillingConfigTab
+                        currentConfig={{
+                            enabled: workspace.billingEnabled || false,
+                            emailsCC: workspace.billingEmailsCC || null,
+                            emailsBCC: workspace.billingEmailsBCC || null,
+                            emailSubject: workspace.billingEmailSubject || null,
+                            emailBody: workspace.billingEmailBody || null,
+                            fromUserId: workspace.billingFromUserId || null,
+                        }}
+                        availableUsers={workspaceUsers}
+                        senderEmailConfig={billingSenderEmailConfig}
+                    />
+                );
+
+            case 'admcloud':
+                return (
+                    <AdmCloudConfigTab 
+                        currentConfig={{
+                            enabled: workspace.admCloudEnabled || false,
+                            appId: workspace.admCloudAppId || null,
+                            username: workspace.admCloudUsername || null,
+                            password: workspace.admCloudPassword || null,
+                            company: workspace.admCloudCompany || null,
+                            role: workspace.admCloudRole || null,
+                            defaultPriceListId: workspace.admCloudDefaultPriceListId || null,
+                            defaultPriceListName: workspace.admCloudDefaultPriceListName || null,
+                            defaultPaymentTermId: workspace.admCloudDefaultPaymentTermId || null,
+                            defaultPaymentTermName: workspace.admCloudDefaultPaymentTermName || null,
+                            defaultSalesStageId: workspace.admCloudDefaultSalesStageId || null,
+                            defaultSalesStageNam: workspace.admCloudDefaultStageName || null,
+                        }}
+                    />
+                );
+
+            case 'clickup':
+                return (
+                    <ClickUpConfigTab 
+                        currentConfig={{
+                            enabled: workspace.clickUpEnabled || false,
+                            apiToken: workspace.clickUpApiToken || null,
+                            workspaceId: workspace.clickUpWorkspaceId || null,
+                            listId: workspace.clickUpListId || null,
+                            clientFieldId: workspace.clickUpClientFieldId || null,
+                        }}
+                    />
+                );
+
+            default:
+                return null;
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-[var(--background)] py-6 sm:py-8 overflow-x-hidden">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden">
+                <div className="mb-6 sm:mb-8">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-[var(--foreground)]">Configuración</h1>
+                    <p className="text-sm sm:text-base text-[var(--muted-text)] mt-1">
+                        Gestiona tu workspace, equipo y configuraciones
+                    </p>
+                </div>
+
+                {/* Mobile: Dropdown selector */}
+                <div className="md:hidden mb-4">
+                    <button
+                        onClick={() => setMobileNavOpen(!mobileNavOpen)}
+                        className="w-full flex items-center justify-between px-4 py-3 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl text-sm font-medium text-[var(--foreground)]"
+                    >
+                        <span className="flex items-center gap-2">
+                            {currentSectionMeta && <currentSectionMeta.icon size={16} className="text-nearby-accent" />}
+                            {currentSectionMeta?.label}
+                        </span>
+                        <ChevronRight size={16} className={cn("text-[var(--muted-text)] transition-transform", mobileNavOpen && "rotate-90")} />
+                    </button>
+                    {mobileNavOpen && (
+                        <div className="mt-2 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl overflow-hidden shadow-lg">
+                            {sectionGroups.map((group) => (
+                                <div key={group.label}>
+                                    <p className="px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-text)] bg-[var(--hover-bg)]">
+                                        {group.label}
+                                    </p>
+                                    {group.items.map((item) => (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => { setActiveSection(item.id); setMobileNavOpen(false); }}
+                                            className={cn(
+                                                "w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors",
+                                                activeSection === item.id
+                                                    ? "text-nearby-accent bg-nearby-accent/5"
+                                                    : "text-[var(--foreground)] hover:bg-[var(--hover-bg)]"
+                                            )}
+                                        >
+                                            <item.icon size={16} />
+                                            {item.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Desktop: Sidebar + Content */}
+                <div className="flex gap-6">
+                    {/* Settings Sidebar (desktop only) */}
+                    <nav className="hidden md:block w-56 shrink-0">
+                        <div className="sticky top-20 space-y-5">
+                            {sectionGroups.map((group) => (
+                                <div key={group.label}>
+                                    <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-text)]">
+                                        {group.label}
+                                    </p>
+                                    <div className="space-y-0.5">
+                                        {group.items.map((item) => (
+                                            <button
+                                                key={item.id}
+                                                onClick={() => setActiveSection(item.id)}
+                                                className={cn(
+                                                    "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200",
+                                                    activeSection === item.id
+                                                        ? "bg-gradient-to-r from-nearby-accent/15 to-nearby-accent/5 text-nearby-accent shadow-sm"
+                                                        : "text-[var(--muted-text)] hover:bg-[var(--hover-bg)] hover:text-[var(--foreground)]"
+                                                )}
+                                            >
+                                                <item.icon size={16} className={cn(activeSection === item.id ? "text-nearby-accent" : "")} />
+                                                {item.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </nav>
+
+                    {/* Content area */}
+                    <div className="flex-1 min-w-0">
+                        {currentSectionMeta && (
+                            <div className="mb-5">
+                                <h2 className="text-lg font-semibold text-[var(--foreground)]">{currentSectionMeta.label}</h2>
+                                <p className="text-sm text-[var(--muted-text)] mt-0.5">{currentSectionMeta.description}</p>
+                            </div>
+                        )}
+                        {renderSectionContent()}
+                    </div>
+                </div>
             </div>
         </div>
     );

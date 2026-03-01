@@ -293,15 +293,15 @@ export function ActivitiesSection({
             {/* Timeline - Scrollable */}
             <div className="flex-1 overflow-y-auto pr-1 -mr-1">
                 {filteredActivities.length === 0 ? (
-                    <div className="text-center py-8 text-gray-400 text-xs">
+                    <div className="text-center py-8 text-[var(--muted-text)] text-xs">
                         {filter === "all" ? "Sin actividades" : "Sin actividades de este tipo"}
                     </div>
                 ) : (
                     <div className="relative">
                         {/* Timeline line */}
-                        <div className="absolute left-[11px] top-2 bottom-2 w-px bg-graphite-gray/50" />
+                        <div className="absolute left-[13px] top-4 bottom-4 w-0.5 bg-[var(--card-border)]" />
                         
-                        <div className="space-y-0">
+                        <div className="space-y-0.5">
                             {filteredActivities.map((activity) => {
                                 const config = getActivityConfig(activity);
                                 const Icon = config.icon;
@@ -310,26 +310,25 @@ export function ActivitiesSection({
                                 return (
                                     <div
                                         key={activity.id}
-                                        className="relative flex items-start gap-3 py-2 group"
+                                        className="relative flex items-start gap-3 py-2.5 px-1 rounded-lg hover:bg-[var(--hover-bg)] transition-colors group"
                                     >
                                         {/* Icon */}
-                                        <div className={`relative z-10 flex-shrink-0 w-6 h-6 rounded-full ${config.bgColor} flex items-center justify-center`}>
-                                            <Icon size={12} className={config.color} />
+                                        <div className={`relative z-10 flex-shrink-0 w-7 h-7 rounded-full ${config.bgColor} flex items-center justify-center ring-2 ring-[var(--card-bg)]`}>
+                                            <Icon size={13} className={config.color} />
                                         </div>
                                         
                                         {/* Content */}
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-start justify-between gap-2">
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-xs text-dark-slate leading-relaxed line-clamp-2">
+                                                    <p className="text-xs text-[var(--foreground)] leading-relaxed line-clamp-2 font-medium">
                                                         {config.label}
                                                     </p>
                                                     {activity.type === "EMAIL" && activity.emailTo && (
-                                                        <p className="text-[10px] text-gray-500 mt-0.5">
+                                                        <p className="text-[10px] text-[var(--muted-text)] mt-0.5">
                                                             Para: {activity.emailTo}
                                                         </p>
                                                     )}
-                                                    {/* Attachments */}
                                                     {attachments.length > 0 && (
                                                         <div className="flex flex-wrap gap-1 mt-1">
                                                             {attachments.map((file, idx) => {
@@ -340,7 +339,7 @@ export function ActivitiesSection({
                                                                         href={file.url}
                                                                         target="_blank"
                                                                         rel="noopener noreferrer"
-                                                                        className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-gray-100 rounded text-[10px] text-gray-600 hover:bg-gray-200"
+                                                                        className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-[var(--hover-bg)] rounded-md text-[10px] text-[var(--muted-text)] hover:bg-[var(--surface-0)] border border-[var(--card-border)]"
                                                                     >
                                                                         <FileIcon size={10} />
                                                                         <span className="truncate max-w-[80px]">{file.filename}</span>
@@ -350,12 +349,11 @@ export function ActivitiesSection({
                                                         </div>
                                                     )}
                                                 </div>
-                                                <span className="text-[10px] text-gray-400 whitespace-nowrap flex-shrink-0">
+                                                <span className="text-[10px] text-[var(--muted-text)] whitespace-nowrap flex-shrink-0">
                                                     {formatRelativeTime(new Date(activity.createdAt))}
                                                 </span>
                                             </div>
-                                            {/* User who created */}
-                                            <p className="text-[10px] text-gray-400 mt-0.5">
+                                            <p className="text-[10px] text-[var(--muted-text)] mt-0.5">
                                                 {activity.createdBy.name || activity.createdBy.email?.split('@')[0]}
                                             </p>
                                         </div>

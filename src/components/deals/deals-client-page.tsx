@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Table2, LayoutGrid } from "lucide-react";
+import { Plus, Table2, LayoutGrid, TrendingUp } from "lucide-react";
 import { Deal, Company, Contact, User, DealStatus, DealType } from "@prisma/client";
 import {
     DndContext,
@@ -84,7 +84,7 @@ function DealCard({ deal, isDragging = false }: { deal: DealWithRelations, isDra
         <div
             ref={setNodeRef}
             style={style}
-            className={`bg-white border border-graphite-gray rounded-lg p-3 hover:shadow-md transition-shadow touch-manipulation ${isDragging ? 'opacity-50 shadow-lg' : ''}`}
+            className={`bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl p-3 hover:shadow-md transition-shadow touch-manipulation ${isDragging ? 'opacity-50 shadow-lg' : ''}`}
         >
             {/* Drag Handle & Title */}
             <div className="flex items-start justify-between gap-2 mb-2">
@@ -536,37 +536,46 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table", in
     };
 
     return (
-        <div className="min-h-screen bg-soft-gray py-8">
+        <div className="min-h-screen bg-[var(--surface-0)] py-6 sm:py-8">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-                    <div>
-                        <h1 className="text-2xl sm:text-3xl font-bold text-nearby-dark">Negocios</h1>
-                        <p className="text-dark-slate mt-2 text-sm sm:text-base">
-                            Gestiona tu pipeline de ventas y oportunidades
-                        </p>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                    <div className="flex items-center gap-3">
+                        <div className="hidden sm:flex h-10 w-10 rounded-xl bg-nearby-accent/10 items-center justify-center">
+                            <TrendingUp size={20} className="text-nearby-accent" />
+                        </div>
+                        <div>
+                            <h1 className="text-xl sm:text-2xl font-bold text-[var(--foreground)] flex items-center gap-2">
+                                Negocios
+                                <span className="text-sm font-medium text-[var(--muted-text)] bg-[var(--hover-bg)] px-2 py-0.5 rounded-full">
+                                    {deals.length}
+                                </span>
+                            </h1>
+                            <p className="text-sm text-[var(--muted-text)] mt-0.5">
+                                Gestiona tu pipeline de ventas y oportunidades
+                            </p>
+                        </div>
                     </div>
                     <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-3">
-                        {/* View Toggle */}
-                        <div className="inline-flex rounded-md shadow-sm">
+                        <div className="inline-flex rounded-xl overflow-hidden border border-[var(--card-border)]">
                             <button
                                 onClick={() => setViewMode("table")}
-                                className={`inline-flex items-center justify-center px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium border ${
+                                className={`inline-flex items-center justify-center px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-colors ${
                                     viewMode === "table"
-                                        ? "bg-nearby-dark text-white border-nearby-dark"
-                                        : "bg-white text-dark-slate border-graphite-gray hover:bg-gray-50"
-                                } rounded-l-md transition-colors`}
+                                        ? "bg-nearby-dark text-white"
+                                        : "bg-[var(--card-bg)] text-[var(--muted-text)] hover:bg-[var(--hover-bg)]"
+                                }`}
                             >
                                 <Table2 size={16} className="sm:mr-2" />
                                 <span className="hidden sm:inline">Tabla</span>
                             </button>
                             <button
                                 onClick={() => setViewMode("kanban")}
-                                className={`inline-flex items-center justify-center px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium border-t border-r border-b ${
+                                className={`inline-flex items-center justify-center px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium border-l border-[var(--card-border)] transition-colors ${
                                     viewMode === "kanban"
-                                        ? "bg-nearby-dark text-white border-nearby-dark"
-                                        : "bg-white text-dark-slate border-graphite-gray hover:bg-gray-50"
-                                } rounded-r-md transition-colors`}
+                                        ? "bg-nearby-dark text-white"
+                                        : "bg-[var(--card-bg)] text-[var(--muted-text)] hover:bg-[var(--hover-bg)]"
+                                }`}
                             >
                                 <LayoutGrid size={16} className="sm:mr-2" />
                                 <span className="hidden sm:inline">Kanban</span>
@@ -575,9 +584,9 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table", in
 
                         <Link
                             href="/app/deals/new"
-                            className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900 transition-colors"
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-nearby-dark rounded-xl hover:bg-nearby-dark-600 transition-colors shadow-sm"
                         >
-                            <Plus size={20} className="mr-2" />
+                            <Plus size={16} />
                             <span className="hidden sm:inline">Nuevo Negocio</span>
                             <span className="sm:hidden">Nuevo</span>
                         </Link>

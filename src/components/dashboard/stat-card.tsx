@@ -16,19 +16,19 @@ interface StatCardProps {
 
 const colorStyles = {
     accent: {
-        bg: "bg-nearby-accent-50",
+        bg: "bg-nearby-accent-50 dark:bg-nearby-accent/10",
         icon: "text-nearby-accent",
     },
     success: {
-        bg: "bg-green-50",
+        bg: "bg-success-green/10",
         icon: "text-success-green",
     },
     warning: {
-        bg: "bg-amber-50",
+        bg: "bg-warning-amber/10",
         icon: "text-warning-amber",
     },
     info: {
-        bg: "bg-blue-50",
+        bg: "bg-info-blue/10",
         icon: "text-ocean-blue",
     },
 };
@@ -44,9 +44,9 @@ export function StatCard({
     const styles = colorStyles[color];
 
     return (
-        <div className="bg-white rounded-xl border border-graphite-gray p-3 sm:p-5 hover:shadow-lg transition-all duration-300 active:scale-[0.98]">
+        <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-3 sm:p-5 hover:shadow-lg transition-all duration-300 active:scale-[0.98]">
             <div className="flex items-center justify-between mb-2 sm:mb-3">
-                <span className="text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wide">
+                <span className="text-[10px] sm:text-xs font-medium text-[var(--muted-text)] uppercase tracking-wide">
                     {title}
                 </span>
                 <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg ${styles.bg} flex items-center justify-center`}>
@@ -55,7 +55,7 @@ export function StatCard({
             </div>
             
             <div className="flex items-baseline gap-1.5 sm:gap-2">
-                <span className="text-xl sm:text-2xl font-bold text-nearby-dark">
+                <span className="text-xl sm:text-2xl font-bold text-[var(--foreground)]">
                     {typeof value === "number" ? value.toLocaleString() : value}
                 </span>
                 
@@ -74,7 +74,7 @@ export function StatCard({
             </div>
             
             {description && (
-                <p className="text-[10px] sm:text-xs text-gray-500 mt-1.5 sm:mt-2">{description}</p>
+                <p className="text-[10px] sm:text-xs text-[var(--muted-text)] mt-1.5 sm:mt-2">{description}</p>
             )}
         </div>
     );

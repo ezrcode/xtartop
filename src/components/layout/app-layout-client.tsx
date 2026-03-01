@@ -4,6 +4,7 @@ import { useState, Suspense, useEffect } from "react";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { CommandPalette } from "@/components/layout/command-palette";
 import { OfflineBanner } from "@/components/ui/offline-banner";
 import { ThemePreference } from "@prisma/client";
 
@@ -70,12 +71,16 @@ export function AppLayoutClient({ user, userRole, currentExchangeRate = null, ch
 
     return (
         <div className="flex min-h-screen bg-[var(--background)]">
+            {/* Command Palette */}
+            <CommandPalette userRole={userRole} />
+            
             {/* Offline Banner */}
             <OfflineBanner />
             
             {/* Desktop Sidebar */}
             <Sidebar 
-                userRole={userRole} 
+                userRole={userRole}
+                user={user}
                 isMobileOpen={isMobileMenuOpen}
                 setIsMobileOpen={setIsMobileMenuOpen}
             />
