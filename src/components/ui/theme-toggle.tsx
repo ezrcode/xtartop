@@ -57,23 +57,15 @@ export function ThemeToggle({ initialTheme, variant = "buttons" }: ThemeTogglePr
                 size="icon"
                 onClick={() => handleThemeChange(nextTheme)}
                 disabled={isUpdating}
-                className="relative overflow-hidden"
+                className="relative"
                 title={theme === "DARK" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
             >
-                <div className={cn(
-                    "absolute inset-0 flex items-center justify-center transition-all duration-300",
-                    theme === "DARK" ? "rotate-0 opacity-100" : "rotate-90 opacity-0"
-                )}>
-                    <Sun size={20} className="text-amber-400" />
-                </div>
-                <div className={cn(
-                    "absolute inset-0 flex items-center justify-center transition-all duration-300",
-                    theme === "DARK" ? "-rotate-90 opacity-0" : "rotate-0 opacity-100"
-                )}>
-                    <Moon size={20} className="text-[var(--muted-text)]" />
-                </div>
-                {isUpdating && (
+                {isUpdating ? (
                     <Loader2 size={20} className="animate-spin text-[var(--muted-text)]" />
+                ) : theme === "DARK" ? (
+                    <Sun size={20} className="text-amber-400" />
+                ) : (
+                    <Moon size={20} className="text-[var(--muted-text)]" />
                 )}
             </Button>
         );
