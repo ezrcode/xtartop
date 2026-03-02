@@ -85,7 +85,7 @@ export function AppLayoutClient({ user, userRole, currentExchangeRate = null, ch
                 setIsMobileOpen={setIsMobileMenuOpen}
             />
             
-            <div className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
+            <div className={`flex-1 min-w-0 transition-all duration-300 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
                 <Suspense fallback={<TopbarSkeleton />}>
                     <Topbar 
                         user={user} 

@@ -242,8 +242,9 @@ export function ContactsTable({ contacts, initialPreferences, itemsPerPage = 10 
                                             </p>
                                         )}
                                         {contact.email && (
-                                            <p className="truncate break-all">
-                                                <span className="font-medium">Email:</span> {contact.email}
+                                            <p className="break-words">
+                                                <span className="font-medium">Email:</span>{" "}
+                                                <span className="[overflow-wrap:anywhere]">{contact.email}</span>
                                             </p>
                                         )}
                                     </div>
