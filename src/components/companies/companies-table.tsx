@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Building2, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { DataTable, Column, TablePreferences, ItemsPerPage } from "@/components/ui/data-table";
 import { saveTablePreferences } from "@/actions/table-preferences";
 import { CompanyStatus } from "@prisma/client";
@@ -28,13 +28,17 @@ interface CompaniesTableProps {
     itemsPerPage?: 10 | 25 | 50;
 }
 
-const statusConfig: Record<CompanyStatus, { label: string; className: string }> = {
-    CLIENTE: { label: "Cliente", className: "bg-success-green/10 text-success-green" },
-    POTENCIAL: { label: "Potencial", className: "bg-nearby-accent/10 text-nearby-accent" },
-    PROSPECTO: { label: "Prospecto", className: "bg-gray-100 text-gray-800" },
-    DESCARTADA: { label: "Descartada", className: "bg-error-red/10 text-error-red" },
-    INACTIVA: { label: "Inactiva", className: "bg-gray-100 text-gray-600" },
+const statusConfig: Record<CompanyStatus, { label: string; className: string; dotColor: string }> = {
+    CLIENTE: { label: "Cliente", className: "bg-success-green/10 text-success-green", dotColor: "bg-success-green" },
+    POTENCIAL: { label: "Potencial", className: "bg-nearby-accent/10 text-nearby-accent", dotColor: "bg-nearby-accent" },
+    PROSPECTO: { label: "Prospecto", className: "bg-gray-100 text-gray-800", dotColor: "bg-gray-400" },
+    DESCARTADA: { label: "Descartada", className: "bg-error-red/10 text-error-red", dotColor: "bg-error-red" },
+    INACTIVA: { label: "Inactiva", className: "bg-gray-100 text-gray-600", dotColor: "bg-gray-300" },
 };
+
+function getCompanyInitials(name: string): string {
+    return name.trim().substring(0, 2).toUpperCase();
+}
 
 export function CompaniesTable({ companies, initialPreferences, itemsPerPage = 10 }: CompaniesTableProps) {
     const router = useRouter();
@@ -46,7 +50,7 @@ export function CompaniesTable({ companies, initialPreferences, itemsPerPage = 1
             hideable: false,
             className: "w-14",
             render: (company) => (
-                <div className="w-10 h-10 rounded-lg bg-gray-100 border border-graphite-gray overflow-hidden flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg border border-graphite-gray overflow-hidden flex items-center justify-center">
                     {company.logoUrl ? (
                         <Image
                             src={company.logoUrl}
@@ -56,7 +60,11 @@ export function CompaniesTable({ companies, initialPreferences, itemsPerPage = 1
                             className="object-contain"
                         />
                     ) : (
-                        <Building2 size={20} className="text-gray-400" />
+                        <div className="w-full h-full bg-gradient-to-br from-nearby-dark/10 to-nearby-dark/5 flex items-center justify-center">
+                            <span className="text-nearby-dark font-bold text-sm">
+                                {getCompanyInitials(company.name)}
+                            </span>
+                        </div>
                     )}
                 </div>
             ),
@@ -69,10 +77,17 @@ export function CompaniesTable({ companies, initialPreferences, itemsPerPage = 1
             render: (company) => (
                 <Link
                     href={`/app/companies/${company.id}`}
-                    className="text-sm font-medium text-nearby-accent hover:text-nearby-dark"
+                    className="group block"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    {company.name}
+                    <span className="text-sm font-medium text-nearby-accent group-hover:underline">
+                        {company.name}
+                    </span>
+                    {company.city && (
+                        <span className="block text-xs text-[var(--muted-text)] truncate max-w-[220px]">
+                            {company.city}
+                        </span>
+                    )}
                 </Link>
             ),
         },
@@ -129,7 +144,8 @@ export function CompaniesTable({ companies, initialPreferences, itemsPerPage = 1
             render: (company) => {
                 const config = statusConfig[company.status];
                 return (
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${config.className}`}>
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${config.className}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${config.dotColor}`} />
                         {config.label}
                     </span>
                 );
@@ -191,51 +207,64 @@ export function CompaniesTable({ companies, initialPreferences, itemsPerPage = 1
 
             {/* Mobile Card View */}
             <div className="md:hidden bg-white shadow-sm rounded-lg border border-graphite-gray overflow-hidden divide-y divide-graphite-gray">
-                {companies.map((company) => (
-                    <Link
-                        key={company.id}
-                        href={`/app/companies/${company.id}`}
-                        className="block p-4 hover:bg-soft-gray transition-colors"
-                    >
-                        <div className="flex items-start gap-3 mb-2">
-                            <div className="w-10 h-10 rounded-lg bg-gray-100 border border-graphite-gray overflow-hidden flex items-center justify-center flex-shrink-0">
-                                {company.logoUrl ? (
-                                    <Image
-                                        src={company.logoUrl}
-                                        alt={company.name}
-                                        width={40}
-                                        height={40}
-                                        className="object-contain"
-                                    />
-                                ) : (
-                                    <Building2 size={20} className="text-gray-400" />
-                                )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-start justify-between">
-                                    <h3 className="text-base font-semibold text-nearby-accent truncate">
-                                        {company.name}
-                                    </h3>
-                                    <span className={`ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full flex-shrink-0 ${statusConfig[company.status].className}`}>
-                                        {statusConfig[company.status].label}
-                                    </span>
-                                </div>
-                                <div className="space-y-1 text-sm text-dark-slate mt-1">
-                                    {(company.city || company.country) && (
-                                        <p>
-                                            <span className="font-medium">Ubicación:</span> {[company.city, company.country].filter(Boolean).join(", ") || "-"}
-                                        </p>
-                                    )}
-                                    {company.primaryContact && (
-                                        <p>
-                                            <span className="font-medium">Contacto:</span> {company.primaryContact.fullName}
-                                        </p>
+                {companies.map((company) => {
+                    const config = statusConfig[company.status];
+                    return (
+                        <Link
+                            key={company.id}
+                            href={`/app/companies/${company.id}`}
+                            className="block p-4 hover:bg-soft-gray transition-colors"
+                        >
+                            <div className="flex items-start gap-3 mb-2">
+                                <div className="w-10 h-10 rounded-lg border border-graphite-gray overflow-hidden flex items-center justify-center flex-shrink-0">
+                                    {company.logoUrl ? (
+                                        <Image
+                                            src={company.logoUrl}
+                                            alt={company.name}
+                                            width={40}
+                                            height={40}
+                                            className="object-contain"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full bg-gradient-to-br from-nearby-dark/10 to-nearby-dark/5 flex items-center justify-center">
+                                            <span className="text-nearby-dark font-bold text-sm">
+                                                {getCompanyInitials(company.name)}
+                                            </span>
+                                        </div>
                                     )}
                                 </div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-start justify-between">
+                                        <div className="min-w-0">
+                                            <h3 className="text-base font-semibold text-nearby-accent truncate">
+                                                {company.name}
+                                            </h3>
+                                            {company.city && (
+                                                <p className="text-xs text-[var(--muted-text)]">{company.city}</p>
+                                            )}
+                                        </div>
+                                        <span className={`ml-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold flex-shrink-0 ${config.className}`}>
+                                            <span className={`w-1.5 h-1.5 rounded-full ${config.dotColor}`} />
+                                            {config.label}
+                                        </span>
+                                    </div>
+                                    <div className="space-y-1 text-sm text-dark-slate mt-1">
+                                        {company.country && (
+                                            <p>
+                                                <span className="font-medium">País:</span> {company.country}
+                                            </p>
+                                        )}
+                                        {company.primaryContact && (
+                                            <p>
+                                                <span className="font-medium">Contacto:</span> {company.primaryContact.fullName}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </Link>
-                ))}
+                        </Link>
+                    );
+                })}
             </div>
         </>
     );
