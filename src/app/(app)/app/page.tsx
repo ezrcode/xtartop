@@ -146,7 +146,7 @@ interface StatCardProps {
     label: string;
     value: string | number;
     description?: string;
-    icon: React.ComponentType<{ size?: number; className?: string }>;
+    icon: React.ComponentType<{ size?: number | string; className?: string }>;
     gradient: string;
     iconColor: string;
 }
