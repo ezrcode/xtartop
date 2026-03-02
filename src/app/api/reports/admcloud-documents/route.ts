@@ -41,6 +41,63 @@ function extractExchangeRate(doc: AdmCloudInvoice | AdmCloudQuote): number {
     return isNaN(num) ? 0 : num;
 }
 
+function parseNumericValue(value: unknown): number | null {
+    if (typeof value === "number") return Number.isFinite(value) ? value : null;
+    if (typeof value === "string") {
+        const normalized = value.trim().replace(/,/g, "");
+        if (!normalized) return null;
+        const parsed = Number(normalized);
+        return Number.isFinite(parsed) ? parsed : null;
+    }
+    return null;
+}
+
+function getNumberFromAliases(record: Record<string, unknown>, aliases: string[]): number | null {
+    for (const alias of aliases) {
+        const direct = parseNumericValue(record[alias]);
+        if (direct !== null) return direct;
+    }
+
+    const lowerMap = new Map<string, unknown>();
+    for (const [key, value] of Object.entries(record)) {
+        lowerMap.set(key.toLowerCase(), value);
+    }
+
+    for (const alias of aliases) {
+        const match = parseNumericValue(lowerMap.get(alias.toLowerCase()));
+        if (match !== null) return match;
+    }
+
+    return null;
+}
+
+function getDiscountPercent(record: Record<string, unknown>, quantity: number, unitPrice: number): number {
+    const percent = getNumberFromAliases(record, [
+        "DiscountPercent",
+        "Discount",
+        "DiscountPct",
+        "DiscountPCT",
+        "DiscPercent",
+        "DiscPct",
+        "DiscPrcnt",
+    ]);
+    if (percent !== null) return percent;
+
+    const discountAmount = getNumberFromAliases(record, [
+        "DiscountAmount",
+        "DiscountValue",
+        "DiscAmount",
+        "DiscValue",
+    ]);
+
+    const gross = quantity * unitPrice;
+    if (discountAmount !== null && gross > 0) {
+        return (discountAmount * 100) / gross;
+    }
+
+    return 0;
+}
+
 function normalizeInvoiceItems(invoice: AdmCloudInvoice, clientName: string, clientId: string): ReportLine[] {
     const items = invoice.Items || [];
     const docDate = extractDocDate(invoice);
@@ -49,10 +106,13 @@ function normalizeInvoiceItems(invoice: AdmCloudInvoice, clientName: string, cli
 
     return items.map((item) => {
         const record = item as Record<string, unknown>;
-        const quantity = Number(record.Quantity || item.Quantity || 0);
-        const unitPrice = Number(record.UnitPrice || record.Price || item.UnitPrice || 0);
-        const discountPercent = Number(record.DiscountPercent || record.Discount || 0);
-        const extended = Number(record.Extended || record.Amount || item.Amount || (quantity * unitPrice * (1 - discountPercent / 100)));
+        const quantity = getNumberFromAliases(record, ["Quantity"]) ?? item.Quantity ?? 0;
+        const unitPrice = getNumberFromAliases(record, ["UnitPrice", "Price", "SalesPrice"]) ?? item.UnitPrice ?? 0;
+        const discountPercent = getDiscountPercent(record, quantity, unitPrice);
+        const extended =
+            getNumberFromAliases(record, ["Extended", "Amount", "LineTotal"]) ??
+            item.Amount ??
+            quantity * unitPrice * (1 - discountPercent / 100);
         const itemCode = String(record.ItemCode || record.ItemSKU || record.Code || "");
         const itemDesc = String(record.Description || record.Name || record.ItemName || item.Description || "");
 
@@ -81,10 +141,12 @@ function normalizeQuoteItems(quote: AdmCloudQuote, clientName: string, clientId:
 
     return items.map((item) => {
         const record = item as Record<string, unknown>;
-        const quantity = Number(record.Quantity || item.Quantity || 0);
-        const unitPrice = Number(record.UnitPrice || record.Price || item.Price || 0);
-        const discountPercent = Number(record.DiscountPercent || item.DiscountPercent || 0);
-        const extended = Number(record.Extended || (quantity * unitPrice * (1 - discountPercent / 100)));
+        const quantity = getNumberFromAliases(record, ["Quantity"]) ?? item.Quantity ?? 0;
+        const unitPrice = getNumberFromAliases(record, ["UnitPrice", "Price", "SalesPrice"]) ?? item.Price ?? 0;
+        const discountPercent = getDiscountPercent(record, quantity, unitPrice);
+        const extended =
+            getNumberFromAliases(record, ["Extended", "Amount", "LineTotal"]) ??
+            quantity * unitPrice * (1 - discountPercent / 100);
         const itemCode = String(record.ItemCode || record.ItemSKU || record.Code || "");
         const itemDesc = String(record.Description || record.Name || record.ItemName || item.Name || "");
 
