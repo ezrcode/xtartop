@@ -96,6 +96,14 @@ export async function getCompany(id: string) {
             workspaceId: workspace.id,
         },
         include: {
+            workspace: {
+                select: {
+                    name: true,
+                    legalName: true,
+                    contractTemplate: true,
+                    contractVersion: true,
+                },
+            },
             primaryContact: true,
             contacts: true,
             clientInvitations: {
@@ -279,4 +287,3 @@ export async function deleteCompany(id: string) {
 
     redirect("/app/companies");
 }
-

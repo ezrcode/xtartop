@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import Link from "next/link";
-import { Save, Trash2, ArrowLeft, Loader2, ChevronDown, Search, X, Building2, Users, CreditCard, Ticket } from "lucide-react";
+import { Save, Trash2, ArrowLeft, Loader2, ChevronDown, Search, X, Building2, Users, CreditCard, Ticket, Download } from "lucide-react";
 import { createCompanyAction, updateCompanyAction, deleteCompany, CompanyState } from "@/actions/companies";
 import { Company, Contact, CompanyStatus, ClientInvitation, Project, ClientUser } from "@prisma/client";
 import { CompanyActivitiesClient } from "../activities/company-activities-client";
@@ -27,6 +27,12 @@ type CompanyWithTerms = Company & {
     quoteId?: string | null;
     quoteFileUrl?: string | null;
     clickUpClientName?: string | null;
+    workspace?: {
+        name: string;
+        legalName: string | null;
+        contractTemplate: string | null;
+        contractVersion: string | null;
+    } | null;
 };
 
 interface CompanyFormProps {
@@ -95,13 +101,42 @@ function DeleteButton() {
     );
 }
 
+function replaceContractVariables(
+    template: string,
+    data: {
+        clientLegalName: string;
+        clientRnc: string;
+        clientAddress: string;
+        clientRepresentative: string;
+        providerName: string;
+        initialProjects: number;
+        initialUsers: number;
+        quoteId: string;
+        acceptanceDate: string;
+    }
+): string {
+    return template
+        .replace(/\{\{CLIENTE_RAZON_SOCIAL\}\}/g, data.clientLegalName || "—")
+        .replace(/\{\{CLIENTE_RNC\}\}/g, data.clientRnc || "—")
+        .replace(/\{\{CLIENTE_DIRECCION\}\}/g, data.clientAddress || "—")
+        .replace(/\{\{CLIENTE_REPRESENTANTE\}\}/g, data.clientRepresentative || "—")
+        .replace(/\{\{PROYECTOS_INICIALES\}\}/g, String(data.initialProjects || 0))
+        .replace(/\{\{USUARIOS_INICIALES\}\}/g, String(data.initialUsers || 0))
+        .replace(/\{\{ID_COTIZACION\}\}/g, data.quoteId || "—")
+        .replace(/\{\{PROVEEDOR_NOMBRE\}\}/g, data.providerName || "—")
+        .replace(/\{\{FECHA_ACTUAL\}\}/g, data.acceptanceDate || "—");
+}
+
 export function CompanyForm({ company, contacts, isEditMode = false, userRole = null }: CompanyFormProps) {
     const isAdmin = userRole === 'OWNER' || userRole === 'ADMIN';
     const formRef = useRef<HTMLFormElement>(null);
+    const signedContractRef = useRef<HTMLDivElement>(null);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<"general" | "contacts" | "subscription" | "tickets">("general");
     const [subscriptionSection, setSubscriptionSection] = useState<"contract" | "billing" | "proformas" | "invoices">("contract");
     const [pendingAction, setPendingAction] = useState<string | null>(null);
+    const [isGeneratingContractPdf, setIsGeneratingContractPdf] = useState(false);
+    const [contractPdfError, setContractPdfError] = useState<string | null>(null);
     
     // Controlled form fields - persist values across tab switches
     const [formData, setFormData] = useState({
@@ -197,6 +232,122 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
     const memoizedCompanyContacts = useMemo(() => {
         return contacts.filter(c => c.companyId === company?.id);
     }, [contacts, company?.id]);
+
+    const approvedByContact = useMemo(() => {
+        if (!company?.termsAcceptedById) return null;
+        return contacts.find((contact) => contact.id === company.termsAcceptedById) || null;
+    }, [company?.termsAcceptedById, contacts]);
+
+    const acceptanceDateTime = useMemo(() => {
+        if (!company?.termsAcceptedAt) return null;
+        return new Date(company.termsAcceptedAt).toLocaleString("es-DO", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+    }, [company?.termsAcceptedAt]);
+
+    const signedContractHtml = useMemo(() => {
+        if (!company?.termsAccepted) return "";
+
+        const template = company.workspace?.contractTemplate?.trim()
+            ? company.workspace.contractTemplate
+            : `<h2 style="text-align: center;">Contrato de Términos y Condiciones</h2><p>Se deja constancia de la aceptación de los términos y condiciones asociados a la cotización <strong>{{ID_COTIZACION}}</strong>.</p><h3>Datos del cliente</h3><ul><li><strong>Razón Social:</strong> {{CLIENTE_RAZON_SOCIAL}}</li><li><strong>RNC:</strong> {{CLIENTE_RNC}}</li><li><strong>Dirección:</strong> {{CLIENTE_DIRECCION}}</li><li><strong>Representante:</strong> {{CLIENTE_REPRESENTANTE}}</li></ul>`;
+
+        return replaceContractVariables(template, {
+            clientLegalName: formData.legalName || company.legalName || "",
+            clientRnc: formData.taxId || company.taxId || "",
+            clientAddress: formData.fiscalAddress || company.fiscalAddress || "",
+            clientRepresentative: company.termsAcceptedByName || approvedByContact?.fullName || "",
+            providerName: company.workspace?.legalName || company.workspace?.name || "NEARBY",
+            initialProjects: company.initialProjects || 0,
+            initialUsers: company.initialUsers || 0,
+            quoteId: formData.quoteId || company.quoteId || "",
+            acceptanceDate: company.termsAcceptedAt
+                ? new Date(company.termsAcceptedAt).toLocaleDateString("es-DO", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                })
+                : "—",
+        });
+    }, [
+        approvedByContact?.fullName,
+        company?.fiscalAddress,
+        company?.initialProjects,
+        company?.initialUsers,
+        company?.legalName,
+        company?.quoteId,
+        company?.taxId,
+        company?.termsAccepted,
+        company?.termsAcceptedAt,
+        company?.termsAcceptedByName,
+        company?.workspace?.contractTemplate,
+        company?.workspace?.legalName,
+        company?.workspace?.name,
+        formData.fiscalAddress,
+        formData.legalName,
+        formData.quoteId,
+        formData.taxId,
+    ]);
+
+    const handleDownloadSignedContract = async () => {
+        if (!company?.termsAccepted || !signedContractRef.current) return;
+
+        setIsGeneratingContractPdf(true);
+        setContractPdfError(null);
+
+        try {
+            const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+                import("html2canvas"),
+                import("jspdf"),
+            ]);
+
+            const canvas = await html2canvas(signedContractRef.current, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: "#ffffff",
+            });
+
+            const pdf = new jsPDF("p", "mm", "a4");
+            const pageWidth = 210;
+            const pageHeight = 297;
+            const margin = 10;
+            const contentWidth = pageWidth - margin * 2;
+            const contentHeightPerPage = pageHeight - margin * 2;
+            const imageHeight = (canvas.height * contentWidth) / canvas.width;
+            const imageData = canvas.toDataURL("image/png");
+
+            let heightLeft = imageHeight;
+            let position = margin;
+
+            pdf.addImage(imageData, "PNG", margin, position, contentWidth, imageHeight);
+            heightLeft -= contentHeightPerPage;
+
+            while (heightLeft > 0) {
+                pdf.addPage();
+                position = margin - (imageHeight - heightLeft);
+                pdf.addImage(imageData, "PNG", margin, position, contentWidth, imageHeight);
+                heightLeft -= contentHeightPerPage;
+            }
+
+            const safeCompanyName = (company.name || "empresa")
+                .replace(/[^a-zA-Z0-9_-]/g, "_")
+                .slice(0, 40);
+            const acceptanceDate = company.termsAcceptedAt
+                ? new Date(company.termsAcceptedAt).toISOString().slice(0, 10)
+                : new Date().toISOString().slice(0, 10);
+
+            pdf.save(`acuerdo-terminos-${safeCompanyName}-${acceptanceDate}.pdf`);
+        } catch (error) {
+            console.error("Error generating signed contract PDF:", error);
+            setContractPdfError("No se pudo generar el PDF del acuerdo. Intenta de nuevo.");
+        } finally {
+            setIsGeneratingContractPdf(false);
+        }
+    };
 
     return (
         <div className="flex flex-col h-full">
@@ -809,6 +960,61 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                             </div>
                                                         </div>
 
+                                                        {company.termsAccepted && (
+                                                            <div className="rounded-lg border border-nearby-accent/20 bg-nearby-accent/5 p-4 space-y-3">
+                                                                <div>
+                                                                    <h4 className="text-sm font-semibold text-nearby-dark">
+                                                                        Acuerdo firmado por el cliente
+                                                                    </h4>
+                                                                    <p className="text-xs text-dark-slate mt-1">
+                                                                        Fecha/Hora: <strong>{acceptanceDateTime || "—"}</strong>
+                                                                    </p>
+                                                                    <p className="text-xs text-dark-slate">
+                                                                        Nombre: <strong>{company.termsAcceptedByName || approvedByContact?.fullName || "—"}</strong>
+                                                                    </p>
+                                                                    <p className="text-xs text-dark-slate">
+                                                                        Correo: <strong>{approvedByContact?.email || "—"}</strong>
+                                                                    </p>
+                                                                </div>
+
+                                                                <div className="flex flex-wrap gap-2">
+                                                                    {formData.quoteFileUrl && (
+                                                                        <a
+                                                                            href={formData.quoteFileUrl}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-white bg-nearby-dark rounded-md hover:bg-gray-900 transition-colors"
+                                                                        >
+                                                                            <Download size={14} />
+                                                                            Descargar cotización
+                                                                        </a>
+                                                                    )}
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={handleDownloadSignedContract}
+                                                                        disabled={isGeneratingContractPdf}
+                                                                        className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-white bg-nearby-accent rounded-md hover:bg-nearby-dark transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                                                                    >
+                                                                        {isGeneratingContractPdf ? (
+                                                                            <>
+                                                                                <Loader2 size={14} className="animate-spin" />
+                                                                                Generando PDF...
+                                                                            </>
+                                                                        ) : (
+                                                                            <>
+                                                                                <Download size={14} />
+                                                                                Descargar acuerdo (PDF)
+                                                                            </>
+                                                                        )}
+                                                                    </button>
+                                                                </div>
+
+                                                                {contractPdfError && (
+                                                                    <p className="text-xs text-error-red">{contractPdfError}</p>
+                                                                )}
+                                                            </div>
+                                                        )}
+
                                                         {/* Proyectos y Usuarios Iniciales - Editables antes de enviar invitación */}
                                                         <div className="grid grid-cols-2 gap-4">
                                                             <div>
@@ -848,6 +1054,29 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                         </div>
                                                     </div>
                                                 </div>
+
+                                                {company.termsAccepted && (
+                                                    <div
+                                                        ref={signedContractRef}
+                                                        className="fixed left-[-99999px] top-0 w-[794px] bg-white text-black p-10"
+                                                        aria-hidden="true"
+                                                    >
+                                                        <div
+                                                            className="prose prose-sm max-w-none"
+                                                            dangerouslySetInnerHTML={{ __html: signedContractHtml }}
+                                                        />
+                                                        <hr className="my-6 border-gray-300" />
+                                                        <h3 className="text-lg font-semibold">Evidencia de aceptación digital</h3>
+                                                        <p className="text-sm">
+                                                            Este acuerdo fue aceptado digitalmente por el cliente en la plataforma.
+                                                        </p>
+                                                        <ul className="text-sm">
+                                                            <li><strong>Fecha y hora de aceptación:</strong> {acceptanceDateTime || "—"}</li>
+                                                            <li><strong>Nombre del aprobador:</strong> {company.termsAcceptedByName || approvedByContact?.fullName || "—"}</li>
+                                                            <li><strong>Correo del aprobador:</strong> {approvedByContact?.email || "—"}</li>
+                                                        </ul>
+                                                    </div>
+                                                )}
 
                                                 {/* Projects Table */}
                                                 <div className="border-t border-graphite-gray pt-6">
