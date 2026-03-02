@@ -182,7 +182,25 @@ export async function GET(request: NextRequest) {
                     const res = await client.getCreditInvoices(relId);
                     if (res.success && res.data) {
                         for (const invoice of res.data) {
-                            lines.push(...normalizeInvoiceItems(invoice, company.name, company.id));
+                            const invoiceLines = normalizeInvoiceItems(invoice, company.name, company.id);
+                            if (invoiceLines.length > 0) {
+                                lines.push(...invoiceLines);
+                            } else {
+                                lines.push({
+                                    clientName: company.name,
+                                    clientId: company.id,
+                                    itemDescription: "(Sin detalle de items)",
+                                    itemCode: "",
+                                    quantity: 1,
+                                    unitPrice: Number((invoice as Record<string, unknown>).SubtotalAmount || invoice.SubTotal || invoice.Total || 0),
+                                    exchangeRate: extractExchangeRate(invoice),
+                                    discountPercent: 0,
+                                    documentNumber: extractDocNumber(invoice),
+                                    documentType: "credit_invoice",
+                                    documentDate: extractDocDate(invoice)?.toISOString().split("T")[0] || "",
+                                    extendedPrice: Number((invoice as Record<string, unknown>).TotalAmount || invoice.Total || 0),
+                                });
+                            }
                         }
                     }
                 }
@@ -190,8 +208,23 @@ export async function GET(request: NextRequest) {
                 if (includeProformas) {
                     const res = await client.getQuotesByCustomer(relId);
                     if (res.success && res.data) {
-                        for (const quote of res.data) {
-                            lines.push(...normalizeQuoteItems(quote, company.name, company.id));
+                        const QUOTE_BATCH = 5;
+                        for (let q = 0; q < res.data.length; q += QUOTE_BATCH) {
+                            const quoteBatch = res.data.slice(q, q + QUOTE_BATCH);
+                            const detailResults = await Promise.all(
+                                quoteBatch.map(async (quote) => {
+                                    if (quote.Items && quote.Items.length > 0) {
+                                        return quote;
+                                    }
+                                    const quoteId = quote.ID || (quote as Record<string, unknown>).id;
+                                    if (!quoteId) return quote;
+                                    const detail = await client.getQuote(String(quoteId));
+                                    return detail.success && detail.data ? detail.data : quote;
+                                })
+                            );
+                            for (const fullQuote of detailResults) {
+                                lines.push(...normalizeQuoteItems(fullQuote, company.name, company.id));
+                            }
                         }
                     }
                 }
