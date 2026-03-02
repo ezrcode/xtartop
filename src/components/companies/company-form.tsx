@@ -309,6 +309,24 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                 scale: 2,
                 useCORS: true,
                 backgroundColor: "#ffffff",
+                onclone: (clonedDoc) => {
+                    const styleNodes = clonedDoc.querySelectorAll("style, link[rel='stylesheet']");
+                    styleNodes.forEach((node) => node.remove());
+
+                    const clonedTarget = clonedDoc.getElementById("signed-contract-pdf-content");
+                    if (clonedTarget) {
+                        (clonedTarget as HTMLElement).style.position = "static";
+                        (clonedTarget as HTMLElement).style.left = "0";
+                        (clonedTarget as HTMLElement).style.top = "0";
+                        (clonedTarget as HTMLElement).style.width = "794px";
+                        (clonedTarget as HTMLElement).style.background = "#ffffff";
+                        (clonedTarget as HTMLElement).style.color = "#111111";
+                    }
+
+                    clonedDoc.body.style.margin = "0";
+                    clonedDoc.body.style.background = "#ffffff";
+                    clonedDoc.body.style.color = "#111111";
+                },
             });
 
             const pdf = new jsPDF("p", "mm", "a4");
@@ -1057,20 +1075,32 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
 
                                                 {company.termsAccepted && (
                                                     <div
+                                                        id="signed-contract-pdf-content"
                                                         ref={signedContractRef}
-                                                        className="fixed left-[-99999px] top-0 w-[794px] bg-white text-black p-10"
+                                                        style={{
+                                                            position: "fixed",
+                                                            left: "-99999px",
+                                                            top: "0",
+                                                            width: "794px",
+                                                            background: "#ffffff",
+                                                            color: "#111111",
+                                                            padding: "40px",
+                                                            fontFamily: "Arial, sans-serif",
+                                                            fontSize: "14px",
+                                                            lineHeight: "1.5",
+                                                        }}
                                                         aria-hidden="true"
                                                     >
                                                         <div
-                                                            className="prose prose-sm max-w-none"
+                                                            style={{ color: "#111111" }}
                                                             dangerouslySetInnerHTML={{ __html: signedContractHtml }}
                                                         />
-                                                        <hr className="my-6 border-gray-300" />
-                                                        <h3 className="text-lg font-semibold">Evidencia de aceptación digital</h3>
-                                                        <p className="text-sm">
+                                                        <hr style={{ margin: "24px 0", borderColor: "#d1d5db" }} />
+                                                        <h3 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "8px" }}>Evidencia de aceptación digital</h3>
+                                                        <p style={{ marginBottom: "12px" }}>
                                                             Este acuerdo fue aceptado digitalmente por el cliente en la plataforma.
                                                         </p>
-                                                        <ul className="text-sm">
+                                                        <ul style={{ paddingLeft: "20px", margin: 0 }}>
                                                             <li><strong>Fecha y hora de aceptación:</strong> {acceptanceDateTime || "—"}</li>
                                                             <li><strong>Nombre del aprobador:</strong> {company.termsAcceptedByName || approvedByContact?.fullName || "—"}</li>
                                                             <li><strong>Correo del aprobador:</strong> {approvedByContact?.email || "—"}</li>
