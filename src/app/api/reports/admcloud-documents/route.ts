@@ -192,13 +192,13 @@ export async function GET(request: NextRequest) {
                                     itemDescription: "(Sin detalle de items)",
                                     itemCode: "",
                                     quantity: 1,
-                                    unitPrice: Number((invoice as Record<string, unknown>).SubtotalAmount || invoice.SubTotal || invoice.Total || 0),
+                                    unitPrice: Number(invoice.SubtotalAmount || invoice.SubTotal || invoice.Total || 0),
                                     exchangeRate: extractExchangeRate(invoice),
                                     discountPercent: 0,
                                     documentNumber: extractDocNumber(invoice),
                                     documentType: "credit_invoice",
                                     documentDate: extractDocDate(invoice)?.toISOString().split("T")[0] || "",
-                                    extendedPrice: Number((invoice as Record<string, unknown>).TotalAmount || invoice.Total || 0),
+                                    extendedPrice: Number(invoice.TotalAmount || invoice.Total || 0),
                                 });
                             }
                         }
