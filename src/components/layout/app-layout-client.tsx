@@ -70,7 +70,7 @@ export function AppLayoutClient({ user, userRole, currentExchangeRate = null, ch
     }, []);
 
     return (
-        <div className="flex min-h-screen bg-[var(--background)]">
+        <div className="flex min-h-[100dvh] bg-[var(--background)]">
             {/* Command Palette */}
             <CommandPalette userRole={userRole} />
             
@@ -93,7 +93,7 @@ export function AppLayoutClient({ user, userRole, currentExchangeRate = null, ch
                         onMenuClick={() => setIsMobileMenuOpen(true)}
                     />
                 </Suspense>
-                <main className="pb-20 md:pb-0">
+                <main className="pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-0">
                     {children}
                 </main>
             </div>
@@ -103,4 +103,3 @@ export function AppLayoutClient({ user, userRole, currentExchangeRate = null, ch
         </div>
     );
 }
-

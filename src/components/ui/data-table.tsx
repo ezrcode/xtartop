@@ -260,12 +260,12 @@ export function DataTable<T>({
     const activeFiltersCount = Object.keys(filters).length;
 
     return (
-        <div className="bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)] overflow-hidden shadow-sm">
+        <div className="bg-[var(--card-bg)] rounded-xl sm:rounded-2xl border border-[var(--card-border)] overflow-hidden shadow-sm">
             {/* Toolbar */}
-            <div className="p-4 border-b border-[var(--card-border)] flex flex-wrap items-center gap-3">
+            <div className="p-3 sm:p-4 border-b border-[var(--card-border)] flex flex-wrap items-center gap-2.5 sm:gap-3">
                 {/* Search */}
                 {searchable && (
-                    <div className="relative flex-1 min-w-[200px] max-w-md">
+                    <div className="relative flex-1 min-w-[180px] max-w-md">
                         <Input
                             type="text"
                             value={searchQuery}
@@ -273,12 +273,12 @@ export function DataTable<T>({
                             placeholder={searchPlaceholder}
                             icon={<Search size={18} />}
                             iconPosition="left"
-                            className="h-10"
+                            className="h-11"
                         />
                     </div>
                 )}
                 
-                <div className="flex items-center gap-2 ml-auto">
+                <div className="flex items-center gap-2 ml-auto w-full sm:w-auto justify-end">
                     {/* Filter Button */}
                     {filterableColumns.length > 0 && (
                         <div className="relative" ref={filterRef}>
@@ -298,7 +298,7 @@ export function DataTable<T>({
                             </Button>
                             
                             {showFilters && (
-                                <div className="absolute right-0 top-full mt-2 w-80 bg-[var(--card-bg)] rounded-xl shadow-xl border border-[var(--card-border)] z-50 p-4 animate-in fade-in-0 zoom-in-95">
+                                <div className="absolute right-0 top-full mt-2 w-[min(20rem,calc(100vw-1.5rem))] bg-[var(--card-bg)] rounded-xl shadow-xl border border-[var(--card-border)] z-50 p-4 animate-in fade-in-0 zoom-in-95">
                                     <div className="flex items-center justify-between mb-4">
                                         <h4 className="font-semibold text-[var(--foreground)]">Filtros</h4>
                                         {activeFiltersCount > 0 && (
@@ -352,7 +352,7 @@ export function DataTable<T>({
                             </Button>
                             
                             {showColumnSelector && (
-                                <div className="absolute right-0 top-full mt-2 w-60 bg-[var(--card-bg)] rounded-xl shadow-xl border border-[var(--card-border)] z-50 p-2 animate-in fade-in-0 zoom-in-95">
+                                <div className="absolute right-0 top-full mt-2 w-[min(15rem,calc(100vw-1.5rem))] bg-[var(--card-bg)] rounded-xl shadow-xl border border-[var(--card-border)] z-50 p-2 animate-in fade-in-0 zoom-in-95">
                                     <div className="text-xs font-semibold text-[var(--muted-text)] px-3 py-2 uppercase tracking-wider">
                                         Mostrar columnas
                                     </div>
@@ -445,18 +445,18 @@ export function DataTable<T>({
                                     transition={{ delay: index * 0.02 }}
                                     onClick={() => onRowClick?.(item)}
                                     className={cn(
-                                        "p-4",
+                                        "p-4 sm:p-4",
                                         onRowClick && "cursor-pointer hover:bg-[var(--hover-bg)] active:bg-[var(--hover-bg)] transition-colors"
                                     )}
                                 >
-                                    <div className="space-y-2.5">
+                                    <div className="space-y-3">
                                         {displayColumns.slice(0, 4).map((column, colIndex) => (
                                             <div 
                                                 key={`${keyExtractor(item)}-${String(column.key)}`}
                                                 className={cn(
                                                     colIndex === 0 
                                                         ? "font-semibold text-[var(--foreground)] text-base" 
-                                                        : "flex justify-between text-sm"
+                                                        : "flex justify-between gap-3 text-sm"
                                                 )}
                                             >
                                                 {colIndex === 0 ? (
@@ -466,7 +466,7 @@ export function DataTable<T>({
                                                 ) : (
                                                     <>
                                                         <span className="text-[var(--muted-text)]">{column.header}</span>
-                                                        <span className="text-[var(--foreground)] font-medium">
+                                                        <span className="text-[var(--foreground)] font-medium text-right">
                                                             {column.render 
                                                                 ? column.render(item) 
                                                                 : String((item as Record<string, unknown>)[String(column.key)] ?? "")}
@@ -568,8 +568,8 @@ export function DataTable<T>({
             </div>
             
             {/* Footer with count and pagination */}
-            <div className="px-4 py-3 border-t border-[var(--card-border)] bg-[var(--hover-bg)] flex flex-col sm:flex-row items-center justify-between gap-3">
-                <span className="text-xs text-[var(--muted-text)]">
+            <div className="px-3 sm:px-4 py-3 border-t border-[var(--card-border)] bg-[var(--hover-bg)] flex flex-col sm:flex-row items-center justify-between gap-3">
+                <span className="text-xs text-[var(--muted-text)] text-center sm:text-left">
                     {paginated ? (
                         <>
                             Mostrando <span className="font-semibold text-[var(--foreground)]">{Math.min((currentPage - 1) * itemsPerPage + 1, sortedData.length)}</span>
@@ -590,13 +590,13 @@ export function DataTable<T>({
                 
                 {/* Pagination Controls */}
                 {paginated && totalPages > 1 && (
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1.5">
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => setCurrentPage(1)}
                             disabled={currentPage === 1}
-                            className="h-8 w-8 p-0"
+                            className="h-10 w-10 sm:h-8 sm:w-8 p-0"
                             title="Primera página"
                         >
                             <ChevronLeft size={14} />
@@ -607,13 +607,13 @@ export function DataTable<T>({
                             size="sm"
                             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                             disabled={currentPage === 1}
-                            className="h-8 w-8 p-0"
+                            className="h-10 w-10 sm:h-8 sm:w-8 p-0"
                             title="Anterior"
                         >
                             <ChevronLeft size={16} />
                         </Button>
                         
-                        <div className="flex items-center gap-1 px-2">
+                        <div className="flex items-center gap-1 px-1 sm:px-2">
                             {/* Page numbers */}
                             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                                 let pageNum: number;
@@ -634,7 +634,7 @@ export function DataTable<T>({
                                         size="sm"
                                         onClick={() => setCurrentPage(pageNum)}
                                         className={cn(
-                                            "h-8 w-8 p-0 text-xs",
+                                            "h-10 w-10 sm:h-8 sm:w-8 p-0 text-xs",
                                             currentPage === pageNum && "pointer-events-none"
                                         )}
                                     >
@@ -649,7 +649,7 @@ export function DataTable<T>({
                             size="sm"
                             onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                             disabled={currentPage === totalPages}
-                            className="h-8 w-8 p-0"
+                            className="h-10 w-10 sm:h-8 sm:w-8 p-0"
                             title="Siguiente"
                         >
                             <ChevronRight size={16} />
@@ -659,7 +659,7 @@ export function DataTable<T>({
                             size="sm"
                             onClick={() => setCurrentPage(totalPages)}
                             disabled={currentPage === totalPages}
-                            className="h-8 w-8 p-0"
+                            className="h-10 w-10 sm:h-8 sm:w-8 p-0"
                             title="Última página"
                         >
                             <ChevronRight size={14} />

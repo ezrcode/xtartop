@@ -30,8 +30,8 @@ export function BottomNav({ userRole }: BottomNavProps) {
     });
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[var(--card-bg)] border-t border-[var(--card-border)] safe-bottom">
-            <div className="flex items-center justify-around h-16 px-2">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[var(--card-bg)]/95 backdrop-blur-xl border-t border-[var(--card-border)] safe-bottom shadow-[0_-6px_18px_rgba(0,0,0,0.08)]">
+            <div className="flex items-center justify-around h-[68px] px-1.5">
                 {visibleItems.map((item) => {
                     const isActive = item.href === "/app" 
                         ? pathname === "/app"
@@ -41,22 +41,22 @@ export function BottomNav({ userRole }: BottomNavProps) {
                         <Link
                             key={item.name}
                             href={item.href}
-                            className="relative flex flex-col items-center justify-center flex-1 h-full py-1 min-h-[44px]"
+                            className="relative flex flex-col items-center justify-center flex-1 h-full py-1.5 min-h-[48px]"
                         >
                             {isActive && (
                                 <motion.div
                                     layoutId="bottomNavIndicator"
-                                    className="absolute inset-x-2 top-0 h-0.5 bg-[var(--accent-on-dark)] rounded-full"
+                                    className="absolute inset-x-2.5 top-0 h-1 bg-[var(--accent-on-dark)] rounded-full"
                                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                                 />
                             )}
                             <item.icon 
-                                size={22}
+                                size={20}
                                 className={`mb-1 transition-colors ${
                                     isActive ? "text-[var(--accent-on-dark)]" : "text-[var(--muted-text)]"
                                 }`}
                             />
-                            <span className={`text-[10px] font-medium transition-colors ${
+                            <span className={`text-[11px] leading-none font-medium transition-colors ${
                                 isActive ? "text-[var(--accent-on-dark)]" : "text-[var(--muted-text)]"
                             }`}>
                                 {item.name}

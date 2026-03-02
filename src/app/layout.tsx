@@ -8,8 +8,8 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
+  userScalable: true,
   viewportFit: "cover",
   themeColor: "#2d3e50",
 };
@@ -63,16 +63,17 @@ export default function RootLayout({
       <body className={`${inter.variable} antialiased`}>
         {children}
         <Toaster 
-          position="top-right"
+          position="top-center"
           toastOptions={{
             style: {
-              background: "#fff",
-              border: "1px solid #D7D9DB",
+              background: "var(--card-bg)",
+              color: "var(--foreground)",
+              border: "1px solid var(--card-border)",
               borderRadius: "12px",
-              padding: "16px",
+              padding: "14px 16px",
               boxShadow: "0 10px 15px -3px rgb(45 62 80 / 0.1)",
             },
-            className: "text-sm",
+            className: "text-sm sm:text-[13px]",
           }}
           richColors
           closeButton

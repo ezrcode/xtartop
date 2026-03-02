@@ -113,7 +113,7 @@ export function Sidebar({ userRole, user, isMobileOpen, setIsMobileOpen }: Sideb
                 href={item.href}
                 onClick={() => setIsMobileOpen(false)}
                 className={cn(
-                    "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                    "flex items-center gap-3 rounded-xl px-3 py-2.5 min-h-[44px] text-sm font-medium transition-all duration-200",
                     isActive
                         ? "bg-gradient-to-r from-nearby-accent/15 to-nearby-accent/5 text-nearby-accent shadow-sm"
                         : "text-[var(--muted-text)] hover:bg-[var(--hover-bg)] hover:text-[var(--foreground)]",
@@ -169,7 +169,7 @@ export function Sidebar({ userRole, user, isMobileOpen, setIsMobileOpen }: Sideb
             <aside
                 ref={sidebarRef}
                 className={cn(
-                    "fixed inset-y-0 left-0 z-50 flex flex-col overflow-x-hidden bg-[var(--card-bg)] border-r border-[var(--card-border)] transition-all duration-300 ease-in-out shadow-xl md:shadow-none",
+                    "fixed inset-y-0 left-0 z-50 flex flex-col overflow-x-hidden bg-[var(--card-bg)] border-r border-[var(--card-border)] transition-all duration-300 ease-in-out shadow-xl md:shadow-none pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] md:pt-0 md:pb-0",
                     isMobileOpen ? "translate-x-0" : "-translate-x-full",
                     "w-64 md:translate-x-0",
                     isCollapsed ? "md:w-20" : "md:w-64"
@@ -239,7 +239,7 @@ export function Sidebar({ userRole, user, isMobileOpen, setIsMobileOpen }: Sideb
                     <div className="px-3 mb-2">
                         <button
                             onClick={openCommandPalette}
-                            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-[var(--muted-text)] bg-[var(--hover-bg)] rounded-xl border border-[var(--card-border)] hover:border-nearby-accent/30 transition-colors"
+                            className="w-full flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] text-sm text-[var(--muted-text)] bg-[var(--hover-bg)] rounded-xl border border-[var(--card-border)] hover:border-nearby-accent/30 transition-colors"
                         >
                             <Search size={15} />
                             <span className="flex-1 text-left text-xs">Buscar...</span>
@@ -254,7 +254,7 @@ export function Sidebar({ userRole, user, isMobileOpen, setIsMobileOpen }: Sideb
                             <TooltipTrigger asChild>
                                 <button
                                     onClick={openCommandPalette}
-                                    className="w-full flex items-center justify-center p-2.5 text-[var(--muted-text)] bg-[var(--hover-bg)] rounded-xl border border-[var(--card-border)] hover:border-nearby-accent/30 transition-colors"
+                                    className="w-full flex items-center justify-center min-h-[44px] p-2.5 text-[var(--muted-text)] bg-[var(--hover-bg)] rounded-xl border border-[var(--card-border)] hover:border-nearby-accent/30 transition-colors"
                                 >
                                     <Search size={16} />
                                 </button>
@@ -313,7 +313,7 @@ export function Sidebar({ userRole, user, isMobileOpen, setIsMobileOpen }: Sideb
                             href="/app/profile"
                             onClick={() => setIsMobileOpen(false)}
                             className={cn(
-                                "flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-200 hover:bg-[var(--hover-bg)]",
+                                "flex items-center gap-3 rounded-xl px-3 py-2.5 min-h-[44px] transition-all duration-200 hover:bg-[var(--hover-bg)]",
                                 pathname === "/app/profile" ? "bg-[var(--hover-bg)]" : ""
                             )}
                         >
@@ -355,7 +355,7 @@ export function Sidebar({ userRole, user, isMobileOpen, setIsMobileOpen }: Sideb
                                     type="submit"
                                     onClick={() => setIsMobileOpen(false)}
                                     className={cn(
-                                        "flex items-center gap-3 w-full rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                                        "flex items-center gap-3 w-full rounded-xl px-3 py-2.5 min-h-[44px] text-sm font-medium transition-all duration-200",
                                         "text-[var(--muted-text)] hover:bg-error-red/10 hover:text-error-red",
                                         isCollapsed && "md:justify-center"
                                     )}

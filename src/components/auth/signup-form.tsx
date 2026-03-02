@@ -11,7 +11,7 @@ function SubmitButton() {
         <button
             type="submit"
             disabled={pending}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nearby-dark disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex justify-center items-center min-h-[44px] px-4 border border-transparent rounded-md shadow-sm text-base sm:text-sm font-medium text-white bg-nearby-dark hover:bg-nearby-dark-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nearby-dark disabled:opacity-50 disabled:cursor-not-allowed"
         >
             {pending ? "Creando cuenta..." : "Registrarse"}
         </button>
@@ -24,7 +24,7 @@ export function SignupForm() {
     return (
         <form action={action} className="space-y-4">
             <div>
-                <label htmlFor="name" className="block text-sm font-medium text-dark-slate">
+                <label htmlFor="name" className="block text-sm font-medium text-[var(--foreground)]">
                     Nombre completo
                 </label>
                 <input
@@ -33,7 +33,7 @@ export function SignupForm() {
                     type="text"
                     placeholder="Juan Pérez"
                     required
-                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:outline-none focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                    className="mt-1 block w-full px-3 py-2.5 text-base sm:text-sm border border-[var(--input-border)] rounded-md shadow-sm bg-[var(--input-bg)] text-[var(--foreground)] focus:outline-none focus:ring-nearby-accent focus:border-nearby-accent"
                 />
                 {state?.errors?.name && (
                     <p className="mt-1 text-sm text-error-red">{state.errors.name}</p>
@@ -41,7 +41,7 @@ export function SignupForm() {
             </div>
 
             <div>
-                <label htmlFor="email" className="block text-sm font-medium text-dark-slate">
+                <label htmlFor="email" className="block text-sm font-medium text-[var(--foreground)]">
                     Correo electrónico
                 </label>
                 <input
@@ -50,7 +50,7 @@ export function SignupForm() {
                     type="email"
                     placeholder="tu@ejemplo.com"
                     required
-                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:outline-none focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                    className="mt-1 block w-full px-3 py-2.5 text-base sm:text-sm border border-[var(--input-border)] rounded-md shadow-sm bg-[var(--input-bg)] text-[var(--foreground)] focus:outline-none focus:ring-nearby-accent focus:border-nearby-accent"
                 />
                 {state?.errors?.email && (
                     <p className="mt-1 text-sm text-error-red">{state.errors.email}</p>
@@ -58,7 +58,7 @@ export function SignupForm() {
             </div>
 
             <div>
-                <label htmlFor="password" className="block text-sm font-medium text-dark-slate">
+                <label htmlFor="password" className="block text-sm font-medium text-[var(--foreground)]">
                     Contraseña
                 </label>
                 <input
@@ -68,7 +68,7 @@ export function SignupForm() {
                     placeholder="••••••••"
                     required
                     minLength={6}
-                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:outline-none focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                    className="mt-1 block w-full px-3 py-2.5 text-base sm:text-sm border border-[var(--input-border)] rounded-md shadow-sm bg-[var(--input-bg)] text-[var(--foreground)] focus:outline-none focus:ring-nearby-accent focus:border-nearby-accent"
                 />
                 {state?.errors?.password && (
                     <p className="mt-1 text-sm text-error-red">{state.errors.password}</p>
@@ -76,7 +76,7 @@ export function SignupForm() {
             </div>
 
             <div>
-                <label htmlFor="workspaceName" className="block text-sm font-medium text-dark-slate">
+                <label htmlFor="workspaceName" className="block text-sm font-medium text-[var(--foreground)]">
                     Nombre del workspace
                 </label>
                 <input
@@ -85,7 +85,7 @@ export function SignupForm() {
                     type="text"
                     placeholder="Mi Empresa"
                     required
-                    className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:outline-none focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                    className="mt-1 block w-full px-3 py-2.5 text-base sm:text-sm border border-[var(--input-border)] rounded-md shadow-sm bg-[var(--input-bg)] text-[var(--foreground)] focus:outline-none focus:ring-nearby-accent focus:border-nearby-accent"
                 />
                 {state?.errors?.workspaceName && (
                     <p className="mt-1 text-sm text-error-red">{state.errors.workspaceName}</p>
@@ -100,9 +100,9 @@ export function SignupForm() {
 
             <SubmitButton />
 
-            <div className="text-center text-sm text-dark-slate">
+            <div className="text-center text-sm text-[var(--foreground)]">
                 ¿Ya tienes una cuenta?{" "}
-                <Link href="/login" className="font-medium text-nearby-accent hover:text-nearby-dark">
+                <Link href="/login" className="font-medium text-nearby-accent hover:text-nearby-dark-600">
                     Iniciar sesión
                 </Link>
             </div>

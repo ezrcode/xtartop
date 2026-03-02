@@ -162,7 +162,24 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overscroll-behavior-y: contain;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+a,
+button,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a,
+button,
+[role="button"] {
+  touch-action: manipulation;
 }
 
 /* Glass Effect - adapts to theme */
@@ -280,6 +297,29 @@ body {
   }
   .safe-top {
     padding-top: env(safe-area-inset-top);
+  }
+}
+
+/* Mobile/PWA ergonomics (iOS-first) */
+@media (max-width: 767px) {
+  :root {
+    --card-border: #c8d4e3;
+    --surface-2: #f4f8fd;
+    --surface-3: #e9f0f9;
+    --muted-text: #526983;
+  }
+
+  .dark {
+    --card-border: #2d4260;
+    --surface-2: #18283a;
+    --surface-3: #22354b;
+    --muted-text: #bccce0;
+  }
+
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
   }
 }
 

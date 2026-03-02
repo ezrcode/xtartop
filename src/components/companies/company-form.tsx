@@ -52,7 +52,7 @@ function SubmitButton({ actionName, label, mobileLabel, loadingLabel, icon: Icon
 }) {
     const { pending } = useFormStatus();
 
-    const baseClasses = "inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95";
+    const baseClasses = "inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95";
     const variants = {
         primary: "text-white bg-nearby-dark hover:bg-nearby-dark-600 focus:ring-nearby-dark shadow-sm",
         secondary: "text-[var(--foreground)] bg-[var(--card-bg)] border border-[var(--card-border)] hover:bg-[var(--surface-2)] focus:ring-nearby-accent",
