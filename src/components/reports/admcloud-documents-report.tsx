@@ -178,9 +178,9 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
         ws["!cols"] = colWidths;
 
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Documentos ADMCloud");
+        XLSX.utils.book_append_sheet(wb, ws, "Facturacion Detalle");
         const today = new Date().toISOString().split("T")[0];
-        XLSX.writeFile(wb, `Reporte_ADMCloud_${today}.xlsx`);
+        XLSX.writeFile(wb, `Facturacion_con_Detalle_${today}.xlsx`);
     }, [lines]);
 
     const groupedLines = groupByClient
@@ -210,7 +210,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                         </div>
                         <div>
                             <h1 className="text-xl sm:text-2xl font-bold text-[var(--foreground)]">
-                                Documentos ADMCloud
+                                Facturación con Detalle
                             </h1>
                             <p className="text-sm text-[var(--muted-text)] mt-0.5">
                                 Facturas a crédito y proformas

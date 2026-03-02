@@ -30,7 +30,13 @@ export function BottomNav({ userRole }: BottomNavProps) {
     });
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[var(--card-bg)]/95 backdrop-blur-xl border-t border-[var(--card-border)] safe-bottom shadow-[0_-6px_18px_rgba(0,0,0,0.08)]">
+        <nav
+            className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-[var(--card-bg)]/95 backdrop-blur-xl border-t border-[var(--card-border)] safe-bottom shadow-[0_-6px_18px_rgba(0,0,0,0.08)]"
+            style={{
+                paddingLeft: "env(safe-area-inset-left)",
+                paddingRight: "env(safe-area-inset-right)",
+            }}
+        >
             <div className="flex items-center justify-around h-[68px] px-1.5">
                 {visibleItems.map((item) => {
                     const isActive = item.href === "/app" 

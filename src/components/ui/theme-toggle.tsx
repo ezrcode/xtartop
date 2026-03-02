@@ -61,13 +61,13 @@ export function ThemeToggle({ initialTheme, variant = "buttons" }: ThemeTogglePr
                 title={theme === "DARK" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
             >
                 <div className={cn(
-                    "absolute transition-all duration-300",
+                    "absolute inset-0 flex items-center justify-center transition-all duration-300",
                     theme === "DARK" ? "rotate-0 opacity-100" : "rotate-90 opacity-0"
                 )}>
                     <Sun size={20} className="text-amber-400" />
                 </div>
                 <div className={cn(
-                    "absolute transition-all duration-300",
+                    "absolute inset-0 flex items-center justify-center transition-all duration-300",
                     theme === "DARK" ? "-rotate-90 opacity-0" : "rotate-0 opacity-100"
                 )}>
                     <Moon size={20} className="text-[var(--muted-text)]" />

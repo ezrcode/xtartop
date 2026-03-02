@@ -9,6 +9,8 @@ const routeNames: Record<string, string> = {
     "contacts": "Contactos",
     "companies": "Empresas",
     "deals": "Negocios",
+    "reports": "Reportes",
+    "admcloud-documents": "Facturación con Detalle",
     "settings": "Configuración",
     "profile": "Mi Perfil",
     "new": "Nuevo",

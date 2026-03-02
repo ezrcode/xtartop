@@ -33,7 +33,11 @@ export function Topbar({ user, currentExchangeRate = null, onMenuClick }: Topbar
     return (
         <header
             className="sticky top-0 z-40 bg-[var(--card-bg)]/85 backdrop-blur-xl border-b border-[var(--card-border)] shadow-[0_1px_0_var(--card-border)]"
-            style={{ paddingTop: "env(safe-area-inset-top)" }}
+            style={{
+                paddingTop: "env(safe-area-inset-top)",
+                paddingLeft: "env(safe-area-inset-left)",
+                paddingRight: "env(safe-area-inset-right)",
+            }}
         >
             <div className="flex items-center justify-between h-[60px] sm:h-14 px-3 sm:px-6 lg:px-8">
                 {/* Left side */}
@@ -52,7 +56,7 @@ export function Topbar({ user, currentExchangeRate = null, onMenuClick }: Topbar
                 </div>
 
                 {/* Right side */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 shrink-0">
                     {/* Search button (mobile) */}
                     <Button
                         variant="ghost"

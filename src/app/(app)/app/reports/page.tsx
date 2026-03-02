@@ -2,14 +2,44 @@ import { PageHeader } from "@/components/ui/page-header";
 import { BarChart3, FileSpreadsheet, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-const reports = [
+type ReportCard = {
+    title: string;
+    description: string;
+    href: string;
+    icon: typeof FileSpreadsheet;
+    gradient: string;
+    iconColor: string;
+};
+
+type ReportGroup = {
+    key: "sales" | "customer-success";
+    title: string;
+    description: string;
+    reports: ReportCard[];
+};
+
+const reportGroups: ReportGroup[] = [
     {
-        title: "Documentos ADMCloud",
-        description: "Consulta facturas a crédito y proformas desde ADMCloud con filtros avanzados, agrupación por cliente y exportación a Excel.",
-        href: "/app/reports/admcloud-documents",
-        icon: FileSpreadsheet,
-        gradient: "from-ocean-blue/20 to-ocean-blue/5",
-        iconColor: "text-ocean-blue",
+        key: "sales",
+        title: "Ventas",
+        description: "Indicadores y análisis de facturación, cotizaciones y desempeño comercial.",
+        reports: [
+            {
+                title: "Facturación con Detalle",
+                description:
+                    "Consulta facturas a crédito y proformas desde ADMCloud con filtros avanzados, agrupación por cliente y exportación a Excel.",
+                href: "/app/reports/admcloud-documents",
+                icon: FileSpreadsheet,
+                gradient: "from-ocean-blue/20 to-ocean-blue/5",
+                iconColor: "text-ocean-blue",
+            },
+        ],
+    },
+    {
+        key: "customer-success",
+        title: "Customer Success",
+        description: "Espacio reservado para nuevos reportes de seguimiento, adopción y retención.",
+        reports: [],
     },
 ];
 
@@ -23,28 +53,57 @@ export default function ReportsPage() {
                     icon={BarChart3}
                 />
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {reports.map((report) => (
-                        <Link
-                            key={report.href}
-                            href={report.href}
-                            className="group bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-5 hover:shadow-lg transition-all duration-300 hover:border-nearby-accent/30"
+                <div className="space-y-6 sm:space-y-8">
+                    {reportGroups.map((group) => (
+                        <section
+                            key={group.key}
+                            className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl p-4 sm:p-5"
                         >
-                            <div className="flex items-start gap-4">
-                                <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${report.gradient} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300`}>
-                                    <report.icon size={20} className={report.iconColor} />
+                            <div className="mb-4">
+                                <h2 className="text-base sm:text-lg font-semibold text-[var(--foreground)]">
+                                    {group.title}
+                                </h2>
+                                <p className="text-sm text-[var(--muted-text)] mt-1">{group.description}</p>
+                            </div>
+
+                            {group.reports.length > 0 ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {group.reports.map((report) => (
+                                        <Link
+                                            key={report.href}
+                                            href={report.href}
+                                            className="group bg-[var(--surface-1)] rounded-xl border border-[var(--card-border)] p-5 hover:shadow-lg transition-all duration-300 hover:border-nearby-accent/30"
+                                        >
+                                            <div className="flex items-start gap-4">
+                                                <div
+                                                    className={`w-11 h-11 rounded-xl bg-gradient-to-br ${report.gradient} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300`}
+                                                >
+                                                    <report.icon size={20} className={report.iconColor} />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="text-sm font-semibold text-[var(--foreground)] mb-1 flex items-center gap-2">
+                                                        {report.title}
+                                                        <ArrowRight
+                                                            size={14}
+                                                            className="text-[var(--muted-text)] opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all"
+                                                        />
+                                                    </h3>
+                                                    <p className="text-xs text-[var(--muted-text)] leading-relaxed">
+                                                        {report.description}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    ))}
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <h3 className="text-sm font-semibold text-[var(--foreground)] mb-1 flex items-center gap-2">
-                                        {report.title}
-                                        <ArrowRight size={14} className="text-[var(--muted-text)] opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
-                                    </h3>
-                                    <p className="text-xs text-[var(--muted-text)] leading-relaxed">
-                                        {report.description}
+                            ) : (
+                                <div className="rounded-lg border border-dashed border-[var(--card-border)] bg-[var(--surface-1)] p-4 sm:p-5">
+                                    <p className="text-sm text-[var(--muted-text)]">
+                                        Próximamente agregaremos informes en este grupo.
                                     </p>
                                 </div>
-                            </div>
-                        </Link>
+                            )}
+                        </section>
                     ))}
                 </div>
             </div>
