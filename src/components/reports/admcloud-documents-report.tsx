@@ -194,8 +194,8 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
     const totalExtended = lines.reduce((sum, l) => sum + l.extendedPrice, 0);
 
     return (
-        <div className="min-h-screen bg-[var(--surface-0)] py-6 sm:py-8">
-            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-[var(--surface-0)] py-6 sm:py-8 overflow-x-hidden">
+            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full min-w-0 overflow-x-hidden">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <div className="flex items-center gap-3">
@@ -229,13 +229,13 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                 </div>
 
                 {/* Filters */}
-                <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4 sm:p-5 mb-6 overflow-hidden">
+                <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4 sm:p-5 mb-6 w-full min-w-0 overflow-hidden">
                     <div className="flex items-center gap-2 mb-4">
                         <Filter size={16} className="text-[var(--muted-text)]" />
                         <h3 className="text-sm font-semibold text-[var(--foreground)]">Filtros</h3>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 items-start gap-4 mb-4 w-full min-w-0">
                         {/* Doc types */}
                         <div className="min-w-0">
                             <label className="block text-xs font-medium text-[var(--muted-text)] uppercase tracking-wider mb-2">
@@ -324,7 +324,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                     </div>
 
                     {/* Items filter */}
-                    <div className="mb-4" ref={itemPickerRef}>
+                    <div className="mb-4 w-full min-w-0" ref={itemPickerRef}>
                         <label className="block text-xs font-medium text-[var(--muted-text)] uppercase tracking-wider mb-2">
                             Filtrar artículos
                         </label>
@@ -354,7 +354,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                             </div>
                         )}
 
-                        <div className="relative">
+                        <div className="relative w-full min-w-0">
                             <input
                                 type="text"
                                 placeholder="Buscar artículos por código o nombre..."
@@ -364,12 +364,12 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                                     setShowItemPicker(true);
                                 }}
                                 onFocus={() => setShowItemPicker(true)}
-                                className="w-full sm:w-96 max-w-full min-w-0 px-3 py-2 pl-9 text-sm rounded-lg border border-[var(--card-border)] bg-[var(--surface-0)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-accent/30 focus:border-nearby-accent outline-none transition-colors"
+                                className="w-full md:w-96 max-w-full min-w-0 px-3 py-2 pl-9 text-sm rounded-lg border border-[var(--card-border)] bg-[var(--surface-0)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-accent/30 focus:border-nearby-accent outline-none transition-colors"
                             />
                             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted-text)]" />
 
                             {showItemPicker && (
-                                <div className="absolute z-20 mt-1 w-full sm:w-96 max-h-60 overflow-y-auto bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-xl">
+                                <div className="absolute z-20 mt-1 w-full md:w-96 max-h-60 overflow-y-auto bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-xl">
                                     {filteredAvailableItems.length === 0 ? (
                                         <p className="px-3 py-3 text-xs text-[var(--muted-text)]">Sin resultados</p>
                                     ) : (

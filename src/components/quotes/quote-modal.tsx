@@ -373,7 +373,7 @@ export function QuoteModal({
                             </div>
                         </div>
 
-                        {/* Products Table */}
+                        {/* Products */}
                         <div>
                             <div className="flex items-center justify-between mb-2">
                                 <label className="block text-sm font-medium text-[var(--foreground)]">
@@ -389,9 +389,102 @@ export function QuoteModal({
                                     <span className="sm:hidden">Agregar</span>
                                 </button>
                             </div>
-                            
-                            <div className="border border-[var(--card-border)] rounded-md overflow-x-auto overscroll-x-contain">
-                                <table className="min-w-[760px] sm:min-w-full divide-y divide-gray-200">
+
+                            {/* Mobile cards */}
+                            <div className="sm:hidden space-y-3">
+                                {items.map((item, index) => (
+                                    <div
+                                        key={index}
+                                        className="border border-[var(--card-border)] rounded-lg bg-[var(--surface-2)] p-3 space-y-3 w-full min-w-0 overflow-hidden"
+                                    >
+                                        <div className="flex items-center justify-between gap-2">
+                                            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted-text)]">
+                                                Producto {index + 1}
+                                            </p>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveItem(index)}
+                                                disabled={items.length === 1}
+                                                className="text-error-red hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed p-1"
+                                                aria-label={`Eliminar producto ${index + 1}`}
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </div>
+
+                                        <div className="min-w-0">
+                                            <label className="block text-xs font-medium text-[var(--muted-text)] mb-1">
+                                                Nombre
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={item.name}
+                                                onChange={(e) => handleItemChange(index, "name", e.target.value)}
+                                                placeholder="Nombre"
+                                                required
+                                                className="w-full min-w-0 max-w-full px-3 py-3 text-base border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)]"
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="min-w-0">
+                                                <label className="block text-xs font-medium text-[var(--muted-text)] mb-1">
+                                                    Precio
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    value={item.price}
+                                                    onChange={(e) => handleItemChange(index, "price", parseFloat(e.target.value) || 0)}
+                                                    required
+                                                    className="w-full min-w-0 max-w-full px-3 py-3 text-base border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)]"
+                                                />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <label className="block text-xs font-medium text-[var(--muted-text)] mb-1">
+                                                    Cantidad
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    value={item.quantity}
+                                                    onChange={(e) => handleItemChange(index, "quantity", parseFloat(e.target.value) || 1)}
+                                                    required
+                                                    className="w-full min-w-0 max-w-full px-3 py-3 text-base border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)]"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="min-w-0">
+                                                <label className="block text-xs font-medium text-[var(--muted-text)] mb-1">
+                                                    Frecuencia
+                                                </label>
+                                                <select
+                                                    value={item.frequency}
+                                                    onChange={(e) => handleItemChange(index, "frequency", e.target.value as PaymentFrequency)}
+                                                    className="w-full min-w-0 max-w-full px-3 py-3 text-base border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)]"
+                                                >
+                                                    <option value="PAGO_UNICO">Único</option>
+                                                    <option value="MENSUAL">Mensual</option>
+                                                </select>
+                                            </div>
+                                            <div className="min-w-0">
+                                                <label className="block text-xs font-medium text-[var(--muted-text)] mb-1">
+                                                    Neto
+                                                </label>
+                                                <div className="w-full min-w-0 max-w-full px-3 py-3 text-base font-semibold border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] text-[var(--foreground)] truncate">
+                                                    {formatNumber(typeof item.netPrice === 'number' ? item.netPrice : parseFloat(String(item.netPrice) || '0'), 2)}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Desktop table */}
+                            <div className="hidden sm:block border border-[var(--card-border)] rounded-md overflow-x-auto overscroll-x-contain">
+                                <table className="min-w-full divide-y divide-gray-200">
                                     <thead className="bg-[var(--surface-2)]">
                                         <tr>
                                             <th className="px-2 sm:px-3 py-2 text-left text-xs font-medium text-[var(--muted-text)] uppercase">Nombre</th>

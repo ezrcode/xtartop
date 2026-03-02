@@ -212,32 +212,32 @@ export function ContactsTable({ contacts, initialPreferences, itemsPerPage = 10 
             </div>
 
             {/* Mobile Card View */}
-            <div className="md:hidden bg-white border border-graphite-gray rounded-lg shadow-sm overflow-hidden divide-y divide-graphite-gray">
+            <div className="md:hidden bg-white border border-graphite-gray rounded-lg shadow-sm overflow-hidden divide-y divide-graphite-gray min-w-0">
                 {contacts.map((contact) => {
                     const config = statusConfig[contact.status];
                     return (
                         <Link
                             key={contact.id}
                             href={`/app/contacts/${contact.id}`}
-                            className="block p-4 hover:bg-soft-gray transition-colors"
+                            className="block p-4 hover:bg-soft-gray transition-colors min-w-0 overflow-hidden"
                         >
                             <div className="flex items-start gap-3 mb-2">
                                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-accent-600 text-white flex items-center justify-center text-xs font-semibold flex-shrink-0">
                                     {getInitials(contact.fullName)}
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex flex-wrap items-start gap-2">
-                                        <h3 className="flex-1 min-w-0 text-base font-semibold text-nearby-accent truncate">
-                                            {contact.fullName}
-                                        </h3>
-                                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 whitespace-nowrap ${config.className}`}>
-                                            <span className={`w-1.5 h-1.5 rounded-full ${config.dotColor}`} />
-                                            {config.label}
+                                <div className="flex-1 min-w-0 space-y-1.5">
+                                    <h3 className="text-base font-semibold text-nearby-accent truncate">
+                                        {contact.fullName}
+                                    </h3>
+                                    <div>
+                                        <span className={`inline-flex max-w-full items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${config.className}`}>
+                                            <span className={`w-1.5 h-1.5 rounded-full ${config.dotColor} flex-shrink-0`} />
+                                            <span className="truncate">{config.label}</span>
                                         </span>
                                     </div>
                                     <div className="space-y-1 text-sm text-dark-slate mt-1">
                                         {contact.company && (
-                                            <p>
+                                            <p className="truncate">
                                                 <span className="font-medium">Empresa:</span> {contact.company.name}
                                             </p>
                                         )}
