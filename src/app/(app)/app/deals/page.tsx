@@ -27,9 +27,16 @@ export default async function DealsPage() {
     const defaultView = user?.dealsViewPref === "KANBAN" ? "kanban" : "table";
     const itemsPerPage = (user?.itemsPerPage || 10) as 10 | 25 | 50;
 
+    const serializedDeals = deals.map(deal => ({
+        ...deal,
+        value: Number(deal.value) as unknown as typeof deal.value,
+        mrr: deal.mrr ? Number(deal.mrr) as unknown as typeof deal.mrr : null,
+        arr: deal.arr ? Number(deal.arr) as unknown as typeof deal.arr : null,
+    }));
+
     return (
         <DealsClientPage 
-            deals={deals} 
+            deals={serializedDeals} 
             defaultView={defaultView} 
             initialTablePreferences={tablePreferences}
             itemsPerPage={itemsPerPage}

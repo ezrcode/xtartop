@@ -15,23 +15,10 @@ export default async function AppLayout({
         redirect("/login");
     }
 
-    let userWithRole;
-    let latestExchangeRate = null;
-
-    try {
-        userWithRole = await getCachedUserWithRole(session.user.email);
-    } catch (error) {
-        console.error("[LAYOUT] Error fetching user with role:", error);
-        throw error;
-    }
-
-    try {
-        if (userWithRole?.workspaceId) {
-            latestExchangeRate = await getCachedLatestExchangeRate(userWithRole.workspaceId);
-        }
-    } catch (error) {
-        console.error("[LAYOUT] Error fetching exchange rate:", error);
-    }
+    const userWithRole = await getCachedUserWithRole(session.user.email);
+    const latestExchangeRate = userWithRole?.workspaceId
+        ? await getCachedLatestExchangeRate(userWithRole.workspaceId)
+        : null;
 
     return (
         <AppLayoutClient 
