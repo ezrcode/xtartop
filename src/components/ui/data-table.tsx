@@ -493,12 +493,12 @@ export function DataTable<T>({
             <div className="hidden md:block overflow-x-auto">
                 <table className="w-full">
                     <thead>
-                        <tr className="bg-[var(--hover-bg)]">
+                        <tr className="bg-[var(--surface-2)]">
                             {displayColumns.map((column) => (
                                 <th
                                     key={String(column.key)}
                                     className={cn(
-                                        "px-4 py-3.5 text-left text-xs font-semibold text-[var(--muted-text)] uppercase tracking-wider border-b border-[var(--card-border)]",
+                                        "px-4 py-3.5 text-left text-xs font-semibold text-[var(--foreground)] uppercase tracking-wider border-b border-[var(--card-border)]",
                                         column.sortable && "cursor-pointer hover:bg-[var(--card-border)]/30 transition-colors select-none",
                                         column.className
                                     )}
@@ -541,7 +541,7 @@ export function DataTable<T>({
                                         transition={{ delay: index * 0.015 }}
                                         onClick={() => onRowClick?.(item)}
                                         className={cn(
-                                            "group",
+                                            "group even:bg-[var(--surface-2)]",
                                             onRowClick && "cursor-pointer hover:bg-[var(--hover-bg)] transition-colors"
                                         )}
                                     >
