@@ -169,7 +169,7 @@ export function Sidebar({ userRole, user, isMobileOpen, setIsMobileOpen }: Sideb
             <aside
                 ref={sidebarRef}
                 className={cn(
-                    "fixed inset-y-0 left-0 z-50 flex flex-col bg-[var(--card-bg)] border-r border-[var(--card-border)] transition-all duration-300 ease-in-out shadow-xl md:shadow-none",
+                    "fixed inset-y-0 left-0 z-50 flex flex-col overflow-x-hidden bg-[var(--card-bg)] border-r border-[var(--card-border)] transition-all duration-300 ease-in-out shadow-xl md:shadow-none",
                     isMobileOpen ? "translate-x-0" : "-translate-x-full",
                     "w-64 md:translate-x-0",
                     isCollapsed ? "md:w-20" : "md:w-64"
@@ -264,10 +264,10 @@ export function Sidebar({ userRole, user, isMobileOpen, setIsMobileOpen }: Sideb
                     </div>
                 )}
 
-                <Separator className="mx-4" />
+                <Separator className="mx-4 w-auto" />
 
                 {/* Navigation */}
-                <ScrollArea className="flex-1 px-3 py-3">
+                <ScrollArea className="flex-1 overflow-x-hidden px-3 py-3">
                     {/* Section: Principal */}
                     {!isCollapsed && (
                         <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-text)]">
@@ -287,7 +287,7 @@ export function Sidebar({ userRole, user, isMobileOpen, setIsMobileOpen }: Sideb
                     {/* Section: Workspace (Admin only) */}
                     {isAdmin && (
                         <>
-                            <Separator className="my-3" />
+                            <Separator className="my-3 mx-2 w-auto" />
                             {!isCollapsed && (
                                 <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-text)]">
                                     Workspace
@@ -303,7 +303,7 @@ export function Sidebar({ userRole, user, isMobileOpen, setIsMobileOpen }: Sideb
                     )}
                 </ScrollArea>
 
-                <Separator className="mx-4" />
+                <Separator className="mx-4 w-auto" />
 
                 {/* User footer */}
                 <div className="p-3 space-y-1">
