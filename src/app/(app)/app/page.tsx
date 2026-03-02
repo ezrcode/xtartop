@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentWorkspace } from "@/actions/workspace";
+import { DealStatus } from "@prisma/client";
 import Link from "next/link";
 import {
     Building2,
@@ -27,7 +28,7 @@ const STATUS_LABELS: Record<string, string> = {
     NO_CALIFICADOS: "No Calificados",
 };
 
-const STATUS_ORDER = [
+const STATUS_ORDER: DealStatus[] = [
     "PROSPECCION",
     "CALIFICACION",
     "NEGOCIACION",
