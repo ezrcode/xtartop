@@ -257,6 +257,8 @@ export async function GET(request: NextRequest) {
         const dateFrom = searchParams.get("dateFrom");
         const dateTo = searchParams.get("dateTo");
         const itemsFilter = searchParams.get("items")?.split(",").filter(Boolean) || [];
+        const clientLabel = searchParams.get("clientLabel") || "company";
+        const useLegalName = clientLabel === "legal";
 
         const includeProformas = typesParam.includes("proformas");
         const includeCredit = typesParam.includes("credit");
@@ -272,6 +274,7 @@ export async function GET(request: NextRequest) {
             select: {
                 id: true,
                 name: true,
+                legalName: true,
                 admCloudRelationshipId: true,
             },
         });
@@ -287,18 +290,21 @@ export async function GET(request: NextRequest) {
             const batch = companies.slice(i, i + BATCH_SIZE);
             const batchPromises = batch.map(async (company) => {
                 const relId = company.admCloudRelationshipId!;
+                const companyLabel = useLegalName
+                    ? (company.legalName?.trim() || company.name)
+                    : company.name;
                 const lines: ReportLine[] = [];
 
                 if (includeCredit) {
                     const res = await client.getCreditInvoices(relId);
                     if (res.success && res.data) {
                         for (const invoice of res.data) {
-                            const invoiceLines = normalizeInvoiceItems(invoice, company.name, company.id);
+                            const invoiceLines = normalizeInvoiceItems(invoice, companyLabel, company.id);
                             if (invoiceLines.length > 0) {
                                 lines.push(...invoiceLines);
                             } else {
                                 lines.push({
-                                    clientName: company.name,
+                                    clientName: companyLabel,
                                     clientId: company.id,
                                     itemDescription: "(Sin detalle de items)",
                                     itemCode: "",
@@ -334,7 +340,7 @@ export async function GET(request: NextRequest) {
                                 })
                             );
                             for (const fullQuote of detailResults) {
-                                lines.push(...normalizeQuoteItems(fullQuote, company.name, company.id));
+                                lines.push(...normalizeQuoteItems(fullQuote, companyLabel, company.id));
                             }
                         }
                     }

@@ -60,6 +60,7 @@ function formatDate(dateStr: string): string {
 export function AdmCloudDocumentsReport({ availableItems }: Props) {
     const [includeProformas, setIncludeProformas] = useState(true);
     const [includeCredit, setIncludeCredit] = useState(true);
+    const [clientLabel, setClientLabel] = useState<"company" | "legal">("company");
     const [dateFrom, setDateFrom] = useState("");
     const [dateTo, setDateTo] = useState("");
     const [selectedItems, setSelectedItems] = useState<string[]>([]);
@@ -119,6 +120,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
             if (dateFrom) params.set("dateFrom", dateFrom);
             if (dateTo) params.set("dateTo", dateTo);
             if (selectedItems.length > 0) params.set("items", selectedItems.join(","));
+            params.set("clientLabel", clientLabel);
 
             const res = await fetch(`/api/reports/admcloud-documents?${params.toString()}`);
             const data = await res.json();
@@ -139,7 +141,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
         } finally {
             setLoading(false);
         }
-    }, [includeProformas, includeCredit, dateFrom, dateTo, selectedItems]);
+    }, [includeProformas, includeCredit, clientLabel, dateFrom, dateTo, selectedItems]);
 
     const handleExport = useCallback(() => {
         if (lines.length === 0) return;
@@ -233,7 +235,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                         <h3 className="text-sm font-semibold text-[var(--foreground)]">Filtros</h3>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
                         {/* Doc types */}
                         <div>
                             <label className="block text-xs font-medium text-[var(--muted-text)] uppercase tracking-wider mb-2">
@@ -285,6 +287,21 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                                 onChange={(e) => setDateTo(e.target.value)}
                                 className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--card-border)] bg-[var(--surface-0)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-accent/30 focus:border-nearby-accent outline-none transition-colors"
                             />
+                        </div>
+
+                        {/* Client Label */}
+                        <div>
+                            <label className="block text-xs font-medium text-[var(--muted-text)] uppercase tracking-wider mb-2">
+                                Mostrar cliente como
+                            </label>
+                            <select
+                                value={clientLabel}
+                                onChange={(e) => setClientLabel(e.target.value as "company" | "legal")}
+                                className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--card-border)] bg-[var(--surface-0)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-accent/30 focus:border-nearby-accent outline-none transition-colors"
+                            >
+                                <option value="company">Nombre comercial</option>
+                                <option value="legal">Razón social</option>
+                            </select>
                         </div>
 
                         {/* Group toggle */}
