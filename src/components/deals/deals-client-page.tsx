@@ -36,13 +36,13 @@ interface DealsClientPageProps {
 }
 
 const dealStatusConfig: Record<DealStatus, { label: string; color: string }> = {
-    PROSPECCION: { label: "Prospección", color: "bg-gray-100 text-gray-800" },
+    PROSPECCION: { label: "Prospección", color: "bg-[var(--surface-3)] text-gray-800" },
     CALIFICACION: { label: "Calificación", color: "bg-blue-100 text-blue-800" },
     NEGOCIACION: { label: "Negociación", color: "bg-yellow-100 text-yellow-800" },
     FORMALIZACION: { label: "Formalización", color: "bg-purple-100 text-purple-800" },
     CIERRE_GANADO: { label: "Cierre ganado", color: "bg-success-green/10 text-success-green" },
     CIERRE_PERDIDO: { label: "Cierre perdido", color: "bg-error-red/10 text-error-red" },
-    NO_CALIFICADOS: { label: "No calificados", color: "bg-gray-100 text-gray-600" },
+    NO_CALIFICADOS: { label: "No calificados", color: "bg-[var(--surface-3)] text-[var(--muted-text)]" },
 };
 
 const dealTypeConfig: Record<DealType, { label: string }> = {
@@ -91,14 +91,14 @@ function DealCard({ deal, isDragging = false }: { deal: DealWithRelations, isDra
                 <div className="flex-1 min-w-0">
                     <Link 
                         href={`/app/deals/${deal.id}`}
-                        className="text-sm font-semibold text-nearby-accent hover:text-nearby-dark active:text-nearby-dark line-clamp-2 block"
+                        className="text-sm font-semibold text-nearby-accent hover:text-[var(--foreground)] active:text-[var(--foreground)] line-clamp-2 block"
                     >
                         {deal.name}
                     </Link>
                 </div>
                 {/* Drag Handle - más grande para touch */}
                 <div 
-                    className="flex-shrink-0 cursor-grab active:cursor-grabbing p-1.5 -m-1 hover:bg-gray-100 active:bg-gray-200 rounded-lg touch-manipulation"
+                    className="flex-shrink-0 cursor-grab active:cursor-grabbing p-1.5 -m-1 hover:bg-[var(--surface-3)] active:bg-[var(--surface-3)] rounded-lg touch-manipulation"
                     {...attributes}
                     {...listeners}
                     title="Arrastra para mover"
@@ -113,7 +113,7 @@ function DealCard({ deal, isDragging = false }: { deal: DealWithRelations, isDra
                         strokeWidth="2" 
                         strokeLinecap="round" 
                         strokeLinejoin="round"
-                        className="text-gray-400"
+                        className="text-[var(--muted-text)]"
                     >
                         <circle cx="9" cy="5" r="1"/>
                         <circle cx="9" cy="12" r="1"/>
@@ -126,28 +126,28 @@ function DealCard({ deal, isDragging = false }: { deal: DealWithRelations, isDra
             </div>
 
             {/* Value */}
-            <p className="text-base font-bold text-nearby-dark mb-2">
+            <p className="text-base font-bold text-[var(--foreground)] mb-2">
                 {formatCurrency(Number(deal.value))}
             </p>
 
             {/* Company & Contact */}
             {(deal.company || deal.contact) && (
-                <div className="space-y-0.5 text-xs text-gray-600 mb-2">
+                <div className="space-y-0.5 text-xs text-[var(--muted-text)] mb-2">
                     {deal.company && (
                         <div className="truncate">
-                            <span className="text-gray-500">Empresa:</span> {deal.company.name}
+                            <span className="text-[var(--muted-text)]">Empresa:</span> {deal.company.name}
                         </div>
                     )}
                     {deal.contact && (
                         <div className="truncate">
-                            <span className="text-gray-500">Contacto:</span> {deal.contact.fullName}
+                            <span className="text-[var(--muted-text)]">Contacto:</span> {deal.contact.fullName}
                         </div>
                     )}
                 </div>
             )}
 
             {/* Created By Avatar & Date */}
-            <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+            <div className="flex items-center justify-between pt-2 border-t border-[var(--card-border)]">
                 <div className="flex items-center space-x-1.5">
                     {deal.createdBy?.photoUrl ? (
                         <img
@@ -162,11 +162,11 @@ function DealCard({ deal, isDragging = false }: { deal: DealWithRelations, isDra
                             </span>
                         </div>
                     )}
-                    <span className="text-xs text-gray-500 truncate max-w-[80px]">
+                    <span className="text-xs text-[var(--muted-text)] truncate max-w-[80px]">
                         {deal.createdBy?.name || deal.createdBy?.email || "Usuario"}
                     </span>
                 </div>
-                <span className="text-[10px] text-gray-400">
+                <span className="text-[10px] text-[var(--muted-text)]">
                     {new Date(deal.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })}
                 </span>
             </div>
@@ -193,19 +193,19 @@ function KanbanColumn({ status, deals }: { status: DealStatus, deals: DealWithRe
 
     return (
         <div className="flex-shrink-0 w-64 sm:w-72">
-            <div className={`bg-white rounded-lg border shadow-sm transition-all ${isOver ? 'border-nearby-accent border-2 shadow-md' : 'border-graphite-gray'}`}>
+            <div className={`bg-[var(--card-bg)] rounded-lg border shadow-sm transition-all ${isOver ? 'border-nearby-accent border-2 shadow-md' : 'border-[var(--card-border)]'}`}>
                 {/* Column Header */}
-                <div className="px-3 py-2.5 border-b border-graphite-gray sticky top-0 bg-white rounded-t-lg z-10">
+                <div className="px-3 py-2.5 border-b border-[var(--card-border)] sticky top-0 bg-[var(--card-bg)] rounded-t-lg z-10">
                     <div className="flex items-center justify-between mb-1">
-                        <h3 className="text-xs sm:text-sm font-semibold text-dark-slate truncate">
+                        <h3 className="text-xs sm:text-sm font-semibold text-[var(--foreground)] truncate">
                             {dealStatusConfig[status].label}
                         </h3>
-                        <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] sm:text-xs font-medium text-gray-600 bg-gray-100 rounded-full">
+                        <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] sm:text-xs font-medium text-[var(--muted-text)] bg-[var(--surface-3)] rounded-full">
                             {deals.length}
                         </span>
                     </div>
                     {deals.length > 0 && (
-                        <p className="text-[10px] sm:text-xs text-gray-500 font-medium">
+                        <p className="text-[10px] sm:text-xs text-[var(--muted-text)] font-medium">
                             {formatCurrency(totalValue)}
                         </p>
                     )}
@@ -222,7 +222,7 @@ function KanbanColumn({ status, deals }: { status: DealStatus, deals: DealWithRe
                             <DealCard key={deal.id} deal={deal} />
                         ))
                     ) : (
-                        <div className="text-center py-6 sm:py-8 text-xs sm:text-sm text-gray-400">
+                        <div className="text-center py-6 sm:py-8 text-xs sm:text-sm text-[var(--muted-text)]">
                             Sin negocios
                         </div>
                     )}
@@ -255,7 +255,7 @@ function DealsTable({ deals, initialPreferences, itemsPerPage = 10 }: { deals: D
             render: (deal) => (
                 <Link
                     href={`/app/deals/${deal.id}`}
-                    className="text-sm font-medium text-nearby-accent hover:text-nearby-dark"
+                    className="text-sm font-medium text-nearby-accent hover:text-[var(--foreground)]"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {deal.name}
@@ -271,13 +271,13 @@ function DealsTable({ deals, initialPreferences, itemsPerPage = 10 }: { deals: D
                 deal.company ? (
                     <Link
                         href={`/app/companies/${deal.company.id}`}
-                        className="text-sm text-nearby-accent hover:text-nearby-dark"
+                        className="text-sm text-nearby-accent hover:text-[var(--foreground)]"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {deal.company.name}
                     </Link>
                 ) : (
-                    <span className="text-sm text-gray-400">-</span>
+                    <span className="text-sm text-[var(--muted-text)]">-</span>
                 )
             ),
         },
@@ -290,13 +290,13 @@ function DealsTable({ deals, initialPreferences, itemsPerPage = 10 }: { deals: D
                 deal.contact ? (
                     <Link
                         href={`/app/contacts/${deal.contact.id}`}
-                        className="text-sm text-nearby-accent hover:text-nearby-dark"
+                        className="text-sm text-nearby-accent hover:text-[var(--foreground)]"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {deal.contact.fullName}
                     </Link>
                 ) : (
-                    <span className="text-sm text-gray-400">-</span>
+                    <span className="text-sm text-[var(--muted-text)]">-</span>
                 )
             ),
         },
@@ -307,7 +307,7 @@ function DealsTable({ deals, initialPreferences, itemsPerPage = 10 }: { deals: D
             hideable: true,
             defaultVisible: true,
             render: (deal) => (
-                <span className="text-sm font-medium text-dark-slate">
+                <span className="text-sm font-medium text-[var(--foreground)]">
                     {formatCurrency(Number(deal.value))}
                 </span>
             ),
@@ -324,7 +324,7 @@ function DealsTable({ deals, initialPreferences, itemsPerPage = 10 }: { deals: D
             hideable: true,
             defaultVisible: true,
             render: (deal) => (
-                <span className="text-sm text-dark-slate">
+                <span className="text-sm text-[var(--foreground)]">
                     {deal.type ? dealTypeConfig[deal.type].label : "-"}
                 </span>
             ),
@@ -356,7 +356,7 @@ function DealsTable({ deals, initialPreferences, itemsPerPage = 10 }: { deals: D
             hideable: true,
             defaultVisible: false,
             render: (deal) => (
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-[var(--muted-text)]">
                     {new Date(deal.createdAt).toLocaleDateString('es-ES')}
                 </span>
             ),
@@ -369,12 +369,12 @@ function DealsTable({ deals, initialPreferences, itemsPerPage = 10 }: { deals: D
 
     if (deals.length === 0) {
         return (
-            <div className="bg-white shadow-sm rounded-lg border border-graphite-gray overflow-hidden">
+            <div className="bg-[var(--card-bg)] shadow-sm rounded-lg border border-[var(--card-border)] overflow-hidden">
                 <div className="text-center py-8 sm:py-12 px-4">
-                    <p className="text-dark-slate text-base sm:text-lg">No hay negocios registrados</p>
+                    <p className="text-[var(--foreground)] text-base sm:text-lg">No hay negocios registrados</p>
                     <Link
                         href="/app/deals/new"
-                        className="inline-flex items-center px-4 py-2 mt-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900"
+                        className="inline-flex items-center px-4 py-2 mt-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-nearby-dark-600"
                     >
                         <Plus size={16} className="mr-2" />
                         Agregar primer negocio
@@ -404,7 +404,7 @@ function DealsTable({ deals, initialPreferences, itemsPerPage = 10 }: { deals: D
             </div>
 
             {/* Mobile Card View - Optimizado para iOS */}
-            <div className="md:hidden bg-white shadow-sm rounded-lg border border-graphite-gray overflow-hidden divide-y divide-graphite-gray">
+            <div className="md:hidden bg-[var(--card-bg)] shadow-sm rounded-lg border border-[var(--card-border)] overflow-hidden divide-y divide-graphite-gray">
                 {deals.map((deal) => {
                     const formatCurrencyShort = (value: number) => {
                         if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
@@ -416,13 +416,13 @@ function DealsTable({ deals, initialPreferences, itemsPerPage = 10 }: { deals: D
                         <Link
                             key={deal.id}
                             href={`/app/deals/${deal.id}`}
-                            className="block p-3 sm:p-4 hover:bg-soft-gray active:bg-gray-100 transition-colors touch-manipulation"
+                            className="block p-3 sm:p-4 hover:bg-soft-gray active:bg-[var(--surface-3)] transition-colors touch-manipulation"
                         >
                             <div className="flex items-start gap-3">
                                 {/* Value Badge */}
                                 <div className="flex-shrink-0 w-16 h-16 rounded-xl bg-gradient-to-br from-nearby-accent/10 to-nearby-accent/5 flex flex-col items-center justify-center border border-nearby-accent/20">
                                     <span className="text-[10px] text-nearby-accent font-medium">VALOR</span>
-                                    <span className="text-sm font-bold text-nearby-dark">
+                                    <span className="text-sm font-bold text-[var(--foreground)]">
                                         {formatCurrencyShort(Number(deal.value))}
                                     </span>
                                 </div>
@@ -430,7 +430,7 @@ function DealsTable({ deals, initialPreferences, itemsPerPage = 10 }: { deals: D
                                 {/* Content */}
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-start justify-between gap-2 mb-1">
-                                        <h3 className="text-sm font-semibold text-nearby-dark truncate">
+                                        <h3 className="text-sm font-semibold text-[var(--foreground)] truncate">
                                             {deal.name}
                                         </h3>
                                         <span className={`flex-shrink-0 px-2 py-0.5 text-[10px] font-semibold rounded-full ${dealStatusConfig[deal.status].color}`}>
@@ -438,24 +438,24 @@ function DealsTable({ deals, initialPreferences, itemsPerPage = 10 }: { deals: D
                                         </span>
                                     </div>
                                     
-                                    <div className="space-y-0.5 text-xs text-gray-600">
+                                    <div className="space-y-0.5 text-xs text-[var(--muted-text)]">
                                         {deal.company && (
                                             <p className="truncate">
-                                                <span className="text-gray-500">Empresa:</span> {deal.company.name}
+                                                <span className="text-[var(--muted-text)]">Empresa:</span> {deal.company.name}
                                             </p>
                                         )}
                                         {deal.contact && (
                                             <p className="truncate">
-                                                <span className="text-gray-500">Contacto:</span> {deal.contact.fullName}
+                                                <span className="text-[var(--muted-text)]">Contacto:</span> {deal.contact.fullName}
                                             </p>
                                         )}
                                     </div>
                                     
-                                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
-                                        <span className="text-[10px] text-gray-500">
+                                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-[var(--card-border)]">
+                                        <span className="text-[10px] text-[var(--muted-text)]">
                                             {deal.type ? dealTypeConfig[deal.type].label : "—"}
                                         </span>
-                                        <span className="text-[10px] text-gray-400">
+                                        <span className="text-[10px] text-[var(--muted-text)]">
                                             {new Date(deal.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' })}
                                         </span>
                                     </div>
@@ -608,7 +608,7 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table", in
                     >
                         {/* Instrucción para móvil */}
                         <div className="md:hidden mb-3">
-                            <p className="text-xs text-gray-500 flex items-center gap-1.5">
+                            <p className="text-xs text-[var(--muted-text)] flex items-center gap-1.5">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M5 12h14"/>
                                     <path d="m12 5 7 7-7 7"/>

@@ -34,7 +34,7 @@ function SubmitButton() {
         <button
             type="submit"
             disabled={pending}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900 transition-colors disabled:opacity-50"
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-nearby-dark-600 transition-colors disabled:opacity-50"
         >
             {pending ? (
                 <>
@@ -173,21 +173,21 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
 
     return (
         <div className="space-y-6">
-            <div className="bg-white shadow-sm rounded-lg border border-graphite-gray p-6">
+            <div className="bg-[var(--card-bg)] shadow-sm rounded-lg border border-[var(--card-border)] p-6">
                 <div className="flex items-start justify-between mb-6">
                     <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${enabled ? 'bg-green-100' : 'bg-gray-100'}`}>
+                        <div className={`p-2 rounded-lg ${enabled ? 'bg-green-100' : 'bg-[var(--hover-bg)]'}`}>
                             {enabled ? (
                                 <Cloud className="text-green-600" size={24} />
                             ) : (
-                                <CloudOff className="text-gray-400" size={24} />
+                                <CloudOff className="text-[var(--muted-text)]" size={24} />
                             )}
                         </div>
                         <div>
-                            <h2 className="text-lg font-semibold text-nearby-dark">
+                            <h2 className="text-lg font-semibold text-[var(--foreground)]">
                                 Integración con AdmCloud
                             </h2>
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-[var(--muted-text)]">
                                 Conecta tu sistema contable para visualizar facturas de clientes
                             </p>
                         </div>
@@ -206,10 +206,10 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                     <input type="hidden" name="enabled" value={enabled.toString()} />
 
                     {/* Toggle de activación */}
-                    <div className="flex items-center justify-between p-4 bg-soft-gray rounded-lg border border-graphite-gray">
+                    <div className="flex items-center justify-between p-4 bg-soft-gray rounded-lg border border-[var(--card-border)]">
                         <div>
-                            <p className="font-medium text-dark-slate">Habilitar integración</p>
-                            <p className="text-sm text-gray-500">
+                            <p className="font-medium text-[var(--foreground)]">Habilitar integración</p>
+                            <p className="text-sm text-[var(--muted-text)]">
                                 Permite consultar facturas de clientes desde AdmCloud
                             </p>
                         </div>
@@ -217,11 +217,11 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                             type="button"
                             onClick={() => setEnabled(!enabled)}
                             className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-nearby-accent focus:ring-offset-2 ${
-                                enabled ? 'bg-nearby-accent' : 'bg-gray-200'
+                                enabled ? 'bg-nearby-accent' : 'bg-[var(--surface-3)]'
                             }`}
                         >
                             <span
-                                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-[var(--card-bg)] shadow ring-0 transition duration-200 ease-in-out ${
                                     enabled ? 'translate-x-5' : 'translate-x-0'
                                 }`}
                             />
@@ -230,14 +230,14 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
 
                     {/* Campos de configuración */}
                     {enabled && (
-                        <div className="space-y-4 pt-4 border-t border-graphite-gray">
-                            <p className="text-sm text-gray-600">
+                        <div className="space-y-4 pt-4 border-t border-[var(--card-border)]">
+                            <p className="text-sm text-[var(--muted-text)]">
                                 Ingresa las credenciales de tu cuenta de AdmCloud. La API usa autenticación básica (Basic Auth).
                             </p>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label htmlFor="appId" className="block text-sm font-medium text-dark-slate mb-2">
+                                    <label htmlFor="appId" className="block text-sm font-medium text-[var(--foreground)] mb-2">
                                         App ID <span className="text-error-red">*</span>
                                     </label>
                                     <input
@@ -246,7 +246,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                         id="appId"
                                         defaultValue={currentConfig.appId || ""}
                                         placeholder="ej: f9218618-ee43-4ca0-52f9-..."
-                                        className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm font-mono text-xs"
+                                        className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm font-mono text-xs"
                                     />
                                     {state?.errors?.appId && (
                                         <p className="mt-1 text-sm text-error-red">{state.errors.appId}</p>
@@ -254,7 +254,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                 </div>
 
                                 <div>
-                                    <label htmlFor="company" className="block text-sm font-medium text-dark-slate mb-2">
+                                    <label htmlFor="company" className="block text-sm font-medium text-[var(--foreground)] mb-2">
                                         ID de Compañía <span className="text-error-red">*</span>
                                     </label>
                                     <input
@@ -263,7 +263,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                         id="company"
                                         defaultValue={currentConfig.company || ""}
                                         placeholder="ej: 030c4f39-3188-4485-b557-..."
-                                        className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm font-mono text-xs"
+                                        className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm font-mono text-xs"
                                     />
                                     {state?.errors?.company && (
                                         <p className="mt-1 text-sm text-error-red">{state.errors.company}</p>
@@ -271,7 +271,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                 </div>
 
                                 <div>
-                                    <label htmlFor="username" className="block text-sm font-medium text-dark-slate mb-2">
+                                    <label htmlFor="username" className="block text-sm font-medium text-[var(--foreground)] mb-2">
                                         Usuario <span className="text-error-red">*</span>
                                     </label>
                                     <input
@@ -280,7 +280,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                         id="username"
                                         defaultValue={currentConfig.username || ""}
                                         placeholder="Tu usuario de AdmCloud"
-                                        className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                        className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                     />
                                     {state?.errors?.username && (
                                         <p className="mt-1 text-sm text-error-red">{state.errors.username}</p>
@@ -288,7 +288,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                 </div>
 
                                 <div>
-                                    <label htmlFor="password" className="block text-sm font-medium text-dark-slate mb-2">
+                                    <label htmlFor="password" className="block text-sm font-medium text-[var(--foreground)] mb-2">
                                         Contraseña <span className="text-error-red">*</span>
                                     </label>
                                     <input
@@ -297,7 +297,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                         id="password"
                                         defaultValue={currentConfig.password || ""}
                                         placeholder="Tu contraseña de AdmCloud"
-                                        className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                        className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                     />
                                     {state?.errors?.password && (
                                         <p className="mt-1 text-sm text-error-red">{state.errors.password}</p>
@@ -305,7 +305,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                 </div>
 
                                 <div>
-                                    <label htmlFor="role" className="block text-sm font-medium text-dark-slate mb-2">
+                                    <label htmlFor="role" className="block text-sm font-medium text-[var(--foreground)] mb-2">
                                         Rol
                                     </label>
                                     <input
@@ -314,18 +314,18 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                         id="role"
                                         defaultValue={currentConfig.role || "Administradores"}
                                         placeholder="Administradores"
-                                        className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                        className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                     />
-                                    <p className="mt-1 text-xs text-gray-500">
+                                    <p className="mt-1 text-xs text-[var(--muted-text)]">
                                         Normalmente es "Administradores"
                                     </p>
                                 </div>
                             </div>
 
                             {/* Default Price List Selector */}
-                            <div className="mt-6 pt-4 border-t border-graphite-gray">
+                            <div className="mt-6 pt-4 border-t border-[var(--card-border)]">
                                 <div className="flex items-center justify-between mb-2">
-                                    <label htmlFor="defaultPriceListId" className="block text-sm font-medium text-dark-slate">
+                                    <label htmlFor="defaultPriceListId" className="block text-sm font-medium text-[var(--foreground)]">
                                         Lista de precios predeterminada
                                     </label>
                                     <button
@@ -360,14 +360,14 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                         </option>
                                     ))}
                                 </select>
-                                <p className="mt-1 text-xs text-gray-500">
+                                <p className="mt-1 text-xs text-[var(--muted-text)]">
                                     Al seleccionar artículos con múltiples precios, esta lista se usará por defecto
                                 </p>
                             </div>
 
                             {/* Quote Defaults Section */}
-                            <div className="mt-6 pt-4 border-t border-graphite-gray">
-                                <h3 className="text-sm font-medium text-dark-slate mb-4">
+                            <div className="mt-6 pt-4 border-t border-[var(--card-border)]">
+                                <h3 className="text-sm font-medium text-[var(--foreground)] mb-4">
                                     Configuración para Cotizaciones/Proformas
                                 </h3>
                                 
@@ -375,7 +375,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                     {/* Payment Terms Selector */}
                                     <div>
                                         <div className="flex items-center justify-between mb-2">
-                                            <label htmlFor="defaultPaymentTermId" className="block text-sm font-medium text-dark-slate">
+                                            <label htmlFor="defaultPaymentTermId" className="block text-sm font-medium text-[var(--foreground)]">
                                                 Términos de pago
                                             </label>
                                             <button
@@ -410,7 +410,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                                 </option>
                                             ))}
                                         </select>
-                                        <p className="mt-1 text-xs text-gray-500">
+                                        <p className="mt-1 text-xs text-[var(--muted-text)]">
                                             Ej: 5 días laborales
                                         </p>
                                     </div>
@@ -418,7 +418,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                     {/* Sales Stage Selector */}
                                     <div>
                                         <div className="flex items-center justify-between mb-2">
-                                            <label htmlFor="defaultSalesStageId" className="block text-sm font-medium text-dark-slate">
+                                            <label htmlFor="defaultSalesStageId" className="block text-sm font-medium text-[var(--foreground)]">
                                                 Etapa de ventas
                                             </label>
                                             <button
@@ -453,7 +453,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                                 </option>
                                             ))}
                                         </select>
-                                        <p className="mt-1 text-xs text-gray-500">
+                                        <p className="mt-1 text-xs text-[var(--muted-text)]">
                                             Ej: ENVIADA
                                         </p>
                                     </div>
@@ -478,7 +478,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                         </div>
                     )}
 
-                    <div className="flex justify-end pt-4 border-t border-graphite-gray">
+                    <div className="flex justify-end pt-4 border-t border-[var(--card-border)]">
                         <SubmitButton />
                     </div>
                 </form>

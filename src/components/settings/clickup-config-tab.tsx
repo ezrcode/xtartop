@@ -17,12 +17,12 @@ interface ClickUpConfigTabProps {
 
 function SubmitButton() {
     const { pending } = useFormStatus();
-    
+
     return (
         <button
             type="submit"
             disabled={pending}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900 transition-colors disabled:opacity-50"
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-nearby-dark-600 transition-colors disabled:opacity-50"
         >
             {pending ? (
                 <>
@@ -45,23 +45,23 @@ export function ClickUpConfigTab({ currentConfig }: ClickUpConfigTabProps) {
     const [workspaceId, setWorkspaceId] = useState(currentConfig.workspaceId || "");
     const [listId, setListId] = useState(currentConfig.listId || "");
     const [clientFieldId, setClientFieldId] = useState(currentConfig.clientFieldId || "");
-    
+
     // Dynamic loading states
     const [loadingTeams, setLoadingTeams] = useState(false);
     const [loadingLists, setLoadingLists] = useState(false);
     const [loadingFields, setLoadingFields] = useState(false);
-    
+
     // Loaded options
     const [teams, setTeams] = useState<{ id: string; name: string }[]>([]);
     const [lists, setLists] = useState<{ id: string; name: string; folder?: { name: string }; space?: { name: string } }[]>([]);
     const [fields, setFields] = useState<{ id: string; name: string; type: string }[]>([]);
-    
+
     const initialState: ClickUpSettingsState = { message: "" };
     const [state, formAction] = useFormState(saveClickUpSettings, initialState);
 
     const handleLoadTeams = async () => {
         if (!apiToken.trim()) return;
-        
+
         setLoadingTeams(true);
         try {
             const result = await getClickUpTeams(apiToken);
@@ -76,7 +76,7 @@ export function ClickUpConfigTab({ currentConfig }: ClickUpConfigTabProps) {
 
     const handleLoadLists = async () => {
         if (!apiToken.trim() || !workspaceId.trim()) return;
-        
+
         setLoadingLists(true);
         try {
             const result = await getClickUpLists(apiToken, workspaceId);
@@ -96,7 +96,7 @@ export function ClickUpConfigTab({ currentConfig }: ClickUpConfigTabProps) {
 
     const handleLoadFields = async () => {
         if (!apiToken.trim() || !listId.trim()) return;
-        
+
         setLoadingFields(true);
         try {
             const result = await getClickUpFields(apiToken, listId);
@@ -114,32 +114,32 @@ export function ClickUpConfigTab({ currentConfig }: ClickUpConfigTabProps) {
     };
 
     return (
-        <div className="bg-white shadow-sm rounded-lg border border-graphite-gray p-6 mt-6">
+        <div className="bg-[var(--card-bg)] shadow-sm rounded-lg border border-[var(--card-border)] p-6 mt-6">
             <div className="flex items-start justify-between mb-6">
                 <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${enabled ? 'bg-purple-100' : 'bg-gray-100'}`}>
-                        <svg 
-                            className={enabled ? "text-purple-600" : "text-gray-400"} 
-                            width="24" 
-                            height="24" 
-                            viewBox="0 0 24 24" 
+                    <div className={`p-2 rounded-lg ${enabled ? 'bg-purple-100' : 'bg-[var(--hover-bg)]'}`}>
+                        <svg
+                            className={enabled ? "text-purple-600" : "text-[var(--muted-text)]"}
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
                             fill="currentColor"
                         >
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-4-4 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8z"/>
                         </svg>
                     </div>
                     <div>
-                        <h2 className="text-lg font-semibold text-nearby-dark">
+                        <h2 className="text-lg font-semibold text-[var(--foreground)]">
                             Integración con ClickUp
                         </h2>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-[var(--muted-text)]">
                             Visualiza tickets y tareas de clientes desde ClickUp
                         </p>
                     </div>
                 </div>
-                <a 
-                    href="https://clickup.com/api" 
-                    target="_blank" 
+                <a
+                    href="https://clickup.com/api"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm text-nearby-accent hover:underline flex items-center gap-1"
                 >
@@ -155,10 +155,10 @@ export function ClickUpConfigTab({ currentConfig }: ClickUpConfigTabProps) {
                 <input type="hidden" name="clientFieldId" value={clientFieldId} />
 
                 {/* Toggle */}
-                <div className="flex items-center justify-between p-4 bg-soft-gray rounded-lg border border-graphite-gray">
+                <div className="flex items-center justify-between p-4 bg-soft-gray rounded-lg border border-[var(--card-border)]">
                     <div>
-                        <p className="font-medium text-dark-slate">Habilitar integración</p>
-                        <p className="text-sm text-gray-500">
+                        <p className="font-medium text-[var(--foreground)]">Habilitar integración</p>
+                        <p className="text-sm text-[var(--muted-text)]">
                             Permite ver tickets de ClickUp en la ficha de cada empresa
                         </p>
                     </div>
@@ -166,11 +166,11 @@ export function ClickUpConfigTab({ currentConfig }: ClickUpConfigTabProps) {
                         type="button"
                         onClick={() => setEnabled(!enabled)}
                         className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${
-                            enabled ? 'bg-purple-600' : 'bg-gray-200'
+                            enabled ? 'bg-purple-600' : 'bg-[var(--surface-3)]'
                         }`}
                     >
                         <span
-                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-[var(--card-bg)] shadow ring-0 transition duration-200 ease-in-out ${
                                 enabled ? 'translate-x-5' : 'translate-x-0'
                             }`}
                         />
@@ -179,14 +179,14 @@ export function ClickUpConfigTab({ currentConfig }: ClickUpConfigTabProps) {
 
                 {/* Config fields */}
                 {enabled && (
-                    <div className="space-y-4 pt-4 border-t border-graphite-gray">
-                        <p className="text-sm text-gray-600">
+                    <div className="space-y-4 pt-4 border-t border-[var(--card-border)]">
+                        <p className="text-sm text-[var(--muted-text)]">
                             Obtén tu API Token en ClickUp → Settings → Apps → API Token
                         </p>
 
                         {/* API Token */}
                         <div>
-                            <label htmlFor="clickUpApiToken" className="block text-sm font-medium text-dark-slate mb-2">
+                            <label htmlFor="clickUpApiToken" className="block text-sm font-medium text-[var(--foreground)] mb-2">
                                 API Token <span className="text-error-red">*</span>
                             </label>
                             <div className="flex gap-2">
@@ -196,13 +196,13 @@ export function ClickUpConfigTab({ currentConfig }: ClickUpConfigTabProps) {
                                     value={apiToken}
                                     onChange={(e) => setApiToken(e.target.value)}
                                     placeholder="pk_xxxxxxxx_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                                    className="flex-1 px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm font-mono text-xs"
+                                    className="flex-1 px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm font-mono text-xs"
                                 />
                                 <button
                                     type="button"
                                     onClick={handleLoadTeams}
                                     disabled={!apiToken.trim() || loadingTeams}
-                                    className="px-3 py-2 border border-graphite-gray rounded-md text-sm font-medium text-dark-slate bg-white hover:bg-gray-50 disabled:opacity-50"
+                                    className="px-3 py-2 border border-[var(--card-border)] rounded-md text-sm font-medium text-[var(--foreground)] bg-[var(--card-bg)] hover:bg-[var(--surface-2)] disabled:opacity-50"
                                 >
                                     {loadingTeams ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
                                 </button>
@@ -214,7 +214,7 @@ export function ClickUpConfigTab({ currentConfig }: ClickUpConfigTabProps) {
 
                         {/* Workspace ID */}
                         <div>
-                            <label htmlFor="clickUpWorkspaceId" className="block text-sm font-medium text-dark-slate mb-2">
+                            <label htmlFor="clickUpWorkspaceId" className="block text-sm font-medium text-[var(--foreground)] mb-2">
                                 Workspace/Team ID <span className="text-error-red">*</span>
                             </label>
                             <div className="flex gap-2">
@@ -229,7 +229,7 @@ export function ClickUpConfigTab({ currentConfig }: ClickUpConfigTabProps) {
                                             setListId("");
                                             setClientFieldId("");
                                         }}
-                                        className="flex-1 px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                                        className="flex-1 px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                                     >
                                         <option value="">Selecciona un workspace</option>
                                         {teams.map(t => (
@@ -243,14 +243,14 @@ export function ClickUpConfigTab({ currentConfig }: ClickUpConfigTabProps) {
                                         value={workspaceId}
                                         onChange={(e) => setWorkspaceId(e.target.value)}
                                         placeholder="ej: 12345678"
-                                        className="flex-1 px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm font-mono"
+                                        className="flex-1 px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm font-mono"
                                     />
                                 )}
                                 <button
                                     type="button"
                                     onClick={handleLoadLists}
                                     disabled={!workspaceId.trim() || loadingLists}
-                                    className="px-3 py-2 border border-graphite-gray rounded-md text-sm font-medium text-dark-slate bg-white hover:bg-gray-50 disabled:opacity-50"
+                                    className="px-3 py-2 border border-[var(--card-border)] rounded-md text-sm font-medium text-[var(--foreground)] bg-[var(--card-bg)] hover:bg-[var(--surface-2)] disabled:opacity-50"
                                 >
                                     {loadingLists ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
                                 </button>
@@ -262,7 +262,7 @@ export function ClickUpConfigTab({ currentConfig }: ClickUpConfigTabProps) {
 
                         {/* List ID */}
                         <div>
-                            <label htmlFor="clickUpListId" className="block text-sm font-medium text-dark-slate mb-2">
+                            <label htmlFor="clickUpListId" className="block text-sm font-medium text-[var(--foreground)] mb-2">
                                 Lista de Tickets <span className="text-error-red">*</span>
                             </label>
                             <div className="flex gap-2">
@@ -275,7 +275,7 @@ export function ClickUpConfigTab({ currentConfig }: ClickUpConfigTabProps) {
                                             setFields([]);
                                             setClientFieldId("");
                                         }}
-                                        className="flex-1 px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                                        className="flex-1 px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                                     >
                                         <option value="">Selecciona una lista</option>
                                         {lists.map(l => (
@@ -291,14 +291,14 @@ export function ClickUpConfigTab({ currentConfig }: ClickUpConfigTabProps) {
                                         value={listId}
                                         onChange={(e) => setListId(e.target.value)}
                                         placeholder="ej: 901234567"
-                                        className="flex-1 px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm font-mono"
+                                        className="flex-1 px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm font-mono"
                                     />
                                 )}
                                 <button
                                     type="button"
                                     onClick={handleLoadFields}
                                     disabled={!listId.trim() || loadingFields}
-                                    className="px-3 py-2 border border-graphite-gray rounded-md text-sm font-medium text-dark-slate bg-white hover:bg-gray-50 disabled:opacity-50"
+                                    className="px-3 py-2 border border-[var(--card-border)] rounded-md text-sm font-medium text-[var(--foreground)] bg-[var(--card-bg)] hover:bg-[var(--surface-2)] disabled:opacity-50"
                                 >
                                     {loadingFields ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
                                 </button>
@@ -310,7 +310,7 @@ export function ClickUpConfigTab({ currentConfig }: ClickUpConfigTabProps) {
 
                         {/* Client Field ID */}
                         <div>
-                            <label htmlFor="clickUpClientFieldId" className="block text-sm font-medium text-dark-slate mb-2">
+                            <label htmlFor="clickUpClientFieldId" className="block text-sm font-medium text-[var(--foreground)] mb-2">
                                 Campo &quot;Cliente&quot; <span className="text-error-red">*</span>
                             </label>
                             {fields.length > 0 ? (
@@ -318,7 +318,7 @@ export function ClickUpConfigTab({ currentConfig }: ClickUpConfigTabProps) {
                                     id="clickUpClientFieldId"
                                     value={clientFieldId}
                                     onChange={(e) => setClientFieldId(e.target.value)}
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                                    className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                                 >
                                     <option value="">Selecciona el campo de cliente</option>
                                     {fields.map(f => (
@@ -334,10 +334,10 @@ export function ClickUpConfigTab({ currentConfig }: ClickUpConfigTabProps) {
                                     value={clientFieldId}
                                     onChange={(e) => setClientFieldId(e.target.value)}
                                     placeholder="ej: abc123de-f456-7890-abcd-ef1234567890"
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm font-mono text-xs"
+                                    className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm font-mono text-xs"
                                 />
                             )}
-                            <p className="mt-1 text-xs text-gray-500">
+                            <p className="mt-1 text-xs text-[var(--muted-text)]">
                                 Campo personalizado que contiene el nombre del cliente
                             </p>
                             {state?.errors?.clientFieldId && (
@@ -350,8 +350,8 @@ export function ClickUpConfigTab({ currentConfig }: ClickUpConfigTabProps) {
                 {/* Status message */}
                 {state?.message && (
                     <div className={`flex items-center gap-2 p-4 rounded-md ${
-                        state.success 
-                            ? "bg-green-50 text-green-800" 
+                        state.success
+                            ? "bg-green-50 text-green-800"
                             : "bg-red-50 text-red-800"
                     }`}>
                         {state.success ? (
@@ -363,7 +363,7 @@ export function ClickUpConfigTab({ currentConfig }: ClickUpConfigTabProps) {
                     </div>
                 )}
 
-                <div className="flex justify-end pt-4 border-t border-graphite-gray">
+                <div className="flex justify-end pt-4 border-t border-[var(--card-border)]">
                     <SubmitButton />
                 </div>
             </form>

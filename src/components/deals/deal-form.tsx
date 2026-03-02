@@ -44,8 +44,8 @@ function SubmitButton({ actionName, label, mobileLabel, loadingLabel, icon: Icon
 
     const baseClasses = "inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95";
     const variants = {
-        primary: "text-white bg-nearby-dark hover:bg-gray-900 focus:ring-nearby-dark shadow-sm",
-        secondary: "text-dark-slate bg-white border border-graphite-gray hover:bg-gray-50 focus:ring-nearby-accent",
+        primary: "text-white bg-nearby-dark hover:bg-nearby-dark-600 focus:ring-nearby-dark shadow-sm",
+        secondary: "text-[var(--foreground)] bg-[var(--card-bg)] border border-[var(--card-border)] hover:bg-[var(--surface-2)] focus:ring-nearby-accent",
         danger: "text-white bg-error-red hover:bg-red-700 focus:ring-error-red shadow-sm",
     };
 
@@ -104,17 +104,17 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
         <div className="flex flex-col h-full">
             <form action={action} className="flex flex-col h-full">
                 {/* Command Bar - Mobile Optimized */}
-                <div className="sticky top-16 z-30 bg-white border-b border-graphite-gray shadow-sm">
+                <div className="sticky top-16 z-30 bg-[var(--card-bg)] border-b border-[var(--card-border)] shadow-sm">
                     <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
                         <div className="flex items-center justify-between h-14 sm:h-16">
                             <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
                                 <Link
                                     href="/app/deals"
-                                    className="p-2 text-gray-400 hover:text-dark-slate rounded-full hover:bg-gray-100 flex-shrink-0"
+                                    className="p-2 text-[var(--muted-text)] hover:text-[var(--foreground)] rounded-full hover:bg-[var(--hover-bg)] flex-shrink-0"
                                 >
                                     <ArrowLeft size={20} />
                                 </Link>
-                                <h1 className="text-base sm:text-xl font-bold text-nearby-dark truncate">
+                                <h1 className="text-base sm:text-xl font-bold text-[var(--foreground)] truncate">
                                     {isEditMode ? deal?.name : "Nuevo Negocio"}
                                 </h1>
                             </div>
@@ -158,7 +158,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                         {/* Left Column: Form */}
                         <div className="lg:col-span-7 space-y-4 sm:space-y-6">
                             {/* Tabs - Mobile Optimized */}
-                            <div className="border-b border-graphite-gray overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0">
+                            <div className="border-b border-[var(--card-border)] overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0">
                                 <nav className="-mb-px flex space-x-1 sm:space-x-6 min-w-max">
                                     <button
                                         type="button"
@@ -166,7 +166,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                         className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
                                             activeTab === "general"
                                                 ? "border-nearby-accent text-nearby-accent"
-                                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                                : "border-transparent text-[var(--muted-text)] hover:text-[var(--foreground)] hover:border-[var(--card-border)]"
                                         }`}
                                     >
                                         Información General
@@ -177,7 +177,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                         className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
                                             activeTab === "quotes"
                                                 ? "border-nearby-accent text-nearby-accent"
-                                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                                : "border-transparent text-[var(--muted-text)] hover:text-[var(--foreground)] hover:border-[var(--card-border)]"
                                         }`}
                                     >
                                         Cotizaciones
@@ -185,7 +185,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                 </nav>
                             </div>
 
-                            <div className="bg-white shadow-sm rounded-xl border border-graphite-gray p-4 sm:p-6 space-y-4 sm:space-y-6">
+                            <div className="bg-[var(--card-bg)] shadow-sm rounded-xl border border-[var(--card-border)] p-4 sm:p-6 space-y-4 sm:space-y-6">
                                 
                                 {state?.message && (
                                     <div className={`p-4 rounded-md ${
@@ -203,7 +203,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                         <div className="grid grid-cols-1 gap-4 sm:gap-y-5 sm:gap-x-4 sm:grid-cols-6">
                                             {/* Nombre del Negocio */}
                                             <div className="sm:col-span-6">
-                                                <label htmlFor="name" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="name" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                                     Nombre del Negocio <span className="text-error-red">*</span>
                                                 </label>
                                                 <input
@@ -212,7 +212,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                                     id="name"
                                                     defaultValue={deal?.name}
                                                     required
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 />
                                                 {state?.errors?.name && (
                                                     <p className="mt-1.5 text-xs text-error-red">{state.errors.name}</p>
@@ -221,7 +221,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
 
                                             {/* Descripción */}
                                             <div className="sm:col-span-6">
-                                                <label htmlFor="description" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="description" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                                     Descripción
                                                 </label>
                                                 <textarea
@@ -230,7 +230,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                                     rows={5}
                                                     defaultValue={deal?.description || ""}
                                                     placeholder="Describe brevemente el contexto, alcance y objetivos del negocio..."
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors resize-y"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors resize-y"
                                                 />
                                                 {state?.errors?.description && (
                                                     <p className="mt-1.5 text-xs text-error-red">{state.errors.description}</p>
@@ -239,14 +239,14 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
 
                                             {/* Empresa y Contacto */}
                                             <div className="sm:col-span-3">
-                                                <label htmlFor="companyId" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="companyId" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                                     Empresa
                                                 </label>
                                                 <select
                                                     id="companyId"
                                                     name="companyId"
                                                     defaultValue={deal?.companyId || "null"}
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
                                                 >
                                                     <option value="null">Sin empresa</option>
                                                     {companies.map((company) => (
@@ -258,14 +258,14 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                             </div>
 
                                             <div className="sm:col-span-3">
-                                                <label htmlFor="contactId" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="contactId" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                                     Contacto
                                                 </label>
                                                 <select
                                                     id="contactId"
                                                     name="contactId"
                                                     defaultValue={deal?.contactId || "null"}
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
                                                 >
                                                     <option value="null">Sin contacto</option>
                                                     {contacts.map((contact) => (
@@ -278,7 +278,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
 
                                             {/* Recurrencia, tipo y estado */}
                                             <div className="sm:col-span-2">
-                                                <label htmlFor="recurrence" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="recurrence" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                                     Recurrencia <span className="text-error-red">*</span>
                                                 </label>
                                                 <select
@@ -286,7 +286,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                                     name="recurrence"
                                                     defaultValue={deal?.recurrence || "ONETIME_PROJECT"}
                                                     required
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
                                                 >
                                                     <option value="ONETIME_PROJECT">Onetime Project</option>
                                                     <option value="SUSCRIPCION">Suscripción</option>
@@ -297,14 +297,14 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                             </div>
 
                                             <div className="sm:col-span-2">
-                                                <label htmlFor="type" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="type" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                                     Tipo de Negocio
                                                 </label>
                                                 <select
                                                     id="type"
                                                     name="type"
                                                     defaultValue={deal?.type || "null"}
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
                                                 >
                                                     <option value="null">Seleccionar tipo</option>
                                                     <option value="CLIENTE_NUEVO">Cliente nuevo</option>
@@ -313,7 +313,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                             </div>
 
                                             <div className="sm:col-span-2">
-                                                <label htmlFor="status" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="status" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                                     Estado <span className="text-error-red">*</span>
                                                 </label>
                                                 <select
@@ -321,7 +321,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                                     name="status"
                                                     defaultValue={deal?.status || "PROSPECCION"}
                                                     required
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
                                                 >
                                                     <option value="PROSPECCION">Prospección</option>
                                                     <option value="CALIFICACION">Calificación</option>
@@ -335,12 +335,12 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
 
                                             {/* Valor y LoB */}
                                             <div className="sm:col-span-3">
-                                                <label htmlFor="value" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="value" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                                     Valor del Negocio
                                                 </label>
                                                 <div className="relative rounded-lg shadow-sm">
                                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                        <span className="text-gray-500 text-base sm:text-sm">$</span>
+                                                        <span className="text-[var(--muted-text)] text-base sm:text-sm">$</span>
                                                     </div>
                                                     <input
                                                         type="number"
@@ -348,20 +348,20 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                                         id="value"
                                                         step="0.01"
                                                         defaultValue={deal?.value ? deal.value.toString() : "0"}
-                                                        className="block w-full pl-7 pr-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                        className="block w-full pl-7 pr-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                     />
                                                 </div>
                                             </div>
 
                                             <div className="sm:col-span-3">
-                                                <label htmlFor="businessLineId" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="businessLineId" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                                     LoB
                                                 </label>
                                                 <select
                                                     id="businessLineId"
                                                     name="businessLineId"
                                                     defaultValue={deal?.businessLineId || "null"}
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
                                                 >
                                                     <option value="null">Sin línea</option>
                                                     {businessLines.map((bl) => (
@@ -374,23 +374,23 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                         </div>
 
                                         {isEditMode && deal && (
-                                            <div className="border-t border-graphite-gray pt-5">
-                                                <h3 className="text-base sm:text-lg font-medium text-dark-slate mb-4">Metadatos</h3>
+                                            <div className="border-t border-[var(--card-border)] pt-5">
+                                                <h3 className="text-base sm:text-lg font-medium text-[var(--foreground)] mb-4">Metadatos</h3>
                                                 <div className="grid grid-cols-1 gap-4 sm:gap-y-5 sm:gap-x-4 sm:grid-cols-6">
                                                     <div className="sm:col-span-3">
-                                                        <label className="block text-sm font-medium text-gray-500 mb-1.5">
+                                                        <label className="block text-sm font-medium text-[var(--muted-text)] mb-1.5">
                                                             Creado por
                                                         </label>
-                                                        <div className="py-3 sm:py-2.5 text-base sm:text-sm text-dark-slate">
+                                                        <div className="py-3 sm:py-2.5 text-base sm:text-sm text-[var(--foreground)]">
                                                             {deal.createdBy?.name || deal.createdBy?.email || "-"}
                                                         </div>
                                                     </div>
 
                                                     <div className="sm:col-span-3">
-                                                        <label className="block text-sm font-medium text-gray-500 mb-1.5">
+                                                        <label className="block text-sm font-medium text-[var(--muted-text)] mb-1.5">
                                                             Fecha de creación
                                                         </label>
-                                                        <div className="py-3 sm:py-2.5 text-base sm:text-sm text-dark-slate">
+                                                        <div className="py-3 sm:py-2.5 text-base sm:text-sm text-[var(--foreground)]">
                                                             {deal.createdAt ? new Date(deal.createdAt).toLocaleDateString('es-ES', { 
                                                                 year: 'numeric', 
                                                                 month: '2-digit', 
@@ -416,8 +416,8 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                     />
                                 )}
                                 {activeTab === "quotes" && !isEditMode && (
-                                    <div className="flex flex-col items-center justify-center h-64 text-center border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
-                                        <p className="text-gray-500">
+                                    <div className="flex flex-col items-center justify-center h-64 text-center border-2 border-dashed border-[var(--card-border)] rounded-lg bg-[var(--surface-2)]">
+                                        <p className="text-[var(--muted-text)]">
                                             Guarda el negocio primero para poder crear cotizaciones
                                         </p>
                                     </div>
@@ -427,7 +427,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
 
                         {/* Right Column: Activities */}
                         <div className="lg:col-span-5">
-                            <div className="bg-white shadow-sm rounded-xl border border-graphite-gray p-4 sm:p-6 h-full min-h-[300px] sm:min-h-[400px] max-h-[500px] lg:max-h-[calc(100vh-200px)]">
+                            <div className="bg-[var(--card-bg)] shadow-sm rounded-xl border border-[var(--card-border)] p-4 sm:p-6 h-full min-h-[300px] sm:min-h-[400px] max-h-[500px] lg:max-h-[calc(100vh-200px)]">
                                 {isEditMode && deal ? (
                                     <ActivitiesWithSuspense
                                         entityType="deal"
@@ -435,8 +435,8 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                         defaultEmail={deal.contact?.email || ""}
                                     />
                                 ) : (
-                                    <div className="flex flex-col items-center justify-center h-48 sm:h-64 text-center border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
-                                        <p className="text-gray-500 text-sm px-4">
+                                    <div className="flex flex-col items-center justify-center h-48 sm:h-64 text-center border-2 border-dashed border-[var(--card-border)] rounded-lg bg-[var(--surface-2)]">
+                                        <p className="text-[var(--muted-text)] text-sm px-4">
                                             Guarda el negocio primero para registrar actividades
                                         </p>
                                     </div>
@@ -451,15 +451,15 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
             {/* Delete Confirmation Modal */}
             {deleteConfirmOpen && deal && (
                 <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4">
-                    <div className="bg-white rounded-t-2xl sm:rounded-xl shadow-lg p-5 sm:p-6 w-full sm:max-w-md safe-bottom">
-                        <h3 className="text-lg font-bold text-dark-slate mb-2">Eliminar Negocio</h3>
-                        <p className="text-gray-600 mb-6 text-sm sm:text-base">
+                    <div className="bg-[var(--card-bg)] rounded-t-2xl sm:rounded-xl shadow-lg p-5 sm:p-6 w-full sm:max-w-md safe-bottom">
+                        <h3 className="text-lg font-bold text-[var(--foreground)] mb-2">Eliminar Negocio</h3>
+                        <p className="text-[var(--muted-text)] mb-6 text-sm sm:text-base">
                             ¿Estás seguro de que deseas eliminar <strong>{deal.name}</strong>? Esta acción no se puede deshacer.
                         </p>
                         <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3">
                             <button
                                 onClick={() => setDeleteConfirmOpen(false)}
-                                className="w-full sm:w-auto px-4 py-3 sm:py-2 text-sm font-medium text-dark-slate bg-white border border-graphite-gray rounded-lg hover:bg-gray-50 transition-colors"
+                                className="w-full sm:w-auto px-4 py-3 sm:py-2 text-sm font-medium text-[var(--foreground)] bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg hover:bg-[var(--surface-2)] transition-colors"
                             >
                                 Cancelar
                             </button>

@@ -79,13 +79,13 @@ export function ComposeEmailModal({
                 <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={onClose} />
 
                 {/* Modal */}
-                <div className="relative bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[95vh] overflow-y-auto">
+                <div className="relative bg-[var(--card-bg)] rounded-lg shadow-xl w-full max-w-2xl max-h-[95vh] overflow-y-auto">
                     {/* Header */}
-                    <div className="sticky top-0 bg-white flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 z-10">
-                        <h2 className="text-lg sm:text-xl font-semibold text-nearby-dark">Nuevo Email</h2>
+                    <div className="sticky top-0 bg-[var(--card-bg)] flex items-center justify-between p-4 sm:p-6 border-b border-[var(--card-border)] z-10">
+                        <h2 className="text-lg sm:text-xl font-semibold text-[var(--foreground)]">Nuevo Email</h2>
                         <button
                             onClick={onClose}
-                            className="text-gray-400 hover:text-gray-600 transition-colors"
+                            className="text-[var(--muted-text)] hover:text-[var(--foreground)] transition-colors"
                         >
                             <X size={20} className="sm:w-6 sm:h-6" />
                         </button>
@@ -112,7 +112,7 @@ export function ComposeEmailModal({
 
                         {/* To */}
                         <div>
-                            <label htmlFor="to" className="block text-sm font-medium text-dark-slate mb-2">
+                            <label htmlFor="to" className="block text-sm font-medium text-[var(--foreground)] mb-2">
                                 Para
                             </label>
                             <input
@@ -121,14 +121,14 @@ export function ComposeEmailModal({
                                 id="to"
                                 defaultValue={toEmail}
                                 required
-                                className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                 placeholder="destinatario@email.com"
                             />
                         </div>
 
                         {/* Subject */}
                         <div>
-                            <label htmlFor="subject" className="block text-sm font-medium text-dark-slate mb-2">
+                            <label htmlFor="subject" className="block text-sm font-medium text-[var(--foreground)] mb-2">
                                 Asunto
                             </label>
                             <input
@@ -136,14 +136,14 @@ export function ComposeEmailModal({
                                 name="subject"
                                 id="subject"
                                 required
-                                className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
                                 placeholder="Asunto del email"
                             />
                         </div>
 
                         {/* Body */}
                         <div>
-                            <label htmlFor="body" className="block text-sm font-medium text-dark-slate mb-2">
+                            <label htmlFor="body" className="block text-sm font-medium text-[var(--foreground)] mb-2">
                                 Mensaje
                             </label>
                             <textarea
@@ -151,7 +151,7 @@ export function ComposeEmailModal({
                                 id="body"
                                 rows={8}
                                 required
-                                className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent text-sm"
+                                className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent text-sm"
                                 placeholder="Escribe tu mensaje aquí..."
                             />
                         </div>
@@ -169,7 +169,7 @@ export function ComposeEmailModal({
                             <button
                                 type="button"
                                 onClick={() => fileInputRef.current?.click()}
-                                className="inline-flex items-center px-3 py-2 border border-graphite-gray rounded-md shadow-sm text-xs sm:text-sm font-medium text-dark-slate bg-white hover:bg-gray-50 transition-colors"
+                                className="inline-flex items-center px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm text-xs sm:text-sm font-medium text-[var(--foreground)] bg-[var(--card-bg)] hover:bg-[var(--surface-2)] transition-colors"
                             >
                                 <Paperclip size={16} className="mr-2" />
                                 Adjuntar archivos
@@ -180,9 +180,9 @@ export function ComposeEmailModal({
                                     {attachments.map((file, index) => (
                                         <div
                                             key={index}
-                                            className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-200"
+                                            className="flex items-center justify-between p-2 bg-[var(--surface-2)] rounded border border-[var(--card-border)]"
                                         >
-                                            <span className="text-xs sm:text-sm text-dark-slate truncate flex-1 mr-2">{file.name}</span>
+                                            <span className="text-xs sm:text-sm text-[var(--foreground)] truncate flex-1 mr-2">{file.name}</span>
                                             <button
                                                 type="button"
                                                 onClick={() => handleRemoveAttachment(index)}
@@ -197,11 +197,11 @@ export function ComposeEmailModal({
                         </div>
 
                         {/* Actions */}
-                        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-200">
+                        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 pt-4 border-t border-[var(--card-border)]">
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="px-4 py-2 border border-graphite-gray rounded-md shadow-sm text-sm font-medium text-dark-slate bg-white hover:bg-gray-50 transition-colors"
+                                className="px-4 py-2 border border-[var(--card-border)] rounded-md shadow-sm text-sm font-medium text-[var(--foreground)] bg-[var(--card-bg)] hover:bg-[var(--surface-2)] transition-colors"
                             >
                                 Cancelar
                             </button>

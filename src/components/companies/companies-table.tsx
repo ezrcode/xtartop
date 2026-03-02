@@ -31,9 +31,9 @@ interface CompaniesTableProps {
 const statusConfig: Record<CompanyStatus, { label: string; className: string; dotColor: string }> = {
     CLIENTE: { label: "Cliente", className: "bg-success-green/10 text-success-green", dotColor: "bg-success-green" },
     POTENCIAL: { label: "Potencial", className: "bg-nearby-accent/10 text-nearby-accent", dotColor: "bg-nearby-accent" },
-    PROSPECTO: { label: "Prospecto", className: "bg-gray-100 text-gray-800", dotColor: "bg-gray-400" },
+    PROSPECTO: { label: "Prospecto", className: "bg-[var(--surface-3)] text-gray-800", dotColor: "bg-gray-400" },
     DESCARTADA: { label: "Descartada", className: "bg-error-red/10 text-error-red", dotColor: "bg-error-red" },
-    INACTIVA: { label: "Inactiva", className: "bg-gray-100 text-gray-600", dotColor: "bg-gray-300" },
+    INACTIVA: { label: "Inactiva", className: "bg-[var(--surface-3)] text-[var(--muted-text)]", dotColor: "bg-gray-300" },
 };
 
 function getCompanyInitials(name: string): string {
@@ -50,7 +50,7 @@ export function CompaniesTable({ companies, initialPreferences, itemsPerPage = 1
             hideable: false,
             className: "w-14",
             render: (company) => (
-                <div className="w-10 h-10 rounded-lg border border-graphite-gray overflow-hidden flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg border border-[var(--card-border)] overflow-hidden flex items-center justify-center">
                     {company.logoUrl ? (
                         <Image
                             src={company.logoUrl}
@@ -61,7 +61,7 @@ export function CompaniesTable({ companies, initialPreferences, itemsPerPage = 1
                         />
                     ) : (
                         <div className="w-full h-full bg-gradient-to-br from-nearby-dark/10 to-nearby-dark/5 flex items-center justify-center">
-                            <span className="text-nearby-dark font-bold text-sm">
+                            <span className="text-[var(--foreground)] font-bold text-sm">
                                 {getCompanyInitials(company.name)}
                             </span>
                         </div>
@@ -98,7 +98,7 @@ export function CompaniesTable({ companies, initialPreferences, itemsPerPage = 1
             hideable: true,
             defaultVisible: true,
             render: (company) => (
-                <span className="text-sm text-dark-slate">{company.city || "-"}</span>
+                <span className="text-sm text-[var(--foreground)]">{company.city || "-"}</span>
             ),
         },
         {
@@ -108,7 +108,7 @@ export function CompaniesTable({ companies, initialPreferences, itemsPerPage = 1
             hideable: true,
             defaultVisible: true,
             render: (company) => (
-                <span className="text-sm text-dark-slate">{company.country || "-"}</span>
+                <span className="text-sm text-[var(--foreground)]">{company.country || "-"}</span>
             ),
         },
         {
@@ -120,13 +120,13 @@ export function CompaniesTable({ companies, initialPreferences, itemsPerPage = 1
                 company.primaryContact ? (
                     <Link
                         href={`/app/contacts/${company.primaryContact.id}`}
-                        className="text-sm text-nearby-accent hover:text-nearby-dark"
+                        className="text-sm text-nearby-accent hover:text-[var(--foreground)]"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {company.primaryContact.fullName}
                     </Link>
                 ) : (
-                    <span className="text-sm text-gray-400">-</span>
+                    <span className="text-sm text-[var(--muted-text)]">-</span>
                 )
             ),
         },
@@ -158,7 +158,7 @@ export function CompaniesTable({ companies, initialPreferences, itemsPerPage = 1
             hideable: true,
             defaultVisible: false,
             render: (company) => (
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-[var(--muted-text)]">
                     {new Date(company.createdAt).toLocaleDateString('es-ES')}
                 </span>
             ),
@@ -171,12 +171,12 @@ export function CompaniesTable({ companies, initialPreferences, itemsPerPage = 1
 
     if (companies.length === 0) {
         return (
-            <div className="bg-white shadow-sm rounded-lg border border-graphite-gray overflow-hidden">
+            <div className="bg-[var(--card-bg)] shadow-sm rounded-lg border border-[var(--card-border)] overflow-hidden">
                 <div className="text-center py-12 px-4">
-                    <p className="text-dark-slate text-base sm:text-lg">No hay empresas registradas</p>
+                    <p className="text-[var(--foreground)] text-base sm:text-lg">No hay empresas registradas</p>
                     <Link
                         href="/app/companies/new"
-                        className="inline-flex items-center px-4 py-2 mt-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-gray-900"
+                        className="inline-flex items-center px-4 py-2 mt-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-nearby-dark-600"
                     >
                         <Plus size={16} className="mr-2" />
                         Agregar primera empresa
@@ -206,7 +206,7 @@ export function CompaniesTable({ companies, initialPreferences, itemsPerPage = 1
             </div>
 
             {/* Mobile Card View */}
-            <div className="md:hidden bg-white shadow-sm rounded-lg border border-graphite-gray overflow-hidden divide-y divide-graphite-gray">
+            <div className="md:hidden bg-[var(--card-bg)] shadow-sm rounded-lg border border-[var(--card-border)] overflow-hidden divide-y divide-graphite-gray">
                 {companies.map((company) => {
                     const config = statusConfig[company.status];
                     return (
@@ -216,7 +216,7 @@ export function CompaniesTable({ companies, initialPreferences, itemsPerPage = 1
                             className="block p-4 hover:bg-soft-gray transition-colors"
                         >
                             <div className="flex items-start gap-3 mb-2">
-                                <div className="w-10 h-10 rounded-lg border border-graphite-gray overflow-hidden flex items-center justify-center flex-shrink-0">
+                                <div className="w-10 h-10 rounded-lg border border-[var(--card-border)] overflow-hidden flex items-center justify-center flex-shrink-0">
                                     {company.logoUrl ? (
                                         <Image
                                             src={company.logoUrl}
@@ -227,7 +227,7 @@ export function CompaniesTable({ companies, initialPreferences, itemsPerPage = 1
                                         />
                                     ) : (
                                         <div className="w-full h-full bg-gradient-to-br from-nearby-dark/10 to-nearby-dark/5 flex items-center justify-center">
-                                            <span className="text-nearby-dark font-bold text-sm">
+                                            <span className="text-[var(--foreground)] font-bold text-sm">
                                                 {getCompanyInitials(company.name)}
                                             </span>
                                         </div>
@@ -248,7 +248,7 @@ export function CompaniesTable({ companies, initialPreferences, itemsPerPage = 1
                                             {config.label}
                                         </span>
                                     </div>
-                                    <div className="space-y-1 text-sm text-dark-slate mt-1">
+                                    <div className="space-y-1 text-sm text-[var(--foreground)] mt-1">
                                         {company.country && (
                                             <p>
                                                 <span className="font-medium">País:</span> {company.country}

@@ -54,8 +54,8 @@ function SubmitButton({ actionName, label, mobileLabel, loadingLabel, icon: Icon
 
     const baseClasses = "inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95";
     const variants = {
-        primary: "text-white bg-nearby-dark hover:bg-gray-900 focus:ring-nearby-dark shadow-sm",
-        secondary: "text-dark-slate bg-white border border-graphite-gray hover:bg-gray-50 focus:ring-nearby-accent",
+        primary: "text-white bg-nearby-dark hover:bg-nearby-dark-600 focus:ring-nearby-dark shadow-sm",
+        secondary: "text-[var(--foreground)] bg-[var(--card-bg)] border border-[var(--card-border)] hover:bg-[var(--surface-2)] focus:ring-nearby-accent",
         danger: "text-white bg-error-red hover:bg-red-700 focus:ring-error-red shadow-sm",
     };
 
@@ -370,17 +370,17 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
     return (
         <div className="flex flex-col h-full">
             {/* Command Bar - Fixed below topbar on scroll */}
-            <div className="sticky top-16 z-30 bg-white border-b border-graphite-gray shadow-sm">
+            <div className="sticky top-16 z-30 bg-[var(--card-bg)] border-b border-[var(--card-border)] shadow-sm">
                 <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-14 sm:h-16">
                         <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
                             <Link
                                 href="/app/companies"
-                                className="p-2 text-gray-400 hover:text-dark-slate rounded-full hover:bg-gray-100 flex-shrink-0"
+                                className="p-2 text-[var(--muted-text)] hover:text-[var(--foreground)] rounded-full hover:bg-[var(--surface-3)] flex-shrink-0"
                             >
                                 <ArrowLeft size={20} />
                             </Link>
-                            <h1 className="text-base sm:text-xl font-bold text-nearby-dark truncate">
+                            <h1 className="text-base sm:text-xl font-bold text-[var(--foreground)] truncate">
                                 {isEditMode ? company?.name : "Nueva Empresa"}
                             </h1>
                         </div>
@@ -392,7 +392,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                     setTimeout(() => formRef.current?.requestSubmit(), 0);
                                 }}
                                 disabled={pendingAction !== null}
-                                className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all active:scale-95 text-white bg-nearby-dark hover:bg-gray-900 focus:ring-nearby-dark shadow-sm disabled:opacity-50"
+                                className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all active:scale-95 text-white bg-nearby-dark hover:bg-nearby-dark-600 focus:ring-nearby-dark shadow-sm disabled:opacity-50"
                             >
                                 {pendingAction === "save" ? (
                                     <Loader2 size={16} className="animate-spin" />
@@ -408,7 +408,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                     setTimeout(() => formRef.current?.requestSubmit(), 0);
                                 }}
                                 disabled={pendingAction !== null}
-                                className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all active:scale-95 text-dark-slate bg-white border border-graphite-gray hover:bg-gray-50 focus:ring-nearby-accent disabled:opacity-50"
+                                className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all active:scale-95 text-[var(--foreground)] bg-[var(--card-bg)] border border-[var(--card-border)] hover:bg-[var(--surface-2)] focus:ring-nearby-accent disabled:opacity-50"
                             >
                                 {pendingAction === "saveAndClose" ? (
                                     <Loader2 size={16} className="animate-spin" />
@@ -494,7 +494,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                             </nav>
                         </div>
 
-                        <form ref={formRef} id="company-form" action={action} className="bg-white shadow-sm rounded-xl border border-graphite-gray p-4 sm:p-6 space-y-4 sm:space-y-6">
+                        <form ref={formRef} id="company-form" action={action} className="bg-[var(--card-bg)] shadow-sm rounded-xl border border-[var(--card-border)] p-4 sm:p-6 space-y-4 sm:space-y-6">
                                 {/* Hidden fields - always send all form values regardless of active tab */}
                                 <input type="hidden" name="action" value={pendingAction || "save"} />
                                 <input type="hidden" name="name" value={formData.name} />
@@ -542,7 +542,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
 
                                         <div className="grid grid-cols-1 gap-4 sm:gap-y-5 sm:gap-x-4 sm:grid-cols-6">
                                             <div className="sm:col-span-6">
-                                                <label htmlFor="name-input" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="name-input" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                                     Nombre <span className="text-error-red">*</span>
                                                 </label>
                                                 <input
@@ -551,7 +551,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                     value={formData.name}
                                                     onChange={(e) => updateField("name", e.target.value)}
                                                     required
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 />
                                                 {state?.errors?.name && (
                                                     <p className="mt-1.5 text-xs text-error-red">{state.errors.name}</p>
@@ -559,7 +559,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                             </div>
 
                                             <div className="sm:col-span-3">
-                                                <label htmlFor="taxId-display" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="taxId-display" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                                     RNC
                                                 </label>
                                                 <input
@@ -567,13 +567,13 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                     id="taxId-display"
                                                     value={formData.taxId || ""}
                                                     readOnly
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm bg-gray-50 text-gray-600 cursor-not-allowed"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm bg-[var(--surface-2)] text-[var(--muted-text)] cursor-not-allowed"
                                                 />
-                                                <p className="mt-1 text-xs text-gray-500">Editable en la pestaña Suscripción</p>
+                                                <p className="mt-1 text-xs text-[var(--muted-text)]">Editable en la pestaña Suscripción</p>
                                             </div>
 
                                             <div className="sm:col-span-3">
-                                                <label htmlFor="phone-input" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="phone-input" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                                     Teléfono
                                                 </label>
                                                 <input
@@ -581,12 +581,12 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                     id="phone-input"
                                                     value={formData.phone}
                                                     onChange={(e) => updateField("phone", e.target.value)}
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 />
                                             </div>
 
                                             <div className="sm:col-span-3">
-                                                <label htmlFor="country-input" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="country-input" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                                     País
                                                 </label>
                                                 <input
@@ -594,12 +594,12 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                     id="country-input"
                                                     value={formData.country}
                                                     onChange={(e) => updateField("country", e.target.value)}
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 />
                                             </div>
 
                                             <div className="sm:col-span-3">
-                                                <label htmlFor="city-input" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="city-input" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                                     Ciudad
                                                 </label>
                                                 <input
@@ -607,12 +607,12 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                     id="city-input"
                                                     value={formData.city}
                                                     onChange={(e) => updateField("city", e.target.value)}
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 />
                                             </div>
 
                                             <div className="sm:col-span-6">
-                                                <label htmlFor="website-input" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="website-input" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                                     Sitio Web
                                                 </label>
                                                 <input
@@ -621,7 +621,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                     value={formData.website}
                                                     onChange={(e) => updateField("website", e.target.value)}
                                                     placeholder="https://example.com"
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 />
                                                 {state?.errors?.website && (
                                                     <p className="mt-1.5 text-xs text-error-red">{state.errors.website}</p>
@@ -629,7 +629,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                             </div>
 
                                             <div className="sm:col-span-3">
-                                                <label htmlFor="instagramUrl-input" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="instagramUrl-input" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                                     Instagram (URL)
                                                 </label>
                                                 <input
@@ -638,7 +638,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                     value={formData.instagramUrl}
                                                     onChange={(e) => updateField("instagramUrl", e.target.value)}
                                                     placeholder="https://instagram.com/..."
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 />
                                                 {state?.errors?.instagramUrl && (
                                                     <p className="mt-1.5 text-xs text-error-red">{state.errors.instagramUrl}</p>
@@ -646,7 +646,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                             </div>
 
                                             <div className="sm:col-span-3">
-                                                <label htmlFor="linkedinUrl-input" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="linkedinUrl-input" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                                     LinkedIn (URL)
                                                 </label>
                                                 <input
@@ -655,7 +655,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                     value={formData.linkedinUrl}
                                                     onChange={(e) => updateField("linkedinUrl", e.target.value)}
                                                     placeholder="https://linkedin.com/company/..."
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 />
                                                 {state?.errors?.linkedinUrl && (
                                                     <p className="mt-1.5 text-xs text-error-red">{state.errors.linkedinUrl}</p>
@@ -663,7 +663,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                             </div>
 
                                             <div className="sm:col-span-6">
-                                                <label className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                                     Contacto Principal
                                                 </label>
                                                 <div className="relative" ref={contactDropdownRef}>
@@ -673,33 +673,33 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                             setContactDropdownOpen(!contactDropdownOpen);
                                                             setContactSearchTerm("");
                                                         }}
-                                                        className="flex items-center justify-between w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white text-left"
+                                                        className="flex items-center justify-between w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)] text-left"
                                                     >
-                                                        <span className={selectedContact ? "text-dark-slate" : "text-gray-500"}>
+                                                        <span className={selectedContact ? "text-[var(--foreground)]" : "text-[var(--muted-text)]"}>
                                                             {selectedContact ? selectedContact.fullName : "Sin contacto principal"}
                                                         </span>
-                                                        <ChevronDown size={16} className={`text-gray-400 transition-transform ${contactDropdownOpen ? "rotate-180" : ""}`} />
+                                                        <ChevronDown size={16} className={`text-[var(--muted-text)] transition-transform ${contactDropdownOpen ? "rotate-180" : ""}`} />
                                                     </button>
 
                                                     {contactDropdownOpen && (
-                                                        <div className="absolute z-50 mt-1 w-full bg-white border border-graphite-gray rounded-lg shadow-lg">
+                                                        <div className="absolute z-50 mt-1 w-full bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-lg">
                                                             {/* Search input */}
-                                                            <div className="p-2 border-b border-gray-100">
+                                                            <div className="p-2 border-b border-[var(--card-border)]">
                                                                 <div className="relative">
-                                                                    <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                                                                    <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--muted-text)]" />
                                                                     <input
                                                                         type="text"
                                                                         value={contactSearchTerm}
                                                                         onChange={(e) => setContactSearchTerm(e.target.value)}
                                                                         placeholder="Buscar contacto..."
-                                                                        className="w-full pl-8 pr-8 py-2 text-sm border border-gray-200 rounded-md focus:ring-nearby-accent focus:border-nearby-accent"
+                                                                        className="w-full pl-8 pr-8 py-2 text-sm border border-[var(--card-border)] rounded-md focus:ring-nearby-accent focus:border-nearby-accent"
                                                                         autoFocus
                                                                     />
                                                                     {contactSearchTerm && (
                                                                         <button
                                                                             type="button"
                                                                             onClick={() => setContactSearchTerm("")}
-                                                                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                                                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--muted-text)] hover:text-[var(--foreground)]"
                                                                         >
                                                                             <X size={14} />
                                                                         </button>
@@ -715,8 +715,8 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                                         updateField("primaryContactId", "null");
                                                                         setContactDropdownOpen(false);
                                                                     }}
-                                                                    className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${
-                                                                        formData.primaryContactId === "null" ? "bg-nearby-accent/10 text-nearby-accent font-medium" : "text-gray-500"
+                                                                    className={`w-full px-3 py-2 text-left text-sm hover:bg-[var(--surface-2)] ${
+                                                                        formData.primaryContactId === "null" ? "bg-nearby-accent/10 text-nearby-accent font-medium" : "text-[var(--muted-text)]"
                                                                     }`}
                                                                 >
                                                                     Sin contacto principal
@@ -730,18 +730,18 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                                                 updateField("primaryContactId", contact.id);
                                                                                 setContactDropdownOpen(false);
                                                                             }}
-                                                                            className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${
-                                                                                formData.primaryContactId === contact.id ? "bg-nearby-accent/10 text-nearby-accent font-medium" : "text-dark-slate"
+                                                                            className={`w-full px-3 py-2 text-left text-sm hover:bg-[var(--surface-2)] ${
+                                                                                formData.primaryContactId === contact.id ? "bg-nearby-accent/10 text-nearby-accent font-medium" : "text-[var(--foreground)]"
                                                                             }`}
                                                                         >
                                                                             <div>{contact.fullName}</div>
                                                                             {contact.email && (
-                                                                                <div className="text-xs text-gray-400">{contact.email}</div>
+                                                                                <div className="text-xs text-[var(--muted-text)]">{contact.email}</div>
                                                                             )}
                                                                         </button>
                                                                     ))
                                                                 ) : (
-                                                                    <div className="px-3 py-4 text-sm text-gray-500 text-center">
+                                                                    <div className="px-3 py-4 text-sm text-[var(--muted-text)] text-center">
                                                                         No se encontraron contactos
                                                                     </div>
                                                                 )}
@@ -752,14 +752,14 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                             </div>
 
                                             <div className="sm:col-span-6">
-                                                <label htmlFor="origin-input" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                <label htmlFor="origin-input" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                                     Origen
                                                 </label>
                                                 <select
                                                     id="origin-input"
                                                     value={formData.origin}
                                                     onChange={(e) => updateField("origin", e.target.value)}
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
                                                 >
                                                     <option value="null">Seleccionar origen</option>
                                                     <option value="PROSPECCION_MANUAL">Prospección manual</option>
@@ -772,18 +772,18 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                             </div>
                                         </div>
 
-                                        <div className="border-t border-graphite-gray pt-5">
-                                            <h3 className="text-base sm:text-lg font-medium text-dark-slate mb-4">Estado y Metadatos</h3>
+                                        <div className="border-t border-[var(--card-border)] pt-5">
+                                            <h3 className="text-base sm:text-lg font-medium text-[var(--foreground)] mb-4">Estado y Metadatos</h3>
                                             <div className="grid grid-cols-1 gap-4 sm:gap-y-5 sm:gap-x-4 sm:grid-cols-6">
                                                 <div className="sm:col-span-3">
-                                                    <label htmlFor="status-input" className="block text-sm font-medium text-dark-slate mb-1.5">
+                                                    <label htmlFor="status-input" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                                         Estado
                                                     </label>
                                                     <select
                                                         id="status-input"
                                                         value={formData.status}
                                                         onChange={(e) => updateField("status", e.target.value)}
-                                                        className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
+                                                        className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
                                                     >
                                                         {Object.values(CompanyStatus).map((status) => (
                                                             <option key={status} value={status}>
@@ -795,10 +795,10 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
 
                                                 {isEditMode && (
                                                     <div className="sm:col-span-3">
-                                                        <label className="block text-sm font-medium text-gray-500 mb-1.5">
+                                                        <label className="block text-sm font-medium text-[var(--muted-text)] mb-1.5">
                                                             Creado el
                                                         </label>
-                                                        <div className="py-3 sm:py-2.5 text-base sm:text-sm text-dark-slate">
+                                                        <div className="py-3 sm:py-2.5 text-base sm:text-sm text-[var(--foreground)]">
                                                             {company?.createdAt ? new Date(company.createdAt).toLocaleDateString('es-ES', { 
                                                                 year: 'numeric', 
                                                                 month: '2-digit', 
@@ -830,7 +830,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                 onClick={() => setSubscriptionSection("contract")}
                                                 className={`flex-1 sm:flex-none px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                                                     subscriptionSection === "contract"
-                                                        ? "bg-white dark:bg-[var(--card-bg)] text-[var(--foreground)] shadow-sm"
+                                                        ? "bg-[var(--card-bg)] text-[var(--foreground)] shadow-sm"
                                                         : "text-[var(--muted-text)] hover:text-[var(--foreground)]"
                                                 }`}
                                             >
@@ -841,7 +841,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                 onClick={() => setSubscriptionSection("billing")}
                                                 className={`flex-1 sm:flex-none px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                                                     subscriptionSection === "billing"
-                                                        ? "bg-white dark:bg-[var(--card-bg)] text-[var(--foreground)] shadow-sm"
+                                                        ? "bg-[var(--card-bg)] text-[var(--foreground)] shadow-sm"
                                                         : "text-[var(--muted-text)] hover:text-[var(--foreground)]"
                                                 }`}
                                             >
@@ -852,7 +852,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                 onClick={() => setSubscriptionSection("proformas")}
                                                 className={`flex-1 sm:flex-none px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                                                     subscriptionSection === "proformas"
-                                                        ? "bg-white dark:bg-[var(--card-bg)] text-[var(--foreground)] shadow-sm"
+                                                        ? "bg-[var(--card-bg)] text-[var(--foreground)] shadow-sm"
                                                         : "text-[var(--muted-text)] hover:text-[var(--foreground)]"
                                                 }`}
                                             >
@@ -863,7 +863,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                 onClick={() => setSubscriptionSection("invoices")}
                                                 className={`flex-1 sm:flex-none px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                                                     subscriptionSection === "invoices"
-                                                        ? "bg-white dark:bg-[var(--card-bg)] text-[var(--foreground)] shadow-sm"
+                                                        ? "bg-[var(--card-bg)] text-[var(--foreground)] shadow-sm"
                                                         : "text-[var(--muted-text)] hover:text-[var(--foreground)]"
                                                 }`}
                                             >
@@ -887,7 +887,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                     </p>
                                                     <div className="grid grid-cols-1 gap-4">
                                                         <div>
-                                                            <label htmlFor="legalName-input" className="block text-sm font-medium text-dark-slate mb-1">
+                                                            <label htmlFor="legalName-input" className="block text-sm font-medium text-[var(--foreground)] mb-1">
                                                                 Razón Social
                                                             </label>
                                                             {isAdmin ? (
@@ -897,16 +897,16 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                                     value={formData.legalName}
                                                                     onChange={(e) => updateField("legalName", e.target.value)}
                                                                     placeholder="Nombre legal de la empresa"
-                                                                    className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                                                    className="block w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
                                                                 />
                                                             ) : (
-                                                                <div className="px-3 py-2 border border-graphite-gray rounded-md bg-gray-50 text-sm">
-                                                                    {formData.legalName || <span className="text-gray-400 italic">Pendiente</span>}
+                                                                <div className="px-3 py-2 border border-[var(--card-border)] rounded-md bg-[var(--surface-2)] text-sm">
+                                                                    {formData.legalName || <span className="text-[var(--muted-text)] italic">Pendiente</span>}
                                                                 </div>
                                                             )}
                                                         </div>
                                                         <div>
-                                                            <label htmlFor="taxId-input" className="block text-sm font-medium text-dark-slate mb-1">
+                                                            <label htmlFor="taxId-input" className="block text-sm font-medium text-[var(--foreground)] mb-1">
                                                                 RNC
                                                             </label>
                                                             {isAdmin ? (
@@ -916,16 +916,16 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                                     value={formData.taxId}
                                                                     onChange={(e) => updateField("taxId", e.target.value)}
                                                                     placeholder="Ej: 1-23-45678-9"
-                                                                    className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                                                    className="block w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
                                                                 />
                                                             ) : (
-                                                                <div className="px-3 py-2 border border-graphite-gray rounded-md bg-gray-50 text-sm">
-                                                                    {formData.taxId || <span className="text-gray-400 italic">Pendiente</span>}
+                                                                <div className="px-3 py-2 border border-[var(--card-border)] rounded-md bg-[var(--surface-2)] text-sm">
+                                                                    {formData.taxId || <span className="text-[var(--muted-text)] italic">Pendiente</span>}
                                                                 </div>
                                                             )}
                                                         </div>
                                                         <div>
-                                                            <label htmlFor="fiscalAddress-input" className="block text-sm font-medium text-dark-slate mb-1">
+                                                            <label htmlFor="fiscalAddress-input" className="block text-sm font-medium text-[var(--foreground)] mb-1">
                                                                 Dirección Fiscal
                                                             </label>
                                                             {isAdmin ? (
@@ -935,11 +935,11 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                                     onChange={(e) => updateField("fiscalAddress", e.target.value)}
                                                                     placeholder="Dirección fiscal de la empresa"
                                                                     rows={2}
-                                                                    className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent resize-none"
+                                                                    className="block w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent resize-none"
                                                                 />
                                                             ) : (
-                                                                <div className="px-3 py-2 border border-graphite-gray rounded-md bg-gray-50 text-sm">
-                                                                    {formData.fiscalAddress || <span className="text-gray-400 italic">Pendiente</span>}
+                                                                <div className="px-3 py-2 border border-[var(--card-border)] rounded-md bg-[var(--surface-2)] text-sm">
+                                                                    {formData.fiscalAddress || <span className="text-[var(--muted-text)] italic">Pendiente</span>}
                                                                 </div>
                                                             )}
                                                         </div>
@@ -947,7 +947,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                         {/* Cotización - Editables solo por admin antes de aceptar contrato */}
                                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                             <div>
-                                                                <label htmlFor="quoteId-input" className="block text-sm font-medium text-dark-slate mb-1">
+                                                                <label htmlFor="quoteId-input" className="block text-sm font-medium text-[var(--foreground)] mb-1">
                                                                     Id. Cotización
                                                                 </label>
                                                                 <input
@@ -957,10 +957,10 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                                     value={formData.quoteId}
                                                                     onChange={(e) => updateField("quoteId", e.target.value)}
                                                                     disabled={company.termsAccepted}
-                                                                    className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                                                    className="block w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:bg-[var(--surface-3)] disabled:cursor-not-allowed"
                                                                 />
                                                                 {company.termsAccepted && (
-                                                                    <p className="text-xs text-gray-500 mt-1">No editable después de aceptar contrato</p>
+                                                                    <p className="text-xs text-[var(--muted-text)] mt-1">No editable después de aceptar contrato</p>
                                                                 )}
                                                             </div>
                                                             <div>
@@ -973,7 +973,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                                     disabled={company.termsAccepted}
                                                                 />
                                                                 {company.termsAccepted && (
-                                                                    <p className="text-xs text-gray-500 mt-1">No editable después de aceptar contrato</p>
+                                                                    <p className="text-xs text-[var(--muted-text)] mt-1">No editable después de aceptar contrato</p>
                                                                 )}
                                                             </div>
                                                         </div>
@@ -981,16 +981,16 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                         {company.termsAccepted && (
                                                             <div className="rounded-lg border border-nearby-accent/20 bg-nearby-accent/5 p-4 space-y-3">
                                                                 <div>
-                                                                    <h4 className="text-sm font-semibold text-nearby-dark">
+                                                                    <h4 className="text-sm font-semibold text-[var(--foreground)]">
                                                                         Acuerdo firmado por el cliente
                                                                     </h4>
-                                                                    <p className="text-xs text-dark-slate mt-1">
+                                                                    <p className="text-xs text-[var(--foreground)] mt-1">
                                                                         Fecha/Hora: <strong>{acceptanceDateTime || "—"}</strong>
                                                                     </p>
-                                                                    <p className="text-xs text-dark-slate">
+                                                                    <p className="text-xs text-[var(--foreground)]">
                                                                         Nombre: <strong>{company.termsAcceptedByName || approvedByContact?.fullName || "—"}</strong>
                                                                     </p>
-                                                                    <p className="text-xs text-dark-slate">
+                                                                    <p className="text-xs text-[var(--foreground)]">
                                                                         Correo: <strong>{approvedByContact?.email || "—"}</strong>
                                                                     </p>
                                                                 </div>
@@ -1001,7 +1001,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                                             href={formData.quoteFileUrl}
                                                                             target="_blank"
                                                                             rel="noopener noreferrer"
-                                                                            className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-white bg-nearby-dark rounded-md hover:bg-gray-900 transition-colors"
+                                                                            className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-white bg-nearby-dark rounded-md hover:bg-nearby-dark-600 transition-colors"
                                                                         >
                                                                             <Download size={14} />
                                                                             Descargar cotización
@@ -1036,7 +1036,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                         {/* Proyectos y Usuarios Iniciales - Editables antes de enviar invitación */}
                                                         <div className="grid grid-cols-2 gap-4">
                                                             <div>
-                                                                <label htmlFor="initialProjects-input" className="block text-sm font-medium text-dark-slate mb-1">
+                                                                <label htmlFor="initialProjects-input" className="block text-sm font-medium text-[var(--foreground)] mb-1">
                                                                     Proyectos iniciales
                                                                 </label>
                                                                 <input
@@ -1046,14 +1046,14 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                                     value={formData.initialProjects}
                                                                     onChange={(e) => updateField("initialProjects", e.target.value)}
                                                                     disabled={company.termsAccepted}
-                                                                    className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                                                    className="block w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:bg-[var(--surface-3)] disabled:cursor-not-allowed"
                                                                 />
                                                                 {company.termsAccepted && (
-                                                                    <p className="text-xs text-gray-500 mt-1">No editable después de aceptar contrato</p>
+                                                                    <p className="text-xs text-[var(--muted-text)] mt-1">No editable después de aceptar contrato</p>
                                                                 )}
                                                             </div>
                                                             <div>
-                                                                <label htmlFor="initialUsers-input" className="block text-sm font-medium text-dark-slate mb-1">
+                                                                <label htmlFor="initialUsers-input" className="block text-sm font-medium text-[var(--foreground)] mb-1">
                                                                     Usuarios iniciales
                                                                 </label>
                                                                 <input
@@ -1063,10 +1063,10 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                                     value={formData.initialUsers}
                                                                     onChange={(e) => updateField("initialUsers", e.target.value)}
                                                                     disabled={company.termsAccepted}
-                                                                    className="block w-full px-3 py-2 text-sm border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                                                    className="block w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:bg-[var(--surface-3)] disabled:cursor-not-allowed"
                                                                 />
                                                                 {company.termsAccepted && (
-                                                                    <p className="text-xs text-gray-500 mt-1">No editable después de aceptar contrato</p>
+                                                                    <p className="text-xs text-[var(--muted-text)] mt-1">No editable después de aceptar contrato</p>
                                                                 )}
                                                             </div>
                                                         </div>
@@ -1109,7 +1109,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                 )}
 
                                                 {/* Projects Table */}
-                                                <div className="border-t border-graphite-gray pt-6">
+                                                <div className="border-t border-[var(--card-border)] pt-6">
                                                     <ProjectsTable 
                                                         companyId={company.id} 
                                                         projects={company.projects || []} 
@@ -1117,7 +1117,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                 </div>
 
                                                 {/* Client Users Table */}
-                                                <div className="border-t border-graphite-gray pt-6">
+                                                <div className="border-t border-[var(--card-border)] pt-6">
                                                     <ClientUsersTable 
                                                         companyId={company.id} 
                                                         clientUsers={company.clientUsers || []} 
@@ -1162,7 +1162,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
 
                     {/* Right Column: Activities - Outside the form */}
                     <div className="lg:col-span-5 flex flex-col">
-                        <div className="bg-white shadow-sm rounded-xl border border-graphite-gray p-4 sm:p-6 flex-1 flex flex-col min-h-[300px] sm:min-h-[400px] max-h-[500px] lg:max-h-[calc(100vh-200px)]">
+                        <div className="bg-[var(--card-bg)] shadow-sm rounded-xl border border-[var(--card-border)] p-4 sm:p-6 flex-1 flex flex-col min-h-[300px] sm:min-h-[400px] max-h-[500px] lg:max-h-[calc(100vh-200px)]">
                             {isEditMode && company ? (
                                 <CompanyActivitiesClient
                                     companyId={company.id}
@@ -1172,8 +1172,8 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                     companyContacts={memoizedCompanyContacts}
                                 />
                             ) : (
-                                <div className="flex flex-col items-center justify-center h-64 text-center border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
-                                    <p className="text-gray-500">
+                                <div className="flex flex-col items-center justify-center h-64 text-center border-2 border-dashed border-gray-200 rounded-lg bg-[var(--surface-2)]">
+                                    <p className="text-[var(--muted-text)]">
                                         Guarda la empresa primero para registrar actividades
                                     </p>
                                 </div>
@@ -1187,15 +1187,15 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
             {/* Delete Confirmation Modal */}
             {deleteConfirmOpen && company && (
                 <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4">
-                    <div className="bg-white rounded-t-2xl sm:rounded-xl shadow-lg p-5 sm:p-6 w-full sm:max-w-md safe-bottom">
-                        <h3 className="text-lg font-bold text-dark-slate mb-2">Eliminar Empresa</h3>
-                        <p className="text-gray-600 mb-6 text-sm sm:text-base">
+                    <div className="bg-[var(--card-bg)] rounded-t-2xl sm:rounded-xl shadow-lg p-5 sm:p-6 w-full sm:max-w-md safe-bottom">
+                        <h3 className="text-lg font-bold text-[var(--foreground)] mb-2">Eliminar Empresa</h3>
+                        <p className="text-[var(--muted-text)] mb-6 text-sm sm:text-base">
                             ¿Estás seguro de que deseas eliminar <strong>{company.name}</strong>? Esta acción no se puede deshacer.
                         </p>
                         <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3">
                             <button
                                 onClick={() => setDeleteConfirmOpen(false)}
-                                className="w-full sm:w-auto px-4 py-3 sm:py-2 text-sm font-medium text-dark-slate bg-white border border-graphite-gray rounded-lg hover:bg-gray-50 transition-colors"
+                                className="w-full sm:w-auto px-4 py-3 sm:py-2 text-sm font-medium text-[var(--foreground)] bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg hover:bg-[var(--surface-2)] transition-colors"
                             >
                                 Cancelar
                             </button>
