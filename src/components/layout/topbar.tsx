@@ -39,7 +39,7 @@ export function Topbar({ user, currentExchangeRate = null, onMenuClick }: Topbar
                 paddingRight: "env(safe-area-inset-right)",
             }}
         >
-            <div className="flex items-center justify-between h-[60px] sm:h-14 px-3 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-[60px] sm:h-14 pl-3 pr-4 sm:px-6 lg:px-8">
                 {/* Left side */}
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                     <Button
@@ -56,7 +56,7 @@ export function Topbar({ user, currentExchangeRate = null, onMenuClick }: Topbar
                 </div>
 
                 {/* Right side */}
-                <div className="flex items-center gap-1.5 shrink-0">
+                <div className="flex items-center gap-1 shrink-0">
                     {/* Search button (mobile) */}
                     <Button
                         variant="ghost"
@@ -92,7 +92,8 @@ export function Topbar({ user, currentExchangeRate = null, onMenuClick }: Topbar
 
                     <ThemeToggle 
                         initialTheme={user.themePreference || "LIGHT"} 
-                        variant="icon" 
+                        variant="icon"
+                        buttonClassName="h-9 w-9 min-h-0 min-w-0"
                     />
                 </div>
             </div>

@@ -10,9 +10,10 @@ import { Button } from "./button";
 interface ThemeToggleProps {
     initialTheme: ThemePreference;
     variant?: "icon" | "select" | "buttons";
+    buttonClassName?: string;
 }
 
-export function ThemeToggle({ initialTheme, variant = "buttons" }: ThemeToggleProps) {
+export function ThemeToggle({ initialTheme, variant = "buttons", buttonClassName }: ThemeToggleProps) {
     const [theme, setTheme] = useState<ThemePreference>(initialTheme);
     const [isUpdating, setIsUpdating] = useState(false);
 
@@ -57,7 +58,7 @@ export function ThemeToggle({ initialTheme, variant = "buttons" }: ThemeTogglePr
                 size="icon"
                 onClick={() => handleThemeChange(nextTheme)}
                 disabled={isUpdating}
-                className="relative"
+                className={cn("relative", buttonClassName)}
                 title={theme === "DARK" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
             >
                 {isUpdating ? (
