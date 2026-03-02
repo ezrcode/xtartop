@@ -193,7 +193,7 @@ export function ContactsTable({ contacts, initialPreferences, itemsPerPage = 10 
     }
 
     return (
-        <>
+        <div className="w-full min-w-0 overflow-x-hidden">
             {/* Desktop Table View */}
             <div className="hidden md:block">
                 <DataTable
@@ -212,14 +212,14 @@ export function ContactsTable({ contacts, initialPreferences, itemsPerPage = 10 
             </div>
 
             {/* Mobile Card View */}
-            <div className="md:hidden bg-white border border-graphite-gray rounded-lg shadow-sm overflow-hidden divide-y divide-graphite-gray min-w-0">
+            <div className="md:hidden w-full max-w-full bg-white border border-graphite-gray rounded-lg shadow-sm overflow-hidden divide-y divide-graphite-gray min-w-0">
                 {contacts.map((contact) => {
                     const config = statusConfig[contact.status];
                     return (
                         <Link
                             key={contact.id}
                             href={`/app/contacts/${contact.id}`}
-                            className="block p-4 hover:bg-soft-gray transition-colors min-w-0 overflow-hidden"
+                            className="block w-full p-4 hover:bg-soft-gray transition-colors min-w-0 overflow-hidden"
                         >
                             <div className="flex items-start gap-3 mb-2">
                                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-accent-600 text-white flex items-center justify-center text-xs font-semibold flex-shrink-0">
@@ -242,7 +242,7 @@ export function ContactsTable({ contacts, initialPreferences, itemsPerPage = 10 
                                             </p>
                                         )}
                                         {contact.email && (
-                                            <p className="truncate">
+                                            <p className="truncate break-all">
                                                 <span className="font-medium">Email:</span> {contact.email}
                                             </p>
                                         )}
@@ -253,6 +253,6 @@ export function ContactsTable({ contacts, initialPreferences, itemsPerPage = 10 
                     );
                 })}
             </div>
-        </>
+        </div>
     );
 }
