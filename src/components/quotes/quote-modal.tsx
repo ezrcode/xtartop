@@ -274,7 +274,7 @@ export function QuoteModal({
                 <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={onClose} />
 
                 {/* Modal */}
-                <div className="relative bg-[var(--card-bg)] rounded-t-2xl sm:rounded-xl shadow-xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto safe-bottom">
+                <div className="relative bg-[var(--card-bg)] rounded-t-2xl sm:rounded-xl shadow-xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto overflow-x-hidden safe-bottom">
                     {/* Header */}
                     <div className="sticky top-0 bg-[var(--card-bg)] z-10 flex items-center justify-between p-4 sm:p-6 border-b border-[var(--card-border)] safe-top">
                         <h2 className="text-base sm:text-xl font-semibold text-[var(--foreground)]">
@@ -330,7 +330,7 @@ export function QuoteModal({
 
                         {/* Date, Validity, Currency */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div>
+                            <div className="min-w-0">
                                 <label htmlFor="quote-date" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                     Fecha *
                                 </label>
@@ -339,10 +339,10 @@ export function QuoteModal({
                                     id="quote-date"
                                     defaultValue={quote?.date ? new Date(quote.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]}
                                     required
-                                    className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                    className="w-full min-w-0 max-w-full appearance-none px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                 />
                             </div>
-                            <div>
+                            <div className="min-w-0">
                                 <label htmlFor="quote-validity" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                     Validez *
                                 </label>
@@ -350,14 +350,14 @@ export function QuoteModal({
                                     id="quote-validity"
                                     defaultValue={quote?.validity || "30 días"}
                                     required
-                                    className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
+                                    className="w-full min-w-0 max-w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
                                 >
                                     <option value="10 días">10 días</option>
                                     <option value="20 días">20 días</option>
                                     <option value="30 días">30 días</option>
                                 </select>
                             </div>
-                            <div>
+                            <div className="min-w-0">
                                 <label htmlFor="quote-currency" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                     Moneda *
                                 </label>
@@ -365,7 +365,7 @@ export function QuoteModal({
                                     id="quote-currency"
                                     defaultValue={quote?.currency || "USD"}
                                     required
-                                    className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
+                                    className="w-full min-w-0 max-w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
                                 >
                                     <option value="USD">USD</option>
                                     <option value="DOP">DOP</option>
@@ -390,8 +390,8 @@ export function QuoteModal({
                                 </button>
                             </div>
                             
-                            <div className="border border-[var(--card-border)] rounded-md overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
+                            <div className="border border-[var(--card-border)] rounded-md overflow-x-auto overscroll-x-contain">
+                                <table className="min-w-[760px] sm:min-w-full divide-y divide-gray-200">
                                     <thead className="bg-[var(--surface-2)]">
                                         <tr>
                                             <th className="px-2 sm:px-3 py-2 text-left text-xs font-medium text-[var(--muted-text)] uppercase">Nombre</th>
@@ -662,4 +662,3 @@ export function QuoteModal({
         </div>
     );
 }
-

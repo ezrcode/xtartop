@@ -229,7 +229,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                 </div>
 
                 {/* Filters */}
-                <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-5 mb-6">
+                <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4 sm:p-5 mb-6 overflow-hidden">
                     <div className="flex items-center gap-2 mb-4">
                         <Filter size={16} className="text-[var(--muted-text)]" />
                         <h3 className="text-sm font-semibold text-[var(--foreground)]">Filtros</h3>
@@ -237,7 +237,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
                         {/* Doc types */}
-                        <div>
+                        <div className="min-w-0">
                             <label className="block text-xs font-medium text-[var(--muted-text)] uppercase tracking-wider mb-2">
                                 Tipo de documento
                             </label>
@@ -264,7 +264,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                         </div>
 
                         {/* Date From */}
-                        <div>
+                        <div className="min-w-0">
                             <label className="block text-xs font-medium text-[var(--muted-text)] uppercase tracking-wider mb-2">
                                 Desde
                             </label>
@@ -272,12 +272,12 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                                 type="date"
                                 value={dateFrom}
                                 onChange={(e) => setDateFrom(e.target.value)}
-                                className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--card-border)] bg-[var(--surface-0)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-accent/30 focus:border-nearby-accent outline-none transition-colors"
+                                className="w-full min-w-0 max-w-full appearance-none px-3 py-2 text-sm rounded-lg border border-[var(--card-border)] bg-[var(--surface-0)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-accent/30 focus:border-nearby-accent outline-none transition-colors"
                             />
                         </div>
 
                         {/* Date To */}
-                        <div>
+                        <div className="min-w-0">
                             <label className="block text-xs font-medium text-[var(--muted-text)] uppercase tracking-wider mb-2">
                                 Hasta
                             </label>
@@ -285,19 +285,19 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                                 type="date"
                                 value={dateTo}
                                 onChange={(e) => setDateTo(e.target.value)}
-                                className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--card-border)] bg-[var(--surface-0)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-accent/30 focus:border-nearby-accent outline-none transition-colors"
+                                className="w-full min-w-0 max-w-full appearance-none px-3 py-2 text-sm rounded-lg border border-[var(--card-border)] bg-[var(--surface-0)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-accent/30 focus:border-nearby-accent outline-none transition-colors"
                             />
                         </div>
 
                         {/* Client Label */}
-                        <div>
+                        <div className="min-w-0">
                             <label className="block text-xs font-medium text-[var(--muted-text)] uppercase tracking-wider mb-2">
                                 Mostrar cliente como
                             </label>
                             <select
                                 value={clientLabel}
                                 onChange={(e) => setClientLabel(e.target.value as "company" | "legal")}
-                                className="w-full px-3 py-2 text-sm rounded-lg border border-[var(--card-border)] bg-[var(--surface-0)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-accent/30 focus:border-nearby-accent outline-none transition-colors"
+                                className="w-full min-w-0 max-w-full px-3 py-2 text-sm rounded-lg border border-[var(--card-border)] bg-[var(--surface-0)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-accent/30 focus:border-nearby-accent outline-none transition-colors"
                             >
                                 <option value="company">Nombre comercial</option>
                                 <option value="legal">Razón social</option>
@@ -305,13 +305,13 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                         </div>
 
                         {/* Group toggle */}
-                        <div>
+                        <div className="min-w-0">
                             <label className="block text-xs font-medium text-[var(--muted-text)] uppercase tracking-wider mb-2">
                                 Agrupación
                             </label>
                             <button
                                 onClick={() => setGroupByClient(!groupByClient)}
-                                className={`inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg border transition-colors ${
+                                className={`w-full sm:w-auto inline-flex items-center justify-center sm:justify-start gap-2 px-3 py-2 text-sm rounded-lg border transition-colors ${
                                     groupByClient
                                         ? "bg-nearby-accent/10 border-nearby-accent/30 text-nearby-accent"
                                         : "border-[var(--card-border)] text-[var(--muted-text)] hover:border-nearby-accent/30"
@@ -364,7 +364,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                                     setShowItemPicker(true);
                                 }}
                                 onFocus={() => setShowItemPicker(true)}
-                                className="w-full sm:w-96 px-3 py-2 pl-9 text-sm rounded-lg border border-[var(--card-border)] bg-[var(--surface-0)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-accent/30 focus:border-nearby-accent outline-none transition-colors"
+                                className="w-full sm:w-96 max-w-full min-w-0 px-3 py-2 pl-9 text-sm rounded-lg border border-[var(--card-border)] bg-[var(--surface-0)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-accent/30 focus:border-nearby-accent outline-none transition-colors"
                             />
                             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted-text)]" />
 

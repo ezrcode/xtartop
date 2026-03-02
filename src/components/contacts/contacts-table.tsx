@@ -226,11 +226,11 @@ export function ContactsTable({ contacts, initialPreferences, itemsPerPage = 10 
                                     {getInitials(contact.fullName)}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex items-start justify-between">
-                                        <h3 className="text-base font-semibold text-nearby-accent truncate">
+                                    <div className="flex flex-wrap items-start gap-2">
+                                        <h3 className="flex-1 min-w-0 text-base font-semibold text-nearby-accent truncate">
                                             {contact.fullName}
                                         </h3>
-                                        <span className={`ml-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ${config.className}`}>
+                                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 whitespace-nowrap ${config.className}`}>
                                             <span className={`w-1.5 h-1.5 rounded-full ${config.dotColor}`} />
                                             {config.label}
                                         </span>
