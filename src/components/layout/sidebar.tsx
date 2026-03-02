@@ -16,6 +16,7 @@ import {
     X,
     Search,
     User,
+    BarChart3,
 } from "lucide-react";
 import { logout } from "@/actions/auth";
 import { cn } from "@/lib/utils";
@@ -30,6 +31,7 @@ const mainMenuItems = [
     { name: "Contactos", href: "/app/contacts", icon: Users },
     { name: "Empresas", href: "/app/companies", icon: Building2 },
     { name: "Negocios", href: "/app/deals", icon: TrendingUp },
+    { name: "Reportes", href: "/app/reports", icon: BarChart3 },
 ];
 
 const adminMenuItems = [

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, Building2, TrendingUp, Settings } from "lucide-react";
+import { LayoutDashboard, Users, Building2, TrendingUp, Settings, BarChart3 } from "lucide-react";
 import { motion } from "framer-motion";
 
 const navItems = [
@@ -10,6 +10,7 @@ const navItems = [
     { name: "Contactos", href: "/app/contacts", icon: Users },
     { name: "Empresas", href: "/app/companies", icon: Building2 },
     { name: "Negocios", href: "/app/deals", icon: TrendingUp },
+    { name: "Reportes", href: "/app/reports", icon: BarChart3 },
     { name: "Config", href: "/app/settings", icon: Settings },
 ];
 

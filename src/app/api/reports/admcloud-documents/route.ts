@@ -1,0 +1,244 @@
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
+import { getCurrentWorkspace } from "@/actions/workspace";
+import { createAdmCloudClient, AdmCloudInvoice, AdmCloudQuote } from "@/lib/admcloud/client";
+
+export interface ReportLine {
+    clientName: string;
+    clientId: string;
+    itemDescription: string;
+    itemCode: string;
+    quantity: number;
+    unitPrice: number;
+    exchangeRate: number;
+    discountPercent: number;
+    documentNumber: string;
+    documentType: "proforma" | "credit_invoice";
+    documentDate: string;
+    extendedPrice: number;
+}
+
+function parseDate(dateStr?: string): Date | null {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? null : d;
+}
+
+function extractDocDate(doc: AdmCloudInvoice | AdmCloudQuote): Date | null {
+    const raw = doc.DocDate || doc.DocDateString || (doc as AdmCloudInvoice).TransactionDate || doc.CreationDate;
+    return parseDate(raw as string);
+}
+
+function extractDocNumber(doc: AdmCloudInvoice | AdmCloudQuote): string {
+    return (doc.DocID || (doc as AdmCloudInvoice).TransactionNumber || doc.ID || "").toString();
+}
+
+function extractExchangeRate(doc: AdmCloudInvoice | AdmCloudQuote): number {
+    const ref = doc.Reference;
+    if (!ref) return 0;
+    const num = parseFloat(String(ref));
+    return isNaN(num) ? 0 : num;
+}
+
+function normalizeInvoiceItems(invoice: AdmCloudInvoice, clientName: string, clientId: string): ReportLine[] {
+    const items = invoice.Items || [];
+    const docDate = extractDocDate(invoice);
+    const docNumber = extractDocNumber(invoice);
+    const exchangeRate = extractExchangeRate(invoice);
+
+    return items.map((item) => {
+        const record = item as Record<string, unknown>;
+        const quantity = Number(record.Quantity || item.Quantity || 0);
+        const unitPrice = Number(record.UnitPrice || record.Price || item.UnitPrice || 0);
+        const discountPercent = Number(record.DiscountPercent || record.Discount || 0);
+        const extended = Number(record.Extended || record.Amount || item.Amount || (quantity * unitPrice * (1 - discountPercent / 100)));
+        const itemCode = String(record.ItemCode || record.ItemSKU || record.Code || "");
+        const itemDesc = String(record.Description || record.Name || record.ItemName || item.Description || "");
+
+        return {
+            clientName,
+            clientId,
+            itemDescription: itemDesc,
+            itemCode,
+            quantity,
+            unitPrice,
+            exchangeRate,
+            discountPercent,
+            documentNumber: docNumber,
+            documentType: "credit_invoice" as const,
+            documentDate: docDate?.toISOString().split("T")[0] || "",
+            extendedPrice: extended,
+        };
+    });
+}
+
+function normalizeQuoteItems(quote: AdmCloudQuote, clientName: string, clientId: string): ReportLine[] {
+    const items = quote.Items || [];
+    const docDate = extractDocDate(quote);
+    const docNumber = extractDocNumber(quote);
+    const exchangeRate = extractExchangeRate(quote);
+
+    return items.map((item) => {
+        const record = item as Record<string, unknown>;
+        const quantity = Number(record.Quantity || item.Quantity || 0);
+        const unitPrice = Number(record.UnitPrice || record.Price || item.Price || 0);
+        const discountPercent = Number(record.DiscountPercent || item.DiscountPercent || 0);
+        const extended = Number(record.Extended || (quantity * unitPrice * (1 - discountPercent / 100)));
+        const itemCode = String(record.ItemCode || record.ItemSKU || record.Code || "");
+        const itemDesc = String(record.Description || record.Name || record.ItemName || item.Name || "");
+
+        return {
+            clientName,
+            clientId,
+            itemDescription: itemDesc,
+            itemCode,
+            quantity,
+            unitPrice,
+            exchangeRate,
+            discountPercent,
+            documentNumber: docNumber,
+            documentType: "proforma" as const,
+            documentDate: docDate?.toISOString().split("T")[0] || "",
+            extendedPrice: extended,
+        };
+    });
+}
+
+export async function GET(request: NextRequest) {
+    try {
+        const session = await auth();
+        if (!session?.user?.email) {
+            return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+        }
+
+        const workspace = await getCurrentWorkspace();
+        if (!workspace) {
+            return NextResponse.json({ error: "Workspace no encontrado" }, { status: 404 });
+        }
+
+        const workspaceData = await prisma.workspace.findUnique({
+            where: { id: workspace.id },
+            select: {
+                admCloudEnabled: true,
+                admCloudAppId: true,
+                admCloudUsername: true,
+                admCloudPassword: true,
+                admCloudCompany: true,
+                admCloudRole: true,
+            },
+        });
+
+        if (!workspaceData?.admCloudEnabled || !workspaceData.admCloudAppId) {
+            return NextResponse.json({ error: "ADMCloud no está configurado" }, { status: 400 });
+        }
+
+        const client = createAdmCloudClient({
+            appId: workspaceData.admCloudAppId,
+            username: workspaceData.admCloudUsername!,
+            password: workspaceData.admCloudPassword!,
+            company: workspaceData.admCloudCompany!,
+            role: workspaceData.admCloudRole || "Administradores",
+        });
+
+        const { searchParams } = request.nextUrl;
+        const typesParam = searchParams.get("types") || "proformas,credit";
+        const dateFrom = searchParams.get("dateFrom");
+        const dateTo = searchParams.get("dateTo");
+        const itemsFilter = searchParams.get("items")?.split(",").filter(Boolean) || [];
+
+        const includeProformas = typesParam.includes("proformas");
+        const includeCredit = typesParam.includes("credit");
+
+        const dateFromObj = dateFrom ? new Date(dateFrom) : null;
+        const dateToObj = dateTo ? new Date(dateTo + "T23:59:59") : null;
+
+        const companies = await prisma.company.findMany({
+            where: {
+                workspaceId: workspace.id,
+                admCloudRelationshipId: { not: null },
+            },
+            select: {
+                id: true,
+                name: true,
+                admCloudRelationshipId: true,
+            },
+        });
+
+        if (companies.length === 0) {
+            return NextResponse.json({ lines: [], message: "No hay empresas vinculadas a ADMCloud" });
+        }
+
+        const allLines: ReportLine[] = [];
+
+        const BATCH_SIZE = 5;
+        for (let i = 0; i < companies.length; i += BATCH_SIZE) {
+            const batch = companies.slice(i, i + BATCH_SIZE);
+            const batchPromises = batch.map(async (company) => {
+                const relId = company.admCloudRelationshipId!;
+                const lines: ReportLine[] = [];
+
+                if (includeCredit) {
+                    const res = await client.getCreditInvoices(relId);
+                    if (res.success && res.data) {
+                        for (const invoice of res.data) {
+                            lines.push(...normalizeInvoiceItems(invoice, company.name, company.id));
+                        }
+                    }
+                }
+
+                if (includeProformas) {
+                    const res = await client.getQuotesByCustomer(relId);
+                    if (res.success && res.data) {
+                        for (const quote of res.data) {
+                            lines.push(...normalizeQuoteItems(quote, company.name, company.id));
+                        }
+                    }
+                }
+
+                return lines;
+            });
+
+            const batchResults = await Promise.all(batchPromises);
+            for (const lines of batchResults) {
+                allLines.push(...lines);
+            }
+        }
+
+        let filtered = allLines;
+
+        if (dateFromObj) {
+            filtered = filtered.filter((l) => {
+                const d = parseDate(l.documentDate);
+                return d && d >= dateFromObj;
+            });
+        }
+        if (dateToObj) {
+            filtered = filtered.filter((l) => {
+                const d = parseDate(l.documentDate);
+                return d && d <= dateToObj;
+            });
+        }
+
+        if (itemsFilter.length > 0) {
+            const itemSet = new Set(itemsFilter.map(i => i.toLowerCase()));
+            filtered = filtered.filter((l) =>
+                itemSet.has(l.itemCode.toLowerCase()) || itemSet.has(l.itemDescription.toLowerCase())
+            );
+        }
+
+        filtered.sort((a, b) => {
+            const nameCompare = a.clientName.localeCompare(b.clientName);
+            if (nameCompare !== 0) return nameCompare;
+            return a.documentDate.localeCompare(b.documentDate);
+        });
+
+        return NextResponse.json({ lines: filtered });
+    } catch (error) {
+        console.error("[Reports] Error:", error);
+        return NextResponse.json(
+            { error: error instanceof Error ? error.message : "Error interno" },
+            { status: 500 }
+        );
+    }
+}
