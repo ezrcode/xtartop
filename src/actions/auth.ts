@@ -1,6 +1,6 @@
 "use server";
 
-import { signIn, signOut } from "@/auth";
+import { signIn, signOut, INTERNAL_ALLOWED_DOMAINS } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { SignupFormSchema } from "@/lib/definitions";
 import bcrypt from "bcryptjs";
@@ -88,7 +88,24 @@ export async function register(prevState: any, formData: FormData) {
 
 export async function authenticate(prevState: string | undefined, formData: FormData) {
     try {
-        const email = formData.get("email") as string | null;
+        const email = String(formData.get("email") || "").trim().toLowerCase();
+        if (!email) {
+            return "Invalid credentials.";
+        }
+
+        const userForValidation = await prisma.user.findUnique({
+            where: { email },
+            select: { userType: true },
+        });
+
+        if (userForValidation?.userType === "INTERNAL") {
+            const domain = email.split("@")[1] || "";
+            const allowedDomains = INTERNAL_ALLOWED_DOMAINS.join(" o @");
+            if (!INTERNAL_ALLOWED_DOMAINS.includes(domain as typeof INTERNAL_ALLOWED_DOMAINS[number])) {
+                return `Acceso denegado. Para usuarios internos debes iniciar sesión con un correo @${allowedDomains}.`;
+            }
+        }
+
         let redirectTo = "/app";
 
         if (email) {

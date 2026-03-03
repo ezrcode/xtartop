@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import type { User } from "@prisma/client";
 
-const INTERNAL_DOMAIN = "nearbycrm.com"; // Internal users domain
+export const INTERNAL_ALLOWED_DOMAINS = ["nearbycrm.com", "decima.us"] as const;
 
 async function getUser(email: string): Promise<User | null> {
     try {
@@ -40,9 +40,9 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
 
                     // Validate INTERNAL users must have @nearbycrm.com domain
                     if (user.userType === "INTERNAL") {
-                        const domain = email.split("@")[1];
-                        if (domain !== INTERNAL_DOMAIN) {
-                            console.log("Internal user must have @nearbycrm.com domain");
+                        const domain = (email.split("@")[1] || "").toLowerCase();
+                        if (!INTERNAL_ALLOWED_DOMAINS.includes(domain as typeof INTERNAL_ALLOWED_DOMAINS[number])) {
+                            console.log("Internal user must use an allowed internal domain");
                             return null;
                         }
                     }
