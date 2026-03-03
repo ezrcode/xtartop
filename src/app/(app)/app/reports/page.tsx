@@ -1,12 +1,13 @@
 import { PageHeader } from "@/components/ui/page-header";
-import { BarChart3, FileSpreadsheet, ArrowRight } from "lucide-react";
+import { BarChart3, FileSpreadsheet, ArrowRight, LifeBuoy } from "lucide-react";
 import Link from "next/link";
+import { LucideIcon } from "lucide-react";
 
 type ReportCard = {
     title: string;
     description: string;
     href: string;
-    icon: typeof FileSpreadsheet;
+    icon: LucideIcon;
     gradient: string;
     iconColor: string;
 };
@@ -38,8 +39,18 @@ const reportGroups: ReportGroup[] = [
     {
         key: "customer-success",
         title: "Customer Success",
-        description: "Espacio reservado para nuevos reportes de seguimiento, adopción y retención.",
-        reports: [],
+        description: "Analiza operación de soporte, cumplimiento y productividad por cliente y equipo.",
+        reports: [
+            {
+                title: "Tickets Cerrados (ClickUp)",
+                description:
+                    "Resumen gráfico de tickets cerrados en estado completado, con filtros por fecha, cliente y asignado, y exportación en PDF.",
+                href: "/app/reports/customer-success-tickets",
+                icon: LifeBuoy,
+                gradient: "from-success-green/25 to-success-green/5",
+                iconColor: "text-success-green",
+            },
+        ],
     },
 ];
 
