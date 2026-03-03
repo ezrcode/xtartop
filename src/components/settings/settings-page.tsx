@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useFormState } from "react-dom";
+import { useRouter } from "next/navigation";
 import { Save, UserPlus, Mail, Trash2, X, Building2, Users2, FileText, Loader2, Cloud, Settings2, DollarSign, BriefcaseBusiness, ChevronRight } from "lucide-react";
 import { ImageUpload } from "../ui/image-upload";
 import {
@@ -9,6 +10,7 @@ import {
     sendInvitation,
     revokeInvitation,
     removeMember,
+    updateWorkspaceUserProfile,
     updateContractTemplate,
     WorkspaceState,
     InvitationState
@@ -77,6 +79,7 @@ type WorkspaceUser = {
 
 interface SettingsPageProps {
     workspace: WorkspaceWithDetails;
+    currentUserRole: "OWNER" | "ADMIN";
     workspaceUsers?: WorkspaceUser[];
     billingSenderEmailConfig?: {
         emailConfigured: boolean;
@@ -220,17 +223,23 @@ const sectionGroups = [
 
 export function SettingsPage({
     workspace,
+    currentUserRole,
     workspaceUsers = [],
     billingSenderEmailConfig = null,
     businessLines = [],
     exchangeRates = [],
     projectRateReferences = [],
 }: SettingsPageProps) {
+    const router = useRouter();
     const [activeSection, setActiveSection] = useState<Section>('workspace');
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
     const [showInviteForm, setShowInviteForm] = useState(false);
     const [revokingId, setRevokingId] = useState<string | null>(null);
     const [removingId, setRemovingId] = useState<string | null>(null);
+    const [editingUserId, setEditingUserId] = useState<string | null>(null);
+    const [savingUserId, setSavingUserId] = useState<string | null>(null);
+    const [profileErrorByUser, setProfileErrorByUser] = useState<Record<string, string>>({});
+    const [userDrafts, setUserDrafts] = useState<Record<string, { name: string; photoUrl: string | null }>>({});
     const [logoUrl, setLogoUrl] = useState<string | null>(workspace.logoUrl || null);
     
     // Contract state
@@ -266,6 +275,74 @@ export function SettingsPage({
         setRemovingId(memberId);
         await removeMember(memberId);
         setRemovingId(null);
+    };
+
+    const canEditUser = (userId: string) => {
+        if (currentUserRole === "OWNER") return true;
+        return userId !== workspace.owner.id;
+    };
+
+    const startEditingUser = (user: Pick<User, "id" | "name" | "photoUrl">) => {
+        if (!canEditUser(user.id)) return;
+
+        setProfileErrorByUser((prev) => {
+            const next = { ...prev };
+            delete next[user.id];
+            return next;
+        });
+
+        setUserDrafts((prev) => ({
+            ...prev,
+            [user.id]: {
+                name: user.name || "",
+                photoUrl: user.photoUrl || null,
+            },
+        }));
+        setEditingUserId(user.id);
+    };
+
+    const updateUserDraft = (userId: string, patch: Partial<{ name: string; photoUrl: string | null }>) => {
+        setUserDrafts((prev) => {
+            const current = prev[userId] || { name: "", photoUrl: null };
+            return {
+                ...prev,
+                [userId]: { ...current, ...patch },
+            };
+        });
+    };
+
+    const cancelUserEditing = (userId: string) => {
+        setEditingUserId((current) => (current === userId ? null : current));
+        setProfileErrorByUser((prev) => {
+            const next = { ...prev };
+            delete next[userId];
+            return next;
+        });
+    };
+
+    const saveUserProfile = async (userId: string) => {
+        const draft = userDrafts[userId];
+        if (!draft) return;
+
+        setSavingUserId(userId);
+        const result = await updateWorkspaceUserProfile(userId, draft.name, draft.photoUrl);
+        setSavingUserId(null);
+
+        if (!result.success) {
+            setProfileErrorByUser((prev) => ({
+                ...prev,
+                [userId]: result.message || "No se pudo actualizar el usuario.",
+            }));
+            return;
+        }
+
+        setEditingUserId(null);
+        setProfileErrorByUser((prev) => {
+            const next = { ...prev };
+            delete next[userId];
+            return next;
+        });
+        router.refresh();
     };
 
     const totalMembers = workspace.members.length + 1; // +1 for owner
@@ -387,31 +464,135 @@ export function SettingsPage({
                             )}
                             <div className="space-y-3 overflow-hidden">
                                 <h3 className="text-sm font-medium text-[var(--foreground)]">Miembros Activos</h3>
-                                <div className="flex items-center gap-2 p-3 border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] overflow-hidden">
-                                    {workspace.owner.photoUrl ? (
-                                        <img src={workspace.owner.photoUrl} alt={workspace.owner.name || ""} className="h-9 w-9 rounded-full object-cover flex-shrink-0" />
+                                <div className="p-3 border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] overflow-hidden">
+                                    {editingUserId === workspace.owner.id ? (
+                                        <div className="space-y-3">
+                                            <ImageUpload
+                                                currentImage={userDrafts[workspace.owner.id]?.photoUrl || workspace.owner.photoUrl}
+                                                onImageChange={(url) => updateUserDraft(workspace.owner.id, { photoUrl: url })}
+                                                category="profile"
+                                                folder="profiles"
+                                                size="sm"
+                                                label="Foto"
+                                            />
+                                            <div className="space-y-2">
+                                                <Label htmlFor={`member-name-${workspace.owner.id}`}>Nombre</Label>
+                                                <Input
+                                                    id={`member-name-${workspace.owner.id}`}
+                                                    value={userDrafts[workspace.owner.id]?.name || ""}
+                                                    onChange={(e) => updateUserDraft(workspace.owner.id, { name: e.target.value })}
+                                                    placeholder="Nombre del usuario"
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <p className="text-xs text-[var(--muted-text)]">Correo (solo lectura)</p>
+                                                <p className="text-sm text-[var(--foreground)] break-all">{workspace.owner.email}</p>
+                                            </div>
+                                            {profileErrorByUser[workspace.owner.id] && (
+                                                <p className="text-xs text-error-red">{profileErrorByUser[workspace.owner.id]}</p>
+                                            )}
+                                            <div className="flex items-center justify-between gap-2">
+                                                <Badge variant="secondary" className="text-xs">Owner</Badge>
+                                                <div className="flex items-center gap-2">
+                                                    <Button type="button" variant="ghost" size="sm" onClick={() => cancelUserEditing(workspace.owner.id)}>
+                                                        Cancelar
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        size="sm"
+                                                        onClick={() => saveUserProfile(workspace.owner.id)}
+                                                        disabled={savingUserId === workspace.owner.id}
+                                                    >
+                                                        {savingUserId === workspace.owner.id ? "Guardando..." : "Guardar"}
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     ) : (
-                                        <div className="h-9 w-9 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-dark flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">{getInitials(workspace.owner.name, workspace.owner.email)}</div>
+                                        <div className="flex items-center gap-2 overflow-hidden">
+                                            {workspace.owner.photoUrl ? (
+                                                <img src={workspace.owner.photoUrl} alt={workspace.owner.name || ""} className="h-9 w-9 rounded-full object-cover flex-shrink-0" />
+                                            ) : (
+                                                <div className="h-9 w-9 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-dark flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">{getInitials(workspace.owner.name, workspace.owner.email)}</div>
+                                            )}
+                                            <div className="min-w-0 flex-1">
+                                                <p className="text-sm font-medium text-[var(--foreground)] truncate">{workspace.owner.name || workspace.owner.email}</p>
+                                                <p className="text-xs text-[var(--muted-text)] truncate">{workspace.owner.email}</p>
+                                            </div>
+                                            <Badge variant="secondary" className="flex-shrink-0 text-xs">Owner</Badge>
+                                            {canEditUser(workspace.owner.id) && (
+                                                <Button type="button" variant="ghost" size="sm" onClick={() => startEditingUser(workspace.owner)}>
+                                                    Editar
+                                                </Button>
+                                            )}
+                                        </div>
                                     )}
-                                    <div className="min-w-0 flex-1">
-                                        <p className="text-sm font-medium text-[var(--foreground)] truncate">{workspace.owner.name || workspace.owner.email}</p>
-                                        <p className="text-xs text-[var(--muted-text)] truncate">{workspace.owner.email}</p>
-                                    </div>
-                                    <Badge variant="secondary" className="flex-shrink-0 text-xs">Owner</Badge>
                                 </div>
                                 {workspace.members.map((member) => (
-                                    <div key={member.id} className="flex items-center gap-2 p-3 border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] overflow-hidden">
-                                        {member.user.photoUrl ? (
-                                            <img src={member.user.photoUrl} alt={member.user.name || ""} className="h-9 w-9 rounded-full object-cover flex-shrink-0" />
+                                    <div key={member.id} className="p-3 border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] overflow-hidden">
+                                        {editingUserId === member.user.id ? (
+                                            <div className="space-y-3">
+                                                <ImageUpload
+                                                    currentImage={userDrafts[member.user.id]?.photoUrl || member.user.photoUrl}
+                                                    onImageChange={(url) => updateUserDraft(member.user.id, { photoUrl: url })}
+                                                    category="profile"
+                                                    folder="profiles"
+                                                    size="sm"
+                                                    label="Foto"
+                                                />
+                                                <div className="space-y-2">
+                                                    <Label htmlFor={`member-name-${member.user.id}`}>Nombre</Label>
+                                                    <Input
+                                                        id={`member-name-${member.user.id}`}
+                                                        value={userDrafts[member.user.id]?.name || ""}
+                                                        onChange={(e) => updateUserDraft(member.user.id, { name: e.target.value })}
+                                                        placeholder="Nombre del usuario"
+                                                    />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="text-xs text-[var(--muted-text)]">Correo (solo lectura)</p>
+                                                    <p className="text-sm text-[var(--foreground)] break-all">{member.user.email}</p>
+                                                </div>
+                                                {profileErrorByUser[member.user.id] && (
+                                                    <p className="text-xs text-error-red">{profileErrorByUser[member.user.id]}</p>
+                                                )}
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <Badge variant={member.role === 'ADMIN' ? 'info' : 'success'} className="text-xs">{member.role}</Badge>
+                                                    <div className="flex items-center gap-2">
+                                                        <Button type="button" variant="ghost" size="sm" onClick={() => cancelUserEditing(member.user.id)}>
+                                                            Cancelar
+                                                        </Button>
+                                                        <Button
+                                                            type="button"
+                                                            size="sm"
+                                                            onClick={() => saveUserProfile(member.user.id)}
+                                                            disabled={savingUserId === member.user.id}
+                                                        >
+                                                            {savingUserId === member.user.id ? "Guardando..." : "Guardar"}
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         ) : (
-                                            <div className="h-9 w-9 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-dark flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">{getInitials(member.user.name, member.user.email)}</div>
+                                            <div className="flex items-center gap-2 overflow-hidden">
+                                                {member.user.photoUrl ? (
+                                                    <img src={member.user.photoUrl} alt={member.user.name || ""} className="h-9 w-9 rounded-full object-cover flex-shrink-0" />
+                                                ) : (
+                                                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-dark flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">{getInitials(member.user.name, member.user.email)}</div>
+                                                )}
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="text-sm font-medium text-[var(--foreground)] truncate">{member.user.name || member.user.email}</p>
+                                                    <p className="text-xs text-[var(--muted-text)] truncate">{member.user.email}</p>
+                                                </div>
+                                                <Badge variant={member.role === 'ADMIN' ? 'info' : 'success'} className="flex-shrink-0 text-xs">{member.role}</Badge>
+                                                {canEditUser(member.user.id) && (
+                                                    <Button type="button" variant="ghost" size="sm" onClick={() => startEditingUser(member.user)}>
+                                                        Editar
+                                                    </Button>
+                                                )}
+                                                <button onClick={() => handleRemoveMember(member.id)} disabled={removingId === member.id || member.user.id === workspace.owner.id} className="text-error-red hover:text-red-700 disabled:opacity-50 p-1 flex-shrink-0" title={member.user.id === workspace.owner.id ? "No se puede eliminar al Owner" : "Eliminar"}><Trash2 size={16} /></button>
+                                            </div>
                                         )}
-                                        <div className="min-w-0 flex-1">
-                                            <p className="text-sm font-medium text-[var(--foreground)] truncate">{member.user.name || member.user.email}</p>
-                                            <p className="text-xs text-[var(--muted-text)] truncate">{member.user.email}</p>
-                                        </div>
-                                        <Badge variant={member.role === 'ADMIN' ? 'info' : 'success'} className="flex-shrink-0 text-xs">{member.role}</Badge>
-                                        <button onClick={() => handleRemoveMember(member.id)} disabled={removingId === member.id || member.user.id === workspace.owner.id} className="text-error-red hover:text-red-700 disabled:opacity-50 p-1 flex-shrink-0" title={member.user.id === workspace.owner.id ? "No se puede eliminar al Owner" : "Eliminar"}><Trash2 size={16} /></button>
                                     </div>
                                 ))}
                             </div>

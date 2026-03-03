@@ -25,13 +25,14 @@ export default async function Settings() {
     }
 
     // Only OWNER and ADMIN can access settings
-    if (userRole?.role !== 'OWNER' && userRole?.role !== 'ADMIN') {
+    if (!userRole || (userRole.role !== 'OWNER' && userRole.role !== 'ADMIN')) {
         redirect("/app");
     }
 
     return (
         <SettingsPage
             workspace={workspace}
+            currentUserRole={userRole.role}
             workspaceUsers={workspaceUsers}
             billingSenderEmailConfig={billingSenderEmailConfig}
             businessLines={businessLines}
@@ -40,4 +41,3 @@ export default async function Settings() {
         />
     );
 }
-

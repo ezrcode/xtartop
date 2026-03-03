@@ -512,6 +512,78 @@ export async function removeMember(memberId: string) {
     }
 }
 
+const UpdateWorkspaceUserProfileSchema = z.object({
+    userId: z.string().min(1, "Usuario inválido"),
+    name: z.string().trim().min(1, "El nombre es obligatorio").max(120, "Nombre demasiado largo"),
+    photoUrl: z.union([z.string().url("URL de foto inválida"), z.literal(""), z.null()]).optional(),
+});
+
+export async function updateWorkspaceUserProfile(userId: string, name: string, photoUrl: string | null) {
+    const session = await auth();
+    if (!session?.user?.email) redirect("/login");
+
+    const userRole = await getUserWorkspaceRole();
+    if (userRole?.role !== "OWNER" && userRole?.role !== "ADMIN") {
+        return { success: false, message: "No autorizado." };
+    }
+
+    const validatedFields = UpdateWorkspaceUserProfileSchema.safeParse({
+        userId,
+        name,
+        photoUrl,
+    });
+
+    if (!validatedFields.success) {
+        return {
+            success: false,
+            message: validatedFields.error.issues[0]?.message || "Datos inválidos.",
+        };
+    }
+
+    try {
+        const workspace = await prisma.workspace.findUnique({
+            where: { id: userRole.workspaceId },
+            select: {
+                ownerId: true,
+                members: {
+                    where: { userId: validatedFields.data.userId },
+                    select: { id: true },
+                    take: 1,
+                },
+            },
+        });
+
+        if (!workspace) {
+            return { success: false, message: "Workspace no encontrado." };
+        }
+
+        const isOwner = workspace.ownerId === validatedFields.data.userId;
+        const isMember = workspace.members.length > 0;
+
+        if (!isOwner && !isMember) {
+            return { success: false, message: "Usuario no pertenece a este workspace." };
+        }
+
+        if (userRole.role === "ADMIN" && isOwner) {
+            return { success: false, message: "No autorizado para editar al Owner." };
+        }
+
+        await prisma.user.update({
+            where: { id: validatedFields.data.userId },
+            data: {
+                name: validatedFields.data.name,
+                photoUrl: validatedFields.data.photoUrl || null,
+            },
+        });
+
+        revalidatePath("/app/settings");
+        return { success: true, message: "Usuario actualizado correctamente." };
+    } catch (error) {
+        console.error("Database Error:", error);
+        return { success: false, message: "No se pudo actualizar el usuario." };
+    }
+}
+
 export async function acceptInvitation(token: string) {
     const session = await auth();
     if (!session?.user?.email) redirect("/login");
@@ -609,4 +681,3 @@ export async function getContractTemplate() {
         version: workspace.contractVersion,
     };
 }
-
