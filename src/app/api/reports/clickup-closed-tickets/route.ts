@@ -15,6 +15,25 @@ interface ClosedTicketLine {
     url: string;
 }
 
+function extractCompletionDate(task: ClickUpTask): Date | null {
+    const record = task as unknown as Record<string, unknown>;
+    const rawCandidates = [
+        task.date_closed,
+        typeof record.date_done === "string" ? record.date_done : null,
+        task.date_updated,
+    ];
+
+    for (const raw of rawCandidates) {
+        if (!raw) continue;
+        const value = Number(raw);
+        if (Number.isFinite(value) && value > 0) {
+            const parsed = new Date(value);
+            if (!Number.isNaN(parsed.getTime())) return parsed;
+        }
+    }
+    return null;
+}
+
 function parseDateInput(value: string | null): Date | null {
     if (!value) return null;
     const parsed = new Date(value);
@@ -39,7 +58,7 @@ function getClientFieldValue(field?: ClickUpCustomField): string {
 }
 
 function normalizeTask(task: ClickUpTask, clientFieldId: string): ClosedTicketLine {
-    const closedAt = task.date_closed ? new Date(Number(task.date_closed)) : null;
+    const closedAt = extractCompletionDate(task);
     const clientField = task.custom_fields?.find((field) => field.id === clientFieldId);
 
     return {
@@ -56,7 +75,18 @@ function normalizeTask(task: ClickUpTask, clientFieldId: string): ClosedTicketLi
 
 function isCompletedStatus(status: string): boolean {
     const normalized = status.trim().toLowerCase();
-    return normalized.includes("completad");
+    return (
+        normalized.includes("completad") ||
+        normalized.includes("complete") ||
+        normalized.includes("done") ||
+        normalized.includes("cerrad") ||
+        normalized.includes("resuelto")
+    );
+}
+
+function isClosedType(task: ClickUpTask): boolean {
+    const type = (task.status?.type || "").toLowerCase();
+    return type === "closed" || type === "done";
 }
 
 export async function GET(request: NextRequest) {
@@ -107,7 +137,7 @@ export async function GET(request: NextRequest) {
         }
 
         const lines = taskResult.data
-            .filter((task) => task.date_closed && isCompletedStatus(task.status.status))
+            .filter((task) => isCompletedStatus(task.status.status) || isClosedType(task))
             .map((task) => normalizeTask(task, workspaceConfig.clickUpClientFieldId!))
             .filter((line) => {
                 if (!line.closedAt) return false;
