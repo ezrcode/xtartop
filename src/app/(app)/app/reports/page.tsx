@@ -2,6 +2,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { BarChart3, FileSpreadsheet, ArrowRight, LifeBuoy } from "lucide-react";
 import Link from "next/link";
 import { LucideIcon } from "lucide-react";
+import { getUserWorkspaceRole } from "@/actions/workspace";
 
 type ReportCard = {
     title: string;
@@ -54,7 +55,11 @@ const reportGroups: ReportGroup[] = [
     },
 ];
 
-export default function ReportsPage() {
+export default async function ReportsPage() {
+    const userRole = await getUserWorkspaceRole();
+    const isMember = userRole?.role === "MEMBER";
+    const visibleGroups = reportGroups.filter((group) => !(isMember && group.key === "sales"));
+
     return (
         <div className="min-h-screen bg-[var(--surface-0)] py-6 sm:py-8">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -65,7 +70,7 @@ export default function ReportsPage() {
                 />
 
                 <div className="space-y-6 sm:space-y-8">
-                    {reportGroups.map((group) => (
+                    {visibleGroups.map((group) => (
                         <section
                             key={group.key}
                             className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl p-4 sm:p-5"
