@@ -35,6 +35,11 @@ interface GroupedRow {
     tickets: number;
 }
 
+interface ClickUpClosedTicketsReportProps {
+    workspaceName?: string;
+    workspaceLogoUrl?: string | null;
+}
+
 function formatDateForInput(date: Date): string {
     return date.toISOString().split("T")[0];
 }
@@ -85,7 +90,37 @@ function buildRows(lines: TicketLine[], groupBy: GroupBy): GroupedRow[] {
         .sort((a, b) => b.tickets - a.tickets);
 }
 
-export function ClickUpClosedTicketsReport() {
+async function loadImageAsDataUrl(imageUrl: string): Promise<string | null> {
+    try {
+        const response = await fetch(imageUrl, { mode: "cors" });
+        if (!response.ok) return null;
+        const blob = await response.blob();
+        const dataUrl: string = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve((reader.result as string) || "");
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(blob);
+        });
+        return dataUrl || null;
+    } catch {
+        return null;
+    }
+}
+
+function addPdfPageNumbers(pdf: jsPDF) {
+    const pageCount = pdf.getNumberOfPages();
+    for (let page = 1; page <= pageCount; page++) {
+        pdf.setPage(page);
+        pdf.setFontSize(8);
+        pdf.setTextColor(120, 130, 145);
+        pdf.text(`Página ${page} de ${pageCount}`, 195, 290, { align: "right" });
+    }
+}
+
+export function ClickUpClosedTicketsReport({
+    workspaceName = "Workspace",
+    workspaceLogoUrl = null,
+}: ClickUpClosedTicketsReportProps) {
     const now = new Date();
     const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
@@ -166,8 +201,24 @@ export function ClickUpClosedTicketsReport() {
             const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
             let y = 14;
+            if (workspaceLogoUrl) {
+                const logo = await loadImageAsDataUrl(workspaceLogoUrl);
+                if (logo) {
+                    pdf.addImage(logo, "PNG", 14, y - 2, 16, 16);
+                }
+            }
             pdf.setFontSize(14);
-            pdf.text("Reporte Customer Success - Tickets Cerrados", 14, y);
+            pdf.setTextColor(28, 40, 56);
+            pdf.text(workspaceName, 34, y + 2);
+            pdf.setFontSize(10);
+            pdf.setTextColor(120, 130, 145);
+            pdf.text("Reporte Customer Success", 34, y + 7);
+            y += 16;
+            pdf.setDrawColor(220, 227, 236);
+            pdf.line(14, y - 3, 196, y - 3);
+            pdf.setFontSize(14);
+            pdf.setTextColor(28, 40, 56);
+            pdf.text("Tickets Cerrados - ClickUp", 14, y);
             y += 6;
             pdf.setFontSize(10);
             pdf.text(`Rango: ${dateFrom || "-"} a ${dateTo || "-"}`, 14, y);
@@ -226,6 +277,7 @@ export function ClickUpClosedTicketsReport() {
                 y += 4.2;
             });
 
+            addPdfPageNumbers(pdf);
             pdf.save(`Customer_Success_Tickets_${new Date().toISOString().split("T")[0]}.pdf`);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Error exportando PDF");
