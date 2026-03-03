@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, BarChart3, Download, Loader2, Search } from "lucide-react";
 import {
@@ -13,6 +13,7 @@ import {
     YAxis,
 } from "recharts";
 import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 interface TicketLine {
     id: string;
@@ -84,63 +85,6 @@ function buildRows(lines: TicketLine[], groupBy: GroupBy): GroupedRow[] {
         .sort((a, b) => b.tickets - a.tickets);
 }
 
-function exportPdf(params: {
-    lines: TicketLine[];
-    rows: GroupedRow[];
-    groupBy: GroupBy;
-    breakdownBy: BreakdownBy;
-    dateFrom: string;
-    dateTo: string;
-}) {
-    const { lines, rows, groupBy, breakdownBy, dateFrom, dateTo } = params;
-    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-
-    let y = 14;
-    pdf.setFontSize(14);
-    pdf.text("Reporte Customer Success - Tickets Cerrados", 14, y);
-    y += 6;
-    pdf.setFontSize(10);
-    pdf.text(`Rango: ${dateFrom || "-"} a ${dateTo || "-"}`, 14, y);
-    y += 5;
-    pdf.text(`Agrupacion principal: ${groupBy}`, 14, y);
-    y += 5;
-    pdf.text(`Desglose secundario: ${breakdownBy}`, 14, y);
-    y += 5;
-    pdf.text(`Total tickets: ${lines.length}`, 14, y);
-    y += 8;
-
-    pdf.setFontSize(11);
-    pdf.text("Resumen", 14, y);
-    y += 6;
-    pdf.setFontSize(9);
-    rows.slice(0, 20).forEach((row) => {
-        if (y > 280) {
-            pdf.addPage();
-            y = 14;
-        }
-        pdf.text(`${row.label}: ${row.tickets}`, 14, y);
-        y += 4.5;
-    });
-
-    y += 4;
-    pdf.setFontSize(11);
-    pdf.text("Detalle", 14, y);
-    y += 6;
-    pdf.setFontSize(8);
-    lines.slice(0, 50).forEach((line) => {
-        if (y > 280) {
-            pdf.addPage();
-            y = 14;
-        }
-        const assignees = line.assignees.length > 0 ? line.assignees.join(", ") : "Sin asignado";
-        const row = `${line.closedDate} | ${line.client} | ${assignees} | ${line.name}`;
-        pdf.text(row.slice(0, 120), 14, y);
-        y += 4.2;
-    });
-
-    pdf.save(`Customer_Success_Tickets_${new Date().toISOString().split("T")[0]}.pdf`);
-}
-
 export function ClickUpClosedTicketsReport() {
     const now = new Date();
     const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -153,9 +97,11 @@ export function ClickUpClosedTicketsReport() {
     const [assigneeFilter, setAssigneeFilter] = useState("all");
 
     const [loading, setLoading] = useState(false);
+    const [exportingPdf, setExportingPdf] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [lines, setLines] = useState<TicketLine[]>([]);
     const [hasQueried, setHasQueried] = useState(false);
+    const chartContainerRef = useRef<HTMLDivElement>(null);
 
     const clients = useMemo(() => {
         return Array.from(new Set(lines.map((line) => line.client).filter(Boolean))).sort();
@@ -214,10 +160,87 @@ export function ClickUpClosedTicketsReport() {
         }
     };
 
+    const handleExportPdf = async () => {
+        setExportingPdf(true);
+        try {
+            const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+
+            let y = 14;
+            pdf.setFontSize(14);
+            pdf.text("Reporte Customer Success - Tickets Cerrados", 14, y);
+            y += 6;
+            pdf.setFontSize(10);
+            pdf.text(`Rango: ${dateFrom || "-"} a ${dateTo || "-"}`, 14, y);
+            y += 5;
+            pdf.text(`Agrupación principal: ${groupBy}`, 14, y);
+            y += 5;
+            pdf.text(`Desglose secundario: ${breakdownBy}`, 14, y);
+            y += 5;
+            pdf.text(`Total tickets: ${filteredLines.length}`, 14, y);
+            y += 8;
+
+            if (chartContainerRef.current) {
+                const canvas = await html2canvas(chartContainerRef.current, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: "#ffffff",
+                });
+                const imgData = canvas.toDataURL("image/png");
+                const imgWidth = 182;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                pdf.addImage(imgData, "PNG", 14, y, imgWidth, imgHeight);
+                y += imgHeight + 8;
+            }
+
+            if (y > 260) {
+                pdf.addPage();
+                y = 14;
+            }
+
+            pdf.setFontSize(11);
+            pdf.text("Resumen", 14, y);
+            y += 6;
+            pdf.setFontSize(9);
+            groupedRows.slice(0, 24).forEach((row) => {
+                if (y > 280) {
+                    pdf.addPage();
+                    y = 14;
+                }
+                pdf.text(`${row.label}: ${row.tickets}`, 14, y);
+                y += 4.5;
+            });
+
+            y += 3;
+            pdf.setFontSize(11);
+            pdf.text("Detalle", 14, y);
+            y += 6;
+            pdf.setFontSize(8);
+            filteredLines.slice(0, 60).forEach((line) => {
+                if (y > 280) {
+                    pdf.addPage();
+                    y = 14;
+                }
+                const assignees = line.assignees.length > 0 ? line.assignees.join(", ") : "Sin asignado";
+                const row = `${line.closedDate} | ${line.client} | ${assignees} | ${line.name}`;
+                pdf.text(row.slice(0, 130), 14, y);
+                y += 4.2;
+            });
+
+            pdf.save(`Customer_Success_Tickets_${new Date().toISOString().split("T")[0]}.pdf`);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Error exportando PDF");
+        } finally {
+            setExportingPdf(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[var(--surface-0)] py-6 sm:py-8">
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div className="relative overflow-hidden bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)] p-4 sm:p-6 mb-6">
+                    <div className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-success-green/10 blur-2xl" />
+                    <div className="absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-ocean-blue/10 blur-2xl" />
+                    <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                         <Link
                             href="/app/reports"
@@ -240,25 +263,22 @@ export function ClickUpClosedTicketsReport() {
 
                     {groupedRows.length > 0 && (
                         <button
-                            onClick={() =>
-                                exportPdf({
-                                    lines: filteredLines,
-                                    rows: groupedRows,
-                                    groupBy,
-                                    breakdownBy,
-                                    dateFrom,
-                                    dateTo,
-                                })
-                            }
-                            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-success-green rounded-xl hover:bg-success-green/90 transition-colors shadow-sm"
+                            onClick={handleExportPdf}
+                            disabled={exportingPdf}
+                            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-success-green rounded-xl hover:bg-success-green/90 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <Download size={16} />
-                            Exportar PDF
+                            {exportingPdf ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+                            {exportingPdf ? "Generando PDF..." : "Exportar PDF"}
                         </button>
                     )}
                 </div>
+                </div>
 
-                <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4 sm:p-5 mb-6">
+                <div className="bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)] p-4 sm:p-5 mb-6">
+                    <div className="mb-3">
+                        <h3 className="text-sm font-semibold text-[var(--foreground)]">Filtros y agrupaciones</h3>
+                        <p className="text-xs text-[var(--muted-text)] mt-0.5">Configura el rango de fechas y la forma de análisis.</p>
+                    </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div>
                             <label className="block text-xs font-medium text-[var(--muted-text)] uppercase tracking-wider mb-2">
@@ -370,21 +390,21 @@ export function ClickUpClosedTicketsReport() {
                 {hasQueried && !loading && groupedRows.length > 0 && (
                     <div className="space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4">
+                            <div className="bg-gradient-to-br from-success-green/10 to-success-green/5 rounded-xl border border-success-green/20 p-4">
                                 <p className="text-xs text-[var(--muted-text)] uppercase tracking-wider">Tickets cerrados</p>
                                 <p className="text-2xl font-bold text-[var(--foreground)] mt-1">{filteredLines.length}</p>
                             </div>
-                            <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4">
+                            <div className="bg-gradient-to-br from-ocean-blue/10 to-ocean-blue/5 rounded-xl border border-ocean-blue/20 p-4">
                                 <p className="text-xs text-[var(--muted-text)] uppercase tracking-wider">Clientes</p>
                                 <p className="text-2xl font-bold text-[var(--foreground)] mt-1">{clients.length}</p>
                             </div>
-                            <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4">
+                            <div className="bg-gradient-to-br from-nearby-accent/10 to-nearby-accent/5 rounded-xl border border-nearby-accent/20 p-4">
                                 <p className="text-xs text-[var(--muted-text)] uppercase tracking-wider">Asignados</p>
                                 <p className="text-2xl font-bold text-[var(--foreground)] mt-1">{assignees.length}</p>
                             </div>
                         </div>
 
-                        <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4 sm:p-5">
+                        <div ref={chartContainerRef} className="bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)] p-4 sm:p-5">
                             <h3 className="text-sm font-semibold text-[var(--foreground)] mb-3">
                                 Distribución por {groupBy === "week" ? "semana" : groupBy === "client" ? "cliente" : "asignado"}
                             </h3>
@@ -392,10 +412,10 @@ export function ClickUpClosedTicketsReport() {
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={groupedRows}>
                                         <CartesianGrid strokeDasharray="3 3" stroke="var(--card-border)" />
-                                        <XAxis dataKey="label" tick={{ fill: "var(--muted-text)", fontSize: 12 }} interval={0} angle={-15} height={56} />
+                                        <XAxis dataKey="label" tick={{ fill: "var(--muted-text)", fontSize: 11 }} interval={0} angle={-18} height={58} />
                                         <YAxis allowDecimals={false} tick={{ fill: "var(--muted-text)", fontSize: 12 }} />
                                         <Tooltip />
-                                        <Bar dataKey="tickets" fill="#3b82f6" radius={[6, 6, 0, 0]} />
+                                        <Bar dataKey="tickets" fill="#1BC47D" radius={[6, 6, 0, 0]} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
