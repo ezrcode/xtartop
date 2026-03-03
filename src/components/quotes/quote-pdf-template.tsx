@@ -174,10 +174,14 @@ export function QuotePDFTemplate({
                 >
                     {quote.proposalDescription || "—"}
                 </div>
+                <div
+                    style={{
+                        height: "12px",
+                        backgroundColor: "#c9d9de",
+                        marginTop: "10px",
+                    }}
+                />
             </div>
-
-            {/* Divider 2.5 */}
-            <div style={{ height: "12px", backgroundColor: "#c9d9de", margin: "10px 0" }} />
 
             {/* Products Table */}
             <div style={{ marginBottom: "14px" }}>
