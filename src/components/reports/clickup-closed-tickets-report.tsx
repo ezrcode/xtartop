@@ -90,18 +90,28 @@ function buildRows(lines: TicketLine[], groupBy: GroupBy): GroupedRow[] {
         .sort((a, b) => b.tickets - a.tickets);
 }
 
-async function loadImageAsDataUrl(imageUrl: string): Promise<string | null> {
+async function loadImageAsDataUrl(imageUrl: string): Promise<{ dataUrl: string; width: number; height: number } | null> {
     try {
         const response = await fetch(imageUrl, { mode: "cors" });
         if (!response.ok) return null;
         const blob = await response.blob();
-        const dataUrl: string = await new Promise((resolve, reject) => {
+        const dataUrl = await new Promise<string>((resolve, reject) => {
             const reader = new FileReader();
             reader.onloadend = () => resolve((reader.result as string) || "");
             reader.onerror = () => reject(reader.error);
             reader.readAsDataURL(blob);
         });
-        return dataUrl || null;
+
+        if (!dataUrl) return null;
+
+        const dimensions = await new Promise<{ width: number; height: number }>((resolve, reject) => {
+            const image = new Image();
+            image.onload = () => resolve({ width: image.naturalWidth || 1, height: image.naturalHeight || 1 });
+            image.onerror = () => reject(new Error("No se pudo leer el logo"));
+            image.src = dataUrl;
+        });
+
+        return { dataUrl, width: dimensions.width, height: dimensions.height };
     } catch {
         return null;
     }
@@ -199,37 +209,65 @@ export function ClickUpClosedTicketsReport({
         setExportingPdf(true);
         try {
             const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-
+            const pageWidth = 210;
+            const marginX = 14;
+            const contentWidth = pageWidth - marginX * 2;
             let y = 14;
+
+            // Top brand line
+            pdf.setFillColor(27, 196, 125);
+            pdf.rect(0, 0, pageWidth, 6, "F");
+
+            // Header block
+            pdf.setFillColor(247, 250, 253);
+            pdf.roundedRect(marginX, y, contentWidth, 24, 2, 2, "F");
+            pdf.setDrawColor(220, 227, 236);
+            pdf.roundedRect(marginX, y, contentWidth, 24, 2, 2);
+
             if (workspaceLogoUrl) {
                 const logo = await loadImageAsDataUrl(workspaceLogoUrl);
                 if (logo) {
-                    pdf.addImage(logo, "PNG", 14, y - 2, 16, 16);
+                    const maxLogoW = 24;
+                    const maxLogoH = 10;
+                    const ratio = logo.width / logo.height;
+                    let drawW = maxLogoW;
+                    let drawH = drawW / ratio;
+                    if (drawH > maxLogoH) {
+                        drawH = maxLogoH;
+                        drawW = drawH * ratio;
+                    }
+                    pdf.addImage(logo.dataUrl, "PNG", marginX + 2, y + 2.5, drawW, drawH);
                 }
             }
-            pdf.setFontSize(14);
-            pdf.setTextColor(28, 40, 56);
-            pdf.text(workspaceName, 34, y + 2);
-            pdf.setFontSize(10);
-            pdf.setTextColor(120, 130, 145);
-            pdf.text("Reporte Customer Success", 34, y + 7);
-            y += 16;
-            pdf.setDrawColor(220, 227, 236);
-            pdf.line(14, y - 3, 196, y - 3);
-            pdf.setFontSize(14);
-            pdf.setTextColor(28, 40, 56);
-            pdf.text("Tickets Cerrados - ClickUp", 14, y);
-            y += 6;
-            pdf.setFontSize(10);
-            pdf.text(`Rango: ${dateFrom || "-"} a ${dateTo || "-"}`, 14, y);
-            y += 5;
-            pdf.text(`Agrupación principal: ${groupBy}`, 14, y);
-            y += 5;
-            pdf.text(`Desglose secundario: ${breakdownBy}`, 14, y);
-            y += 5;
-            pdf.text(`Total tickets: ${filteredLines.length}`, 14, y);
-            y += 8;
 
+            pdf.setTextColor(28, 40, 56);
+            pdf.setFontSize(13);
+            pdf.text(workspaceName, marginX + 30, y + 7.5);
+            pdf.setFontSize(9);
+            pdf.setTextColor(104, 118, 138);
+            pdf.text("Reporte de Customer Success", marginX + 30, y + 13);
+            pdf.text(`Generado: ${new Date().toLocaleString("es-DO")}`, marginX + 30, y + 18);
+            y += 30;
+
+            pdf.setTextColor(28, 40, 56);
+            pdf.setFontSize(14);
+            pdf.text("Tickets Cerrados - ClickUp", marginX, y);
+            y += 6;
+
+            // Metadata row
+            pdf.setFillColor(250, 252, 255);
+            pdf.roundedRect(marginX, y, contentWidth, 16, 2, 2, "F");
+            pdf.setDrawColor(225, 233, 243);
+            pdf.roundedRect(marginX, y, contentWidth, 16, 2, 2);
+            pdf.setFontSize(9);
+            pdf.setTextColor(96, 111, 132);
+            pdf.text(`Rango: ${dateFrom || "-"} a ${dateTo || "-"}`, marginX + 3, y + 6);
+            pdf.text(`Agrupación: ${groupBy}`, marginX + 3, y + 11);
+            pdf.text(`Desglose: ${breakdownBy}`, marginX + 70, y + 6);
+            pdf.text(`Total tickets: ${filteredLines.length}`, marginX + 70, y + 11);
+            y += 20;
+
+            // Chart section
             if (chartContainerRef.current) {
                 const canvas = await html2canvas(chartContainerRef.current, {
                     scale: 2,
@@ -237,44 +275,90 @@ export function ClickUpClosedTicketsReport({
                     backgroundColor: "#ffffff",
                 });
                 const imgData = canvas.toDataURL("image/png");
-                const imgWidth = 182;
+                const imgWidth = contentWidth;
                 const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                pdf.addImage(imgData, "PNG", 14, y, imgWidth, imgHeight);
-                y += imgHeight + 8;
+                const safeHeight = Math.min(92, imgHeight);
+                pdf.setFontSize(10);
+                pdf.setTextColor(28, 40, 56);
+                pdf.text("Visualización principal", marginX, y);
+                y += 3;
+                pdf.setDrawColor(220, 227, 236);
+                pdf.roundedRect(marginX, y, contentWidth, safeHeight + 4, 2, 2);
+                pdf.addImage(imgData, "PNG", marginX + 2, y + 2, contentWidth - 4, safeHeight);
+                y += safeHeight + 10;
             }
 
-            if (y > 260) {
-                pdf.addPage();
-                y = 14;
-            }
-
-            pdf.setFontSize(11);
-            pdf.text("Resumen", 14, y);
-            y += 6;
-            pdf.setFontSize(9);
-            groupedRows.slice(0, 24).forEach((row) => {
-                if (y > 280) {
+            const ensureSpace = (needed: number) => {
+                if (y + needed > 280) {
                     pdf.addPage();
-                    y = 14;
+                    y = 16;
                 }
-                pdf.text(`${row.label}: ${row.tickets}`, 14, y);
-                y += 4.5;
+            };
+
+            // Summary table
+            ensureSpace(20);
+            pdf.setFontSize(11);
+            pdf.setTextColor(28, 40, 56);
+            pdf.text("Resumen de Agrupación", marginX, y);
+            y += 5;
+            pdf.setFillColor(234, 242, 250);
+            pdf.rect(marginX, y, contentWidth, 7, "F");
+            pdf.setFontSize(9);
+            pdf.setTextColor(67, 84, 106);
+            pdf.text("Grupo", marginX + 2, y + 4.8);
+            pdf.text("Tickets", marginX + contentWidth - 2, y + 4.8, { align: "right" });
+            y += 7;
+
+            groupedRows.slice(0, 24).forEach((row, idx) => {
+                ensureSpace(6.8);
+                if (idx % 2 === 1) {
+                    pdf.setFillColor(248, 251, 255);
+                    pdf.rect(marginX, y, contentWidth, 6.5, "F");
+                }
+                pdf.setTextColor(45, 62, 80);
+                pdf.text(row.label.slice(0, 72), marginX + 2, y + 4.4);
+                pdf.text(String(row.tickets), marginX + contentWidth - 2, y + 4.4, { align: "right" });
+                y += 6.5;
             });
 
-            y += 3;
+            y += 4;
+            ensureSpace(14);
             pdf.setFontSize(11);
-            pdf.text("Detalle", 14, y);
-            y += 6;
-            pdf.setFontSize(8);
-            filteredLines.slice(0, 60).forEach((line) => {
-                if (y > 280) {
-                    pdf.addPage();
-                    y = 14;
+            pdf.setTextColor(28, 40, 56);
+            pdf.text("Detalle de Tickets", marginX, y);
+            y += 5;
+
+            // Detail table header
+            const colX = {
+                date: marginX + 2,
+                client: marginX + 26,
+                assignee: marginX + 82,
+                ticket: marginX + 132,
+                right: marginX + contentWidth - 2,
+            };
+            pdf.setFillColor(234, 242, 250);
+            pdf.rect(marginX, y, contentWidth, 7, "F");
+            pdf.setFontSize(8.5);
+            pdf.setTextColor(67, 84, 106);
+            pdf.text("Fecha", colX.date, y + 4.8);
+            pdf.text("Cliente", colX.client, y + 4.8);
+            pdf.text("Asignado", colX.assignee, y + 4.8);
+            pdf.text("Ticket", colX.ticket, y + 4.8);
+            y += 7;
+
+            filteredLines.slice(0, 60).forEach((line, idx) => {
+                ensureSpace(7);
+                if (idx % 2 === 1) {
+                    pdf.setFillColor(248, 251, 255);
+                    pdf.rect(marginX, y, contentWidth, 6.6, "F");
                 }
                 const assignees = line.assignees.length > 0 ? line.assignees.join(", ") : "Sin asignado";
-                const row = `${line.closedDate} | ${line.client} | ${assignees} | ${line.name}`;
-                pdf.text(row.slice(0, 130), 14, y);
-                y += 4.2;
+                pdf.setTextColor(45, 62, 80);
+                pdf.text(line.closedDate, colX.date, y + 4.5);
+                pdf.text(line.client.slice(0, 28), colX.client, y + 4.5);
+                pdf.text(assignees.slice(0, 24), colX.assignee, y + 4.5);
+                pdf.text(line.name.slice(0, 42), colX.ticket, y + 4.5);
+                y += 6.6;
             });
 
             addPdfPageNumbers(pdf);
