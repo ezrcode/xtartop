@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Download, LineChart as LineChartIcon, Loader2, Search } from "lucide-react";
-import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import {
     CartesianGrid,
     Legend,
@@ -44,6 +45,18 @@ function formatDateForInput(date: Date): string {
     return date.toISOString().split("T")[0];
 }
 
+function getMonthKey(dateStr: string): string {
+    const date = new Date(dateStr);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    return `${year}-${month}`;
+}
+
+function getMonthLabel(dateStr: string): string {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("es-DO", { month: "short", year: "numeric" });
+}
+
 export function CustomerSuccessUserLifecycleReport() {
     const now = new Date();
     const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -52,9 +65,11 @@ export function CustomerSuccessUserLifecycleReport() {
     const [dateTo, setDateTo] = useState(formatDateForInput(now));
     const [companyFilter, setCompanyFilter] = useState("all");
     const [loading, setLoading] = useState(false);
+    const [exportingPdf, setExportingPdf] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [hasQueried, setHasQueried] = useState(false);
     const [data, setData] = useState<ReportResponse | null>(null);
+    const chartContainerRef = useRef<HTMLDivElement>(null);
 
     const companies = useMemo(() => {
         const list = data?.activeNowByCompany || [];
@@ -68,12 +83,12 @@ export function CustomerSuccessUserLifecycleReport() {
     }, [data, companyFilter]);
 
     const timelineRows = useMemo(() => {
-        const map = new Map<string, { weekLabel: string; activated: number; deactivated: number; net: number }>();
+        const map = new Map<string, { monthKey: string; monthLabel: string; activated: number; deactivated: number; net: number }>();
 
         for (const event of filteredEvents) {
-            const key = event.weekLabel;
+            const key = getMonthKey(event.date);
             if (!map.has(key)) {
-                map.set(key, { weekLabel: key, activated: 0, deactivated: 0, net: 0 });
+                map.set(key, { monthKey: key, monthLabel: getMonthLabel(event.date), activated: 0, deactivated: 0, net: 0 });
             }
             const row = map.get(key)!;
             if (event.eventType === "ACTIVATED") row.activated += 1;
@@ -81,7 +96,7 @@ export function CustomerSuccessUserLifecycleReport() {
             row.net = row.activated - row.deactivated;
         }
 
-        return Array.from(map.values());
+        return Array.from(map.values()).sort((a, b) => a.monthKey.localeCompare(b.monthKey));
     }, [filteredEvents]);
 
     const summaryByCompany = useMemo(() => {
@@ -164,44 +179,114 @@ export function CustomerSuccessUserLifecycleReport() {
         }
     };
 
-    const handleExportExcel = () => {
+    const handleExportPdf = async () => {
         if (!data) return;
+        setExportingPdf(true);
+        setError(null);
 
-        const wb = XLSX.utils.book_new();
+        try {
+            const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+            const pageWidth = 210;
+            const marginX = 14;
+            const contentWidth = pageWidth - marginX * 2;
+            let y = 16;
 
-        const summarySheet = XLSX.utils.json_to_sheet(
-            summaryByCompany.map((row) => ({
-                Cliente: row.companyName,
-                Activaciones: row.activated,
-                Desactivaciones: row.deactivated,
-                "Activos actuales": row.activeCurrent,
-                "Balance neto": row.net,
-            }))
-        );
-        XLSX.utils.book_append_sheet(wb, summarySheet, "Resumen");
+            pdf.setFillColor(252, 90, 52);
+            pdf.rect(0, 0, pageWidth, 5, "F");
 
-        const timelineSheet = XLSX.utils.json_to_sheet(
-            timelineRows.map((row) => ({
-                Semana: row.weekLabel,
-                Activaciones: row.activated,
-                Desactivaciones: row.deactivated,
-                "Balance neto": row.net,
-            }))
-        );
-        XLSX.utils.book_append_sheet(wb, timelineSheet, "Timeline");
+            pdf.setTextColor(28, 40, 56);
+            pdf.setFontSize(16);
+            pdf.text("Reporte Ejecutivo - Activación de Usuarios", marginX, y);
+            y += 6;
+            pdf.setFontSize(10);
+            pdf.setTextColor(95, 110, 130);
+            const companyName = companyFilter === "all"
+                ? "Todos los clientes"
+                : (companies.find((company) => company.companyId === companyFilter)?.companyName || "Cliente");
+            pdf.text(`Rango: ${dateFrom} a ${dateTo}`, marginX, y);
+            y += 5;
+            pdf.text(`Cliente: ${companyName}`, marginX, y);
+            y += 5;
+            pdf.text(`Generado: ${new Date().toLocaleString("es-DO")}`, marginX, y);
+            y += 8;
 
-        const eventsSheet = XLSX.utils.json_to_sheet(
-            filteredEvents.map((event) => ({
-                Fecha: event.dateLabel,
-                Cliente: event.companyName,
-                Usuario: event.userName,
-                Evento: event.eventType === "ACTIVATED" ? "Activación" : "Desactivación",
-                Fuente: event.source === "CREATE" ? "Creación de usuario" : "Cambio de estado",
-            }))
-        );
-        XLSX.utils.book_append_sheet(wb, eventsSheet, "Eventos");
+            pdf.setFillColor(247, 250, 253);
+            pdf.roundedRect(marginX, y, contentWidth, 18, 2, 2, "F");
+            pdf.setDrawColor(220, 227, 236);
+            pdf.roundedRect(marginX, y, contentWidth, 18, 2, 2);
+            pdf.setTextColor(28, 40, 56);
+            pdf.setFontSize(10);
+            pdf.text(`Activaciones: ${totals.activated}`, marginX + 4, y + 6);
+            pdf.text(`Desactivaciones: ${totals.deactivated}`, marginX + 4, y + 12);
+            pdf.text(`Activos actuales: ${totals.activeNow}`, marginX + 90, y + 6);
+            pdf.text(`Balance neto: ${totals.activated - totals.deactivated}`, marginX + 90, y + 12);
+            y += 24;
 
-        XLSX.writeFile(wb, `Customer_Success_Activacion_Usuarios_${new Date().toISOString().split("T")[0]}.xlsx`);
+            if (chartContainerRef.current) {
+                const canvas = await html2canvas(chartContainerRef.current, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: "#ffffff",
+                });
+                const imgData = canvas.toDataURL("image/png");
+                const imgWidth = contentWidth;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                const drawHeight = Math.min(imgHeight, 95);
+                pdf.setFontSize(11);
+                pdf.setTextColor(28, 40, 56);
+                pdf.text("Línea de tiempo mensual", marginX, y);
+                y += 3;
+                pdf.setDrawColor(220, 227, 236);
+                pdf.roundedRect(marginX, y, contentWidth, drawHeight + 4, 2, 2);
+                pdf.addImage(imgData, "PNG", marginX + 2, y + 2, contentWidth - 4, drawHeight);
+                y += drawHeight + 10;
+            }
+
+            const ensureSpace = (needed: number) => {
+                if (y + needed > 280) {
+                    pdf.addPage();
+                    y = 16;
+                }
+            };
+
+            ensureSpace(14);
+            pdf.setFontSize(11);
+            pdf.setTextColor(28, 40, 56);
+            pdf.text("Resumen por cliente", marginX, y);
+            y += 5;
+
+            pdf.setFillColor(234, 242, 250);
+            pdf.rect(marginX, y, contentWidth, 7, "F");
+            pdf.setFontSize(8.5);
+            pdf.setTextColor(67, 84, 106);
+            pdf.text("Cliente", marginX + 2, y + 4.8);
+            pdf.text("Act.", marginX + 118, y + 4.8, { align: "right" });
+            pdf.text("Des.", marginX + 136, y + 4.8, { align: "right" });
+            pdf.text("Activos", marginX + 160, y + 4.8, { align: "right" });
+            pdf.text("Balance", marginX + contentWidth - 2, y + 4.8, { align: "right" });
+            y += 7;
+
+            summaryByCompany.slice(0, 30).forEach((row, index) => {
+                ensureSpace(6.8);
+                if (index % 2 === 1) {
+                    pdf.setFillColor(248, 251, 255);
+                    pdf.rect(marginX, y, contentWidth, 6.5, "F");
+                }
+                pdf.setTextColor(45, 62, 80);
+                pdf.text(row.companyName.slice(0, 48), marginX + 2, y + 4.4);
+                pdf.text(String(row.activated), marginX + 118, y + 4.4, { align: "right" });
+                pdf.text(String(row.deactivated), marginX + 136, y + 4.4, { align: "right" });
+                pdf.text(String(row.activeCurrent), marginX + 160, y + 4.4, { align: "right" });
+                pdf.text(String(row.net), marginX + contentWidth - 2, y + 4.4, { align: "right" });
+                y += 6.5;
+            });
+
+            pdf.save(`Customer_Success_Activacion_Usuarios_${new Date().toISOString().split("T")[0]}.pdf`);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Error exportando PDF");
+        } finally {
+            setExportingPdf(false);
+        }
     };
 
     return (
@@ -231,11 +316,12 @@ export function CustomerSuccessUserLifecycleReport() {
 
                         {hasQueried && data && (
                             <button
-                                onClick={handleExportExcel}
-                                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-ocean-blue rounded-xl hover:bg-ocean-blue/90 transition-colors shadow-sm"
+                                onClick={handleExportPdf}
+                                disabled={exportingPdf}
+                                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-ocean-blue rounded-xl hover:bg-ocean-blue/90 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                <Download size={16} />
-                                Exportar Excel
+                                {exportingPdf ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+                                {exportingPdf ? "Generando PDF..." : "Exportar PDF"}
                             </button>
                         )}
                     </div>
@@ -310,13 +396,13 @@ export function CustomerSuccessUserLifecycleReport() {
                             </div>
                         </div>
 
-                        <div className="bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)] p-4 sm:p-5">
-                            <h3 className="text-sm font-semibold text-[var(--foreground)] mb-3">Línea de tiempo semanal</h3>
+                        <div ref={chartContainerRef} className="bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)] p-4 sm:p-5">
+                            <h3 className="text-sm font-semibold text-[var(--foreground)] mb-3">Línea de tiempo mensual</h3>
                             <div className="h-[320px]">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <LineChart data={timelineRows}>
                                         <CartesianGrid strokeDasharray="3 3" stroke="var(--card-border)" />
-                                        <XAxis dataKey="weekLabel" tick={{ fill: "var(--muted-text)", fontSize: 11 }} />
+                                        <XAxis dataKey="monthLabel" tick={{ fill: "var(--muted-text)", fontSize: 11 }} />
                                         <YAxis allowDecimals={false} tick={{ fill: "var(--muted-text)", fontSize: 12 }} />
                                         <Tooltip />
                                         <Legend />
