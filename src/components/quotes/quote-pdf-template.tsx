@@ -156,24 +156,28 @@ export function QuotePDFTemplate({
             <div style={{ height: "12px", backgroundColor: "#c9d9de", margin: "10px 0" }} />
 
             {/* Proposal description */}
-            {quote.proposalDescription && (
-                <div style={{ marginBottom: "14px" }}>
-                    <div style={{
-                        fontSize: "9pt",
-                        fontWeight: 700,
-                        marginBottom: "6px",
-                    }}>
-                        Descripción de la Propuesta
-                    </div>
-                    <div style={{
+            <div style={{ marginBottom: "10px" }}>
+                <div style={{
+                    fontSize: "9pt",
+                    fontWeight: 700,
+                    marginBottom: "6px",
+                }}>
+                    Descripción de la Propuesta
+                </div>
+                <div
+                    style={{
+                        minHeight: "34px",
                         whiteSpace: "pre-wrap",
                         fontSize: "8.2pt",
                         lineHeight: "1.55",
-                    }}>
-                        {quote.proposalDescription}
-                    </div>
+                    }}
+                >
+                    {quote.proposalDescription || "—"}
                 </div>
-            )}
+            </div>
+
+            {/* Divider 2.5 */}
+            <div style={{ height: "12px", backgroundColor: "#c9d9de", margin: "10px 0" }} />
 
             {/* Products Table */}
             <div style={{ marginBottom: "14px" }}>
@@ -336,4 +340,3 @@ export function QuotePDFTemplate({
         </div>
     );
 }
-
