@@ -215,7 +215,7 @@ export function ClickUpClosedTicketsReport({
             let y = 14;
 
             // Top brand line
-            pdf.setFillColor(27, 196, 125);
+            pdf.setFillColor(252, 90, 52);
             pdf.rect(0, 0, pageWidth, 6, "F");
 
             // Header block
@@ -551,7 +551,7 @@ export function ClickUpClosedTicketsReport({
                                         <XAxis dataKey="label" tick={{ fill: "var(--muted-text)", fontSize: 11 }} interval={0} angle={-18} height={58} />
                                         <YAxis allowDecimals={false} tick={{ fill: "var(--muted-text)", fontSize: 12 }} />
                                         <Tooltip />
-                                        <Bar dataKey="tickets" fill="#1BC47D" radius={[6, 6, 0, 0]} />
+                                        <Bar dataKey="tickets" fill="#FC5A34" radius={[6, 6, 0, 0]} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
