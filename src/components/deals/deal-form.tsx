@@ -328,13 +328,13 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                                     }}
                                                     className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
                                                 >
+                                                    <option value="__create_company__">✨ + Crear nueva empresa</option>
                                                     <option value="null">Sin empresa</option>
                                                     {companiesState.map((company) => (
                                                         <option key={company.id} value={company.id}>
                                                             {company.name}
                                                         </option>
                                                     ))}
-                                                    <option value="__create_company__">+ Crear nueva empresa</option>
                                                 </select>
                                             </div>
 
@@ -357,13 +357,13 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                                     }}
                                                     className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
                                                 >
+                                                    <option value="__create_contact__">✨ + Crear nuevo contacto</option>
                                                     <option value="null">Sin contacto</option>
                                                     {filteredContacts.map((contact) => (
                                                         <option key={contact.id} value={contact.id}>
                                                             {contact.fullName}
                                                         </option>
                                                     ))}
-                                                    <option value="__create_contact__">+ Crear nuevo contacto</option>
                                                 </select>
                                             </div>
 
