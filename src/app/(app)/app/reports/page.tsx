@@ -43,6 +43,15 @@ const reportGroups: ReportGroup[] = [
         description: "Analiza operación de soporte, cumplimiento y productividad por cliente y equipo.",
         reports: [
             {
+                title: "Activación de Usuarios",
+                description:
+                    "Línea de tiempo de altas y desactivaciones de usuarios por cliente, con resumen ejecutivo y exportación a Excel.",
+                href: "/app/reports/customer-success-user-lifecycle",
+                icon: LifeBuoy,
+                gradient: "from-ocean-blue/20 to-ocean-blue/5",
+                iconColor: "text-ocean-blue",
+            },
+            {
                 title: "Tickets Cerrados (ClickUp)",
                 description:
                     "Resumen gráfico de tickets cerrados en estado completado, con filtros por fecha, cliente y asignado, y exportación en PDF.",
