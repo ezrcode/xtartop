@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import Link from "next/link";
 import { Save, Trash2, ArrowLeft, Loader2 } from "lucide-react";
-import { createDealAction, updateDealAction, deleteDeal, DealState } from "@/actions/deals";
+import { createDealAction, updateDealAction, deleteDeal, DealState, createCompanyFromDeal, createContactFromDeal } from "@/actions/deals";
 import { Deal, Company, Contact, User, BusinessLine } from "@prisma/client";
 import { ActivitiesWithSuspense } from "../activities/activities-with-suspense";
 import { QuotesTable } from "../quotes/quotes-table";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 
 interface DealFormProps {
     deal?: (Deal & {
@@ -94,11 +95,81 @@ function DeleteButton() {
 export function DealForm({ deal, companies, contacts, businessLines = [], isEditMode = false, workspace }: DealFormProps) {
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<"general" | "quotes">("general");
+    const [companiesState, setCompaniesState] = useState<Company[]>(companies);
+    const [contactsState, setContactsState] = useState<Contact[]>(contacts);
+    const [selectedCompanyId, setSelectedCompanyId] = useState<string>(deal?.companyId || "null");
+    const [selectedContactId, setSelectedContactId] = useState<string>(deal?.contactId || "null");
+    const [isCreateCompanyOpen, setIsCreateCompanyOpen] = useState(false);
+    const [isCreateContactOpen, setIsCreateContactOpen] = useState(false);
+    const [newCompanyName, setNewCompanyName] = useState("");
+    const [newContactName, setNewContactName] = useState("");
+    const [newContactEmail, setNewContactEmail] = useState("");
+    const [createCompanyError, setCreateCompanyError] = useState("");
+    const [createContactError, setCreateContactError] = useState("");
+    const [isCreatingCompany, setIsCreatingCompany] = useState(false);
+    const [isCreatingContact, setIsCreatingContact] = useState(false);
 
     const updateAction = deal ? updateDealAction.bind(null, deal.id) : () => Promise.resolve({ message: "Error" });
 
     const initialState: DealState = { message: "", errors: {} };
     const [state, action] = useFormState(isEditMode ? updateAction : createDealAction, initialState);
+
+    const filteredContacts = useMemo(() => {
+        if (selectedCompanyId === "null") return contactsState;
+        return contactsState.filter((contact) => contact.companyId === selectedCompanyId);
+    }, [contactsState, selectedCompanyId]);
+
+    useEffect(() => {
+        if (selectedContactId === "null") return;
+        const selectedContact = contactsState.find((contact) => contact.id === selectedContactId);
+        if (!selectedContact) {
+            setSelectedContactId("null");
+            return;
+        }
+        if (selectedCompanyId !== "null" && selectedContact.companyId !== selectedCompanyId) {
+            setSelectedContactId("null");
+        }
+    }, [selectedCompanyId, selectedContactId, contactsState]);
+
+    const handleCreateCompany = async () => {
+        setCreateCompanyError("");
+        setIsCreatingCompany(true);
+        const result = await createCompanyFromDeal(newCompanyName);
+        setIsCreatingCompany(false);
+
+        if (!result.success || !result.company) {
+            setCreateCompanyError(result.message || "No se pudo crear la empresa.");
+            return;
+        }
+
+        setCompaniesState((prev) => [...prev, result.company].sort((a, b) => a.name.localeCompare(b.name, "es")));
+        setSelectedCompanyId(result.company.id);
+        setSelectedContactId("null");
+        setNewCompanyName("");
+        setIsCreateCompanyOpen(false);
+    };
+
+    const handleCreateContact = async () => {
+        setCreateContactError("");
+        setIsCreatingContact(true);
+        const result = await createContactFromDeal({
+            fullName: newContactName,
+            email: newContactEmail,
+            companyId: selectedCompanyId === "null" ? null : selectedCompanyId,
+        });
+        setIsCreatingContact(false);
+
+        if (!result.success || !result.contact) {
+            setCreateContactError(result.message || "No se pudo crear el contacto.");
+            return;
+        }
+
+        setContactsState((prev) => [...prev, result.contact].sort((a, b) => a.fullName.localeCompare(b.fullName, "es")));
+        setSelectedContactId(result.contact.id);
+        setNewContactName("");
+        setNewContactEmail("");
+        setIsCreateContactOpen(false);
+    };
 
     return (
         <div className="flex flex-col h-full">
@@ -245,15 +316,25 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                                 <select
                                                     id="companyId"
                                                     name="companyId"
-                                                    defaultValue={deal?.companyId || "null"}
+                                                    value={selectedCompanyId}
+                                                    onChange={(e) => {
+                                                        const value = e.target.value;
+                                                        if (value === "__create_company__") {
+                                                            setCreateCompanyError("");
+                                                            setIsCreateCompanyOpen(true);
+                                                            return;
+                                                        }
+                                                        setSelectedCompanyId(value);
+                                                    }}
                                                     className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
                                                 >
                                                     <option value="null">Sin empresa</option>
-                                                    {companies.map((company) => (
+                                                    {companiesState.map((company) => (
                                                         <option key={company.id} value={company.id}>
                                                             {company.name}
                                                         </option>
                                                     ))}
+                                                    <option value="__create_company__">+ Crear nueva empresa</option>
                                                 </select>
                                             </div>
 
@@ -264,15 +345,25 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                                 <select
                                                     id="contactId"
                                                     name="contactId"
-                                                    defaultValue={deal?.contactId || "null"}
+                                                    value={selectedContactId}
+                                                    onChange={(e) => {
+                                                        const value = e.target.value;
+                                                        if (value === "__create_contact__") {
+                                                            setCreateContactError("");
+                                                            setIsCreateContactOpen(true);
+                                                            return;
+                                                        }
+                                                        setSelectedContactId(value);
+                                                    }}
                                                     className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
                                                 >
                                                     <option value="null">Sin contacto</option>
-                                                    {contacts.map((contact) => (
+                                                    {filteredContacts.map((contact) => (
                                                         <option key={contact.id} value={contact.id}>
                                                             {contact.fullName}
                                                         </option>
                                                     ))}
+                                                    <option value="__create_contact__">+ Crear nuevo contacto</option>
                                                 </select>
                                             </div>
 
@@ -447,6 +538,98 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                     </div>
                 </div>
             </form>
+
+            <Dialog open={isCreateCompanyOpen} onOpenChange={setIsCreateCompanyOpen}>
+                <DialogContent size="sm">
+                    <DialogHeader>
+                        <DialogTitle>Nueva Empresa</DialogTitle>
+                        <DialogDescription>Crea una empresa sin salir del negocio.</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-3">
+                        <div>
+                            <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">Nombre</label>
+                            <input
+                                type="text"
+                                value={newCompanyName}
+                                onChange={(e) => setNewCompanyName(e.target.value)}
+                                placeholder="Nombre de la empresa"
+                                className="block w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                            />
+                        </div>
+                        {createCompanyError && <p className="text-xs text-error-red">{createCompanyError}</p>}
+                    </div>
+                    <DialogFooter>
+                        <button
+                            type="button"
+                            onClick={() => setIsCreateCompanyOpen(false)}
+                            className="px-4 py-2.5 text-sm font-medium border border-[var(--card-border)] rounded-lg"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="button"
+                            disabled={isCreatingCompany}
+                            onClick={handleCreateCompany}
+                            className="px-4 py-2.5 text-sm font-medium text-white bg-nearby-dark rounded-lg disabled:opacity-50"
+                        >
+                            {isCreatingCompany ? "Guardando..." : "Guardar"}
+                        </button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={isCreateContactOpen} onOpenChange={setIsCreateContactOpen}>
+                <DialogContent size="sm">
+                    <DialogHeader>
+                        <DialogTitle>Nuevo Contacto</DialogTitle>
+                        <DialogDescription>
+                            {selectedCompanyId === "null"
+                                ? "Se creará sin empresa asociada."
+                                : "Se asociará automáticamente a la empresa seleccionada."}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-3">
+                        <div>
+                            <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">Nombre completo</label>
+                            <input
+                                type="text"
+                                value={newContactName}
+                                onChange={(e) => setNewContactName(e.target.value)}
+                                placeholder="Nombre del contacto"
+                                className="block w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">Correo</label>
+                            <input
+                                type="email"
+                                value={newContactEmail}
+                                onChange={(e) => setNewContactEmail(e.target.value)}
+                                placeholder="correo@empresa.com"
+                                className="block w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                            />
+                        </div>
+                        {createContactError && <p className="text-xs text-error-red">{createContactError}</p>}
+                    </div>
+                    <DialogFooter>
+                        <button
+                            type="button"
+                            onClick={() => setIsCreateContactOpen(false)}
+                            className="px-4 py-2.5 text-sm font-medium border border-[var(--card-border)] rounded-lg"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="button"
+                            disabled={isCreatingContact}
+                            onClick={handleCreateContact}
+                            className="px-4 py-2.5 text-sm font-medium text-white bg-nearby-dark rounded-lg disabled:opacity-50"
+                        >
+                            {isCreatingContact ? "Guardando..." : "Guardar"}
+                        </button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             {/* Delete Confirmation Modal */}
             {deleteConfirmOpen && deal && (

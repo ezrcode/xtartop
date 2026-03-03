@@ -130,6 +130,162 @@ export async function getContacts() {
     });
 }
 
+const QuickCompanySchema = z.object({
+    name: z.string().trim().min(1, "El nombre de la empresa es obligatorio"),
+});
+
+export async function createCompanyFromDeal(name: string) {
+    const session = await auth();
+    if (!session?.user?.email) {
+        return { success: false, message: "No autorizado." };
+    }
+
+    const user = await prisma.user.findUnique({ where: { email: session.user.email } });
+    if (!user) {
+        return { success: false, message: "Usuario no encontrado." };
+    }
+
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) {
+        return { success: false, message: "Workspace no encontrado." };
+    }
+
+    const validated = QuickCompanySchema.safeParse({ name });
+    if (!validated.success) {
+        return { success: false, message: validated.error.issues[0]?.message || "Datos inválidos." };
+    }
+
+    try {
+        const company = await prisma.company.create({
+            data: {
+                name: validated.data.name,
+                workspaceId: workspace.id,
+                createdById: user.id,
+                status: "PROSPECTO",
+            },
+            select: {
+                id: true,
+                name: true,
+                status: true,
+                workspaceId: true,
+                createdById: true,
+                createdAt: true,
+                updatedAt: true,
+                logoUrl: true,
+                taxId: true,
+                legalName: true,
+                fiscalAddress: true,
+                initialProjects: true,
+                initialUsers: true,
+                quoteId: true,
+                quoteFileUrl: true,
+                country: true,
+                city: true,
+                phone: true,
+                website: true,
+                instagramUrl: true,
+                linkedinUrl: true,
+                primaryContactId: true,
+                origin: true,
+                termsAccepted: true,
+                termsAcceptedAt: true,
+                termsAcceptedById: true,
+                termsAcceptedByName: true,
+                termsVersion: true,
+                admCloudRelationshipId: true,
+                admCloudLastSync: true,
+                clickUpClientName: true,
+            },
+        });
+
+        revalidatePath("/app/deals");
+        revalidatePath("/app/companies");
+        return { success: true, company };
+    } catch (error) {
+        console.error("Database Error:", error);
+        return { success: false, message: "No se pudo crear la empresa." };
+    }
+}
+
+const QuickContactSchema = z.object({
+    fullName: z.string().trim().min(1, "El nombre del contacto es obligatorio"),
+    email: z.string().trim().email("Correo inválido"),
+    companyId: z.string().nullable().optional(),
+});
+
+export async function createContactFromDeal(input: { fullName: string; email: string; companyId?: string | null }) {
+    const session = await auth();
+    if (!session?.user?.email) {
+        return { success: false, message: "No autorizado." };
+    }
+
+    const user = await prisma.user.findUnique({ where: { email: session.user.email } });
+    if (!user) {
+        return { success: false, message: "Usuario no encontrado." };
+    }
+
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) {
+        return { success: false, message: "Workspace no encontrado." };
+    }
+
+    const validated = QuickContactSchema.safeParse(input);
+    if (!validated.success) {
+        return { success: false, message: validated.error.issues[0]?.message || "Datos inválidos." };
+    }
+
+    if (validated.data.companyId) {
+        const companyExists = await prisma.company.findFirst({
+            where: {
+                id: validated.data.companyId,
+                workspaceId: workspace.id,
+            },
+            select: { id: true },
+        });
+
+        if (!companyExists) {
+            return { success: false, message: "La empresa seleccionada no es válida." };
+        }
+    }
+
+    try {
+        const contact = await prisma.contact.create({
+            data: {
+                fullName: validated.data.fullName,
+                email: validated.data.email,
+                companyId: validated.data.companyId || null,
+                status: "PROSPECTO",
+                workspaceId: workspace.id,
+                createdById: user.id,
+            },
+            select: {
+                id: true,
+                fullName: true,
+                photoUrl: true,
+                title: true,
+                email: true,
+                mobile: true,
+                instagramUrl: true,
+                linkedinUrl: true,
+                status: true,
+                receivesInvoices: true,
+                workspaceId: true,
+                companyId: true,
+                createdById: true,
+                createdAt: true,
+                updatedAt: true,
+            },
+        });
+
+        revalidatePath("/app/deals");
+        revalidatePath("/app/contacts");
+        return { success: true, contact };
+    } catch (error) {
+        console.error("Database Error:", error);
+        return { success: false, message: "No se pudo crear el contacto." };
+    }
+}
+
 export async function createDealAction(prevState: DealState | undefined, formData: FormData): Promise<DealState> {
     const session = await auth();
     if (!session?.user?.email) redirect("/login");
@@ -327,4 +483,3 @@ export async function updateDealStatus(id: string, status: DealStatus) {
         throw new Error("Failed to update deal status.");
     }
 }
-
