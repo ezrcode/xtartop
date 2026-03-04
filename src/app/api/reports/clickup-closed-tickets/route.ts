@@ -43,18 +43,73 @@ function parseDateInput(value: string | null): Date | null {
 function getClientFieldValue(field?: ClickUpCustomField): string {
     if (!field) return "Sin cliente";
 
-    const raw = field.value;
-    if (typeof raw === "string" && raw.trim()) {
-        return raw.trim();
-    }
+    const typeConfig = field.type_config as
+        | { options?: Array<{ id?: string; orderindex?: number | string; name?: string }> }
+        | undefined;
+    const options = typeConfig?.options || [];
 
-    if (typeof raw === "number" && field.type_config) {
-        const options = (field.type_config as { options?: Array<{ orderindex: number; name: string }> }).options;
-        const selected = options?.find((opt) => opt.orderindex === raw);
-        if (selected?.name) return selected.name;
-    }
+    const resolveByOptionRef = (ref: unknown): string | null => {
+        if (typeof ref === "number" || typeof ref === "string") {
+            const normalized = String(ref).trim();
+            const selected = options.find((opt) => {
+                const byId = opt.id ? String(opt.id) === normalized : false;
+                const byOrder = opt.orderindex !== undefined ? String(opt.orderindex) === normalized : false;
+                return byId || byOrder;
+            });
+            if (selected?.name?.trim()) return selected.name.trim();
+        }
+        return null;
+    };
 
-    return "Sin cliente";
+    const parseRawValue = (raw: unknown): string | null => {
+        if (typeof raw === "string") {
+            const trimmed = raw.trim();
+            if (!trimmed) return null;
+
+            if ((trimmed.startsWith("{") && trimmed.endsWith("}")) || (trimmed.startsWith("[") && trimmed.endsWith("]"))) {
+                try {
+                    const parsed = JSON.parse(trimmed);
+                    const nested = parseRawValue(parsed);
+                    if (nested) return nested;
+                } catch {
+                    // ignore malformed JSON string
+                }
+            }
+
+            const byOption = resolveByOptionRef(trimmed);
+            if (byOption) return byOption;
+            return trimmed;
+        }
+
+        if (typeof raw === "number") {
+            return resolveByOptionRef(raw);
+        }
+
+        if (Array.isArray(raw)) {
+            const values = raw.map((item) => parseRawValue(item)).filter((value): value is string => Boolean(value));
+            if (values.length > 0) return values.join(", ");
+            return null;
+        }
+
+        if (raw && typeof raw === "object") {
+            const record = raw as Record<string, unknown>;
+            if (typeof record.name === "string" && record.name.trim()) return record.name.trim();
+            if (typeof record.label === "string" && record.label.trim()) return record.label.trim();
+            if (typeof record.value === "string" && record.value.trim()) return record.value.trim();
+            if (record.id !== undefined) {
+                const byOption = resolveByOptionRef(record.id);
+                if (byOption) return byOption;
+            }
+            if (record.orderindex !== undefined) {
+                const byOption = resolveByOptionRef(record.orderindex);
+                if (byOption) return byOption;
+            }
+        }
+
+        return null;
+    };
+
+    return parseRawValue(field.value) || "Sin cliente";
 }
 
 function normalizeTask(task: ClickUpTask, clientFieldId: string): ClosedTicketLine {
@@ -148,7 +203,15 @@ export async function GET(request: NextRequest) {
             })
             .sort((a, b) => b.closedAt.localeCompare(a.closedAt));
 
-        return NextResponse.json({ lines });
+        const clients = Array.from(
+            new Set(
+                lines
+                    .map((line) => line.client?.trim())
+                    .filter((client): client is string => Boolean(client && client !== "Sin cliente"))
+            )
+        ).sort((a, b) => a.localeCompare(b, "es"));
+
+        return NextResponse.json({ lines, clients });
     } catch (error) {
         console.error("[ClickUp Closed Tickets Report] Error:", error);
         return NextResponse.json({ error: "Error interno al consultar el reporte" }, { status: 500 });

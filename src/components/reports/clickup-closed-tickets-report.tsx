@@ -26,6 +26,12 @@ interface TicketLine {
     url: string;
 }
 
+interface TicketsReportApiResponse {
+    lines?: TicketLine[];
+    clients?: string[];
+    error?: string;
+}
+
 type GroupBy = "week" | "client" | "assignee";
 type BreakdownBy = "none" | "week" | "client" | "assignee";
 
@@ -145,12 +151,14 @@ export function ClickUpClosedTicketsReport({
     const [exportingPdf, setExportingPdf] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [lines, setLines] = useState<TicketLine[]>([]);
+    const [clientsFromApi, setClientsFromApi] = useState<string[]>([]);
     const [hasQueried, setHasQueried] = useState(false);
     const chartContainerRef = useRef<HTMLDivElement>(null);
 
     const clients = useMemo(() => {
+        if (clientsFromApi.length > 0) return clientsFromApi;
         return Array.from(new Set(lines.map((line) => line.client).filter(Boolean))).sort();
-    }, [lines]);
+    }, [clientsFromApi, lines]);
 
     const assignees = useMemo(() => {
         const set = new Set<string>();
@@ -190,16 +198,19 @@ export function ClickUpClosedTicketsReport({
             if (dateTo) params.set("dateTo", dateTo);
 
             const res = await fetch(`/api/reports/clickup-closed-tickets?${params.toString()}`);
-            const data = await res.json();
+            const data = (await res.json()) as TicketsReportApiResponse;
             if (!res.ok) {
                 setError(data.error || "Error consultando tickets");
                 setLines([]);
+                setClientsFromApi([]);
                 return;
             }
             setLines(data.lines || []);
+            setClientsFromApi(data.clients || []);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Error de conexión");
             setLines([]);
+            setClientsFromApi([]);
         } finally {
             setLoading(false);
         }
