@@ -198,19 +198,12 @@ export async function GET(request: NextRequest) {
         }
 
         const client = createClickUpClient(workspaceConfig.clickUpApiToken);
-        const [taskResult, fieldsResult, catalogCompanies] = await Promise.all([
+        const [taskResult, fieldsResult] = await Promise.all([
             client.getTasks(workspaceConfig.clickUpListId, {
                 subtasks: true,
                 include_closed: true,
             }),
             client.getListFields(workspaceConfig.clickUpListId),
-            prisma.company.findMany({
-                where: {
-                    workspaceId: workspace.id,
-                    clickUpClientName: { not: null },
-                },
-                select: { clickUpClientName: true },
-            }),
         ]);
 
         if (!taskResult.success || !taskResult.data) {
@@ -221,9 +214,26 @@ export async function GET(request: NextRequest) {
             ? fieldsResult.data.find((field) => field.id === workspaceConfig.clickUpClientFieldId)?.type_config?.options
             : undefined) as Array<{ id?: string; orderindex?: number | string; name?: string }> | undefined;
 
+        const taskLevelOptions = taskResult.data
+            .flatMap((task) => task.custom_fields || [])
+            .filter((field) => field.id === workspaceConfig.clickUpClientFieldId)
+            .flatMap((field) => {
+                const typeConfig = field.type_config as
+                    | { options?: Array<{ id?: string; orderindex?: number | string; name?: string }> }
+                    | undefined;
+                return typeConfig?.options || [];
+            });
+
+        const mergedOptionsMap = new Map<string, { id?: string; orderindex?: number | string; name?: string }>();
+        for (const option of [...(clientFieldOptions || []), ...taskLevelOptions]) {
+            const key = option.id ? `id:${option.id}` : option.orderindex !== undefined ? `order:${String(option.orderindex)}` : `name:${option.name || ""}`;
+            mergedOptionsMap.set(key, option);
+        }
+        const mergedOptions = Array.from(mergedOptionsMap.values());
+
         const lines = taskResult.data
             .filter((task) => isCompletedStatus(task.status.status) || isClosedType(task))
-            .map((task) => normalizeTask(task, workspaceConfig.clickUpClientFieldId!, clientFieldOptions || []))
+            .map((task) => normalizeTask(task, workspaceConfig.clickUpClientFieldId!, mergedOptions))
             .filter((line) => {
                 if (!line.closedAt) return false;
                 const closed = new Date(line.closedAt);
@@ -236,10 +246,10 @@ export async function GET(request: NextRequest) {
         const clientsFromLines = lines
             .map((line) => line.client?.trim())
             .filter((client): client is string => Boolean(client && client !== "Sin cliente"));
-        const clientsFromCatalog = catalogCompanies
-            .map((company) => company.clickUpClientName?.trim())
+        const clientsFromFieldOptions = mergedOptions
+            .map((option) => option.name?.trim())
             .filter((name): name is string => Boolean(name));
-        const clients = Array.from(new Set([...clientsFromCatalog, ...clientsFromLines])).sort((a, b) =>
+        const clients = Array.from(new Set([...clientsFromFieldOptions, ...clientsFromLines])).sort((a, b) =>
             a.localeCompare(b, "es")
         );
 
