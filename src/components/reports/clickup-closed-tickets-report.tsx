@@ -29,6 +29,7 @@ interface TicketLine {
 interface TicketsReportApiResponse {
     lines?: TicketLine[];
     clients?: string[];
+    assignees?: string[];
     error?: string;
 }
 
@@ -152,6 +153,7 @@ export function ClickUpClosedTicketsReport({
     const [error, setError] = useState<string | null>(null);
     const [lines, setLines] = useState<TicketLine[]>([]);
     const [clientsFromApi, setClientsFromApi] = useState<string[]>([]);
+    const [assigneesFromApi, setAssigneesFromApi] = useState<string[]>([]);
     const [hasQueried, setHasQueried] = useState(false);
     const chartContainerRef = useRef<HTMLDivElement>(null);
 
@@ -170,14 +172,16 @@ export function ClickUpClosedTicketsReport({
     }, [clientsFromApi, lines]);
 
     const assignees = useMemo(() => {
-        const set = new Set<string>();
-        for (const line of lines) {
-            for (const assignee of line.assignees) {
-                if (assignee) set.add(assignee);
-            }
-        }
-        return Array.from(set).sort();
-    }, [lines]);
+        const fromApi = assigneesFromApi
+            .map((value) => value.trim())
+            .filter((value) => value.length > 0 && value.toLowerCase() !== "sin asignado");
+
+        const fromLines = buildRows(lines, "assignee")
+            .map((row) => row.label.trim())
+            .filter((value) => value.length > 0 && value.toLowerCase() !== "sin asignado");
+
+        return Array.from(new Set([...fromApi, ...fromLines])).sort((a, b) => a.localeCompare(b, "es"));
+    }, [assigneesFromApi, lines]);
 
     const filteredLines = useMemo(() => {
         return lines.filter((line) => {
@@ -212,16 +216,21 @@ export function ClickUpClosedTicketsReport({
                 setError(data.error || "Error consultando tickets");
                 setLines([]);
                 setClientsFromApi([]);
+                setAssigneesFromApi([]);
                 return;
             }
             setLines(data.lines || []);
             setClientsFromApi(data.clients || []);
+            setAssigneesFromApi(data.assignees || []);
             setClientFilter("all");
+            setAssigneeFilter("all");
         } catch (err) {
             setError(err instanceof Error ? err.message : "Error de conexión");
             setLines([]);
             setClientsFromApi([]);
+            setAssigneesFromApi([]);
             setClientFilter("all");
+            setAssigneeFilter("all");
         } finally {
             setLoading(false);
         }

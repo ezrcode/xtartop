@@ -15,6 +15,13 @@ interface ClosedTicketLine {
     url: string;
 }
 
+interface ClickUpAssigneeLike {
+    username?: string | null;
+    email?: string | null;
+    initials?: string | null;
+    id?: string | number | null;
+}
+
 function extractCompletionDate(task: ClickUpTask): Date | null {
     const record = task as unknown as Record<string, unknown>;
     const rawCandidates = [
@@ -132,6 +139,14 @@ function normalizeTask(
     const closedAt = extractCompletionDate(task);
     const clientField = task.custom_fields?.find((field) => field.id === clientFieldId);
 
+    const normalizedAssignees = (task.assignees || [])
+        .map((assignee) => {
+            const raw = assignee as unknown as ClickUpAssigneeLike;
+            const label = raw.username || raw.email || raw.initials || (raw.id !== undefined && raw.id !== null ? String(raw.id) : "");
+            return String(label || "").trim();
+        })
+        .filter(Boolean);
+
     return {
         id: task.id,
         name: task.name,
@@ -139,7 +154,7 @@ function normalizeTask(
         closedAt: closedAt ? closedAt.toISOString() : "",
         closedDate: closedAt ? closedAt.toISOString().split("T")[0] : "",
         client: getClientFieldValue(clientField, fallbackOptions),
-        assignees: task.assignees?.map((assignee) => assignee.username).filter(Boolean) || [],
+        assignees: normalizedAssignees,
         url: task.url,
     };
 }
@@ -253,7 +268,16 @@ export async function GET(request: NextRequest) {
             a.localeCompare(b, "es")
         );
 
-        return NextResponse.json({ lines, clients });
+        const assignees = Array.from(
+            new Set(
+                lines
+                    .flatMap((line) => line.assignees || [])
+                    .map((assignee) => assignee.trim())
+                    .filter((assignee) => assignee.length > 0 && assignee.toLowerCase() !== "sin asignado")
+            )
+        ).sort((a, b) => a.localeCompare(b, "es"));
+
+        return NextResponse.json({ lines, clients, assignees });
     } catch (error) {
         console.error("[ClickUp Closed Tickets Report] Error:", error);
         return NextResponse.json({ error: "Error interno al consultar el reporte" }, { status: 500 });
