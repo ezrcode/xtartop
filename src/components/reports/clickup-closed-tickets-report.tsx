@@ -156,8 +156,17 @@ export function ClickUpClosedTicketsReport({
     const chartContainerRef = useRef<HTMLDivElement>(null);
 
     const clients = useMemo(() => {
-        if (clientsFromApi.length > 0) return clientsFromApi;
-        return Array.from(new Set(lines.map((line) => line.client).filter(Boolean))).sort();
+        const sanitize = (value: string) => value.trim();
+
+        const fromApi = clientsFromApi
+            .map(sanitize)
+            .filter((value) => value.length > 0 && value.toLowerCase() !== "sin cliente");
+
+        const fromLines = buildRows(lines, "client")
+            .map((row) => row.label.trim())
+            .filter((value) => value.length > 0 && value.toLowerCase() !== "sin cliente");
+
+        return Array.from(new Set([...fromApi, ...fromLines])).sort((a, b) => a.localeCompare(b, "es"));
     }, [clientsFromApi, lines]);
 
     const assignees = useMemo(() => {
@@ -207,10 +216,12 @@ export function ClickUpClosedTicketsReport({
             }
             setLines(data.lines || []);
             setClientsFromApi(data.clients || []);
+            setClientFilter("all");
         } catch (err) {
             setError(err instanceof Error ? err.message : "Error de conexión");
             setLines([]);
             setClientsFromApi([]);
+            setClientFilter("all");
         } finally {
             setLoading(false);
         }
