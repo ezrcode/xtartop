@@ -33,6 +33,18 @@ interface TicketsReportApiResponse {
     error?: string;
 }
 
+interface TicketsReportDebugResponse {
+    fieldDefinition?: {
+        type_config?: {
+            options?: Array<{ name?: string | null }>;
+        };
+    } | null;
+    sample?: Array<{
+        assigneesParsed?: string[];
+        clientParsed?: string;
+    }>;
+}
+
 type GroupBy = "week" | "client" | "assignee";
 type BreakdownBy = "none" | "week" | "client" | "assignee";
 
@@ -222,8 +234,41 @@ export function ClickUpClosedTicketsReport({
                 return;
             }
             setLines(data.lines || []);
-            setClientsFromApi(data.clients || []);
-            setAssigneesFromApi(data.assignees || []);
+            let nextClients = data.clients || [];
+            let nextAssignees = data.assignees || [];
+
+            if (nextClients.length === 0 || nextAssignees.length === 0) {
+                try {
+                    const debugRes = await fetch("/api/reports/clickup-closed-tickets/debug");
+                    if (debugRes.ok) {
+                        const debugData = (await debugRes.json()) as TicketsReportDebugResponse;
+                        if (nextClients.length === 0) {
+                            const fromOptions = (debugData.fieldDefinition?.type_config?.options || [])
+                                .map((option) => (option.name || "").trim())
+                                .filter((name) => name.length > 0);
+                            const fromSample = (debugData.sample || [])
+                                .map((row) => (row.clientParsed || "").trim())
+                                .filter((name) => name.length > 0 && name.toLowerCase() !== "sin cliente");
+                            nextClients = Array.from(new Set([...fromOptions, ...fromSample]));
+                        }
+                        if (nextAssignees.length === 0) {
+                            nextAssignees = Array.from(
+                                new Set(
+                                    (debugData.sample || [])
+                                        .flatMap((row) => row.assigneesParsed || [])
+                                        .map((name) => name.trim())
+                                        .filter((name) => name.length > 0 && name.toLowerCase() !== "sin asignado")
+                                )
+                            );
+                        }
+                    }
+                } catch {
+                    // ignore debug fallback errors
+                }
+            }
+
+            setClientsFromApi(nextClients);
+            setAssigneesFromApi(nextAssignees);
             setClientFilter("all");
             setAssigneeFilter("all");
         } catch (err) {
