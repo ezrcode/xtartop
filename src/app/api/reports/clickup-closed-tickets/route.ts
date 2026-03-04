@@ -40,13 +40,16 @@ function parseDateInput(value: string | null): Date | null {
     return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
-function getClientFieldValue(field?: ClickUpCustomField): string {
+function getClientFieldValue(
+    field: ClickUpCustomField | undefined,
+    fallbackOptions: Array<{ id?: string; orderindex?: number | string; name?: string }> = []
+): string {
     if (!field) return "Sin cliente";
 
     const typeConfig = field.type_config as
         | { options?: Array<{ id?: string; orderindex?: number | string; name?: string }> }
         | undefined;
-    const options = typeConfig?.options || [];
+    const options = typeConfig?.options || fallbackOptions;
 
     const resolveByOptionRef = (ref: unknown): string | null => {
         if (typeof ref === "number" || typeof ref === "string") {
@@ -61,7 +64,9 @@ function getClientFieldValue(field?: ClickUpCustomField): string {
         return null;
     };
 
-    const parseRawValue = (raw: unknown): string | null => {
+    const parseRawValue = (raw: unknown, depth = 0): string | null => {
+        if (depth > 6) return null;
+
         if (typeof raw === "string") {
             const trimmed = raw.trim();
             if (!trimmed) return null;
@@ -69,7 +74,7 @@ function getClientFieldValue(field?: ClickUpCustomField): string {
             if ((trimmed.startsWith("{") && trimmed.endsWith("}")) || (trimmed.startsWith("[") && trimmed.endsWith("]"))) {
                 try {
                     const parsed = JSON.parse(trimmed);
-                    const nested = parseRawValue(parsed);
+                    const nested = parseRawValue(parsed, depth + 1);
                     if (nested) return nested;
                 } catch {
                     // ignore malformed JSON string
@@ -86,7 +91,9 @@ function getClientFieldValue(field?: ClickUpCustomField): string {
         }
 
         if (Array.isArray(raw)) {
-            const values = raw.map((item) => parseRawValue(item)).filter((value): value is string => Boolean(value));
+            const values = raw
+                .map((item) => parseRawValue(item, depth + 1))
+                .filter((value): value is string => Boolean(value));
             if (values.length > 0) return values.join(", ");
             return null;
         }
@@ -104,6 +111,11 @@ function getClientFieldValue(field?: ClickUpCustomField): string {
                 const byOption = resolveByOptionRef(record.orderindex);
                 if (byOption) return byOption;
             }
+
+            const nested = Object.values(record)
+                .map((value) => parseRawValue(value, depth + 1))
+                .filter((value): value is string => Boolean(value));
+            if (nested.length > 0) return nested[0];
         }
 
         return null;
@@ -112,7 +124,11 @@ function getClientFieldValue(field?: ClickUpCustomField): string {
     return parseRawValue(field.value) || "Sin cliente";
 }
 
-function normalizeTask(task: ClickUpTask, clientFieldId: string): ClosedTicketLine {
+function normalizeTask(
+    task: ClickUpTask,
+    clientFieldId: string,
+    fallbackOptions: Array<{ id?: string; orderindex?: number | string; name?: string }> = []
+): ClosedTicketLine {
     const closedAt = extractCompletionDate(task);
     const clientField = task.custom_fields?.find((field) => field.id === clientFieldId);
 
@@ -122,7 +138,7 @@ function normalizeTask(task: ClickUpTask, clientFieldId: string): ClosedTicketLi
         status: task.status.status,
         closedAt: closedAt ? closedAt.toISOString() : "",
         closedDate: closedAt ? closedAt.toISOString().split("T")[0] : "",
-        client: getClientFieldValue(clientField),
+        client: getClientFieldValue(clientField, fallbackOptions),
         assignees: task.assignees?.map((assignee) => assignee.username).filter(Boolean) || [],
         url: task.url,
     };
@@ -182,18 +198,32 @@ export async function GET(request: NextRequest) {
         }
 
         const client = createClickUpClient(workspaceConfig.clickUpApiToken);
-        const taskResult = await client.getTasks(workspaceConfig.clickUpListId, {
-            subtasks: true,
-            include_closed: true,
-        });
+        const [taskResult, fieldsResult, catalogCompanies] = await Promise.all([
+            client.getTasks(workspaceConfig.clickUpListId, {
+                subtasks: true,
+                include_closed: true,
+            }),
+            client.getListFields(workspaceConfig.clickUpListId),
+            prisma.company.findMany({
+                where: {
+                    workspaceId: workspace.id,
+                    clickUpClientName: { not: null },
+                },
+                select: { clickUpClientName: true },
+            }),
+        ]);
 
         if (!taskResult.success || !taskResult.data) {
             return NextResponse.json({ error: taskResult.error || "Error consultando ClickUp" }, { status: 502 });
         }
 
+        const clientFieldOptions = (fieldsResult.success && fieldsResult.data
+            ? fieldsResult.data.find((field) => field.id === workspaceConfig.clickUpClientFieldId)?.type_config?.options
+            : undefined) as Array<{ id?: string; orderindex?: number | string; name?: string }> | undefined;
+
         const lines = taskResult.data
             .filter((task) => isCompletedStatus(task.status.status) || isClosedType(task))
-            .map((task) => normalizeTask(task, workspaceConfig.clickUpClientFieldId!))
+            .map((task) => normalizeTask(task, workspaceConfig.clickUpClientFieldId!, clientFieldOptions || []))
             .filter((line) => {
                 if (!line.closedAt) return false;
                 const closed = new Date(line.closedAt);
@@ -203,13 +233,15 @@ export async function GET(request: NextRequest) {
             })
             .sort((a, b) => b.closedAt.localeCompare(a.closedAt));
 
-        const clients = Array.from(
-            new Set(
-                lines
-                    .map((line) => line.client?.trim())
-                    .filter((client): client is string => Boolean(client && client !== "Sin cliente"))
-            )
-        ).sort((a, b) => a.localeCompare(b, "es"));
+        const clientsFromLines = lines
+            .map((line) => line.client?.trim())
+            .filter((client): client is string => Boolean(client && client !== "Sin cliente"));
+        const clientsFromCatalog = catalogCompanies
+            .map((company) => company.clickUpClientName?.trim())
+            .filter((name): name is string => Boolean(name));
+        const clients = Array.from(new Set([...clientsFromCatalog, ...clientsFromLines])).sort((a, b) =>
+            a.localeCompare(b, "es")
+        );
 
         return NextResponse.json({ lines, clients });
     } catch (error) {
