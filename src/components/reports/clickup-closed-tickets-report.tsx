@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, BarChart3, Download, Loader2, Search } from "lucide-react";
+import { ArrowLeft, BarChart3, Download, Loader2, Search, Bug } from "lucide-react";
 import {
     Bar,
     BarChart,
@@ -155,6 +155,8 @@ export function ClickUpClosedTicketsReport({
     const [clientsFromApi, setClientsFromApi] = useState<string[]>([]);
     const [assigneesFromApi, setAssigneesFromApi] = useState<string[]>([]);
     const [hasQueried, setHasQueried] = useState(false);
+    const [debugLoading, setDebugLoading] = useState(false);
+    const [debugPayload, setDebugPayload] = useState<any>(null);
     const chartContainerRef = useRef<HTMLDivElement>(null);
 
     const clients = useMemo(() => {
@@ -401,6 +403,26 @@ export function ClickUpClosedTicketsReport({
         }
     };
 
+    const handleDebug = async () => {
+        setDebugLoading(true);
+        setError(null);
+        try {
+            const res = await fetch("/api/reports/clickup-closed-tickets/debug");
+            const payload = await res.json();
+            if (!res.ok) {
+                setError(payload.error || "Error obteniendo diagnóstico");
+                setDebugPayload(null);
+                return;
+            }
+            setDebugPayload(payload);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Error de conexión al diagnóstico");
+            setDebugPayload(null);
+        } finally {
+            setDebugLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[var(--surface-0)] py-6 sm:py-8">
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -539,19 +561,38 @@ export function ClickUpClosedTicketsReport({
                     </div>
 
                     <div className="mt-4">
-                        <button
-                            onClick={handleQuery}
-                            disabled={loading}
-                            className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-nearby-dark rounded-xl hover:bg-nearby-dark-600 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
-                            {loading ? "Consultando ClickUp..." : "Consultar"}
-                        </button>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <button
+                                onClick={handleQuery}
+                                disabled={loading}
+                                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-nearby-dark rounded-xl hover:bg-nearby-dark-600 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
+                                {loading ? "Consultando ClickUp..." : "Consultar"}
+                            </button>
+                            <button
+                                onClick={handleDebug}
+                                disabled={debugLoading}
+                                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-[var(--foreground)] border border-[var(--card-border)] rounded-xl bg-[var(--surface-0)] hover:bg-[var(--hover-bg)] transition-colors disabled:opacity-50"
+                            >
+                                {debugLoading ? <Loader2 size={16} className="animate-spin" /> : <Bug size={16} />}
+                                {debugLoading ? "Leyendo debug..." : "Diagnóstico ClickUp"}
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 {error && (
                     <div className="mb-4 p-3 rounded-lg bg-error-red/10 text-error-red text-sm">{error}</div>
+                )}
+
+                {debugPayload && (
+                    <div className="mb-4 bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4">
+                        <h3 className="text-sm font-semibold text-[var(--foreground)] mb-2">Diagnóstico ClickUp (raw)</h3>
+                        <pre className="max-h-[420px] overflow-auto text-xs p-3 rounded-lg bg-[var(--surface-0)] border border-[var(--card-border)] text-[var(--foreground)] whitespace-pre-wrap">
+                            {JSON.stringify(debugPayload, null, 2)}
+                        </pre>
+                    </div>
                 )}
 
                 {hasQueried && !loading && groupedRows.length > 0 && (
