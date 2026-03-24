@@ -83,6 +83,17 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
         }).format(numValue || 0);
     };
 
+    const getFinalTotal = (quote: any, type: "oneTime" | "monthly") => {
+        const base = Number(type === "oneTime" ? quote.totalOneTime : quote.totalMonthly) || 0;
+        const tax = Number(type === "oneTime" ? quote.taxAmountOneTime : quote.taxAmountMonthly) || 0;
+
+        if (quote.taxType === "INCLUIDOS") {
+            return base + tax;
+        }
+
+        return base;
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center py-8">
@@ -161,10 +172,10 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
                                         {getStatusBadge(quote.status)}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {formatCurrency(quote.totalOneTime, quote.currency)}
+                                        {formatCurrency(getFinalTotal(quote, "oneTime"), quote.currency)}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {formatCurrency(quote.totalMonthly, quote.currency)}
+                                        {formatCurrency(getFinalTotal(quote, "monthly"), quote.currency)}
                                     </td>
                                 </tr>
                             ))}

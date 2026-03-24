@@ -608,7 +608,7 @@ export function QuoteModal({
                                     <p className="text-sm font-semibold text-[var(--foreground)]">Resumen de productos</p>
                                     <p className="text-xs text-[var(--muted-text)]">
                                         {showTaxBreakdown
-                                            ? `Precios con impuesto incluido: ${taxSummaryLabel}`
+                                            ? `A la base imponible se le agregará: ${taxSummaryLabel}`
                                             : "Totales calculados según los productos cargados"}
                                     </p>
                                 </div>
@@ -636,7 +636,7 @@ export function QuoteModal({
                                                 <span className="font-medium text-[var(--foreground)]">{formatCurrency(taxBreakdown.taxOneTime, selectedCurrency)}</span>
                                             </div>
                                             <div className="flex items-center justify-between pt-2 border-t border-[var(--card-border)]">
-                                                <span className="text-sm font-semibold text-[var(--foreground)]">Total pago único</span>
+                                                <span className="text-sm font-semibold text-[var(--foreground)]">Total pago único con impuesto</span>
                                                 <span className="text-lg font-bold text-[var(--foreground)]">{formatCurrency(taxBreakdown.totalOneTime, selectedCurrency)}</span>
                                             </div>
                                         </div>
@@ -669,7 +669,7 @@ export function QuoteModal({
                                                 <span className="font-medium text-[var(--foreground)]">{formatCurrency(taxBreakdown.taxMonthly, selectedCurrency)}</span>
                                             </div>
                                             <div className="flex items-center justify-between pt-2 border-t border-[var(--card-border)]">
-                                                <span className="text-sm font-semibold text-[var(--foreground)]">Total mensual</span>
+                                                <span className="text-sm font-semibold text-[var(--foreground)]">Total mensual con impuesto</span>
                                                 <span className="text-lg font-bold text-[var(--foreground)]">{formatCurrency(taxBreakdown.totalMonthly, selectedCurrency)}</span>
                                             </div>
                                         </div>

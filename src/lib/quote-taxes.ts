@@ -15,16 +15,16 @@ function roundMoney(value: number): number {
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
-function extractIncludedTax(total: number, rate: number) {
-  if (!Number.isFinite(total) || total <= 0 || !Number.isFinite(rate) || rate <= 0) {
-    return { base: roundMoney(Math.max(total, 0)), tax: 0 };
+function addTaxFromBase(base: number, rate: number) {
+  if (!Number.isFinite(base) || base <= 0 || !Number.isFinite(rate) || rate <= 0) {
+    return { base: roundMoney(Math.max(base, 0)), tax: 0, total: roundMoney(Math.max(base, 0)) };
   }
 
-  const divisor = 1 + rate / 100;
-  const base = roundMoney(total / divisor);
-  const tax = roundMoney(total - base);
+  const normalizedBase = roundMoney(base);
+  const tax = roundMoney(normalizedBase * (rate / 100));
+  const total = roundMoney(normalizedBase + tax);
 
-  return { base, tax };
+  return { base: normalizedBase, tax, total };
 }
 
 export function calculateQuoteTaxBreakdown({
@@ -40,19 +40,19 @@ export function calculateQuoteTaxBreakdown({
   const oneTime = Number(totalOneTime || 0);
   const monthly = Number(totalMonthly || 0);
 
-  const oneTimeValues = extractIncludedTax(oneTime, rate);
-  const monthlyValues = extractIncludedTax(monthly, rate);
+  const oneTimeValues = addTaxFromBase(oneTime, rate);
+  const monthlyValues = addTaxFromBase(monthly, rate);
 
   return {
     rate,
     baseOneTime: oneTimeValues.base,
     taxOneTime: oneTimeValues.tax,
-    totalOneTime: roundMoney(oneTime),
+    totalOneTime: oneTimeValues.total,
     baseMonthly: monthlyValues.base,
     taxMonthly: monthlyValues.tax,
-    totalMonthly: roundMoney(monthly),
+    totalMonthly: monthlyValues.total,
     totalBase: roundMoney(oneTimeValues.base + monthlyValues.base),
     totalTax: roundMoney(oneTimeValues.tax + monthlyValues.tax),
-    grandTotal: roundMoney(oneTime + monthly),
+    grandTotal: roundMoney(oneTimeValues.total + monthlyValues.total),
   };
 }
