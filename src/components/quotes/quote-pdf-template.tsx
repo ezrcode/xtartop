@@ -269,53 +269,35 @@ export function QuotePDFTemplate({
 
             {/* Totals */}
             <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "14px" }}>
-                <div style={{ width: "285px" }}>
-                    {hasOneTime && showTaxBreakdown && (
-                        <>
-                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
-                                <span>Base imponible pago único:</span>
-                                <span style={{ textAlign: "right" }}>{formatCurrency(breakdown.baseOneTime, quote.currency)}</span>
-                            </div>
-                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
-                                <span>{quote.taxName || "Impuesto"} pago único:</span>
-                                <span style={{ textAlign: "right" }}>{formatCurrency(breakdown.taxOneTime, quote.currency)}</span>
-                            </div>
-                        </>
-                    )}
+                <div style={{ width: "300px" }}>
                     {hasOneTime && (
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
-                            <span style={{ fontWeight: 700 }}>Total pago único:</span>
-                            <span style={{ textAlign: "right" }}>{formatCurrency(breakdown.totalOneTime, quote.currency)}</span>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+                            <span>Pago único:</span>
+                            <span style={{ textAlign: "right" }}>{formatCurrency(breakdown.baseOneTime, quote.currency)}</span>
                         </div>
-                    )}
-                    {hasMonthly && showTaxBreakdown && (
-                        <>
-                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
-                                <span>Base imponible mensual:</span>
-                                <span style={{ textAlign: "right" }}>{formatCurrency(breakdown.baseMonthly, quote.currency)}</span>
-                            </div>
-                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
-                                <span>{quote.taxName || "Impuesto"} mensual:</span>
-                                <span style={{ textAlign: "right" }}>{formatCurrency(breakdown.taxMonthly, quote.currency)}</span>
-                            </div>
-                        </>
                     )}
                     {hasMonthly && (
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
-                            <span style={{ fontWeight: 700 }}>Total mensual:</span>
-                            <span style={{ textAlign: "right" }}>{formatCurrency(breakdown.totalMonthly, quote.currency)}</span>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+                            <span>Pago mensual:</span>
+                            <span style={{ textAlign: "right" }}>{formatCurrency(breakdown.baseMonthly, quote.currency)}</span>
                         </div>
                     )}
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
-                        <span style={{ fontWeight: 700 }}>Impuestos:</span>
-                        <span style={{ textAlign: "right" }}>{showTaxBreakdown ? taxName : taxLabel}</span>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px", fontWeight: 700 }}>
+                        <span>Total sin impuestos:</span>
+                        <span style={{ textAlign: "right" }}>{formatCurrency(breakdown.totalBase, quote.currency)}</span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px", fontWeight: 700 }}>
+                        <span>{showTaxBreakdown ? `Impuestos (${taxName})` : "Impuestos"}</span>
+                        <span style={{ textAlign: "right" }}>
+                            {showTaxBreakdown ? formatCurrency(breakdown.totalTax, quote.currency) : formatCurrency(0, quote.currency)}
+                        </span>
                     </div>
                     <div
                         style={{
                             display: "flex",
                             justifyContent: "space-between",
-                            marginTop: "4px",
-                            paddingTop: "4px",
+                            marginTop: "6px",
+                            paddingTop: "6px",
                             borderTop: "1px solid #dddddd",
                             fontWeight: 700,
                         }}
