@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { X, Plus, Trash2, Save, Printer } from "lucide-react";
 import { createQuoteAction, updateQuoteAction, QuoteState } from "@/actions/quotes";
 import { QuoteStatus, Currency, TaxType, PaymentFrequency } from "@prisma/client";
 import { QuotePDFTemplate } from "./quote-pdf-template";
 import { formatNumber } from "@/lib/format";
+import { calculateQuoteTaxBreakdown } from "@/lib/quote-taxes";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -44,6 +45,12 @@ interface QuoteModalProps {
         notes?: string | null;
         isActive: boolean;
     }>;
+    taxes?: Array<{
+        id: string;
+        name: string;
+        rate: unknown;
+        isActive: boolean;
+    }>;
 }
 
 export function QuoteModal({
@@ -55,6 +62,7 @@ export function QuoteModal({
     quote,
     workspace,
     projectRateReferences = [],
+    taxes = [],
 }: QuoteModalProps) {
     const isEditMode = !!quote;
     
@@ -71,7 +79,9 @@ export function QuoteModal({
         : [{ name: "", price: 0, quantity: 1, frequency: "PAGO_UNICO" as PaymentFrequency, netPrice: 0 }];
     
     const [items, setItems] = useState<QuoteItem[]>(initialItems);
-    
+    const [selectedCurrency, setSelectedCurrency] = useState<Currency>(quote?.currency || "USD");
+    const [selectedTaxType, setSelectedTaxType] = useState<TaxType>(quote?.taxType || "INCLUIDOS");
+    const [selectedTaxId, setSelectedTaxId] = useState<string>(quote?.taxId || "");
     const [isPending, setIsPending] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
@@ -143,6 +153,28 @@ export function QuoteModal({
         }).format(n);
     };
 
+    const formatRate = (value: unknown) => {
+        const n = Number(value);
+        if (!Number.isFinite(n) || n <= 0) return "-";
+        return `${n.toLocaleString("es-DO", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}%`;
+    };
+
+    const selectedTax = useMemo(() => {
+        const tax = taxes.find((item) => item.id === selectedTaxId);
+        if (tax) return tax;
+
+        if (quote?.taxType === "INCLUIDOS" && Number(quote?.taxRate || 0) > 0) {
+            return {
+                id: quote?.taxId || "",
+                name: quote?.taxName || "Impuesto",
+                rate: quote?.taxRate,
+                isActive: false,
+            };
+        }
+
+        return null;
+    }, [quote, selectedTaxId, taxes]);
+
     const handleSave = async () => {
         console.log('===== QUOTE SUBMIT STARTED =====');
         console.log('Items:', items);
@@ -170,6 +202,7 @@ export function QuoteModal({
         const paymentInput = document.getElementById('quote-paymentConditions') as HTMLTextAreaElement;
         const deliveryInput = document.getElementById('quote-deliveryTime') as HTMLInputElement;
         const taxInput = document.getElementById('quote-taxType') as HTMLSelectElement;
+        const taxSelectorInput = document.getElementById('quote-taxId') as HTMLSelectElement;
         const statusInput = document.getElementById('quote-status') as HTMLSelectElement;
         
         // Append all values
@@ -180,6 +213,7 @@ export function QuoteModal({
         if (paymentInput) formData.append('paymentConditions', paymentInput.value);
         if (deliveryInput) formData.append('deliveryTime', deliveryInput.value);
         if (taxInput) formData.append('taxType', taxInput.value);
+        if (taxSelectorInput && taxInput?.value === "INCLUIDOS") formData.append('taxId', taxSelectorInput.value);
         if (statusInput) formData.append('status', statusInput.value);
         
         // Only send valid items
@@ -264,6 +298,14 @@ export function QuoteModal({
     };
 
     const totals = calculateTotals();
+    const taxBreakdown = calculateQuoteTaxBreakdown({
+        totalOneTime: totals.oneTime,
+        totalMonthly: totals.monthly,
+        taxRate: selectedTaxType === "INCLUIDOS" ? Number(selectedTax?.rate || 0) : null,
+    });
+    const showTaxSelector = selectedTaxType === "INCLUIDOS";
+    const showTaxBreakdown = showTaxSelector && Number(selectedTax?.rate || 0) > 0;
+    const taxSummaryLabel = selectedTax ? `${selectedTax.name} (${formatRate(selectedTax.rate)})` : "Seleccione un impuesto";
 
     if (!isOpen) return null;
 
@@ -363,7 +405,8 @@ export function QuoteModal({
                                 </label>
                                 <select
                                     id="quote-currency"
-                                    defaultValue={quote?.currency || "USD"}
+                                    value={selectedCurrency}
+                                    onChange={(e) => setSelectedCurrency(e.target.value as Currency)}
                                     required
                                     className="w-full min-w-0 max-w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
                                 >
@@ -559,21 +602,89 @@ export function QuoteModal({
                         </div>
 
                         {/* Totals */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-[var(--surface-2)] p-4 rounded-md">
-                            <div>
-                                <label className="block text-sm font-medium text-[var(--foreground)] mb-1">
-                                    Total Pago Único
-                                </label>
-                                <div className="text-lg font-bold text-[var(--foreground)]">
-                                    {formatCurrency(totals.oneTime, "USD")}
+                        <div className="bg-[var(--surface-2)] p-4 rounded-md space-y-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                <div>
+                                    <p className="text-sm font-semibold text-[var(--foreground)]">Resumen de productos</p>
+                                    <p className="text-xs text-[var(--muted-text)]">
+                                        {showTaxBreakdown
+                                            ? `Precios con impuesto incluido: ${taxSummaryLabel}`
+                                            : "Totales calculados según los productos cargados"}
+                                    </p>
                                 </div>
+                                {showTaxSelector && (
+                                    <div className="sm:text-right">
+                                        <p className="text-xs uppercase tracking-wide text-[var(--muted-text)]">Impuesto seleccionado</p>
+                                        <p className="text-sm font-medium text-[var(--foreground)]">{taxSummaryLabel}</p>
+                                    </div>
+                                )}
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-[var(--foreground)] mb-1">
-                                    Total Mensual
-                                </label>
-                                <div className="text-lg font-bold text-[var(--foreground)]">
-                                    {formatCurrency(totals.monthly, "USD")}
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
+                                    <label className="block text-xs uppercase tracking-wide text-[var(--muted-text)] mb-3">
+                                        Pago único
+                                    </label>
+                                    {showTaxBreakdown ? (
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between text-sm">
+                                                <span className="text-[var(--muted-text)]">Base imponible</span>
+                                                <span className="font-medium text-[var(--foreground)]">{formatCurrency(taxBreakdown.baseOneTime, selectedCurrency)}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between text-sm">
+                                                <span className="text-[var(--muted-text)]">{selectedTax?.name || "Impuesto"}</span>
+                                                <span className="font-medium text-[var(--foreground)]">{formatCurrency(taxBreakdown.taxOneTime, selectedCurrency)}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between pt-2 border-t border-[var(--card-border)]">
+                                                <span className="text-sm font-semibold text-[var(--foreground)]">Total pago único</span>
+                                                <span className="text-lg font-bold text-[var(--foreground)]">{formatCurrency(taxBreakdown.totalOneTime, selectedCurrency)}</span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between text-sm">
+                                                <span className="text-[var(--muted-text)]">Base imponible</span>
+                                                <span className="font-medium text-[var(--foreground)]">{formatCurrency(totals.oneTime, selectedCurrency)}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between pt-2 border-t border-[var(--card-border)]">
+                                                <span className="text-sm font-semibold text-[var(--foreground)]">Total pago único</span>
+                                                <span className="text-lg font-bold text-[var(--foreground)]">{formatCurrency(totals.oneTime, selectedCurrency)}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
+                                    <label className="block text-xs uppercase tracking-wide text-[var(--muted-text)] mb-3">
+                                        Mensual
+                                    </label>
+                                    {showTaxBreakdown ? (
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between text-sm">
+                                                <span className="text-[var(--muted-text)]">Base imponible</span>
+                                                <span className="font-medium text-[var(--foreground)]">{formatCurrency(taxBreakdown.baseMonthly, selectedCurrency)}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between text-sm">
+                                                <span className="text-[var(--muted-text)]">{selectedTax?.name || "Impuesto"}</span>
+                                                <span className="font-medium text-[var(--foreground)]">{formatCurrency(taxBreakdown.taxMonthly, selectedCurrency)}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between pt-2 border-t border-[var(--card-border)]">
+                                                <span className="text-sm font-semibold text-[var(--foreground)]">Total mensual</span>
+                                                <span className="text-lg font-bold text-[var(--foreground)]">{formatCurrency(taxBreakdown.totalMonthly, selectedCurrency)}</span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between text-sm">
+                                                <span className="text-[var(--muted-text)]">Base imponible</span>
+                                                <span className="font-medium text-[var(--foreground)]">{formatCurrency(totals.monthly, selectedCurrency)}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between pt-2 border-t border-[var(--card-border)]">
+                                                <span className="text-sm font-semibold text-[var(--foreground)]">Total mensual</span>
+                                                <span className="text-lg font-bold text-[var(--foreground)]">{formatCurrency(totals.monthly, selectedCurrency)}</span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -621,20 +732,58 @@ export function QuoteModal({
                         </div>
 
                         {/* Tax Type & Status */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
                                 <label htmlFor="quote-taxType" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                     Impuestos *
                                 </label>
                                 <select
                                     id="quote-taxType"
-                                    defaultValue={quote?.taxType || "INCLUIDOS"}
+                                    value={selectedTaxType}
+                                    onChange={(e) => {
+                                        const nextTaxType = e.target.value as TaxType;
+                                        setSelectedTaxType(nextTaxType);
+                                        if (nextTaxType !== "INCLUIDOS") {
+                                            setSelectedTaxId("");
+                                        }
+                                    }}
                                     required
                                     className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
                                 >
                                     <option value="INCLUIDOS">Incluidos</option>
                                     <option value="NO_INCLUIDOS">No incluidos</option>
                                 </select>
+                            </div>
+                            <div>
+                                <label htmlFor="quote-taxId" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
+                                    Impuesto disponible
+                                </label>
+                                <select
+                                    id="quote-taxId"
+                                    value={selectedTaxId}
+                                    onChange={(e) => setSelectedTaxId(e.target.value)}
+                                    disabled={!showTaxSelector}
+                                    className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)] disabled:opacity-60"
+                                >
+                                    <option value="">
+                                        {showTaxSelector ? "Seleccione un impuesto" : "Disponible cuando el impuesto está incluido"}
+                                    </option>
+                                    {selectedTax && !taxes.some((tax) => tax.id === selectedTax.id) && selectedTax.id && (
+                                        <option value={selectedTax.id}>
+                                            {selectedTax.name} ({formatRate(selectedTax.rate)}) [archivado]
+                                        </option>
+                                    )}
+                                    {taxes.map((tax) => (
+                                        <option key={tax.id} value={tax.id}>
+                                            {tax.name} ({formatRate(tax.rate)})
+                                        </option>
+                                    ))}
+                                </select>
+                                {showTaxSelector && taxes.length === 0 && (
+                                    <p className="mt-1 text-xs text-[var(--muted-text)]">
+                                        Primero debes crear impuestos en Configuración &gt; Impuestos.
+                                    </p>
+                                )}
                             </div>
                             <div>
                                 <label htmlFor="quote-status" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
@@ -744,7 +893,14 @@ export function QuoteModal({
             {/* Hidden PDF Template for rendering */}
             {isEditMode && quote && (
                 <QuotePDFTemplate
-                    quote={quote}
+                    quote={{
+                        ...quote,
+                        currency: selectedCurrency,
+                        taxType: selectedTaxType,
+                        taxId: selectedTaxId || null,
+                        taxName: selectedTax?.name || quote.taxName || null,
+                        taxRate: Number(selectedTax?.rate || quote.taxRate || 0) || null,
+                    }}
                     items={items}
                     companyName={companyName}
                     contactName={contactName}

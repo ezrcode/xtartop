@@ -1,6 +1,7 @@
 "use client";
 
 import { PaymentFrequency } from "@prisma/client";
+import { calculateQuoteTaxBreakdown } from "@/lib/quote-taxes";
 
 interface QuoteItem {
     name: string;
@@ -51,9 +52,16 @@ export function QuotePDFTemplate({
     };
 
     const taxLabel = quote.taxType === "INCLUIDOS" ? "Incluidos" : "No incluidos";
+    const taxName = quote.taxName ? `${quote.taxName}${quote.taxRate ? ` (${Number(quote.taxRate).toLocaleString("es-DO", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}%)` : ""}` : taxLabel;
     const hasOneTime = totals.oneTime > 0;
     const hasMonthly = totals.monthly > 0;
-    const grandTotal = totals.oneTime + totals.monthly;
+    const breakdown = calculateQuoteTaxBreakdown({
+        totalOneTime: totals.oneTime,
+        totalMonthly: totals.monthly,
+        taxRate: quote.taxType === "INCLUIDOS" ? Number(quote.taxRate || 0) : null,
+    });
+    const showTaxBreakdown = quote.taxType === "INCLUIDOS" && Number(quote.taxRate || 0) > 0;
+    const grandTotal = breakdown.grandTotal;
 
     return (
         <div
@@ -261,22 +269,46 @@ export function QuotePDFTemplate({
 
             {/* Totals */}
             <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "14px" }}>
-                <div style={{ width: "250px" }}>
+                <div style={{ width: "285px" }}>
+                    {hasOneTime && showTaxBreakdown && (
+                        <>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
+                                <span>Base imponible pago único:</span>
+                                <span style={{ textAlign: "right" }}>{formatCurrency(breakdown.baseOneTime, quote.currency)}</span>
+                            </div>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
+                                <span>{quote.taxName || "Impuesto"} pago único:</span>
+                                <span style={{ textAlign: "right" }}>{formatCurrency(breakdown.taxOneTime, quote.currency)}</span>
+                            </div>
+                        </>
+                    )}
                     {hasOneTime && (
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
                             <span style={{ fontWeight: 700 }}>Total pago único:</span>
-                            <span style={{ textAlign: "right" }}>{formatCurrency(totals.oneTime, quote.currency)}</span>
+                            <span style={{ textAlign: "right" }}>{formatCurrency(breakdown.totalOneTime, quote.currency)}</span>
                         </div>
+                    )}
+                    {hasMonthly && showTaxBreakdown && (
+                        <>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
+                                <span>Base imponible mensual:</span>
+                                <span style={{ textAlign: "right" }}>{formatCurrency(breakdown.baseMonthly, quote.currency)}</span>
+                            </div>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
+                                <span>{quote.taxName || "Impuesto"} mensual:</span>
+                                <span style={{ textAlign: "right" }}>{formatCurrency(breakdown.taxMonthly, quote.currency)}</span>
+                            </div>
+                        </>
                     )}
                     {hasMonthly && (
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
                             <span style={{ fontWeight: 700 }}>Total mensual:</span>
-                            <span style={{ textAlign: "right" }}>{formatCurrency(totals.monthly, quote.currency)}</span>
+                            <span style={{ textAlign: "right" }}>{formatCurrency(breakdown.totalMonthly, quote.currency)}</span>
                         </div>
                     )}
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "3px" }}>
                         <span style={{ fontWeight: 700 }}>Impuestos:</span>
-                        <span style={{ textAlign: "right" }}>{taxLabel}</span>
+                        <span style={{ textAlign: "right" }}>{showTaxBreakdown ? taxName : taxLabel}</span>
                     </div>
                     <div
                         style={{
@@ -332,7 +364,7 @@ export function QuotePDFTemplate({
             }}>
                 <div style={{ fontSize: "7pt", color: "#6b7280", lineHeight: "1.6" }}>
                     <div style={{ marginBottom: "4px" }}>
-                        <span style={{ fontWeight: 600 }}>Impuestos:</span> {taxLabel}
+                        <span style={{ fontWeight: 600 }}>Impuestos:</span> {showTaxBreakdown ? taxName : taxLabel}
                         {" • "}
                         <span style={{ fontWeight: 600 }}>Moneda:</span> {quote.currency}
                     </div>

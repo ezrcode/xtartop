@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useFormState } from "react-dom";
 import { useRouter } from "next/navigation";
-import { Save, UserPlus, Mail, Trash2, X, Building2, Users2, FileText, Loader2, Cloud, Settings2, DollarSign, BriefcaseBusiness, ChevronRight } from "lucide-react";
+import { Save, UserPlus, Mail, Trash2, X, Building2, Users2, FileText, Loader2, Cloud, Settings2, DollarSign, BriefcaseBusiness, ChevronRight, Percent } from "lucide-react";
 import { ImageUpload } from "../ui/image-upload";
 import {
     updateWorkspace,
@@ -15,13 +15,14 @@ import {
     WorkspaceState,
     InvitationState
 } from "@/actions/workspace";
-import type { Workspace, WorkspaceMember, Invitation, User, Subscription, BusinessLine, ExchangeRate } from "@prisma/client";
+import type { Workspace, WorkspaceMember, Invitation, User, Subscription, BusinessLine, ExchangeRate, Tax } from "@prisma/client";
 import { AdmCloudConfigTab } from "./admcloud-config-tab";
 import { ClickUpConfigTab } from "./clickup-config-tab";
 import { BillingConfigTab } from "./billing-config-tab";
 import { BusinessLinesSection } from "./business-lines-section";
 import { ExchangeRatesSection } from "./exchange-rates-section";
 import { ProjectRateReferencesSection } from "./project-rate-references-section";
+import { TaxesSection } from "./taxes-section";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
@@ -89,6 +90,7 @@ interface SettingsPageProps {
     } | null;
     businessLines?: BusinessLine[];
     exchangeRates?: ExchangeRate[];
+    taxes?: Tax[];
     projectRateReferences?: Array<{
         id: string;
         name: string;
@@ -189,7 +191,7 @@ function getDefaultContractTemplate(): string {
 <p>He leído y acepto los Términos y Condiciones de Uso de la plataforma Nearby CRM y la Cotización N° <strong>{{ID_COTIZACION}}</strong> vinculada a mi cuenta. Entiendo que esta aceptación digital tiene la misma validez legal que una firma manuscrita de acuerdo con la legislación vigente.</p>`;
 }
 
-type Section = 'workspace' | 'team' | 'contract' | 'business-lines' | 'rate-references' | 'exchange-rates' | 'billing' | 'admcloud' | 'clickup';
+type Section = 'workspace' | 'team' | 'contract' | 'business-lines' | 'rate-references' | 'exchange-rates' | 'taxes' | 'billing' | 'admcloud' | 'clickup';
 
 const sectionGroups = [
     {
@@ -208,6 +210,7 @@ const sectionGroups = [
             { id: "business-lines" as Section, label: "Líneas de Negocio", icon: BriefcaseBusiness, description: "Categorías de negocio del equipo de ventas" },
             { id: "rate-references" as Section, label: "Tarifas Referencia", icon: DollarSign, description: "Catálogo de precios referenciales por proyecto" },
             { id: "exchange-rates" as Section, label: "Tasa de Cambio", icon: DollarSign, description: "Historial de tasas de cambio USD/DOP" },
+            { id: "taxes" as Section, label: "Impuestos", icon: Percent, description: "Catálogo de impuestos aplicables en cotizaciones" },
         ],
     },
     {
@@ -228,6 +231,7 @@ export function SettingsPage({
     billingSenderEmailConfig = null,
     businessLines = [],
     exchangeRates = [],
+    taxes = [],
     projectRateReferences = [],
 }: SettingsPageProps) {
     const router = useRouter();
@@ -670,6 +674,9 @@ export function SettingsPage({
 
             case 'exchange-rates':
                 return <ExchangeRatesSection exchangeRates={exchangeRates} />;
+
+            case 'taxes':
+                return <TaxesSection taxes={taxes} />;
 
             case 'billing':
                 return (

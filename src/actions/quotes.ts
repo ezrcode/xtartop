@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { QuoteStatus, Currency, TaxType, PaymentFrequency } from "@prisma/client";
+import { calculateQuoteTaxBreakdown } from "@/lib/quote-taxes";
 
 const UNIQUE_FINAL_STATUSES: QuoteStatus[] = ["ACTIVA", "APROBADA"];
 
@@ -27,7 +28,16 @@ const QuoteSchema = z.object({
     currency: z.nativeEnum(Currency),
     deliveryTime: z.string().optional(),
     taxType: z.nativeEnum(TaxType),
+    taxId: z.string().optional(),
     items: z.array(QuoteItemSchema).min(1, "Debe agregar al menos un item"),
+}).superRefine((data, ctx) => {
+    if (data.taxType === "INCLUIDOS" && !data.taxId) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["taxId"],
+            message: "Debe seleccionar un impuesto.",
+        });
+    }
 });
 
 export type QuoteState = {
@@ -40,10 +50,65 @@ export type QuoteState = {
         currency?: string[];
         deliveryTime?: string[];
         taxType?: string[];
+        taxId?: string[];
         items?: string[];
     };
     message?: string;
 };
+
+async function resolveQuoteTax({
+    workspaceId,
+    taxType,
+    taxId,
+    totalOneTime,
+    totalMonthly,
+}: {
+    workspaceId: string;
+    taxType: TaxType;
+    taxId?: string;
+    totalOneTime: number;
+    totalMonthly: number;
+}) {
+    if (taxType !== "INCLUIDOS" || !taxId) {
+        return {
+            taxId: null,
+            taxName: null,
+            taxRate: null,
+            taxAmountOneTime: 0,
+            taxAmountMonthly: 0,
+        };
+    }
+
+    const tax = await prisma.tax.findFirst({
+        where: {
+            id: taxId,
+            workspaceId,
+        },
+        select: {
+            id: true,
+            name: true,
+            rate: true,
+        },
+    });
+
+    if (!tax) {
+        return { error: "El impuesto seleccionado no está disponible." as const };
+    }
+
+    const breakdown = calculateQuoteTaxBreakdown({
+        totalOneTime,
+        totalMonthly,
+        taxRate: Number(tax.rate),
+    });
+
+    return {
+        taxId: tax.id,
+        taxName: tax.name,
+        taxRate: Number(tax.rate),
+        taxAmountOneTime: breakdown.taxOneTime,
+        taxAmountMonthly: breakdown.taxMonthly,
+    };
+}
 
 export async function getQuotesByDeal(dealId: string) {
     const session = await auth();
@@ -159,6 +224,7 @@ export async function createQuoteAction(
         currency: formData.get("currency"),
         deliveryTime: formData.get("deliveryTime") || undefined,
         taxType: formData.get("taxType"),
+        taxId: formData.get("taxId") || undefined,
         items,
     };
 
@@ -205,6 +271,18 @@ export async function createQuoteAction(
         }
     });
 
+    const quoteTax = await resolveQuoteTax({
+        workspaceId: workspace.id,
+        taxType: validatedFields.data.taxType,
+        taxId: validatedFields.data.taxId,
+        totalOneTime,
+        totalMonthly,
+    });
+
+    if ("error" in quoteTax) {
+        return { message: quoteTax.error };
+    }
+
     try {
         // Get next quote number for this deal
         const lastQuote = await prisma.quote.findFirst({
@@ -226,6 +304,11 @@ export async function createQuoteAction(
                 currency: validatedFields.data.currency,
                 deliveryTime: validatedFields.data.deliveryTime,
                 taxType: validatedFields.data.taxType,
+                taxId: quoteTax.taxId,
+                taxName: quoteTax.taxName,
+                taxRate: quoteTax.taxRate,
+                taxAmountOneTime: quoteTax.taxAmountOneTime,
+                taxAmountMonthly: quoteTax.taxAmountMonthly,
                 totalOneTime,
                 totalMonthly,
                 dealId: deal.id,
@@ -303,6 +386,7 @@ export async function updateQuoteAction(
         currency: formData.get("currency"),
         deliveryTime: formData.get("deliveryTime") || undefined,
         taxType: formData.get("taxType"),
+        taxId: formData.get("taxId") || undefined,
         items,
     };
 
@@ -345,6 +429,18 @@ export async function updateQuoteAction(
         }
     });
 
+    const quoteTax = await resolveQuoteTax({
+        workspaceId: workspace.id,
+        taxType: validatedFields.data.taxType,
+        taxId: validatedFields.data.taxId,
+        totalOneTime,
+        totalMonthly,
+    });
+
+    if ("error" in quoteTax) {
+        return { message: quoteTax.error };
+    }
+
     try {
         await prisma.quote.update({
             where: { id: quoteId },
@@ -357,6 +453,11 @@ export async function updateQuoteAction(
                 currency: validatedFields.data.currency,
                 deliveryTime: validatedFields.data.deliveryTime,
                 taxType: validatedFields.data.taxType,
+                taxId: quoteTax.taxId,
+                taxName: quoteTax.taxName,
+                taxRate: quoteTax.taxRate,
+                taxAmountOneTime: quoteTax.taxAmountOneTime,
+                taxAmountMonthly: quoteTax.taxAmountMonthly,
                 totalOneTime,
                 totalMonthly,
             },
@@ -421,4 +522,3 @@ export async function deleteQuote(quoteId: string) {
         return { message: "Error al eliminar la cotización." };
     }
 }
-

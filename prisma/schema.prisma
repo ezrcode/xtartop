@@ -204,6 +204,7 @@ model Workspace {
   businessLines  BusinessLine[]
   exchangeRates  ExchangeRate[]
   projectRateReferences ProjectRateReference[]
+  taxes        Tax[]
 }
 
 model WorkspaceMember {
@@ -447,6 +448,10 @@ model Quote {
   currency            Currency          @default(USD)
   deliveryTime        String?
   taxType             TaxType           @default(INCLUIDOS)
+  taxName             String?
+  taxRate             Decimal?
+  taxAmountOneTime    Decimal           @default(0)
+  taxAmountMonthly    Decimal           @default(0)
   
   // Relations
   dealId      String
@@ -457,6 +462,9 @@ model Quote {
   
   contactId   String?
   contact     Contact? @relation(fields: [contactId], references: [id])
+
+  taxId       String?
+  tax         Tax?     @relation(fields: [taxId], references: [id], onDelete: SetNull)
   
   createdById String
   createdBy   User   @relation(fields: [createdById], references: [id])
@@ -467,6 +475,7 @@ model Quote {
   items QuoteItem[]
   
   @@unique([dealId, number])
+  @@index([taxId])
 }
 
 model QuoteItem {
@@ -696,6 +705,24 @@ model ProjectRateReference {
   createdById    String?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
+
+  @@index([workspaceId])
+  @@index([workspaceId, isActive])
+}
+
+model Tax {
+  id          String   @id @default(cuid())
+  name        String
+  rate        Decimal
+  isActive    Boolean  @default(true)
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  quotes      Quote[]
 
   @@index([workspaceId])
   @@index([workspaceId, isActive])

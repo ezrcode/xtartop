@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import { QuoteModal } from "./quote-modal";
 import { getQuotesByDeal } from "@/actions/quotes";
 import { getProjectRateReferences } from "@/actions/project-rate-references";
+import { getTaxes } from "@/actions/taxes";
 
 interface QuotesTableProps {
     dealId: string;
@@ -22,6 +23,7 @@ interface QuotesTableProps {
 export function QuotesTable({ dealId, companyName, contactName, workspace }: QuotesTableProps) {
     const [quotes, setQuotes] = useState<any[]>([]);
     const [projectRateReferences, setProjectRateReferences] = useState<any[]>([]);
+    const [taxes, setTaxes] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [editingQuote, setEditingQuote] = useState<any>(null);
@@ -29,13 +31,15 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
     const loadQuotes = async () => {
         setLoading(true);
         console.log('Loading quotes for deal:', dealId);
-        const [data, references] = await Promise.all([
+        const [data, references, availableTaxes] = await Promise.all([
             getQuotesByDeal(dealId),
             getProjectRateReferences({ activeOnly: true }),
+            getTaxes({ activeOnly: true }),
         ]);
         console.log('Quotes loaded:', data);
         setQuotes(data);
         setProjectRateReferences(references);
+        setTaxes(availableTaxes);
         setLoading(false);
     };
 
@@ -180,9 +184,9 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
                     quote={editingQuote}
                     workspace={workspace}
                     projectRateReferences={projectRateReferences}
+                    taxes={taxes}
                 />
             )}
         </div>
     );
 }
-

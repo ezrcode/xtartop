@@ -3,6 +3,7 @@ import { getWorkspaceUsersWithEmail, getCurrentBillingSenderEmailConfig } from "
 import { getBusinessLines } from "@/actions/business-lines";
 import { getExchangeRates } from "@/actions/exchange-rates";
 import { getProjectRateReferences } from "@/actions/project-rate-references";
+import { getTaxes } from "@/actions/taxes";
 import { SettingsPage } from "@/components/settings/settings-page";
 import { redirect } from "next/navigation";
 
@@ -10,13 +11,14 @@ import { redirect } from "next/navigation";
 export const revalidate = 120;
 
 export default async function Settings() {
-    const [workspace, userRole, workspaceUsers, billingSenderEmailConfig, businessLines, exchangeRates, projectRateReferences] = await Promise.all([
+    const [workspace, userRole, workspaceUsers, billingSenderEmailConfig, businessLines, exchangeRates, taxes, projectRateReferences] = await Promise.all([
         getWorkspaceWithMembers(),
         getUserWorkspaceRole(),
         getWorkspaceUsersWithEmail(),
         getCurrentBillingSenderEmailConfig(),
         getBusinessLines(),
         getExchangeRates(),
+        getTaxes(),
         getProjectRateReferences(),
     ]);
 
@@ -37,6 +39,7 @@ export default async function Settings() {
             billingSenderEmailConfig={billingSenderEmailConfig}
             businessLines={businessLines}
             exchangeRates={exchangeRates}
+            taxes={taxes}
             projectRateReferences={projectRateReferences}
         />
     );
