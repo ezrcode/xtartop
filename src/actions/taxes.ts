@@ -29,17 +29,37 @@ function parseRate(raw: string): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function isTaxTableUnavailable(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  return (
+    message.includes("`Tax`") ||
+    message.includes("\"Tax\"") ||
+    message.includes("The table") ||
+    message.includes("does not exist") ||
+    message.includes("P2021")
+  );
+}
+
 export async function getTaxes(options?: { activeOnly?: boolean }) {
   const workspace = await getCurrentWorkspace();
   if (!workspace) return [];
 
-  return prisma.tax.findMany({
-    where: {
-      workspaceId: workspace.id,
-      ...(options?.activeOnly ? { isActive: true } : {}),
-    },
-    orderBy: [{ isActive: "desc" }, { name: "asc" }],
-  });
+  try {
+    return await prisma.tax.findMany({
+      where: {
+        workspaceId: workspace.id,
+        ...(options?.activeOnly ? { isActive: true } : {}),
+      },
+      orderBy: [{ isActive: "desc" }, { name: "asc" }],
+    });
+  } catch (error) {
+    if (isTaxTableUnavailable(error)) {
+      console.warn("Tax table is not available yet. Returning empty catalog.");
+      return [];
+    }
+
+    throw error;
+  }
 }
 
 export async function createTax(
@@ -75,6 +95,9 @@ export async function createTax(
     return { message: "Impuesto creado exitosamente" };
   } catch (error) {
     console.error("Error creating tax:", error);
+    if (isTaxTableUnavailable(error)) {
+      return { message: "La configuración de impuestos aún no está disponible en la base de datos. Aplica la migración pendiente e inténtalo de nuevo." };
+    }
     return { message: "Error al crear el impuesto" };
   }
 }
@@ -115,6 +138,9 @@ export async function updateTax(
     return { message: "Impuesto actualizado exitosamente" };
   } catch (error) {
     console.error("Error updating tax:", error);
+    if (isTaxTableUnavailable(error)) {
+      return { message: "La configuración de impuestos aún no está disponible en la base de datos. Aplica la migración pendiente e inténtalo de nuevo." };
+    }
     return { message: "Error al actualizar el impuesto" };
   }
 }
@@ -130,6 +156,9 @@ export async function deleteTax(id: string) {
     return { success: true };
   } catch (error) {
     console.error("Error deleting tax:", error);
+    if (isTaxTableUnavailable(error)) {
+      return { success: false, error: "La configuración de impuestos aún no está disponible en la base de datos." };
+    }
     return { success: false, error: "Error al eliminar el impuesto" };
   }
 }
@@ -152,6 +181,9 @@ export async function toggleTaxActive(id: string) {
     return { success: true };
   } catch (error) {
     console.error("Error toggling tax:", error);
+    if (isTaxTableUnavailable(error)) {
+      return { success: false, error: "La configuración de impuestos aún no está disponible en la base de datos." };
+    }
     return { success: false, error: "Error al cambiar el estado" };
   }
 }

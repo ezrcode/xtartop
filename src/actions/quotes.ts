@@ -79,17 +79,24 @@ async function resolveQuoteTax({
         };
     }
 
-    const tax = await prisma.tax.findFirst({
-        where: {
-            id: taxId,
-            workspaceId,
-        },
-        select: {
-            id: true,
-            name: true,
-            rate: true,
-        },
-    });
+    let tax: { id: string; name: string; rate: unknown } | null = null;
+
+    try {
+        tax = await prisma.tax.findFirst({
+            where: {
+                id: taxId,
+                workspaceId,
+            },
+            select: {
+                id: true,
+                name: true,
+                rate: true,
+            },
+        });
+    } catch (error) {
+        console.error("Error resolving quote tax:", error);
+        return { error: "La configuración de impuestos aún no está disponible en la base de datos." as const };
+    }
 
     if (!tax) {
         return { error: "El impuesto seleccionado no está disponible." as const };
