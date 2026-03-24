@@ -346,7 +346,7 @@ export function QuotePDFTemplate({
             }}>
                 <div style={{ fontSize: "7pt", color: "#6b7280", lineHeight: "1.6" }}>
                     <div style={{ marginBottom: "4px" }}>
-                        <span style={{ fontWeight: 600 }}>Impuestos:</span> {showTaxBreakdown ? taxName : taxLabel}
+                        <span style={{ fontWeight: 600 }}>Impuestos:</span> {quote.taxType === "INCLUIDOS" ? "Incluidos" : "No incluidos"}
                         {" • "}
                         <span style={{ fontWeight: 600 }}>Moneda:</span> {quote.currency}
                     </div>
