@@ -601,6 +601,78 @@ export function QuoteModal({
                             </div>
                         </div>
 
+                        {/* Taxes */}
+                        <div className="rounded-xl border border-[var(--card-border)] bg-[var(--surface-2)] p-4 sm:p-5 space-y-4">
+                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                                <div>
+                                    <p className="text-sm font-semibold text-[var(--foreground)]">Impuestos</p>
+                                    <p className="text-xs text-[var(--muted-text)] mt-1">
+                                        Define si esta cotización lleva impuestos y cuál se debe agregar sobre la base imponible.
+                                    </p>
+                                </div>
+                                {showTaxBreakdown && (
+                                    <div className="inline-flex items-center rounded-full border border-nearby-accent/20 bg-nearby-accent/10 px-3 py-1 text-xs font-medium text-nearby-accent">
+                                        {taxSummaryLabel}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label htmlFor="quote-taxType" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
+                                        Impuestos *
+                                    </label>
+                                    <select
+                                        id="quote-taxType"
+                                        value={selectedTaxType}
+                                        onChange={(e) => {
+                                            const nextTaxType = e.target.value as TaxType;
+                                            setSelectedTaxType(nextTaxType);
+                                            if (nextTaxType !== "INCLUIDOS") {
+                                                setSelectedTaxId("");
+                                            }
+                                        }}
+                                        required
+                                        className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
+                                    >
+                                        <option value="INCLUIDOS">Aplicar impuesto</option>
+                                        <option value="NO_INCLUIDOS">Sin impuesto</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label htmlFor="quote-taxId" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
+                                        Impuesto disponible
+                                    </label>
+                                    <select
+                                        id="quote-taxId"
+                                        value={selectedTaxId}
+                                        onChange={(e) => setSelectedTaxId(e.target.value)}
+                                        disabled={!showTaxSelector}
+                                        className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)] disabled:opacity-60"
+                                    >
+                                        <option value="">
+                                            {showTaxSelector ? "Seleccione un impuesto" : "Disponible cuando el impuesto esté activo"}
+                                        </option>
+                                        {selectedTax && !taxes.some((tax) => tax.id === selectedTax.id) && selectedTax.id && (
+                                            <option value={selectedTax.id}>
+                                                {selectedTax.name} ({formatRate(selectedTax.rate)}) [archivado]
+                                            </option>
+                                        )}
+                                        {taxes.map((tax) => (
+                                            <option key={tax.id} value={tax.id}>
+                                                {tax.name} ({formatRate(tax.rate)})
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {showTaxSelector && taxes.length === 0 && (
+                                        <p className="mt-1 text-xs text-[var(--muted-text)]">
+                                            Primero debes crear impuestos en Configuración &gt; Impuestos.
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Totals */}
                         <div className="bg-[var(--surface-2)] p-4 rounded-md space-y-4">
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -731,60 +803,8 @@ export function QuoteModal({
                             </div>
                         </div>
 
-                        {/* Tax Type & Status */}
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div>
-                                <label htmlFor="quote-taxType" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
-                                    Impuestos *
-                                </label>
-                                <select
-                                    id="quote-taxType"
-                                    value={selectedTaxType}
-                                    onChange={(e) => {
-                                        const nextTaxType = e.target.value as TaxType;
-                                        setSelectedTaxType(nextTaxType);
-                                        if (nextTaxType !== "INCLUIDOS") {
-                                            setSelectedTaxId("");
-                                        }
-                                    }}
-                                    required
-                                    className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
-                                >
-                                    <option value="INCLUIDOS">Incluidos</option>
-                                    <option value="NO_INCLUIDOS">No incluidos</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label htmlFor="quote-taxId" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
-                                    Impuesto disponible
-                                </label>
-                                <select
-                                    id="quote-taxId"
-                                    value={selectedTaxId}
-                                    onChange={(e) => setSelectedTaxId(e.target.value)}
-                                    disabled={!showTaxSelector}
-                                    className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)] disabled:opacity-60"
-                                >
-                                    <option value="">
-                                        {showTaxSelector ? "Seleccione un impuesto" : "Disponible cuando el impuesto está incluido"}
-                                    </option>
-                                    {selectedTax && !taxes.some((tax) => tax.id === selectedTax.id) && selectedTax.id && (
-                                        <option value={selectedTax.id}>
-                                            {selectedTax.name} ({formatRate(selectedTax.rate)}) [archivado]
-                                        </option>
-                                    )}
-                                    {taxes.map((tax) => (
-                                        <option key={tax.id} value={tax.id}>
-                                            {tax.name} ({formatRate(tax.rate)})
-                                        </option>
-                                    ))}
-                                </select>
-                                {showTaxSelector && taxes.length === 0 && (
-                                    <p className="mt-1 text-xs text-[var(--muted-text)]">
-                                        Primero debes crear impuestos en Configuración &gt; Impuestos.
-                                    </p>
-                                )}
-                            </div>
+                        {/* Status */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label htmlFor="quote-status" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                     Estado *
@@ -800,6 +820,13 @@ export function QuoteModal({
                                     <option value="RECHAZADA">Rechazada</option>
                                     <option value="APROBADA">Aprobada</option>
                                 </select>
+                            </div>
+                            <div>
+                                <div className="h-full rounded-lg border border-dashed border-[var(--card-border)] bg-[var(--surface-2)] px-4 py-3 flex items-center">
+                                    <p className="text-xs text-[var(--muted-text)]">
+                                        El estado se mantiene separado para que puedas revisar el impacto del impuesto antes de activar o aprobar la cotización.
+                                    </p>
+                                </div>
                             </div>
                         </div>
 
