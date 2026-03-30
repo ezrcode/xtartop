@@ -74,6 +74,35 @@ function getMonthLabel(dateStr: string): string {
     return date.toLocaleDateString("es-DO", { month: "short", year: "numeric" });
 }
 
+function MetricGroup({
+    title,
+    description,
+    accentClass,
+    metrics,
+}: {
+    title: string;
+    description: string;
+    accentClass: string;
+    metrics: Array<{ label: string; value: number; tone: string }>;
+}) {
+    return (
+        <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] overflow-hidden">
+            <div className={`px-4 sm:px-5 py-4 border-b border-[var(--card-border)] bg-gradient-to-r ${accentClass}`}>
+                <h3 className="text-sm font-semibold text-[var(--foreground)]">{title}</h3>
+                <p className="text-xs text-[var(--muted-text)] mt-1">{description}</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 p-4">
+                {metrics.map((metric) => (
+                    <div key={metric.label} className={`rounded-xl border p-4 ${metric.tone}`}>
+                        <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">{metric.label}</p>
+                        <p className="text-3xl font-bold text-[var(--foreground)] mt-2">{metric.value}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
 export function CustomerSuccessUserLifecycleReport() {
     const now = new Date();
     const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -153,7 +182,7 @@ export function CustomerSuccessUserLifecycleReport() {
         return rows.sort((a, b) => a.companyName.localeCompare(b.companyName, "es"));
     }, [data, companyFilter]);
 
-    const totals = useMemo(() => {
+    const userTotals = useMemo(() => {
         const activated = filteredEvents.filter((event) => event.eventType === "ACTIVATED").length;
         const deactivated = filteredEvents.filter((event) => event.eventType === "DEACTIVATED").length;
         const activeStart = companyFilter === "all"
@@ -162,12 +191,22 @@ export function CustomerSuccessUserLifecycleReport() {
         const activeEnd = companyFilter === "all"
             ? (data?.activeEndTotal || 0)
             : (data?.companySummary.find((row) => row.companyId === companyFilter)?.activeAtEnd || 0);
-        const activeNow = companyFilter === "all"
-            ? (data?.activeNowTotal || 0)
-            : (data?.activeNowByCompany.find((row) => row.companyId === companyFilter)?.activeUsers || 0);
 
-        return { activated, deactivated, activeStart, activeEnd, activeNow };
+        return { activated, deactivated, activeStart, activeEnd };
     }, [filteredEvents, data, companyFilter]);
+
+    const projectTotals = useMemo(() => {
+        const activated = filteredProjectEvents.filter((event) => event.eventType === "ACTIVATED").length;
+        const deactivated = filteredProjectEvents.filter((event) => event.eventType === "DEACTIVATED").length;
+        const activeStart = companyFilter === "all"
+            ? projectSummaryByCompany.reduce((acc, row) => acc + row.activeAtStart, 0)
+            : (data?.projectSummary.find((row) => row.companyId === companyFilter)?.activeAtStart || 0);
+        const activeEnd = companyFilter === "all"
+            ? projectSummaryByCompany.reduce((acc, row) => acc + row.activeAtEnd, 0)
+            : (data?.projectSummary.find((row) => row.companyId === companyFilter)?.activeAtEnd || 0);
+
+        return { activated, deactivated, activeStart, activeEnd };
+    }, [filteredProjectEvents, projectSummaryByCompany, data, companyFilter]);
 
     const handleQuery = async () => {
         setLoading(true);
@@ -233,10 +272,10 @@ export function CustomerSuccessUserLifecycleReport() {
             pdf.roundedRect(marginX, y, contentWidth, 18, 2, 2);
             pdf.setTextColor(28, 40, 56);
             pdf.setFontSize(10);
-            pdf.text(`Activaciones: ${totals.activated}`, marginX + 4, y + 6);
-            pdf.text(`Desactivaciones: ${totals.deactivated}`, marginX + 4, y + 12);
-            pdf.text(`Activos al inicio: ${totals.activeStart}`, marginX + 90, y + 6);
-            pdf.text(`Activos al cierre: ${totals.activeEnd}`, marginX + 90, y + 12);
+            pdf.text(`Activaciones: ${userTotals.activated}`, marginX + 4, y + 6);
+            pdf.text(`Desactivaciones: ${userTotals.deactivated}`, marginX + 4, y + 12);
+            pdf.text(`Activos al inicio: ${userTotals.activeStart}`, marginX + 90, y + 6);
+            pdf.text(`Activos al cierre: ${userTotals.activeEnd}`, marginX + 90, y + 12);
             y += 24;
 
             if (chartContainerRef.current) {
@@ -433,23 +472,29 @@ export function CustomerSuccessUserLifecycleReport() {
 
                 {hasQueried && data && (
                     <div className="space-y-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div className="bg-gradient-to-br from-success-green/10 to-success-green/5 rounded-xl border border-success-green/20 p-4">
-                                <p className="text-xs text-[var(--muted-text)] uppercase tracking-wider">Activaciones</p>
-                                <p className="text-2xl font-bold text-[var(--foreground)] mt-1">{totals.activated}</p>
-                            </div>
-                            <div className="bg-gradient-to-br from-nearby-accent/10 to-nearby-accent/5 rounded-xl border border-nearby-accent/20 p-4">
-                                <p className="text-xs text-[var(--muted-text)] uppercase tracking-wider">Desactivaciones</p>
-                                <p className="text-2xl font-bold text-[var(--foreground)] mt-1">{totals.deactivated}</p>
-                            </div>
-                            <div className="bg-gradient-to-br from-ocean-blue/10 to-ocean-blue/5 rounded-xl border border-ocean-blue/20 p-4">
-                                <p className="text-xs text-[var(--muted-text)] uppercase tracking-wider">Activos al inicio</p>
-                                <p className="text-2xl font-bold text-[var(--foreground)] mt-1">{totals.activeStart}</p>
-                            </div>
-                            <div className="bg-gradient-to-br from-info-blue/10 to-info-blue/5 rounded-xl border border-info-blue/20 p-4">
-                                <p className="text-xs text-[var(--muted-text)] uppercase tracking-wider">Activos al cierre</p>
-                                <p className="text-2xl font-bold text-[var(--foreground)] mt-1">{totals.activeEnd}</p>
-                            </div>
+                        <div className="grid grid-cols-1 2xl:grid-cols-2 gap-4">
+                            <MetricGroup
+                                title="Usuarios"
+                                description="Movimientos y stock de usuarios en el período seleccionado."
+                                accentClass="from-success-green/12 via-success-green/4 to-transparent"
+                                metrics={[
+                                    { label: "Activaciones", value: userTotals.activated, tone: "bg-success-green/5 border-success-green/15" },
+                                    { label: "Desactivaciones", value: userTotals.deactivated, tone: "bg-nearby-accent/5 border-nearby-accent/15" },
+                                    { label: "Activos al inicio", value: userTotals.activeStart, tone: "bg-ocean-blue/5 border-ocean-blue/15" },
+                                    { label: "Activos al cierre", value: userTotals.activeEnd, tone: "bg-info-blue/5 border-info-blue/15" },
+                                ]}
+                            />
+                            <MetricGroup
+                                title="Proyectos"
+                                description="Evolución de proyectos activos por cliente en el mismo rango."
+                                accentClass="from-ocean-blue/12 via-ocean-blue/4 to-transparent"
+                                metrics={[
+                                    { label: "Activaciones", value: projectTotals.activated, tone: "bg-ocean-blue/5 border-ocean-blue/15" },
+                                    { label: "Desactivaciones", value: projectTotals.deactivated, tone: "bg-amber-500/5 border-amber-500/20" },
+                                    { label: "Activos al inicio", value: projectTotals.activeStart, tone: "bg-sky-500/5 border-sky-500/15" },
+                                    { label: "Activos al cierre", value: projectTotals.activeEnd, tone: "bg-indigo-500/5 border-indigo-500/15" },
+                                ]}
+                            />
                         </div>
 
                         <div ref={chartContainerRef} className="bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)] p-4 sm:p-5">
