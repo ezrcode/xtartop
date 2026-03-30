@@ -42,6 +42,7 @@ interface PurchaseOrderFormProps {
         decimaOrderId: string | null;
         decimaStatus: string | null;
         decimaLastSync: Date | null;
+        promoCode: string | null;
         supplierId: string;
         supplier: { id: string; name: string; logoUrl: string | null };
         items: { id: string; productCode: string; productName: string | null; quantity: number }[];
@@ -88,6 +89,7 @@ export function PurchaseOrderForm({
     const [period, setPeriod] = useState(order?.period || new Date().toISOString().slice(0, 7));
     const [notes, setNotes] = useState(order?.notes || "");
     const [externalReference, setExternalReference] = useState(order?.externalReference || "");
+    const [promoCode, setPromoCode] = useState(order?.promoCode || "");
     const [items, setItems] = useState<OrderItem[]>(
         order?.items.map((i) => ({
             productCode: i.productCode,
@@ -278,6 +280,7 @@ export function PurchaseOrderForm({
                 {/* Form */}
                 <form action={formAction} className="space-y-6">
                     <input type="hidden" name="items" value={JSON.stringify(items)} />
+                    <input type="hidden" name="promoCode" value={promoCode} />
 
                     {/* Supplier & Period */}
                     <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-6 space-y-4">
@@ -338,7 +341,7 @@ export function PurchaseOrderForm({
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div className="space-y-2">
                                 <label htmlFor="externalReference" className="block text-sm font-medium text-[var(--foreground)]">
                                     Referencia Externa
@@ -353,6 +356,22 @@ export function PurchaseOrderForm({
                                     placeholder="ej: REF-001"
                                     className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors disabled:opacity-50"
                                 />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label htmlFor="promoCode" className="block text-sm font-medium text-[var(--foreground)]">
+                                    Código de Descuento
+                                </label>
+                                <input
+                                    type="text"
+                                    id="promoCode"
+                                    value={promoCode}
+                                    onChange={(e) => setPromoCode(e.target.value)}
+                                    disabled={!!isReadonly}
+                                    placeholder="ej: MARCH25"
+                                    className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors disabled:opacity-50 font-mono uppercase"
+                                />
+                                <p className="text-xs text-[var(--muted-text)]">Se aplica al enviar a Décima</p>
                             </div>
 
                             <div className="space-y-2">
@@ -398,10 +417,10 @@ export function PurchaseOrderForm({
                         <div className="space-y-3">
                             {/* Header */}
                             <div className="hidden sm:grid sm:grid-cols-12 gap-3 px-1">
-                                <div className="col-span-5 text-xs font-semibold text-[var(--muted-text)] uppercase tracking-wider">
-                                    Código Producto
+                                <div className="col-span-2 text-xs font-semibold text-[var(--muted-text)] uppercase tracking-wider">
+                                    Código
                                 </div>
-                                <div className="col-span-4 text-xs font-semibold text-[var(--muted-text)] uppercase tracking-wider">
+                                <div className="col-span-7 text-xs font-semibold text-[var(--muted-text)] uppercase tracking-wider">
                                     Nombre
                                 </div>
                                 <div className="col-span-2 text-xs font-semibold text-[var(--muted-text)] uppercase tracking-wider">
@@ -415,9 +434,9 @@ export function PurchaseOrderForm({
                                     key={index}
                                     className="grid grid-cols-1 sm:grid-cols-12 gap-3 p-3 bg-[var(--hover-bg)] rounded-xl border border-[var(--card-border)]"
                                 >
-                                    <div className="sm:col-span-5">
+                                    <div className="sm:col-span-2">
                                         <label className="sm:hidden text-xs font-medium text-[var(--muted-text)] mb-1 block">
-                                            Código Producto
+                                            Código
                                         </label>
                                         {decimaProducts.length > 0 ? (
                                             <select
@@ -429,7 +448,7 @@ export function PurchaseOrderForm({
                                                 <option value="">Seleccionar...</option>
                                                 {decimaProducts.map((p) => (
                                                     <option key={p.code} value={p.code}>
-                                                        {p.code} — {p.name}
+                                                        {p.code}
                                                     </option>
                                                 ))}
                                             </select>
@@ -444,7 +463,7 @@ export function PurchaseOrderForm({
                                             />
                                         )}
                                     </div>
-                                    <div className="sm:col-span-4">
+                                    <div className="sm:col-span-7">
                                         <label className="sm:hidden text-xs font-medium text-[var(--muted-text)] mb-1 block">
                                             Nombre
                                         </label>

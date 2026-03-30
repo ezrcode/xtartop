@@ -18,6 +18,7 @@ const PurchaseOrderSchema = z.object({
     supplierId: z.string().min(1, "Proveedor es requerido"),
     notes: z.string().optional(),
     externalReference: z.string().optional(),
+    promoCode: z.string().optional(),
     items: z.array(PurchaseOrderItemSchema).min(1, "Debe incluir al menos un item"),
 });
 
@@ -149,6 +150,7 @@ export async function createPurchaseOrder(
         supplierId: formData.get("supplierId") as string,
         notes: (formData.get("notes") as string) || undefined,
         externalReference: (formData.get("externalReference") as string) || undefined,
+        promoCode: (formData.get("promoCode") as string) || undefined,
         items,
     };
 
@@ -178,6 +180,7 @@ export async function createPurchaseOrder(
                 supplierId: validatedFields.data.supplierId,
                 notes: validatedFields.data.notes,
                 externalReference: validatedFields.data.externalReference,
+                promoCode: validatedFields.data.promoCode,
                 workspaceId: workspace.id,
                 createdById: user.id,
                 items: {
@@ -223,6 +226,7 @@ export async function updatePurchaseOrder(
         supplierId: formData.get("supplierId") as string,
         notes: (formData.get("notes") as string) || undefined,
         externalReference: (formData.get("externalReference") as string) || undefined,
+        promoCode: (formData.get("promoCode") as string) || undefined,
         items,
     };
 
@@ -247,6 +251,7 @@ export async function updatePurchaseOrder(
                     supplierId: validatedFields.data.supplierId,
                     notes: validatedFields.data.notes,
                     externalReference: validatedFields.data.externalReference,
+                    promoCode: validatedFields.data.promoCode,
                     items: {
                         create: validatedFields.data.items.map((item) => ({
                             productCode: item.productCode,

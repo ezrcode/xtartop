@@ -160,6 +160,7 @@ export async function sendOrderToDecima(purchaseOrderId: string): Promise<{
             quantity: item.quantity,
         })),
         externalReference: order.externalReference || `OC-${order.orderNumber}`,
+        promoCode: order.promoCode || undefined,
         notes: order.notes || undefined,
     });
 

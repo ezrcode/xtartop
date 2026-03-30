@@ -751,6 +751,7 @@ model PurchaseOrder {
   period            String              // "YYYY-MM" format
   notes             String?             @db.Text
   externalReference String?             // Referencia externa
+  promoCode         String?             // Código de descuento para Décima
   status            PurchaseOrderStatus @default(BORRADOR)
 
   // Decima sync
