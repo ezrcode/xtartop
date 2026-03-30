@@ -17,6 +17,17 @@ interface LifecycleEvent {
     source: "CREATE" | "STATUS_CHANGE";
 }
 
+interface CompanySummary {
+    companyId: string;
+    companyName: string;
+    activated: number;
+    deactivated: number;
+    activeAtStart: number;
+    activeAtEnd: number;
+    activeCurrent: number;
+    net: number;
+}
+
 function parseDateInput(value: string | null): Date | null {
     if (!value) return null;
     const parsed = new Date(value);
@@ -104,10 +115,6 @@ export async function GET(request: NextRequest) {
                 where: {
                     workspaceId: workspace.id,
                     type: "CLIENT_USER",
-                    createdAt: {
-                        gte: from,
-                        lte: to,
-                    },
                 },
                 select: {
                     id: true,
@@ -120,14 +127,13 @@ export async function GET(request: NextRequest) {
         ]);
 
         const companyNameById = new Map(companies.map((company) => [company.id, company.name]));
-        const events: LifecycleEvent[] = [];
+        const allEvents: LifecycleEvent[] = [];
 
         for (const clientUser of allClientUsers) {
-            if (clientUser.createdAt < from || clientUser.createdAt > to) continue;
             const companyName = companyNameById.get(clientUser.companyId);
             if (!companyName) continue;
 
-            events.push({
+            allEvents.push({
                 id: `create-${clientUser.id}`,
                 date: clientUser.createdAt.toISOString(),
                 dateLabel: toDateLabel(clientUser.createdAt),
@@ -148,7 +154,7 @@ export async function GET(request: NextRequest) {
             const eventType = parseLifecycleStatusFromSubject(activity.emailSubject);
             if (!eventType) continue;
 
-            events.push({
+            allEvents.push({
                 id: `activity-${activity.id}`,
                 date: activity.createdAt.toISOString(),
                 dateLabel: toDateLabel(activity.createdAt),
@@ -161,7 +167,12 @@ export async function GET(request: NextRequest) {
             });
         }
 
-        events.sort((a, b) => a.date.localeCompare(b.date));
+        allEvents.sort((a, b) => a.date.localeCompare(b.date));
+
+        const events = allEvents.filter((event) => {
+            const eventDate = new Date(event.date);
+            return eventDate >= from && eventDate <= to;
+        });
 
         const activeNowByCompanyMap = new Map<string, number>();
         for (const clientUser of allClientUsers) {
@@ -170,6 +181,35 @@ export async function GET(request: NextRequest) {
                 clientUser.companyId,
                 (activeNowByCompanyMap.get(clientUser.companyId) || 0) + 1
             );
+        }
+
+        const activeAtStartByCompanyMap = new Map(activeNowByCompanyMap);
+        const activeAtEndByCompanyMap = new Map(activeNowByCompanyMap);
+
+        for (const event of allEvents) {
+            const eventDate = new Date(event.date);
+            const startCurrent = activeAtStartByCompanyMap.get(event.companyId) || 0;
+            const endCurrent = activeAtEndByCompanyMap.get(event.companyId) || 0;
+
+            if (eventDate >= from) {
+                activeAtStartByCompanyMap.set(
+                    event.companyId,
+                    Math.max(
+                        0,
+                        startCurrent + (event.eventType === "ACTIVATED" ? -1 : 1)
+                    )
+                );
+            }
+
+            if (eventDate > to) {
+                activeAtEndByCompanyMap.set(
+                    event.companyId,
+                    Math.max(
+                        0,
+                        endCurrent + (event.eventType === "ACTIVATED" ? -1 : 1)
+                    )
+                );
+            }
         }
 
         const activeNowByCompany = companies
@@ -181,11 +221,38 @@ export async function GET(request: NextRequest) {
             .sort((a, b) => a.companyName.localeCompare(b.companyName, "es"));
 
         const activeNowTotal = activeNowByCompany.reduce((acc, row) => acc + row.activeUsers, 0);
+        const companySummary: CompanySummary[] = companies
+            .map((company) => {
+                const companyEvents = events.filter((event) => event.companyId === company.id);
+                const activated = companyEvents.filter((event) => event.eventType === "ACTIVATED").length;
+                const deactivated = companyEvents.filter((event) => event.eventType === "DEACTIVATED").length;
+                const activeCurrent = activeNowByCompanyMap.get(company.id) || 0;
+                const activeAtStart = activeAtStartByCompanyMap.get(company.id) || 0;
+                const activeAtEnd = activeAtEndByCompanyMap.get(company.id) || 0;
+
+                return {
+                    companyId: company.id,
+                    companyName: company.name,
+                    activated,
+                    deactivated,
+                    activeAtStart,
+                    activeAtEnd,
+                    activeCurrent,
+                    net: activated - deactivated,
+                };
+            })
+            .sort((a, b) => a.companyName.localeCompare(b.companyName, "es"));
+
+        const activeStartTotal = companySummary.reduce((acc, row) => acc + row.activeAtStart, 0);
+        const activeEndTotal = companySummary.reduce((acc, row) => acc + row.activeAtEnd, 0);
 
         return NextResponse.json({
             events,
             activeNowByCompany,
             activeNowTotal,
+            activeStartTotal,
+            activeEndTotal,
+            companySummary,
             range: {
                 from: from.toISOString().split("T")[0],
                 to: to.toISOString().split("T")[0],

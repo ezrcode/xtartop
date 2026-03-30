@@ -34,10 +34,24 @@ interface ActiveNowByCompany {
     activeUsers: number;
 }
 
+interface CompanySummaryRow {
+    companyId: string;
+    companyName: string;
+    activated: number;
+    deactivated: number;
+    activeAtStart: number;
+    activeAtEnd: number;
+    activeCurrent: number;
+    net: number;
+}
+
 interface ReportResponse {
     events: LifecycleEvent[];
     activeNowByCompany: ActiveNowByCompany[];
     activeNowTotal: number;
+    activeStartTotal: number;
+    activeEndTotal: number;
+    companySummary: CompanySummaryRow[];
     range: { from: string; to: string };
 }
 
@@ -101,39 +115,7 @@ export function CustomerSuccessUserLifecycleReport() {
 
     const summaryByCompany = useMemo(() => {
         if (!data) return [];
-
-        const counter = new Map<string, { companyId: string; companyName: string; activated: number; deactivated: number }>();
-
-        for (const row of data.activeNowByCompany) {
-            counter.set(row.companyId, {
-                companyId: row.companyId,
-                companyName: row.companyName,
-                activated: 0,
-                deactivated: 0,
-            });
-        }
-
-        for (const event of data.events) {
-            const row = counter.get(event.companyId) || {
-                companyId: event.companyId,
-                companyName: event.companyName,
-                activated: 0,
-                deactivated: 0,
-            };
-
-            if (event.eventType === "ACTIVATED") row.activated += 1;
-            if (event.eventType === "DEACTIVATED") row.deactivated += 1;
-            counter.set(event.companyId, row);
-        }
-
-        let rows = Array.from(counter.values()).map((row) => {
-            const activeCurrent = data.activeNowByCompany.find((x) => x.companyId === row.companyId)?.activeUsers || 0;
-            return {
-                ...row,
-                activeCurrent,
-                net: row.activated - row.deactivated,
-            };
-        });
+        let rows = [...data.companySummary];
 
         if (companyFilter !== "all") {
             rows = rows.filter((row) => row.companyId === companyFilter);
@@ -145,11 +127,17 @@ export function CustomerSuccessUserLifecycleReport() {
     const totals = useMemo(() => {
         const activated = filteredEvents.filter((event) => event.eventType === "ACTIVATED").length;
         const deactivated = filteredEvents.filter((event) => event.eventType === "DEACTIVATED").length;
+        const activeStart = companyFilter === "all"
+            ? (data?.activeStartTotal || 0)
+            : (data?.companySummary.find((row) => row.companyId === companyFilter)?.activeAtStart || 0);
+        const activeEnd = companyFilter === "all"
+            ? (data?.activeEndTotal || 0)
+            : (data?.companySummary.find((row) => row.companyId === companyFilter)?.activeAtEnd || 0);
         const activeNow = companyFilter === "all"
             ? (data?.activeNowTotal || 0)
             : (data?.activeNowByCompany.find((row) => row.companyId === companyFilter)?.activeUsers || 0);
 
-        return { activated, deactivated, activeNow };
+        return { activated, deactivated, activeStart, activeEnd, activeNow };
     }, [filteredEvents, data, companyFilter]);
 
     const handleQuery = async () => {
@@ -218,8 +206,8 @@ export function CustomerSuccessUserLifecycleReport() {
             pdf.setFontSize(10);
             pdf.text(`Activaciones: ${totals.activated}`, marginX + 4, y + 6);
             pdf.text(`Desactivaciones: ${totals.deactivated}`, marginX + 4, y + 12);
-            pdf.text(`Activos actuales: ${totals.activeNow}`, marginX + 90, y + 6);
-            pdf.text(`Balance neto: ${totals.activated - totals.deactivated}`, marginX + 90, y + 12);
+            pdf.text(`Activos al inicio: ${totals.activeStart}`, marginX + 90, y + 6);
+            pdf.text(`Activos al cierre: ${totals.activeEnd}`, marginX + 90, y + 12);
             y += 24;
 
             if (chartContainerRef.current) {
@@ -260,10 +248,12 @@ export function CustomerSuccessUserLifecycleReport() {
             pdf.setFontSize(8.5);
             pdf.setTextColor(67, 84, 106);
             pdf.text("Cliente", marginX + 2, y + 4.8);
-            pdf.text("Act.", marginX + 118, y + 4.8, { align: "right" });
-            pdf.text("Des.", marginX + 136, y + 4.8, { align: "right" });
-            pdf.text("Activos", marginX + 160, y + 4.8, { align: "right" });
-            pdf.text("Balance", marginX + contentWidth - 2, y + 4.8, { align: "right" });
+            pdf.text("Inicio", marginX + 106, y + 4.8, { align: "right" });
+            pdf.text("Act.", marginX + 124, y + 4.8, { align: "right" });
+            pdf.text("Des.", marginX + 140, y + 4.8, { align: "right" });
+            pdf.text("Cierre", marginX + 158, y + 4.8, { align: "right" });
+            pdf.text("Actual", marginX + 176, y + 4.8, { align: "right" });
+            pdf.text("Bal.", marginX + contentWidth - 2, y + 4.8, { align: "right" });
             y += 7;
 
             summaryByCompany.slice(0, 30).forEach((row, index) => {
@@ -273,10 +263,12 @@ export function CustomerSuccessUserLifecycleReport() {
                     pdf.rect(marginX, y, contentWidth, 6.5, "F");
                 }
                 pdf.setTextColor(45, 62, 80);
-                pdf.text(row.companyName.slice(0, 48), marginX + 2, y + 4.4);
-                pdf.text(String(row.activated), marginX + 118, y + 4.4, { align: "right" });
-                pdf.text(String(row.deactivated), marginX + 136, y + 4.4, { align: "right" });
-                pdf.text(String(row.activeCurrent), marginX + 160, y + 4.4, { align: "right" });
+                pdf.text(row.companyName.slice(0, 42), marginX + 2, y + 4.4);
+                pdf.text(String(row.activeAtStart), marginX + 106, y + 4.4, { align: "right" });
+                pdf.text(String(row.activated), marginX + 124, y + 4.4, { align: "right" });
+                pdf.text(String(row.deactivated), marginX + 140, y + 4.4, { align: "right" });
+                pdf.text(String(row.activeAtEnd), marginX + 158, y + 4.4, { align: "right" });
+                pdf.text(String(row.activeCurrent), marginX + 176, y + 4.4, { align: "right" });
                 pdf.text(String(row.net), marginX + contentWidth - 2, y + 4.4, { align: "right" });
                 y += 6.5;
             });
@@ -309,7 +301,7 @@ export function CustomerSuccessUserLifecycleReport() {
                                     Activación de Usuarios
                                 </h1>
                                 <p className="text-sm text-[var(--muted-text)] mt-0.5">
-                                    Customer Success - altas, bajas y activos actuales por cliente
+                                    Customer Success - altas, bajas y evolución de usuarios por cliente
                                 </p>
                             </div>
                         </div>
@@ -381,7 +373,7 @@ export function CustomerSuccessUserLifecycleReport() {
 
                 {hasQueried && data && (
                     <div className="space-y-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div className="bg-gradient-to-br from-success-green/10 to-success-green/5 rounded-xl border border-success-green/20 p-4">
                                 <p className="text-xs text-[var(--muted-text)] uppercase tracking-wider">Activaciones</p>
                                 <p className="text-2xl font-bold text-[var(--foreground)] mt-1">{totals.activated}</p>
@@ -391,8 +383,12 @@ export function CustomerSuccessUserLifecycleReport() {
                                 <p className="text-2xl font-bold text-[var(--foreground)] mt-1">{totals.deactivated}</p>
                             </div>
                             <div className="bg-gradient-to-br from-ocean-blue/10 to-ocean-blue/5 rounded-xl border border-ocean-blue/20 p-4">
-                                <p className="text-xs text-[var(--muted-text)] uppercase tracking-wider">Activos actuales</p>
-                                <p className="text-2xl font-bold text-[var(--foreground)] mt-1">{totals.activeNow}</p>
+                                <p className="text-xs text-[var(--muted-text)] uppercase tracking-wider">Activos al inicio</p>
+                                <p className="text-2xl font-bold text-[var(--foreground)] mt-1">{totals.activeStart}</p>
+                            </div>
+                            <div className="bg-gradient-to-br from-info-blue/10 to-info-blue/5 rounded-xl border border-info-blue/20 p-4">
+                                <p className="text-xs text-[var(--muted-text)] uppercase tracking-wider">Activos al cierre</p>
+                                <p className="text-2xl font-bold text-[var(--foreground)] mt-1">{totals.activeEnd}</p>
                             </div>
                         </div>
 
@@ -422,8 +418,10 @@ export function CustomerSuccessUserLifecycleReport() {
                                     <thead className="bg-[var(--surface-2)]">
                                         <tr>
                                             <th className="text-left px-4 py-2 text-xs text-[var(--muted-text)] uppercase">Cliente</th>
+                                            <th className="text-right px-4 py-2 text-xs text-[var(--muted-text)] uppercase">Activos al inicio</th>
                                             <th className="text-right px-4 py-2 text-xs text-[var(--muted-text)] uppercase">Activaciones</th>
                                             <th className="text-right px-4 py-2 text-xs text-[var(--muted-text)] uppercase">Desactivaciones</th>
+                                            <th className="text-right px-4 py-2 text-xs text-[var(--muted-text)] uppercase">Activos al cierre</th>
                                             <th className="text-right px-4 py-2 text-xs text-[var(--muted-text)] uppercase">Activos actuales</th>
                                             <th className="text-right px-4 py-2 text-xs text-[var(--muted-text)] uppercase">Balance</th>
                                         </tr>
@@ -432,8 +430,10 @@ export function CustomerSuccessUserLifecycleReport() {
                                         {summaryByCompany.map((row) => (
                                             <tr key={row.companyId}>
                                                 <td className="px-4 py-2 text-[var(--foreground)]">{row.companyName}</td>
+                                                <td className="px-4 py-2 text-right text-[var(--foreground)] font-semibold">{row.activeAtStart}</td>
                                                 <td className="px-4 py-2 text-right text-success-green font-semibold">{row.activated}</td>
                                                 <td className="px-4 py-2 text-right text-nearby-accent font-semibold">{row.deactivated}</td>
+                                                <td className="px-4 py-2 text-right text-[var(--foreground)] font-semibold">{row.activeAtEnd}</td>
                                                 <td className="px-4 py-2 text-right text-[var(--foreground)] font-semibold">{row.activeCurrent}</td>
                                                 <td className="px-4 py-2 text-right text-[var(--foreground)] font-semibold">{row.net}</td>
                                             </tr>
