@@ -43,9 +43,9 @@ const reportGroups: ReportGroup[] = [
         description: "Analiza operación de soporte, cumplimiento y productividad por cliente y equipo.",
         reports: [
             {
-                title: "Activación de Usuarios",
+                title: "Activación de licencias",
                 description:
-                    "Línea de tiempo de altas y desactivaciones de usuarios por cliente, con resumen ejecutivo y exportación a Excel.",
+                    "Línea de tiempo de activaciones y desactivaciones de usuarios y proyectos por cliente, con resumen ejecutivo y exportación en PDF.",
                 href: "/app/reports/customer-success-user-lifecycle",
                 icon: LifeBuoy,
                 gradient: "from-ocean-blue/20 to-ocean-blue/5",
