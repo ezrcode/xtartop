@@ -279,6 +279,90 @@ export async function updatePurchaseOrder(
 }
 
 /**
+ * Importar resumen totalizado de suscripciones activas para pre-llenar una orden de compra.
+ * Agrupa por código de producto y suma las cantidades calculadas de todos los clientes.
+ */
+export async function getSubscriptionSummaryForOrder(): Promise<{
+    success: boolean;
+    items: { productCode: string; productName: string; quantity: number }[];
+    error?: string;
+}> {
+    const session = await auth();
+    if (!session?.user?.email) return { success: false, items: [], error: "No autenticado" };
+
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) return { success: false, items: [], error: "Workspace no encontrado" };
+
+    const companies = await prisma.company.findMany({
+        where: {
+            workspaceId: workspace.id,
+            subscriptionBilling: { isNot: null },
+        },
+        include: {
+            subscriptionBilling: {
+                include: { items: true },
+            },
+            projects: {
+                where: { status: "ACTIVE" },
+                select: { id: true },
+            },
+            clientUsers: {
+                where: { status: "ACTIVE" },
+                select: { id: true },
+            },
+        },
+    });
+
+    const totals = new Map<string, { productName: string; quantity: number }>();
+
+    for (const company of companies) {
+        const billing = company.subscriptionBilling;
+        if (!billing || billing.items.length === 0) continue;
+
+        const activeProjects = company.projects.length;
+        const activeUsers = company.clientUsers.length;
+
+        for (const item of billing.items) {
+            let quantity = item.manualQuantity || 0;
+
+            if (item.countType === "ACTIVE_PROJECTS") {
+                quantity = activeProjects;
+            } else if (item.countType === "ACTIVE_USERS") {
+                quantity = activeUsers;
+            } else if (item.countType === "CALCULATED") {
+                const base = item.calculatedBase === "USERS"
+                    ? activeUsers
+                    : activeProjects;
+                const subtract = item.calculatedSubtract || 0;
+                quantity = Math.max(0, base - subtract);
+            }
+
+            if (quantity <= 0) continue;
+
+            const existing = totals.get(item.code);
+            if (existing) {
+                existing.quantity += quantity;
+            } else {
+                totals.set(item.code, {
+                    productName: item.description,
+                    quantity,
+                });
+            }
+        }
+    }
+
+    const items = Array.from(totals.entries())
+        .map(([code, data]) => ({
+            productCode: code,
+            productName: data.productName,
+            quantity: data.quantity,
+        }))
+        .sort((a, b) => a.productCode.localeCompare(b.productCode));
+
+    return { success: true, items };
+}
+
+/**
  * Eliminar orden de compra
  */
 export async function deletePurchaseOrder(id: string) {

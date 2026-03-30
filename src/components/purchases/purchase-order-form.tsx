@@ -14,12 +14,14 @@ import {
     CheckCircle,
     XCircle,
     ShoppingCart,
+    Download,
 } from "lucide-react";
 import Link from "next/link";
 import {
     createPurchaseOrder,
     updatePurchaseOrder,
     deletePurchaseOrder,
+    getSubscriptionSummaryForOrder,
     type PurchaseOrderState,
 } from "@/actions/purchase-orders";
 import { sendOrderToDecima, syncOrderFromDecima } from "@/actions/decima";
@@ -103,6 +105,9 @@ export function PurchaseOrderForm({
     const [syncingFromDecima, setSyncingFromDecima] = useState(false);
     const [decimaMessage, setDecimaMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
+    // Import state
+    const [importing, setImporting] = useState(false);
+
     // Delete state
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deleting, setDeleting] = useState(false);
@@ -177,6 +182,31 @@ export function PurchaseOrderForm({
         if (!order) return;
         setDeleting(true);
         await deletePurchaseOrder(order.id);
+    };
+
+    const handleImportSubscriptions = async () => {
+        setImporting(true);
+        setDecimaMessage(null);
+        try {
+            const result = await getSubscriptionSummaryForOrder();
+            if (result.success && result.items.length > 0) {
+                setItems(result.items);
+                setDecimaMessage({
+                    type: "success",
+                    text: `${result.items.length} artículo(s) importados desde suscripciones activas`,
+                });
+            } else if (result.items.length === 0) {
+                setDecimaMessage({
+                    type: "error",
+                    text: "No se encontraron suscripciones activas con cantidades mayores a 0",
+                });
+            } else {
+                setDecimaMessage({ type: "error", text: result.error || "Error al importar" });
+            }
+        } catch {
+            setDecimaMessage({ type: "error", text: "Error inesperado al importar suscripciones" });
+        }
+        setImporting(false);
     };
 
     return (
@@ -399,14 +429,25 @@ export function PurchaseOrderForm({
                                 Items ({items.length})
                             </h2>
                             {!isReadonly && (
-                                <button
-                                    type="button"
-                                    onClick={addItem}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-nearby-accent bg-nearby-accent/10 rounded-lg hover:bg-nearby-accent/20 transition-colors"
-                                >
-                                    <Plus size={14} />
-                                    Agregar Item
-                                </button>
+                                <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={handleImportSubscriptions}
+                                        disabled={importing}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors disabled:opacity-50"
+                                    >
+                                        {importing ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                                        Importar suscripciones
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={addItem}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-nearby-accent bg-nearby-accent/10 rounded-lg hover:bg-nearby-accent/20 transition-colors"
+                                    >
+                                        <Plus size={14} />
+                                        Agregar Item
+                                    </button>
+                                </div>
                             )}
                         </div>
 
