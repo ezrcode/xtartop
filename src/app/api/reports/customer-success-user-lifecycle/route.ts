@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentWorkspace } from "@/actions/workspace";
 
 type LifecycleEventType = "ACTIVATED" | "DEACTIVATED";
+type LifecycleEntity = "USER" | "PROJECT";
 
 interface LifecycleEvent {
     id: string;
@@ -12,8 +13,9 @@ interface LifecycleEvent {
     weekLabel: string;
     companyId: string;
     companyName: string;
-    userName: string;
+    itemName: string;
     eventType: LifecycleEventType;
+    entityType: LifecycleEntity;
     source: "CREATE" | "STATUS_CHANGE";
 }
 
@@ -26,6 +28,25 @@ interface CompanySummary {
     activeAtEnd: number;
     activeCurrent: number;
     net: number;
+}
+
+function parseProjectStatusFromSubject(subject: string | null): LifecycleEventType | null {
+    if (!subject) return null;
+    const normalized = subject.toLowerCase().trim();
+    if (normalized.startsWith("proyecto activado")) return "ACTIVATED";
+    if (normalized.startsWith("proyecto inactivado")) return "DEACTIVATED";
+    if (normalized.startsWith("proyecto eliminado")) return "DEACTIVATED";
+    return null;
+}
+
+function parseItemNameFromSubject(subject: string | null, fallback: string): string {
+    if (!subject) return fallback;
+    const parts = subject.split(":");
+    if (parts.length > 1) {
+        const parsed = parts.slice(1).join(":").trim();
+        if (parsed) return parsed;
+    }
+    return fallback;
 }
 
 function parseDateInput(value: string | null): Date | null {
@@ -68,16 +89,6 @@ function parseLifecycleStatusFromSubject(subject: string | null): LifecycleEvent
     return null;
 }
 
-function parseUserNameFromSubject(subject: string | null): string {
-    if (!subject) return "Usuario";
-    const parts = subject.split(":");
-    if (parts.length > 1) {
-        const parsed = parts.slice(1).join(":").trim();
-        if (parsed) return parsed;
-    }
-    return "Usuario";
-}
-
 export async function GET(request: NextRequest) {
     try {
         const session = await auth();
@@ -96,7 +107,7 @@ export async function GET(request: NextRequest) {
         const to = parseDateInput(request.nextUrl.searchParams.get("dateTo")) || now;
         to.setHours(23, 59, 59, 999);
 
-        const [companies, allClientUsers, statusActivities] = await Promise.all([
+        const [companies, allClientUsers, userActivities, allProjects, projectActivities] = await Promise.all([
             prisma.company.findMany({
                 where: { workspaceId: workspace.id },
                 select: { id: true, name: true },
@@ -124,29 +135,54 @@ export async function GET(request: NextRequest) {
                 },
                 orderBy: { createdAt: "asc" },
             }),
+            prisma.project.findMany({
+                where: { company: { workspaceId: workspace.id } },
+                select: {
+                    id: true,
+                    name: true,
+                    status: true,
+                    companyId: true,
+                    createdAt: true,
+                },
+            }),
+            prisma.activity.findMany({
+                where: {
+                    workspaceId: workspace.id,
+                    type: "PROJECT",
+                },
+                select: {
+                    id: true,
+                    companyId: true,
+                    emailSubject: true,
+                    createdAt: true,
+                },
+                orderBy: { createdAt: "asc" },
+            }),
         ]);
 
         const companyNameById = new Map(companies.map((company) => [company.id, company.name]));
-        const allEvents: LifecycleEvent[] = [];
+        const allUserEvents: LifecycleEvent[] = [];
+        const allProjectEvents: LifecycleEvent[] = [];
 
         for (const clientUser of allClientUsers) {
             const companyName = companyNameById.get(clientUser.companyId);
             if (!companyName) continue;
 
-            allEvents.push({
+            allUserEvents.push({
                 id: `create-${clientUser.id}`,
                 date: clientUser.createdAt.toISOString(),
                 dateLabel: toDateLabel(clientUser.createdAt),
                 weekLabel: getWeekLabel(clientUser.createdAt),
                 companyId: clientUser.companyId,
                 companyName,
-                userName: clientUser.fullName,
+                itemName: clientUser.fullName,
                 eventType: "ACTIVATED",
+                entityType: "USER",
                 source: "CREATE",
             });
         }
 
-        for (const activity of statusActivities) {
+        for (const activity of userActivities) {
             if (!activity.companyId) continue;
             const companyName = companyNameById.get(activity.companyId);
             if (!companyName) continue;
@@ -154,22 +190,68 @@ export async function GET(request: NextRequest) {
             const eventType = parseLifecycleStatusFromSubject(activity.emailSubject);
             if (!eventType) continue;
 
-            allEvents.push({
+            allUserEvents.push({
                 id: `activity-${activity.id}`,
                 date: activity.createdAt.toISOString(),
                 dateLabel: toDateLabel(activity.createdAt),
                 weekLabel: getWeekLabel(activity.createdAt),
                 companyId: activity.companyId,
                 companyName,
-                userName: parseUserNameFromSubject(activity.emailSubject),
+                itemName: parseItemNameFromSubject(activity.emailSubject, "Usuario"),
                 eventType,
+                entityType: "USER",
                 source: "STATUS_CHANGE",
             });
         }
 
-        allEvents.sort((a, b) => a.date.localeCompare(b.date));
+        for (const project of allProjects) {
+            const companyName = companyNameById.get(project.companyId);
+            if (!companyName) continue;
 
-        const events = allEvents.filter((event) => {
+            allProjectEvents.push({
+                id: `create-project-${project.id}`,
+                date: project.createdAt.toISOString(),
+                dateLabel: toDateLabel(project.createdAt),
+                weekLabel: getWeekLabel(project.createdAt),
+                companyId: project.companyId,
+                companyName,
+                itemName: project.name,
+                eventType: "ACTIVATED",
+                entityType: "PROJECT",
+                source: "CREATE",
+            });
+        }
+
+        for (const activity of projectActivities) {
+            if (!activity.companyId) continue;
+            const companyName = companyNameById.get(activity.companyId);
+            if (!companyName) continue;
+
+            const eventType = parseProjectStatusFromSubject(activity.emailSubject);
+            if (!eventType) continue;
+
+            allProjectEvents.push({
+                id: `activity-project-${activity.id}`,
+                date: activity.createdAt.toISOString(),
+                dateLabel: toDateLabel(activity.createdAt),
+                weekLabel: getWeekLabel(activity.createdAt),
+                companyId: activity.companyId,
+                companyName,
+                itemName: parseItemNameFromSubject(activity.emailSubject, "Proyecto"),
+                eventType,
+                entityType: "PROJECT",
+                source: "STATUS_CHANGE",
+            });
+        }
+
+        allUserEvents.sort((a, b) => a.date.localeCompare(b.date));
+        allProjectEvents.sort((a, b) => a.date.localeCompare(b.date));
+
+        const events = allUserEvents.filter((event) => {
+            const eventDate = new Date(event.date);
+            return eventDate >= from && eventDate <= to;
+        });
+        const projectEvents = allProjectEvents.filter((event) => {
             const eventDate = new Date(event.date);
             return eventDate >= from && eventDate <= to;
         });
@@ -186,7 +268,7 @@ export async function GET(request: NextRequest) {
         const activeAtStartByCompanyMap = new Map(activeNowByCompanyMap);
         const activeAtEndByCompanyMap = new Map(activeNowByCompanyMap);
 
-        for (const event of allEvents) {
+        for (const event of allUserEvents) {
             const eventDate = new Date(event.date);
             const startCurrent = activeAtStartByCompanyMap.get(event.companyId) || 0;
             const endCurrent = activeAtEndByCompanyMap.get(event.companyId) || 0;
@@ -208,6 +290,38 @@ export async function GET(request: NextRequest) {
                         0,
                         endCurrent + (event.eventType === "ACTIVATED" ? -1 : 1)
                     )
+                );
+            }
+        }
+
+        const activeProjectsNowByCompanyMap = new Map<string, number>();
+        for (const project of allProjects) {
+            if (project.status !== "ACTIVE") continue;
+            activeProjectsNowByCompanyMap.set(
+                project.companyId,
+                (activeProjectsNowByCompanyMap.get(project.companyId) || 0) + 1
+            );
+        }
+
+        const activeProjectsAtStartByCompanyMap = new Map(activeProjectsNowByCompanyMap);
+        const activeProjectsAtEndByCompanyMap = new Map(activeProjectsNowByCompanyMap);
+
+        for (const event of allProjectEvents) {
+            const eventDate = new Date(event.date);
+            const startCurrent = activeProjectsAtStartByCompanyMap.get(event.companyId) || 0;
+            const endCurrent = activeProjectsAtEndByCompanyMap.get(event.companyId) || 0;
+
+            if (eventDate >= from) {
+                activeProjectsAtStartByCompanyMap.set(
+                    event.companyId,
+                    Math.max(0, startCurrent + (event.eventType === "ACTIVATED" ? -1 : 1))
+                );
+            }
+
+            if (eventDate > to) {
+                activeProjectsAtEndByCompanyMap.set(
+                    event.companyId,
+                    Math.max(0, endCurrent + (event.eventType === "ACTIVATED" ? -1 : 1))
                 );
             }
         }
@@ -243,16 +357,40 @@ export async function GET(request: NextRequest) {
             })
             .sort((a, b) => a.companyName.localeCompare(b.companyName, "es"));
 
+        const projectSummary: CompanySummary[] = companies
+            .map((company) => {
+                const companyEvents = projectEvents.filter((event) => event.companyId === company.id);
+                const activated = companyEvents.filter((event) => event.eventType === "ACTIVATED").length;
+                const deactivated = companyEvents.filter((event) => event.eventType === "DEACTIVATED").length;
+                const activeCurrent = activeProjectsNowByCompanyMap.get(company.id) || 0;
+                const activeAtStart = activeProjectsAtStartByCompanyMap.get(company.id) || 0;
+                const activeAtEnd = activeProjectsAtEndByCompanyMap.get(company.id) || 0;
+
+                return {
+                    companyId: company.id,
+                    companyName: company.name,
+                    activated,
+                    deactivated,
+                    activeAtStart,
+                    activeAtEnd,
+                    activeCurrent,
+                    net: activated - deactivated,
+                };
+            })
+            .sort((a, b) => a.companyName.localeCompare(b.companyName, "es"));
+
         const activeStartTotal = companySummary.reduce((acc, row) => acc + row.activeAtStart, 0);
         const activeEndTotal = companySummary.reduce((acc, row) => acc + row.activeAtEnd, 0);
 
         return NextResponse.json({
             events,
+            projectEvents,
             activeNowByCompany,
             activeNowTotal,
             activeStartTotal,
             activeEndTotal,
             companySummary,
+            projectSummary,
             range: {
                 from: from.toISOString().split("T")[0],
                 to: to.toISOString().split("T")[0],

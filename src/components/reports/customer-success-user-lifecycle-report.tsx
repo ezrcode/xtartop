@@ -23,8 +23,9 @@ interface LifecycleEvent {
     weekLabel: string;
     companyId: string;
     companyName: string;
-    userName: string;
+    itemName: string;
     eventType: "ACTIVATED" | "DEACTIVATED";
+    entityType: "USER" | "PROJECT";
     source: "CREATE" | "STATUS_CHANGE";
 }
 
@@ -47,11 +48,13 @@ interface CompanySummaryRow {
 
 interface ReportResponse {
     events: LifecycleEvent[];
+    projectEvents: LifecycleEvent[];
     activeNowByCompany: ActiveNowByCompany[];
     activeNowTotal: number;
     activeStartTotal: number;
     activeEndTotal: number;
     companySummary: CompanySummaryRow[];
+    projectSummary: CompanySummaryRow[];
     range: { from: string; to: string };
 }
 
@@ -96,26 +99,52 @@ export function CustomerSuccessUserLifecycleReport() {
         return data.events.filter((event) => event.companyId === companyFilter);
     }, [data, companyFilter]);
 
+    const filteredProjectEvents = useMemo(() => {
+        if (!data) return [];
+        if (companyFilter === "all") return data.projectEvents;
+        return data.projectEvents.filter((event) => event.companyId === companyFilter);
+    }, [data, companyFilter]);
+
     const timelineRows = useMemo(() => {
-        const map = new Map<string, { monthKey: string; monthLabel: string; activated: number; deactivated: number; net: number }>();
+        const map = new Map<string, { monthKey: string; monthLabel: string; activated: number; deactivated: number; projectActivated: number; projectDeactivated: number }>();
 
         for (const event of filteredEvents) {
             const key = getMonthKey(event.date);
             if (!map.has(key)) {
-                map.set(key, { monthKey: key, monthLabel: getMonthLabel(event.date), activated: 0, deactivated: 0, net: 0 });
+                map.set(key, { monthKey: key, monthLabel: getMonthLabel(event.date), activated: 0, deactivated: 0, projectActivated: 0, projectDeactivated: 0 });
             }
             const row = map.get(key)!;
             if (event.eventType === "ACTIVATED") row.activated += 1;
             if (event.eventType === "DEACTIVATED") row.deactivated += 1;
-            row.net = row.activated - row.deactivated;
+        }
+
+        for (const event of filteredProjectEvents) {
+            const key = getMonthKey(event.date);
+            if (!map.has(key)) {
+                map.set(key, { monthKey: key, monthLabel: getMonthLabel(event.date), activated: 0, deactivated: 0, projectActivated: 0, projectDeactivated: 0 });
+            }
+            const row = map.get(key)!;
+            if (event.eventType === "ACTIVATED") row.projectActivated += 1;
+            if (event.eventType === "DEACTIVATED") row.projectDeactivated += 1;
         }
 
         return Array.from(map.values()).sort((a, b) => a.monthKey.localeCompare(b.monthKey));
-    }, [filteredEvents]);
+    }, [filteredEvents, filteredProjectEvents]);
 
     const summaryByCompany = useMemo(() => {
         if (!data) return [];
         let rows = [...data.companySummary];
+
+        if (companyFilter !== "all") {
+            rows = rows.filter((row) => row.companyId === companyFilter);
+        }
+
+        return rows.sort((a, b) => a.companyName.localeCompare(b.companyName, "es"));
+    }, [data, companyFilter]);
+
+    const projectSummaryByCompany = useMemo(() => {
+        if (!data) return [];
+        let rows = [...data.projectSummary];
 
         if (companyFilter !== "all") {
             rows = rows.filter((row) => row.companyId === companyFilter);
@@ -184,7 +213,7 @@ export function CustomerSuccessUserLifecycleReport() {
 
             pdf.setTextColor(28, 40, 56);
             pdf.setFontSize(16);
-            pdf.text("Reporte Ejecutivo - Activación de Usuarios", marginX, y);
+            pdf.text("Reporte Ejecutivo - Activación de licencias", marginX, y);
             y += 6;
             pdf.setFontSize(10);
             pdf.setTextColor(95, 110, 130);
@@ -268,8 +297,39 @@ export function CustomerSuccessUserLifecycleReport() {
                 pdf.text(String(row.activated), marginX + 124, y + 4.4, { align: "right" });
                 pdf.text(String(row.deactivated), marginX + 140, y + 4.4, { align: "right" });
                 pdf.text(String(row.activeAtEnd), marginX + 158, y + 4.4, { align: "right" });
-                pdf.text(String(row.activeCurrent), marginX + 176, y + 4.4, { align: "right" });
-                pdf.text(String(row.net), marginX + contentWidth - 2, y + 4.4, { align: "right" });
+                y += 6.5;
+            });
+
+            y += 6;
+            ensureSpace(14);
+            pdf.setFontSize(11);
+            pdf.setTextColor(28, 40, 56);
+            pdf.text("Resumen por cliente - Proyectos", marginX, y);
+            y += 5;
+
+            pdf.setFillColor(234, 242, 250);
+            pdf.rect(marginX, y, contentWidth, 7, "F");
+            pdf.setFontSize(8.5);
+            pdf.setTextColor(67, 84, 106);
+            pdf.text("Cliente", marginX + 2, y + 4.8);
+            pdf.text("Inicio", marginX + 124, y + 4.8, { align: "right" });
+            pdf.text("Act.", marginX + 142, y + 4.8, { align: "right" });
+            pdf.text("Des.", marginX + 158, y + 4.8, { align: "right" });
+            pdf.text("Cierre", marginX + contentWidth - 2, y + 4.8, { align: "right" });
+            y += 7;
+
+            projectSummaryByCompany.slice(0, 30).forEach((row, index) => {
+                ensureSpace(6.8);
+                if (index % 2 === 1) {
+                    pdf.setFillColor(248, 251, 255);
+                    pdf.rect(marginX, y, contentWidth, 6.5, "F");
+                }
+                pdf.setTextColor(45, 62, 80);
+                pdf.text(row.companyName.slice(0, 54), marginX + 2, y + 4.4);
+                pdf.text(String(row.activeAtStart), marginX + 124, y + 4.4, { align: "right" });
+                pdf.text(String(row.activated), marginX + 142, y + 4.4, { align: "right" });
+                pdf.text(String(row.deactivated), marginX + 158, y + 4.4, { align: "right" });
+                pdf.text(String(row.activeAtEnd), marginX + contentWidth - 2, y + 4.4, { align: "right" });
                 y += 6.5;
             });
 
@@ -298,10 +358,10 @@ export function CustomerSuccessUserLifecycleReport() {
                             </div>
                             <div>
                                 <h1 className="text-xl sm:text-2xl font-bold text-[var(--foreground)]">
-                                    Activación de Usuarios
+                                    Activación de licencias
                                 </h1>
                                 <p className="text-sm text-[var(--muted-text)] mt-0.5">
-                                    Customer Success - altas, bajas y evolución de usuarios por cliente
+                                    Customer Success - evolución de usuarios y proyectos por cliente
                                 </p>
                             </div>
                         </div>
@@ -402,8 +462,10 @@ export function CustomerSuccessUserLifecycleReport() {
                                         <YAxis allowDecimals={false} tick={{ fill: "var(--muted-text)", fontSize: 12 }} />
                                         <Tooltip />
                                         <Legend />
-                                        <Line type="monotone" dataKey="activated" name="Activaciones" stroke="#22c55e" strokeWidth={2.5} dot={{ r: 3 }} />
-                                        <Line type="monotone" dataKey="deactivated" name="Desactivaciones" stroke="#FC5A34" strokeWidth={2.5} dot={{ r: 3 }} />
+                                        <Line type="monotone" dataKey="activated" name="Usuarios activados" stroke="#22c55e" strokeWidth={2.5} dot={{ r: 3 }} />
+                                        <Line type="monotone" dataKey="deactivated" name="Usuarios desactivados" stroke="#FC5A34" strokeWidth={2.5} dot={{ r: 3 }} />
+                                        <Line type="monotone" dataKey="projectActivated" name="Proyectos activados" stroke="#3b82f6" strokeWidth={2.5} dot={{ r: 3 }} />
+                                        <Line type="monotone" dataKey="projectDeactivated" name="Proyectos desactivados" stroke="#f59e0b" strokeWidth={2.5} dot={{ r: 3 }} />
                                     </LineChart>
                                 </ResponsiveContainer>
                             </div>
@@ -422,8 +484,6 @@ export function CustomerSuccessUserLifecycleReport() {
                                             <th className="text-right px-4 py-2 text-xs text-[var(--muted-text)] uppercase">Activaciones</th>
                                             <th className="text-right px-4 py-2 text-xs text-[var(--muted-text)] uppercase">Desactivaciones</th>
                                             <th className="text-right px-4 py-2 text-xs text-[var(--muted-text)] uppercase">Activos al cierre</th>
-                                            <th className="text-right px-4 py-2 text-xs text-[var(--muted-text)] uppercase">Activos actuales</th>
-                                            <th className="text-right px-4 py-2 text-xs text-[var(--muted-text)] uppercase">Balance</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-[var(--card-border)]">
@@ -434,8 +494,36 @@ export function CustomerSuccessUserLifecycleReport() {
                                                 <td className="px-4 py-2 text-right text-success-green font-semibold">{row.activated}</td>
                                                 <td className="px-4 py-2 text-right text-nearby-accent font-semibold">{row.deactivated}</td>
                                                 <td className="px-4 py-2 text-right text-[var(--foreground)] font-semibold">{row.activeAtEnd}</td>
-                                                <td className="px-4 py-2 text-right text-[var(--foreground)] font-semibold">{row.activeCurrent}</td>
-                                                <td className="px-4 py-2 text-right text-[var(--foreground)] font-semibold">{row.net}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] overflow-hidden">
+                            <div className="px-4 py-3 border-b border-[var(--card-border)] bg-[var(--hover-bg)]">
+                                <h3 className="text-sm font-semibold text-[var(--foreground)]">Resumen por cliente - Proyectos</h3>
+                            </div>
+                            <div className="max-h-96 overflow-auto">
+                                <table className="w-full text-sm">
+                                    <thead className="bg-[var(--surface-2)]">
+                                        <tr>
+                                            <th className="text-left px-4 py-2 text-xs text-[var(--muted-text)] uppercase">Cliente</th>
+                                            <th className="text-right px-4 py-2 text-xs text-[var(--muted-text)] uppercase">Activos al inicio</th>
+                                            <th className="text-right px-4 py-2 text-xs text-[var(--muted-text)] uppercase">Activaciones</th>
+                                            <th className="text-right px-4 py-2 text-xs text-[var(--muted-text)] uppercase">Desactivaciones</th>
+                                            <th className="text-right px-4 py-2 text-xs text-[var(--muted-text)] uppercase">Activos al cierre</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-[var(--card-border)]">
+                                        {projectSummaryByCompany.map((row) => (
+                                            <tr key={`project-${row.companyId}`}>
+                                                <td className="px-4 py-2 text-[var(--foreground)]">{row.companyName}</td>
+                                                <td className="px-4 py-2 text-right text-[var(--foreground)] font-semibold">{row.activeAtStart}</td>
+                                                <td className="px-4 py-2 text-right text-info-blue font-semibold">{row.activated}</td>
+                                                <td className="px-4 py-2 text-right text-amber-500 font-semibold">{row.deactivated}</td>
+                                                <td className="px-4 py-2 text-right text-[var(--foreground)] font-semibold">{row.activeAtEnd}</td>
                                             </tr>
                                         ))}
                                     </tbody>
