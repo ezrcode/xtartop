@@ -1,5 +1,5 @@
 import { getPurchaseOrder, getSuppliers, isDecimaEnabled } from "@/actions/purchase-orders";
-import { getDecimaProducts } from "@/actions/decima";
+import { getDecimaProducts, getDecimaPromotions } from "@/actions/decima";
 import { PurchaseOrderForm } from "@/components/purchases/purchase-order-form";
 import { ClientOnly } from "@/components/client-only";
 import { notFound } from "next/navigation";
@@ -23,13 +23,27 @@ export default async function PurchaseOrderDetailPage({ params }: Props) {
     }
 
     let decimaProducts: { code: string; name: string; cost: number }[] = [];
+    let decimaPromotions: { code: string; name: string; type: "PERCENTAGE" | "FIXED"; value: number; productCodes: string[] }[] = [];
+
     if (decimaEnabled) {
-        const result = await getDecimaProducts();
-        if (result.success && result.products) {
-            decimaProducts = result.products.map((p) => ({
+        const [prodResult, promoResult] = await Promise.all([
+            getDecimaProducts(),
+            getDecimaPromotions(),
+        ]);
+        if (prodResult.success && prodResult.products) {
+            decimaProducts = prodResult.products.map((p) => ({
                 code: p.code,
                 name: p.name,
                 cost: p.cost || 0,
+            }));
+        }
+        if (promoResult.success && promoResult.promotions) {
+            decimaPromotions = promoResult.promotions.map((p) => ({
+                code: p.code,
+                name: p.name,
+                type: p.type,
+                value: p.value,
+                productCodes: p.products.map((pr) => pr.code),
             }));
         }
     }
@@ -40,6 +54,7 @@ export default async function PurchaseOrderDetailPage({ params }: Props) {
                 order={order}
                 suppliers={suppliers}
                 decimaProducts={decimaProducts}
+                decimaPromotions={decimaPromotions}
                 decimaEnabled={decimaEnabled}
                 isEditMode={true}
             />

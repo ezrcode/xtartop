@@ -34,6 +34,14 @@ interface OrderItem {
     unitPrice: number;
 }
 
+interface DecimaPromotionInfo {
+    code: string;
+    name: string;
+    type: "PERCENTAGE" | "FIXED";
+    value: number;
+    productCodes: string[];
+}
+
 interface PurchaseOrderFormProps {
     order?: {
         id: string;
@@ -52,6 +60,7 @@ interface PurchaseOrderFormProps {
     };
     suppliers: { id: string; name: string; logoUrl: string | null }[];
     decimaProducts: { code: string; name: string; cost: number }[];
+    decimaPromotions?: DecimaPromotionInfo[];
     decimaEnabled: boolean;
     isEditMode: boolean;
 }
@@ -82,6 +91,7 @@ export function PurchaseOrderForm({
     order,
     suppliers,
     decimaProducts,
+    decimaPromotions = [],
     decimaEnabled,
     isEditMode,
 }: PurchaseOrderFormProps) {
@@ -188,6 +198,27 @@ export function PurchaseOrderForm({
         setDeleting(true);
         await deletePurchaseOrder(order.id);
     };
+
+    // Promo code resolution
+    const normalizedPromo = promoCode.trim().toUpperCase();
+    const matchedPromo = normalizedPromo
+        ? decimaPromotions.find((p) => p.code.toUpperCase() === normalizedPromo)
+        : undefined;
+
+    const subtotal = items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0);
+
+    const discountAmount = matchedPromo
+        ? items.reduce((sum, item) => {
+            if (!matchedPromo.productCodes.includes(item.productCode)) return sum;
+            const lineTotal = item.unitPrice * item.quantity;
+            if (matchedPromo.type === "PERCENTAGE") {
+                return sum + lineTotal * (matchedPromo.value / 100);
+            }
+            return sum + matchedPromo.value;
+        }, 0)
+        : 0;
+
+    const total = subtotal - discountAmount;
 
     const handleImportSubscriptions = async () => {
         setImporting(true);
@@ -412,10 +443,25 @@ export function PurchaseOrderForm({
                                     value={promoCode}
                                     onChange={(e) => setPromoCode(e.target.value)}
                                     disabled={!!isReadonly}
-                                    placeholder="ej: MARCH25"
-                                    className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors disabled:opacity-50 font-mono uppercase"
+                                    placeholder="ej: SS2026"
+                                    className={`w-full px-3 py-2.5 text-sm border rounded-xl bg-[var(--card-bg)] shadow-sm focus:ring-2 transition-colors disabled:opacity-50 font-mono uppercase ${
+                                        normalizedPromo && matchedPromo
+                                            ? "border-success-green focus:ring-success-green/20 focus:border-success-green"
+                                            : normalizedPromo && !matchedPromo
+                                                ? "border-amber-400 focus:ring-amber-400/20 focus:border-amber-400"
+                                                : "border-[var(--card-border)] focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                    }`}
                                 />
-                                <p className="text-xs text-[var(--muted-text)]">Se aplica al enviar a Décima</p>
+                                {normalizedPromo && matchedPromo ? (
+                                    <p className="text-xs text-success-green flex items-center gap-1">
+                                        <CheckCircle size={12} />
+                                        {matchedPromo.name} — {matchedPromo.type === "PERCENTAGE" ? `${matchedPromo.value}%` : `$${matchedPromo.value}`} de descuento
+                                    </p>
+                                ) : normalizedPromo && !matchedPromo ? (
+                                    <p className="text-xs text-amber-600">Código no encontrado en las promociones activas</p>
+                                ) : (
+                                    <p className="text-xs text-[var(--muted-text)]">Se valida con las promociones activas de Décima</p>
+                                )}
                             </div>
 
                             <div className="space-y-2">
@@ -621,23 +667,37 @@ export function PurchaseOrderForm({
                                 <div className="flex justify-between items-center text-sm">
                                     <span className="text-[var(--muted-text)]">Subtotal</span>
                                     <span className="font-mono tabular-nums font-medium text-[var(--foreground)]">
-                                        ${items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0).toFixed(2)}
+                                        ${subtotal.toFixed(2)}
                                     </span>
                                 </div>
-                                {promoCode && (
+                                {normalizedPromo && (
                                     <div className="flex justify-between items-center text-sm">
                                         <span className="text-[var(--muted-text)]">
-                                            Descuento <span className="font-mono text-xs bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded">{promoCode}</span>
+                                            Descuento{" "}
+                                            <span className="font-mono text-xs bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded">
+                                                {normalizedPromo}
+                                            </span>
+                                            {matchedPromo && (
+                                                <span className="text-xs text-[var(--muted-text)] ml-1">
+                                                    ({matchedPromo.type === "PERCENTAGE" ? `${matchedPromo.value}%` : `$${matchedPromo.value}`})
+                                                </span>
+                                            )}
                                         </span>
-                                        <span className="font-mono tabular-nums text-[var(--muted-text)] italic">
-                                            Se calcula en Décima
-                                        </span>
+                                        {matchedPromo ? (
+                                            <span className="font-mono tabular-nums text-success-green font-medium">
+                                                -${discountAmount.toFixed(2)}
+                                            </span>
+                                        ) : (
+                                            <span className="font-mono tabular-nums text-amber-500 text-xs italic">
+                                                No reconocido
+                                            </span>
+                                        )}
                                     </div>
                                 )}
                                 <div className="flex justify-between items-center text-base pt-1 border-t border-dashed border-[var(--card-border)]">
-                                    <span className="font-semibold text-[var(--foreground)]">Total estimado</span>
+                                    <span className="font-semibold text-[var(--foreground)]">Total</span>
                                     <span className="font-mono tabular-nums font-bold text-[var(--foreground)]">
-                                        ${items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0).toFixed(2)}
+                                        ${total.toFixed(2)}
                                     </span>
                                 </div>
                             </div>

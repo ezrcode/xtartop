@@ -18,6 +18,8 @@ export interface DecimaProduct {
     code: string;
     name: string;
     cost?: number;
+    salePrice?: number;
+    currency?: string;
     isActive?: boolean;
     [key: string]: unknown;
 }
@@ -52,6 +54,27 @@ export interface DecimaApiResponse<T> {
     success: boolean;
     data?: T;
     error?: string;
+}
+
+export interface DecimaPromotionProduct {
+    id: string;
+    code: string;
+    name: string;
+    cost: number;
+    salePrice: number;
+    currency: string;
+}
+
+export interface DecimaPromotion {
+    id: string;
+    name: string;
+    code: string;
+    type: 'PERCENTAGE' | 'FIXED';
+    value: number;
+    validFrom: string;
+    validTo: string;
+    isActive: boolean;
+    products: DecimaPromotionProduct[];
 }
 
 export interface DecimaCreateOrderRequest {
@@ -161,6 +184,15 @@ class DecimaClient {
             method: 'POST',
             body: JSON.stringify(data),
         });
+    }
+
+    /**
+     * Obtener promociones activas, opcionalmente filtradas por código de producto
+     */
+    async getPromotions(productCode?: string): Promise<DecimaApiResponse<DecimaPromotion[]>> {
+        const queryParams: Record<string, string> = {};
+        if (productCode) queryParams.productCode = productCode;
+        return this.request<DecimaPromotion[]>('/promotions', {}, queryParams);
     }
 
     /**

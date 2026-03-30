@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { createDecimaClient, type DecimaProduct } from "@/lib/decima/client";
+import { createDecimaClient, type DecimaProduct, type DecimaPromotion } from "@/lib/decima/client";
 import { revalidatePath } from "next/cache";
 
 export interface DecimaSettingsState {
@@ -128,6 +128,29 @@ export async function getDecimaProducts(): Promise<{
     }
 
     return { success: true, products: result.data || [] };
+}
+
+/**
+ * Obtener promociones activas de Décima
+ */
+export async function getDecimaPromotions(): Promise<{
+    success: boolean;
+    promotions?: DecimaPromotion[];
+    error?: string;
+}> {
+    const config = await getWorkspaceDecimaConfig();
+    if (!config?.decimaEnabled || !config?.decimaApiKey) {
+        return { success: false, error: "Integración con Décima no configurada" };
+    }
+
+    const client = createDecimaClient({ apiKey: config.decimaApiKey });
+    const result = await client.getPromotions();
+
+    if (!result.success) {
+        return { success: false, error: result.error };
+    }
+
+    return { success: true, promotions: result.data || [] };
 }
 
 /**
