@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import {
@@ -31,6 +31,7 @@ interface OrderItem {
     productCode: string;
     productName: string;
     quantity: number;
+    unitPrice: number;
 }
 
 interface PurchaseOrderFormProps {
@@ -50,7 +51,7 @@ interface PurchaseOrderFormProps {
         items: { id: string; productCode: string; productName: string | null; quantity: number }[];
     };
     suppliers: { id: string; name: string; logoUrl: string | null }[];
-    decimaProducts: { code: string; name: string }[];
+    decimaProducts: { code: string; name: string; cost: number }[];
     decimaEnabled: boolean;
     isEditMode: boolean;
 }
@@ -93,11 +94,15 @@ export function PurchaseOrderForm({
     const [externalReference, setExternalReference] = useState(order?.externalReference || "");
     const [promoCode, setPromoCode] = useState(order?.promoCode || "");
     const [items, setItems] = useState<OrderItem[]>(
-        order?.items.map((i) => ({
-            productCode: i.productCode,
-            productName: i.productName || "",
-            quantity: i.quantity,
-        })) || [{ productCode: "", productName: "", quantity: 1 }]
+        order?.items.map((i) => {
+            const dp = decimaProducts.find((p) => p.code === i.productCode);
+            return {
+                productCode: i.productCode,
+                productName: dp?.name || i.productName || "",
+                quantity: i.quantity,
+                unitPrice: dp?.cost || 0,
+            };
+        }) || [{ productCode: "", productName: "", quantity: 1, unitPrice: 0 }]
     );
 
     // Decima sync state
@@ -122,7 +127,7 @@ export function PurchaseOrderForm({
 
     // Item management
     const addItem = () => {
-        setItems([...items, { productCode: "", productName: "", quantity: 1 }]);
+        setItems([...items, { productCode: "", productName: "", quantity: 1, unitPrice: 0 }]);
     };
 
     const removeItem = (index: number) => {
@@ -134,11 +139,11 @@ export function PurchaseOrderForm({
         const updated = [...items];
         updated[index] = { ...updated[index], [field]: value };
 
-        // Auto-fill product name from Décima catalog
         if (field === "productCode" && decimaProducts.length > 0) {
             const product = decimaProducts.find((p) => p.code === value);
             if (product) {
                 updated[index].productName = product.name;
+                updated[index].unitPrice = product.cost;
             }
         }
 
@@ -190,10 +195,19 @@ export function PurchaseOrderForm({
         try {
             const result = await getSubscriptionSummaryForOrder();
             if (result.success && result.items.length > 0) {
-                setItems(result.items);
+                const enriched = result.items.map((item) => {
+                    const dp = decimaProducts.find((p) => p.code === item.productCode);
+                    return {
+                        productCode: item.productCode,
+                        productName: dp?.name || item.productName,
+                        quantity: item.quantity,
+                        unitPrice: dp?.cost || 0,
+                    };
+                });
+                setItems(enriched);
                 setDecimaMessage({
                     type: "success",
-                    text: `${result.items.length} artículo(s) importados desde suscripciones activas`,
+                    text: `${enriched.length} artículo(s) importados desde suscripciones activas`,
                 });
             } else if (result.items.length === 0) {
                 setDecimaMessage({
@@ -457,94 +471,177 @@ export function PurchaseOrderForm({
 
                         <div className="space-y-3">
                             {/* Header */}
-                            <div className="hidden sm:grid sm:grid-cols-12 gap-3 px-1">
-                                <div className="col-span-2 text-xs font-semibold text-[var(--muted-text)] uppercase tracking-wider">
+                            <div className="hidden sm:grid gap-3 px-1" style={{ gridTemplateColumns: "2fr 4fr 1fr 1.5fr 1.5fr 40px" }}>
+                                <div className="text-xs font-semibold text-[var(--muted-text)] uppercase tracking-wider">
                                     Código
                                 </div>
-                                <div className="col-span-7 text-xs font-semibold text-[var(--muted-text)] uppercase tracking-wider">
+                                <div className="text-xs font-semibold text-[var(--muted-text)] uppercase tracking-wider">
                                     Nombre
                                 </div>
-                                <div className="col-span-2 text-xs font-semibold text-[var(--muted-text)] uppercase tracking-wider">
-                                    Cantidad
+                                <div className="text-xs font-semibold text-[var(--muted-text)] uppercase tracking-wider">
+                                    Cant.
                                 </div>
-                                <div className="col-span-1" />
+                                <div className="text-xs font-semibold text-[var(--muted-text)] uppercase tracking-wider text-right">
+                                    P. Unitario
+                                </div>
+                                <div className="text-xs font-semibold text-[var(--muted-text)] uppercase tracking-wider text-right">
+                                    P. Extendido
+                                </div>
+                                <div />
                             </div>
 
                             {items.map((item, index) => (
                                 <div
                                     key={index}
-                                    className="grid grid-cols-1 sm:grid-cols-12 gap-3 p-3 bg-[var(--hover-bg)] rounded-xl border border-[var(--card-border)]"
+                                    className="grid grid-cols-1 sm:grid-cols-none gap-3 p-3 bg-[var(--hover-bg)] rounded-xl border border-[var(--card-border)]"
+                                    style={{ gridTemplateColumns: undefined }}
                                 >
-                                    <div className="sm:col-span-2">
-                                        <label className="sm:hidden text-xs font-medium text-[var(--muted-text)] mb-1 block">
-                                            Código
-                                        </label>
-                                        {decimaProducts.length > 0 ? (
-                                            <select
-                                                value={item.productCode}
-                                                onChange={(e) => updateItem(index, "productCode", e.target.value)}
-                                                disabled={!!isReadonly}
-                                                className="w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] disabled:opacity-50"
-                                            >
-                                                <option value="">Seleccionar...</option>
-                                                {decimaProducts.map((p) => (
-                                                    <option key={p.code} value={p.code}>
-                                                        {p.code}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        ) : (
+                                    <div className="hidden sm:grid gap-3" style={{ gridTemplateColumns: "2fr 4fr 1fr 1.5fr 1.5fr 40px" }}>
+                                        <div>
+                                            {decimaProducts.length > 0 ? (
+                                                <select
+                                                    value={item.productCode}
+                                                    onChange={(e) => updateItem(index, "productCode", e.target.value)}
+                                                    disabled={!!isReadonly}
+                                                    className="w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] disabled:opacity-50"
+                                                >
+                                                    <option value="">Seleccionar...</option>
+                                                    {decimaProducts.map((p) => (
+                                                        <option key={p.code} value={p.code}>
+                                                            {p.code}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            ) : (
+                                                <input
+                                                    type="text"
+                                                    value={item.productCode}
+                                                    onChange={(e) => updateItem(index, "productCode", e.target.value)}
+                                                    disabled={!!isReadonly}
+                                                    placeholder="CRM-PROJECT"
+                                                    className="w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] font-mono disabled:opacity-50"
+                                                />
+                                            )}
+                                        </div>
+                                        <div>
                                             <input
                                                 type="text"
-                                                value={item.productCode}
-                                                onChange={(e) => updateItem(index, "productCode", e.target.value)}
+                                                value={item.productName}
+                                                onChange={(e) => updateItem(index, "productName", e.target.value)}
                                                 disabled={!!isReadonly}
-                                                placeholder="CRM-PROJECT"
-                                                className="w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] font-mono disabled:opacity-50"
+                                                placeholder="Nombre del producto"
+                                                className="w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] disabled:opacity-50"
                                             />
-                                        )}
+                                        </div>
+                                        <div>
+                                            <input
+                                                type="number"
+                                                value={item.quantity}
+                                                onChange={(e) => updateItem(index, "quantity", parseInt(e.target.value) || 1)}
+                                                disabled={!!isReadonly}
+                                                min={1}
+                                                className="w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] disabled:opacity-50"
+                                            />
+                                        </div>
+                                        <div className="flex items-center justify-end">
+                                            <span className="text-sm text-[var(--foreground)] font-mono tabular-nums">
+                                                ${item.unitPrice.toFixed(2)}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center justify-end">
+                                            <span className="text-sm font-medium text-[var(--foreground)] font-mono tabular-nums">
+                                                ${(item.unitPrice * item.quantity).toFixed(2)}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center justify-end">
+                                            {!isReadonly && items.length > 1 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeItem(index)}
+                                                    className="p-2 text-error-red hover:bg-error-red/10 rounded-lg transition-colors"
+                                                    title="Eliminar item"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="sm:col-span-7">
-                                        <label className="sm:hidden text-xs font-medium text-[var(--muted-text)] mb-1 block">
-                                            Nombre
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={item.productName}
-                                            onChange={(e) => updateItem(index, "productName", e.target.value)}
-                                            disabled={!!isReadonly}
-                                            placeholder="Nombre del producto"
-                                            className="w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] disabled:opacity-50"
-                                        />
-                                    </div>
-                                    <div className="sm:col-span-2">
-                                        <label className="sm:hidden text-xs font-medium text-[var(--muted-text)] mb-1 block">
-                                            Cantidad
-                                        </label>
-                                        <input
-                                            type="number"
-                                            value={item.quantity}
-                                            onChange={(e) => updateItem(index, "quantity", parseInt(e.target.value) || 1)}
-                                            disabled={!!isReadonly}
-                                            min={1}
-                                            className="w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] disabled:opacity-50"
-                                        />
-                                    </div>
-                                    <div className="sm:col-span-1 flex items-center justify-end">
+
+                                    {/* Mobile layout */}
+                                    <div className="sm:hidden space-y-3">
+                                        <div>
+                                            <label className="text-xs font-medium text-[var(--muted-text)] mb-1 block">Código</label>
+                                            {decimaProducts.length > 0 ? (
+                                                <select
+                                                    value={item.productCode}
+                                                    onChange={(e) => updateItem(index, "productCode", e.target.value)}
+                                                    disabled={!!isReadonly}
+                                                    className="w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] disabled:opacity-50"
+                                                >
+                                                    <option value="">Seleccionar...</option>
+                                                    {decimaProducts.map((p) => (
+                                                        <option key={p.code} value={p.code}>{p.code}</option>
+                                                    ))}
+                                                </select>
+                                            ) : (
+                                                <input type="text" value={item.productCode} onChange={(e) => updateItem(index, "productCode", e.target.value)} disabled={!!isReadonly} placeholder="CRM-PROJECT" className="w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] font-mono disabled:opacity-50" />
+                                            )}
+                                        </div>
+                                        <div>
+                                            <label className="text-xs font-medium text-[var(--muted-text)] mb-1 block">Nombre</label>
+                                            <input type="text" value={item.productName} onChange={(e) => updateItem(index, "productName", e.target.value)} disabled={!!isReadonly} placeholder="Nombre del producto" className="w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] disabled:opacity-50" />
+                                        </div>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            <div>
+                                                <label className="text-xs font-medium text-[var(--muted-text)] mb-1 block">Cant.</label>
+                                                <input type="number" value={item.quantity} onChange={(e) => updateItem(index, "quantity", parseInt(e.target.value) || 1)} disabled={!!isReadonly} min={1} className="w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] disabled:opacity-50" />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs font-medium text-[var(--muted-text)] mb-1 block">P. Unit.</label>
+                                                <div className="px-3 py-2 text-sm font-mono">${item.unitPrice.toFixed(2)}</div>
+                                            </div>
+                                            <div>
+                                                <label className="text-xs font-medium text-[var(--muted-text)] mb-1 block">Ext.</label>
+                                                <div className="px-3 py-2 text-sm font-mono font-medium">${(item.unitPrice * item.quantity).toFixed(2)}</div>
+                                            </div>
+                                        </div>
                                         {!isReadonly && items.length > 1 && (
-                                            <button
-                                                type="button"
-                                                onClick={() => removeItem(index)}
-                                                className="p-2 text-error-red hover:bg-error-red/10 rounded-lg transition-colors"
-                                                title="Eliminar item"
-                                            >
-                                                <Trash2 size={16} />
+                                            <button type="button" onClick={() => removeItem(index)} className="inline-flex items-center gap-1 text-xs text-error-red hover:text-red-700">
+                                                <Trash2 size={14} /> Eliminar
                                             </button>
                                         )}
                                     </div>
                                 </div>
                             ))}
                         </div>
+
+                        {/* Totals */}
+                        {items.some((i) => i.productCode) && (
+                            <div className="border-t border-[var(--card-border)] pt-4 mt-4 space-y-2">
+                                <div className="flex justify-between items-center text-sm">
+                                    <span className="text-[var(--muted-text)]">Subtotal</span>
+                                    <span className="font-mono tabular-nums font-medium text-[var(--foreground)]">
+                                        ${items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0).toFixed(2)}
+                                    </span>
+                                </div>
+                                {promoCode && (
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="text-[var(--muted-text)]">
+                                            Descuento <span className="font-mono text-xs bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded">{promoCode}</span>
+                                        </span>
+                                        <span className="font-mono tabular-nums text-[var(--muted-text)] italic">
+                                            Se calcula en Décima
+                                        </span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between items-center text-base pt-1 border-t border-dashed border-[var(--card-border)]">
+                                    <span className="font-semibold text-[var(--foreground)]">Total estimado</span>
+                                    <span className="font-mono tabular-nums font-bold text-[var(--foreground)]">
+                                        ${items.reduce((sum, i) => sum + i.unitPrice * i.quantity, 0).toFixed(2)}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Actions */}

@@ -22,13 +22,14 @@ export default async function PurchaseOrderDetailPage({ params }: Props) {
         notFound();
     }
 
-    let decimaProducts: { code: string; name: string }[] = [];
+    let decimaProducts: { code: string; name: string; cost: number }[] = [];
     if (decimaEnabled) {
         const result = await getDecimaProducts();
         if (result.success && result.products) {
             decimaProducts = result.products.map((p) => ({
                 code: p.code,
                 name: p.name,
+                cost: p.cost || 0,
             }));
         }
     }
