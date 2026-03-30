@@ -31,6 +31,7 @@ const CompanySchema = z.object({
         "PROSPECTO",
         "POTENCIAL",
         "CLIENTE",
+        "PROVEEDOR",
         "DESCARTADA",
         "INACTIVA"
     ]),

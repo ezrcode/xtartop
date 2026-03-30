@@ -17,6 +17,7 @@ import {
     Search,
     User,
     BarChart3,
+    ShoppingCart,
 } from "lucide-react";
 import { logout } from "@/actions/auth";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,10 @@ const mainMenuItems = [
     { name: "Empresas", href: "/app/companies", icon: Building2 },
     { name: "Negocios", href: "/app/deals", icon: TrendingUp },
     { name: "Reportes", href: "/app/reports", icon: BarChart3 },
+];
+
+const comprasMenuItems = [
+    { name: "Órdenes de Compra", href: "/app/purchases", icon: ShoppingCart },
 ];
 
 const adminMenuItems = [
@@ -280,6 +285,20 @@ export function Sidebar({ userRole, user, isMobileOpen, setIsMobileOpen }: Sideb
                                 ? pathname === "/app"
                                 : pathname === item.href || pathname.startsWith(`${item.href}/`);
                             
+                            return <NavItem key={item.name} item={item} isActive={isActive} />;
+                        })}
+                    </nav>
+
+                    {/* Section: Compras */}
+                    <Separator className="my-3 mx-2 w-auto" />
+                    {!isCollapsed && (
+                        <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-text)]">
+                            Compras
+                        </p>
+                    )}
+                    <nav className="space-y-0.5">
+                        {comprasMenuItems.map((item) => {
+                            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
                             return <NavItem key={item.name} item={item} isActive={isActive} />;
                         })}
                     </nav>

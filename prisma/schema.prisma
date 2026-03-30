@@ -20,8 +20,17 @@ enum CompanyStatus {
   PROSPECTO
   POTENCIAL
   CLIENTE
+  PROVEEDOR
   DESCARTADA
   INACTIVA
+}
+
+enum PurchaseOrderStatus {
+  BORRADOR
+  ENVIADA
+  CONFIRMADA
+  RECIBIDA
+  CANCELADA
 }
 
 enum CompanyOrigin {
@@ -146,6 +155,7 @@ model User {
   deals           Deal[]
   activities      Activity[]
   quotes          Quote[]
+  purchaseOrders  PurchaseOrder[]
 }
 
 model Workspace {
@@ -174,6 +184,10 @@ model Workspace {
   admCloudDefaultSalesStageId    String?  // Etapa de ventas predeterminada para cotizaciones
   admCloudDefaultStageName       String?  // Nombre de etapa de ventas
   
+  // Decima Portal Integration Settings
+  decimaEnabled        Boolean  @default(false)
+  decimaApiKey         String?  // API Key para Decima Portal
+
   // ClickUp Integration Settings
   clickUpEnabled       Boolean  @default(false)
   clickUpApiToken      String?  // Personal API Token
@@ -205,6 +219,7 @@ model Workspace {
   exchangeRates  ExchangeRate[]
   projectRateReferences ProjectRateReference[]
   taxes        Tax[]
+  purchaseOrders PurchaseOrder[]
 }
 
 model WorkspaceMember {
@@ -297,6 +312,7 @@ model Company {
   clientUsers          ClientUser[]
   subscriptionBilling  SubscriptionBilling?
   billingHistory       BillingHistory[]
+  supplierOrders       PurchaseOrder[]    @relation("SupplierOrders")
 }
 
 enum ContactStatus {
@@ -726,4 +742,53 @@ model Tax {
 
   @@index([workspaceId])
   @@index([workspaceId, isActive])
+}
+
+// Órdenes de Compra (Purchase Orders)
+model PurchaseOrder {
+  id                String              @id @default(cuid())
+  orderNumber       Int                 // Auto-increment per workspace
+  period            String              // "YYYY-MM" format
+  notes             String?             @db.Text
+  externalReference String?             // Referencia externa
+  status            PurchaseOrderStatus @default(BORRADOR)
+
+  // Decima sync
+  decimaOrderId     String?             // Order ID in Decima Portal
+  decimaStatus      String?             // Status from Decima API
+  decimaLastSync    DateTime?
+
+  // Relations
+  supplierId   String
+  supplier     Company   @relation("SupplierOrders", fields: [supplierId], references: [id])
+
+  workspaceId  String
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  createdById  String
+  createdBy    User      @relation(fields: [createdById], references: [id])
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  items        PurchaseOrderItem[]
+
+  @@unique([workspaceId, orderNumber])
+  @@index([workspaceId])
+  @@index([supplierId])
+}
+
+model PurchaseOrderItem {
+  id               String        @id @default(cuid())
+  productCode      String        // Código del producto en Décima
+  productName      String?       // Nombre cacheado del producto
+  quantity         Int
+
+  purchaseOrderId  String
+  purchaseOrder    PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@index([purchaseOrderId])
 }

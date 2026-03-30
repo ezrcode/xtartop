@@ -32,6 +32,7 @@ const statusConfig: Record<CompanyStatus, { label: string; className: string; do
     CLIENTE: { label: "Cliente", className: "bg-success-green/10 text-success-green", dotColor: "bg-success-green" },
     POTENCIAL: { label: "Potencial", className: "bg-nearby-accent/10 text-nearby-accent", dotColor: "bg-nearby-accent" },
     PROSPECTO: { label: "Prospecto", className: "bg-[var(--surface-3)] text-gray-800", dotColor: "bg-gray-400" },
+    PROVEEDOR: { label: "Proveedor", className: "bg-purple-100 text-purple-800", dotColor: "bg-purple-500" },
     DESCARTADA: { label: "Descartada", className: "bg-error-red/10 text-error-red", dotColor: "bg-error-red" },
     INACTIVA: { label: "Inactiva", className: "bg-[var(--surface-3)] text-[var(--muted-text)]", dotColor: "bg-gray-300" },
 };

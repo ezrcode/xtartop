@@ -18,6 +18,7 @@ import {
 import type { Workspace, WorkspaceMember, Invitation, User, Subscription, BusinessLine, ExchangeRate, Tax } from "@prisma/client";
 import { AdmCloudConfigTab } from "./admcloud-config-tab";
 import { ClickUpConfigTab } from "./clickup-config-tab";
+import { DecimaConfigTab } from "./decima-config-tab";
 import { BillingConfigTab } from "./billing-config-tab";
 import { BusinessLinesSection } from "./business-lines-section";
 import { ExchangeRatesSection } from "./exchange-rates-section";
@@ -51,6 +52,9 @@ type WorkspaceWithDetails = Workspace & {
     admCloudRole?: string | null;
     admCloudDefaultPriceListId?: string | null;
     admCloudDefaultPriceListName?: string | null;
+    // Decima config
+    decimaEnabled?: boolean;
+    decimaApiKey?: string | null;
     // ClickUp config
     clickUpEnabled?: boolean;
     clickUpApiToken?: string | null;
@@ -191,7 +195,7 @@ function getDefaultContractTemplate(): string {
 <p>He leído y acepto los Términos y Condiciones de Uso de la plataforma Nearby CRM y la Cotización N° <strong>{{ID_COTIZACION}}</strong> vinculada a mi cuenta. Entiendo que esta aceptación digital tiene la misma validez legal que una firma manuscrita de acuerdo con la legislación vigente.</p>`;
 }
 
-type Section = 'workspace' | 'team' | 'contract' | 'business-lines' | 'rate-references' | 'exchange-rates' | 'taxes' | 'billing' | 'admcloud' | 'clickup';
+type Section = 'workspace' | 'team' | 'contract' | 'business-lines' | 'rate-references' | 'exchange-rates' | 'taxes' | 'billing' | 'admcloud' | 'clickup' | 'decima';
 
 const sectionGroups = [
     {
@@ -220,6 +224,7 @@ const sectionGroups = [
             { id: "billing" as Section, label: "Facturación Automática", icon: Mail, description: "Correo remitente, plantilla y destinatarios" },
             { id: "admcloud" as Section, label: "ADMCloud", icon: Cloud, description: "Conexión con el ERP de facturación" },
             { id: "clickup" as Section, label: "ClickUp", icon: Settings2, description: "Integración con gestión de tickets" },
+            { id: "decima" as Section, label: "Décima Portal", icon: Cloud, description: "Órdenes de compra con Décima Tech" },
         ],
     },
 ];
@@ -716,13 +721,23 @@ export function SettingsPage({
 
             case 'clickup':
                 return (
-                    <ClickUpConfigTab 
+                    <ClickUpConfigTab
                         currentConfig={{
                             enabled: workspace.clickUpEnabled || false,
                             apiToken: workspace.clickUpApiToken || null,
                             workspaceId: workspace.clickUpWorkspaceId || null,
                             listId: workspace.clickUpListId || null,
                             clientFieldId: workspace.clickUpClientFieldId || null,
+                        }}
+                    />
+                );
+
+            case 'decima':
+                return (
+                    <DecimaConfigTab
+                        currentConfig={{
+                            enabled: workspace.decimaEnabled || false,
+                            apiKey: workspace.decimaApiKey || null,
                         }}
                     />
                 );
