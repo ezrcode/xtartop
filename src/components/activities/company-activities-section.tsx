@@ -17,9 +17,10 @@ import {
     FolderOpen,
     User as UserIcon,
     StickyNote,
-    Filter,
-    Paperclip
+    Paperclip,
+    Download
 } from "lucide-react";
+import * as XLSX from "xlsx";
 import { ComposeEmailModal } from "./compose-email-modal";
 import { sendClientInvitation, revokeInvitation } from "@/actions/client-invitation";
 import { createNote } from "@/actions/notes";
@@ -53,6 +54,54 @@ interface ContractStatus {
     termsVersion: string | null;
 }
 
+type DateFilter = "all" | "today" | "yesterday" | "thisWeek" | "thisMonth" | "lastMonth" | "thisYear" | "lastYear";
+
+const dateFilterOptions: { value: DateFilter; label: string }[] = [
+    { value: "all", label: "Todo" },
+    { value: "today", label: "Hoy" },
+    { value: "yesterday", label: "Ayer" },
+    { value: "thisWeek", label: "Esta Semana" },
+    { value: "thisMonth", label: "Este Mes" },
+    { value: "lastMonth", label: "Mes Previo" },
+    { value: "thisYear", label: "Este Año" },
+    { value: "lastYear", label: "Año Previo" },
+];
+
+function getDateRange(filter: DateFilter): { from: Date; to: Date } | null {
+    if (filter === "all") return null;
+    const now = new Date();
+    const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const endOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+
+    switch (filter) {
+        case "today":
+            return { from: startOfDay(now), to: endOfDay(now) };
+        case "yesterday": {
+            const y = new Date(now);
+            y.setDate(y.getDate() - 1);
+            return { from: startOfDay(y), to: endOfDay(y) };
+        }
+        case "thisWeek": {
+            const day = now.getDay();
+            const diff = day === 0 ? 6 : day - 1;
+            const monday = new Date(now);
+            monday.setDate(now.getDate() - diff);
+            return { from: startOfDay(monday), to: endOfDay(now) };
+        }
+        case "thisMonth":
+            return { from: new Date(now.getFullYear(), now.getMonth(), 1), to: endOfDay(now) };
+        case "lastMonth": {
+            const firstLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            const lastLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+            return { from: firstLastMonth, to: lastLastMonth };
+        }
+        case "thisYear":
+            return { from: new Date(now.getFullYear(), 0, 1), to: endOfDay(now) };
+        case "lastYear":
+            return { from: new Date(now.getFullYear() - 1, 0, 1), to: new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59, 999) };
+    }
+}
+
 interface CompanyActivitiesSectionProps {
     activities: ActivityWithUser[];
     companyId: string;
@@ -78,6 +127,7 @@ export function CompanyActivitiesSection({
     const [noteContent, setNoteContent] = useState("");
     const [noteAttachments, setNoteAttachments] = useState<UploadedFile[]>([]);
     const [filter, setFilter] = useState<"all" | "EMAIL" | "PROJECT" | "CLIENT_USER" | "NOTE">("all");
+    const [dateFilter, setDateFilter] = useState<DateFilter>("all");
     
     // Invitation state
     const [selectedContactId, setSelectedContactId] = useState<string>("");
@@ -262,16 +312,68 @@ export function CompanyActivitiesSection({
         { value: "CLIENT_USER", label: "Usuarios" },
     ];
 
-    // Filter timeline items
-    const filteredTimelineItems = filter === "all" 
-        ? timelineItems 
-        : timelineItems.filter(item => {
+    // Filter timeline items by type and date
+    const dateRange = getDateRange(dateFilter);
+    const filteredTimelineItems = timelineItems.filter(item => {
+        // Type filter
+        if (filter !== "all") {
+            if (item.type !== "activity") return false;
+            if ((item.data as ActivityWithUser).type !== filter) return false;
+        }
+        // Date filter
+        if (dateRange) {
+            const t = item.date.getTime();
+            if (t < dateRange.from.getTime() || t > dateRange.to.getTime()) return false;
+        }
+        return true;
+    });
+
+    const typeLabels: Record<string, string> = {
+        EMAIL: "Correo",
+        PROJECT: "Proyecto",
+        CLIENT_USER: "Usuario",
+        NOTE: "Nota",
+    };
+
+    const handleDownloadExcel = () => {
+        const rows = filteredTimelineItems.map(item => {
             if (item.type === "activity") {
-                return (item.data as ActivityWithUser).type === filter;
+                const a = item.data as ActivityWithUser;
+                return {
+                    Fecha: item.date.toLocaleDateString("es-DO", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }),
+                    Actividad: a.emailSubject || a.emailBody || "-",
+                    Tipo: typeLabels[a.type] || a.type,
+                    Usuario: a.createdBy?.name || a.createdBy?.email || "-",
+                };
             }
-            // Always show invitations and contracts when filter is "all"
-            return false;
+            if (item.type === "invitation") {
+                const inv = item.data as ClientInvitationData;
+                return {
+                    Fecha: item.date.toLocaleDateString("es-DO", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }),
+                    Actividad: `Invitación: ${inv.contact.fullName}`,
+                    Tipo: "Invitación",
+                    Usuario: "-",
+                };
+            }
+            if (item.type === "contract") {
+                const c = item.data as ContractStatus;
+                return {
+                    Fecha: item.date.toLocaleDateString("es-DO", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }),
+                    Actividad: "Contrato aceptado",
+                    Tipo: "T&C",
+                    Usuario: c.termsAcceptedByName || "-",
+                };
+            }
+            return { Fecha: "-", Actividad: "-", Tipo: "-", Usuario: "-" };
         });
+
+        const ws = XLSX.utils.json_to_sheet(rows);
+        const colWidths = [{ wch: 22 }, { wch: 50 }, { wch: 14 }, { wch: 20 }];
+        ws["!cols"] = colWidths;
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Actividades");
+        XLSX.writeFile(wb, `actividades_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    };
 
     return (
         <div className="flex flex-col h-full">
@@ -279,7 +381,6 @@ export function CompanyActivitiesSection({
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                     <h3 className="text-sm font-semibold text-nearby-dark uppercase tracking-wide">Actividades</h3>
-                    {/* Filter Dropdown */}
                     <select
                         value={filter}
                         onChange={(e) => setFilter(e.target.value as typeof filter)}
@@ -289,7 +390,26 @@ export function CompanyActivitiesSection({
                             <option key={opt.value} value={opt.value}>{opt.label}</option>
                         ))}
                     </select>
+                    <select
+                        value={dateFilter}
+                        onChange={(e) => setDateFilter(e.target.value as DateFilter)}
+                        className="text-xs border border-graphite-gray rounded px-1.5 py-0.5 text-gray-600 bg-white focus:ring-nearby-accent focus:border-nearby-accent cursor-pointer"
+                    >
+                        {dateFilterOptions.map(opt => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                    </select>
                 </div>
+                <div className="flex items-center gap-1.5">
+                    <button
+                        type="button"
+                        onClick={handleDownloadExcel}
+                        disabled={filteredTimelineItems.length === 0}
+                        className="inline-flex items-center justify-center w-6 h-6 rounded-full text-gray-400 hover:text-nearby-accent hover:bg-nearby-accent/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Descargar Excel"
+                    >
+                        <Download size={14} />
+                    </button>
                 <div className="relative">
                     <button
                         type="button"
@@ -338,6 +458,7 @@ export function CompanyActivitiesSection({
                             </div>
                         </>
                     )}
+                </div>
                 </div>
             </div>
 
