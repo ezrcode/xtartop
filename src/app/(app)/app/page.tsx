@@ -10,6 +10,7 @@ import {
     TrendingUp,
     DollarSign,
     FolderOpen,
+    UserCheck,
     Repeat,
     CalendarRange,
 } from "lucide-react";
@@ -273,12 +274,18 @@ export default async function DashboardPage() {
                 {/* Row 2 — Revenue */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
                     <StatCard
-                        label="Proyectos y Usuarios"
-                        value={`${stats?.activeProjects ?? 0} / ${stats?.activeClientUsers ?? 0}`}
-                        description={`${(stats?.activeProjects ?? 0) + (stats?.activeClientUsers ?? 0)} activos en clientes`}
+                        label="Proyectos Activos"
+                        value={stats?.activeProjects ?? 0}
                         icon={FolderOpen}
                         gradient="bg-gradient-to-br from-nearby-accent/10 to-transparent"
                         iconColor="text-nearby-accent"
+                    />
+                    <StatCard
+                        label="Usuarios Activos"
+                        value={stats?.activeClientUsers ?? 0}
+                        icon={UserCheck}
+                        gradient="bg-gradient-to-br from-ocean-blue/10 to-transparent"
+                        iconColor="text-ocean-blue"
                     />
                     <StatCard
                         label="MRR"
