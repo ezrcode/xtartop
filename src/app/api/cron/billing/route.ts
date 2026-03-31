@@ -591,8 +591,10 @@ export async function GET(request: NextRequest) {
                         const directDocNumber = extractAdmCloudDocNumber(quoteResult.data);
                         if (directDocNumber) {
                             proformaNumber = directDocNumber;
-                        } else if (admCloudDocId) {
-                            // Fallback: some create responses may omit DocID, request quote details by ID.
+                        }
+
+                        // Fetch full quote detail if we need DocNumber or tax wasn't in create response
+                        if (admCloudDocId && (!directDocNumber || taxAmount === 0)) {
                             const quoteDetail = await admCloudClient.getQuote(admCloudDocId);
                             if (quoteDetail.success && quoteDetail.data) {
                                 const detailObservation = extractAdmCloudObservation(quoteDetail.data);
@@ -600,42 +602,44 @@ export async function GET(request: NextRequest) {
                                     pdfNotes = detailObservation;
                                 }
                                 const detailTax = Number(quoteDetail.data.CalculatedTaxAmount) || 0;
-                                if (detailTax > 0) {
+                                if (detailTax > 0 && taxAmount === 0) {
                                     taxAmount = detailTax;
                                     total = subtotal + taxAmount;
                                 }
-                                const detailDocNumber = extractAdmCloudDocNumber(quoteDetail.data);
-                                if (detailDocNumber) {
-                                    proformaNumber = detailDocNumber;
-                                } else {
-                                    const errorMsg = "ADMCloud creó la cotización/proforma pero no devolvió un número de documento válido (PRF...)";
-                                    console.error(`${company.name}: ${errorMsg}`);
+                                if (!directDocNumber) {
+                                    const detailDocNumber = extractAdmCloudDocNumber(quoteDetail.data);
+                                    if (detailDocNumber) {
+                                        proformaNumber = detailDocNumber;
+                                    } else {
+                                        const errorMsg = "ADMCloud creó la cotización/proforma pero no devolvió un número de documento válido (PRF...)";
+                                        console.error(`${company.name}: ${errorMsg}`);
 
-                                    await prisma.billingHistory.create({
-                                        data: {
+                                        await prisma.billingHistory.create({
+                                            data: {
+                                                companyId: company.id,
+                                                workspaceId: workspace.id,
+                                                billingMonth: targetMonth,
+                                                billingYear: targetYear,
+                                                status: "FAILED",
+                                                errorMessage: errorMsg,
+                                                recipients: JSON.stringify(company.contacts.map(c => c.email)),
+                                                subtotal,
+                                                taxAmount,
+                                                totalAmount: total,
+                                            },
+                                        });
+
+                                        results.failed++;
+                                        results.details.push({
                                             companyId: company.id,
-                                            workspaceId: workspace.id,
-                                            billingMonth: targetMonth,
-                                            billingYear: targetYear,
-                                            status: "FAILED",
-                                            errorMessage: errorMsg,
-                                            recipients: JSON.stringify(company.contacts.map(c => c.email)),
-                                            subtotal,
-                                            taxAmount,
-                                            totalAmount: total,
-                                        },
-                                    });
-
-                                    results.failed++;
-                                    results.details.push({
-                                        companyId: company.id,
-                                        companyName: company.name,
-                                        status: "failed",
-                                        error: errorMsg,
-                                    });
-                                    continue;
+                                            companyName: company.name,
+                                            status: "failed",
+                                            error: errorMsg,
+                                        });
+                                        continue;
+                                    }
                                 }
-                            } else {
+                            } else if (!directDocNumber) {
                                 const errorMsg = quoteDetail.error || "No fue posible recuperar un número de documento válido (PRF...) desde ADMCloud";
                                 console.error(`${company.name}: ${errorMsg}`);
 
@@ -663,7 +667,7 @@ export async function GET(request: NextRequest) {
                                 });
                                 continue;
                             }
-                        } else {
+                        } else if (!directDocNumber && !admCloudDocId) {
                             const errorMsg = "ADMCloud no devolvió un número de documento válido (PRF...) para la cotización/proforma";
                             console.error(`${company.name}: ${errorMsg}`);
 

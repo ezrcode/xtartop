@@ -393,8 +393,10 @@ export async function POST(request: NextRequest) {
                     const directDocNumber = extractAdmCloudDocNumber(quoteResult.data);
                     if (directDocNumber) {
                         proformaNumber = directDocNumber;
-                    } else if (admCloudDocId) {
-                        // Fallback: some ADMCloud responses omit DocID on create, fetch full quote by ID.
+                    }
+
+                    // Fetch full quote detail if we have an ID and either need DocNumber or tax
+                    if (admCloudDocId && (!directDocNumber || taxAmount === 0)) {
                         const quoteDetail = await admCloudClient.getQuote(admCloudDocId);
                         if (quoteDetail.success && quoteDetail.data) {
                             const detailObservation = extractAdmCloudObservation(quoteDetail.data);
@@ -402,17 +404,19 @@ export async function POST(request: NextRequest) {
                                 pdfNotes = detailObservation;
                             }
                             const detailTax = Number(quoteDetail.data.CalculatedTaxAmount) || 0;
-                            if (detailTax > 0) {
+                            if (detailTax > 0 && taxAmount === 0) {
                                 taxAmount = detailTax;
                                 total = subtotal + taxAmount;
                             }
-                            const detailDocNumber = extractAdmCloudDocNumber(quoteDetail.data);
-                            if (detailDocNumber) {
-                                proformaNumber = detailDocNumber;
-                            } else {
-                                admCloudError = "ADMCloud creó la proforma pero no devolvió un número de documento válido (PRF...)";
+                            if (!directDocNumber) {
+                                const detailDocNumber = extractAdmCloudDocNumber(quoteDetail.data);
+                                if (detailDocNumber) {
+                                    proformaNumber = detailDocNumber;
+                                } else {
+                                    admCloudError = "ADMCloud creó la proforma pero no devolvió un número de documento válido (PRF...)";
+                                }
                             }
-                        } else {
+                        } else if (!directDocNumber) {
                             admCloudError = quoteDetail.error || "No fue posible recuperar un número de documento válido (PRF...) desde ADMCloud";
                         }
                     } else {
