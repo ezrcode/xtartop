@@ -46,7 +46,9 @@ async function getItemsList(workspaceId: string) {
                 itemsMap.set(id, { id, code, name });
             }
         }
-        return Array.from(itemsMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+        return Array.from(itemsMap.values())
+            .filter((i) => i.code.startsWith("S-"))
+            .sort((a, b) => a.name.localeCompare(b.name));
     } catch (error) {
         console.error("[Reports] Error fetching items:", error);
         return [];

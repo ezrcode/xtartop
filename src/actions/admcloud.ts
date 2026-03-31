@@ -243,6 +243,14 @@ export async function getCompanyInvoices(companyId: string): Promise<{
             }
         }
 
+        const getTime = (inv: AdmCloudInvoice) => {
+            const v = inv.TransactionDate || inv.DocDate || inv.DocDateString || inv.CreationDate;
+            if (!v) return 0;
+            const t = new Date(v).getTime();
+            return Number.isNaN(t) ? 0 : t;
+        };
+        allInvoices.sort((a, b) => getTime(b) - getTime(a));
+
         return { 
             success: true, 
             invoices: allInvoices,
