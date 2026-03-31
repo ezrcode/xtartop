@@ -56,7 +56,7 @@ export function PendingActions({
     ];
 
     return (
-        <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4 sm:p-5">
+        <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-4 sm:p-5">
             <h3 className="text-sm font-semibold text-[var(--foreground)] mb-3 sm:mb-4">Acciones Pendientes</h3>
             
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
@@ -64,7 +64,7 @@ export function PendingActions({
                     <Link
                         key={action.label}
                         href={action.href}
-                        className={`block p-3 rounded-xl ${action.bgColor} hover:opacity-90 active:scale-[0.98] transition-all`}
+                        className={`block p-3 rounded-lg ${action.bgColor} hover:opacity-90 transition-all`}
                     >
                         <div className="flex items-center justify-between mb-1.5 sm:mb-2">
                             <action.icon size={18} className={action.color} />

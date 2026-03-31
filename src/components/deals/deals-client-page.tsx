@@ -84,7 +84,7 @@ function DealCard({ deal, isDragging = false }: { deal: DealWithRelations, isDra
         <div
             ref={setNodeRef}
             style={style}
-            className={`bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl p-3 hover:shadow-md transition-shadow touch-manipulation ${isDragging ? 'opacity-50 shadow-lg' : ''}`}
+            className={`bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-3 hover:shadow-md transition-shadow touch-manipulation ${isDragging ? 'opacity-50 shadow-lg' : ''}`}
         >
             {/* Drag Handle & Title */}
             <div className="flex items-start justify-between gap-2 mb-2">
@@ -420,7 +420,7 @@ function DealsTable({ deals, initialPreferences, itemsPerPage = 10 }: { deals: D
                         >
                             <div className="flex items-start gap-3">
                                 {/* Value Badge */}
-                                <div className="flex-shrink-0 w-16 h-16 rounded-xl bg-gradient-to-br from-nearby-accent/10 to-nearby-accent/5 flex flex-col items-center justify-center border border-nearby-accent/20">
+                                <div className="flex-shrink-0 w-16 h-16 rounded-lg bg-gradient-to-br from-nearby-accent/10 to-nearby-accent/5 flex flex-col items-center justify-center border border-nearby-accent/20">
                                     <span className="text-[10px] text-nearby-accent font-medium">VALOR</span>
                                     <span className="text-sm font-bold text-[var(--foreground)]">
                                         {formatCurrencyShort(Number(deal.value))}
@@ -541,7 +541,7 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table", in
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                     <div className="flex items-center gap-3">
-                        <div className="hidden sm:flex h-10 w-10 rounded-xl bg-nearby-accent/10 items-center justify-center">
+                        <div className="hidden sm:flex h-10 w-10 rounded-lg bg-nearby-accent/10 items-center justify-center">
                             <TrendingUp size={20} className="text-nearby-accent" />
                         </div>
                         <div>
@@ -557,7 +557,7 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table", in
                         </div>
                     </div>
                     <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-3">
-                        <div className="inline-flex rounded-xl overflow-hidden border border-[var(--card-border)]">
+                        <div className="inline-flex rounded-lg overflow-hidden border border-[var(--card-border)]">
                             <button
                                 onClick={() => setViewMode("table")}
                                 className={`inline-flex items-center justify-center px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-colors ${
@@ -584,7 +584,7 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table", in
 
                         <Link
                             href="/app/deals/new"
-                            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-nearby-dark rounded-xl hover:bg-nearby-dark-600 transition-colors shadow-sm"
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-nearby-dark rounded-lg hover:bg-nearby-dark-600 transition-colors shadow-sm"
                         >
                             <Plus size={16} />
                             <span className="hidden sm:inline">Nuevo Negocio</span>

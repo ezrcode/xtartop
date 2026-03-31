@@ -26,7 +26,7 @@ const actions = [
 
 export function QuickActions() {
     return (
-        <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4 sm:p-5">
+        <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-4 sm:p-5">
             <h3 className="text-sm font-semibold text-[var(--foreground)] mb-3 sm:mb-4">
                 Acciones Rápidas
             </h3>
@@ -35,7 +35,7 @@ export function QuickActions() {
                     <Link
                         key={action.name}
                         href={action.href}
-                        className="flex flex-col items-center p-3 sm:p-4 rounded-xl bg-[var(--hover-bg)] active:bg-[var(--surface-0)] hover:bg-[var(--surface-0)] transition-colors group"
+                        className="flex flex-col items-center p-3 sm:p-4 rounded-lg bg-[var(--hover-bg)] active:bg-[var(--surface-0)] hover:bg-[var(--surface-0)] transition-colors group"
                     >
                         <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full ${action.color} flex items-center justify-center mb-1.5 sm:mb-2 group-active:scale-95 transition-transform`}>
                             <action.icon size={20} className="text-white" />

@@ -37,9 +37,9 @@
   --color-ocean-blue: #3B82F6;
 
   /* ── Radius Scale ── */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
 
   /* ── Shadows ── */
   --shadow-xs: 0 1px 2px 0 rgb(45 62 80 / 0.05);
@@ -51,7 +51,8 @@
   --shadow-glow-success: 0 0 20px rgb(27 196 125 / 0.25);
 
   /* ── Typography ── */
-  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-sans: var(--font-outfit), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
 }
 
 :root {
@@ -209,8 +210,7 @@ button,
 }
 
 .card-interactive:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-md);
 }
 
 /* Button Base Enhancements */
@@ -219,12 +219,8 @@ button,
   font-weight: 500;
 }
 
-.btn-base:hover {
-  transform: translateY(-1px);
-}
-
 .btn-base:active {
-  transform: translateY(0);
+  opacity: 0.9;
 }
 
 .btn-base:focus-visible {

@@ -388,7 +388,7 @@ export function SettingsPage({
                         <CardContent>
                         <form action={workspaceAction} className="space-y-6">
                             {workspaceState?.message && (
-                                <div className={`p-4 rounded-xl ${workspaceState.message.includes("success") ? "bg-success-green/10 text-success-green" : "bg-error-red/10 text-error-red"}`}>
+                                <div className={`p-4 rounded-lg ${workspaceState.message.includes("success") ? "bg-success-green/10 text-success-green" : "bg-error-red/10 text-error-red"}`}>
                                     {workspaceState.message}
                                 </div>
                             )}
@@ -415,11 +415,11 @@ export function SettingsPage({
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="address">Dirección</Label>
-                                <textarea name="address" id="address" rows={2} defaultValue={workspace.address || ''} placeholder="Calle, Número, Sector, Ciudad, País" className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors resize-none" />
+                                <textarea name="address" id="address" rows={2} defaultValue={workspace.address || ''} placeholder="Calle, Número, Sector, Ciudad, País" className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors resize-none" />
                             </div>
                             <div className="space-y-2">
                                 <Label>Plan</Label>
-                                <div className="px-3 py-2.5 bg-[var(--hover-bg)] border border-[var(--card-border)] rounded-xl text-sm text-[var(--foreground)]">
+                                <div className="px-3 py-2.5 bg-[var(--hover-bg)] border border-[var(--card-border)] rounded-lg text-sm text-[var(--foreground)]">
                                     <Badge variant="primary">{workspace.subscription?.plan || "FREE"}</Badge>
                                 </div>
                             </div>
@@ -445,13 +445,13 @@ export function SettingsPage({
                         </CardHeader>
                         <CardContent className="overflow-hidden">
                             {showInviteForm && (
-                                <form action={invitationAction} className="mb-6 p-4 bg-[var(--hover-bg)] rounded-xl border border-[var(--card-border)]">
+                                <form action={invitationAction} className="mb-6 p-4 bg-[var(--hover-bg)] rounded-lg border border-[var(--card-border)]">
                                     <div className="flex items-start justify-between mb-4">
                                         <h3 className="text-sm font-medium text-[var(--foreground)]">Nueva Invitación</h3>
                                         <button type="button" onClick={() => setShowInviteForm(false)} className="text-[var(--muted-text)] hover:text-[var(--foreground)] p-1"><X size={18} /></button>
                                     </div>
                                     {invitationState?.message && (
-                                        <div className={`p-3 rounded-xl mb-4 text-sm ${invitationState.message.includes("success") ? "bg-success-green/10 text-success-green" : "bg-error-red/10 text-error-red"}`}>{invitationState.message}</div>
+                                        <div className={`p-3 rounded-lg mb-4 text-sm ${invitationState.message.includes("success") ? "bg-success-green/10 text-success-green" : "bg-error-red/10 text-error-red"}`}>{invitationState.message}</div>
                                     )}
                                     <div className="space-y-4">
                                         <div className="space-y-2">
@@ -461,7 +461,7 @@ export function SettingsPage({
                                         </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="role">Rol</Label>
-                                            <select name="role" id="role" defaultValue="MEMBER" className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors">
+                                            <select name="role" id="role" defaultValue="MEMBER" className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors">
                                                 <option value="MEMBER">Miembro</option>
                                                 <option value="ADMIN">Administrador</option>
                                                 <option value="VIEWER">Solo lectura</option>
@@ -473,7 +473,7 @@ export function SettingsPage({
                             )}
                             <div className="space-y-3 overflow-hidden">
                                 <h3 className="text-sm font-medium text-[var(--foreground)]">Miembros Activos</h3>
-                                <div className="p-3 border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] overflow-hidden">
+                                <div className="p-3 border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] overflow-hidden">
                                     {editingUserId === workspace.owner.id ? (
                                         <div className="space-y-3">
                                             <ImageUpload
@@ -538,7 +538,7 @@ export function SettingsPage({
                                     )}
                                 </div>
                                 {workspace.members.map((member) => (
-                                    <div key={member.id} className="p-3 border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] overflow-hidden">
+                                    <div key={member.id} className="p-3 border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] overflow-hidden">
                                         {editingUserId === member.user.id ? (
                                             <div className="space-y-3">
                                                 <ImageUpload
@@ -609,7 +609,7 @@ export function SettingsPage({
                                 <div className="mt-6 space-y-3 overflow-hidden">
                                     <h3 className="text-sm font-medium text-[var(--foreground)]">Invitaciones Pendientes</h3>
                                     {workspace.invitations.map((invitation) => (
-                                        <div key={invitation.id} className="flex items-center gap-2 p-3 border border-dashed border-[var(--card-border)] rounded-xl bg-[var(--hover-bg)] overflow-hidden">
+                                        <div key={invitation.id} className="flex items-center gap-2 p-3 border border-dashed border-[var(--card-border)] rounded-lg bg-[var(--hover-bg)] overflow-hidden">
                                             <div className="flex-shrink-0 h-9 w-9 rounded-full bg-[var(--card-border)] flex items-center justify-center text-[var(--muted-text)]"><Mail size={18} /></div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-medium text-[var(--foreground)] truncate">{invitation.email}</p>
@@ -633,7 +633,7 @@ export function SettingsPage({
                             <p className="text-sm text-[var(--muted-text)]">Texto que verán los clientes al aceptar los Términos y Condiciones.</p>
                         </CardHeader>
                         <CardContent>
-                            <div className="mb-6 p-4 bg-[var(--hover-bg)] rounded-xl">
+                            <div className="mb-6 p-4 bg-[var(--hover-bg)] rounded-lg">
                                 <p className="text-sm font-medium text-[var(--foreground)] mb-2">Variables disponibles:</p>
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-[var(--muted-text)]">
                                     {["CLIENTE_RAZON_SOCIAL","CLIENTE_RNC","CLIENTE_DIRECCION","CLIENTE_REPRESENTANTE","PROYECTOS_INICIALES","USUARIOS_INICIALES","ID_COTIZACION","PROVEEDOR_NOMBRE","FECHA_ACTUAL"].map(v => (
@@ -642,7 +642,7 @@ export function SettingsPage({
                                 </div>
                             </div>
                             {contractMessage && (
-                                <div className={`p-4 rounded-xl mb-6 ${contractMessage.type === 'success' ? "bg-success-green/10 text-success-green" : "bg-error-red/10 text-error-red"}`}>{contractMessage.text}</div>
+                                <div className={`p-4 rounded-lg mb-6 ${contractMessage.type === 'success' ? "bg-success-green/10 text-success-green" : "bg-error-red/10 text-error-red"}`}>{contractMessage.text}</div>
                             )}
                             <div className="space-y-4">
                                 <div className="space-y-2">
@@ -651,7 +651,7 @@ export function SettingsPage({
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="contractContent">Contenido del Contrato (HTML)</Label>
-                                    <textarea id="contractContent" value={contractContent} onChange={(e) => setContractContent(e.target.value)} rows={20} className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-xl bg-[var(--input-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors font-mono text-xs resize-none" placeholder="Ingrese el contenido del contrato..." />
+                                    <textarea id="contractContent" value={contractContent} onChange={(e) => setContractContent(e.target.value)} rows={20} className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--input-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors font-mono text-xs resize-none" placeholder="Ingrese el contenido del contrato..." />
                                     <p className="text-xs text-[var(--muted-text)]">Puedes usar etiquetas HTML para dar formato.</p>
                                 </div>
                                 <div className="flex justify-between items-center pt-4 border-t border-[var(--card-border)]">
@@ -663,7 +663,7 @@ export function SettingsPage({
                             </div>
                             <div className="mt-8 pt-6 border-t border-[var(--card-border)]">
                                 <h3 className="text-sm font-medium text-[var(--foreground)] mb-4">Vista Previa</h3>
-                                <div className="bg-[var(--hover-bg)] border border-[var(--card-border)] rounded-xl p-6 max-h-96 overflow-y-auto">
+                                <div className="bg-[var(--hover-bg)] border border-[var(--card-border)] rounded-lg p-6 max-h-96 overflow-y-auto">
                                     <div className="prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: contractContent }} />
                                 </div>
                             </div>
@@ -761,7 +761,7 @@ export function SettingsPage({
                 <div className="md:hidden mb-4">
                     <button
                         onClick={() => setMobileNavOpen(!mobileNavOpen)}
-                        className="w-full flex items-center justify-between px-4 py-3 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl text-sm font-medium text-[var(--foreground)]"
+                        className="w-full flex items-center justify-between px-4 py-3 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg text-sm font-medium text-[var(--foreground)]"
                     >
                         <span className="flex items-center gap-2">
                             {currentSectionMeta && <currentSectionMeta.icon size={16} className="text-nearby-accent" />}
@@ -770,7 +770,7 @@ export function SettingsPage({
                         <ChevronRight size={16} className={cn("text-[var(--muted-text)] transition-transform", mobileNavOpen && "rotate-90")} />
                     </button>
                     {mobileNavOpen && (
-                        <div className="mt-2 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl overflow-hidden shadow-lg">
+                        <div className="mt-2 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg overflow-hidden shadow-lg">
                             {sectionGroups.map((group) => (
                                 <div key={group.label}>
                                     <p className="px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-text)] bg-[var(--hover-bg)]">
@@ -813,7 +813,7 @@ export function SettingsPage({
                                                 key={item.id}
                                                 onClick={() => setActiveSection(item.id)}
                                                 className={cn(
-                                                    "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200",
+                                                    "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
                                                     activeSection === item.id
                                                         ? "bg-gradient-to-r from-nearby-accent/15 to-nearby-accent/5 text-nearby-accent shadow-sm"
                                                         : "text-[var(--muted-text)] hover:bg-[var(--hover-bg)] hover:text-[var(--foreground)]"

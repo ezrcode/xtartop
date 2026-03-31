@@ -88,7 +88,7 @@ export function CommandPalette({ userRole }: CommandPaletteProps) {
             />
             <div className="absolute left-1/2 top-[20%] -translate-x-1/2 w-full max-w-xl px-4">
                 <Command
-                    className="bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)] shadow-2xl overflow-hidden animate-in fade-in-0 zoom-in-95"
+                    className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] shadow-lg overflow-hidden animate-in fade-in-0 zoom-in-95"
                     shouldFilter={false}
                 >
                     <div className="flex items-center gap-3 px-4 border-b border-[var(--card-border)]">
@@ -122,7 +122,7 @@ export function CommandPalette({ userRole }: CommandPaletteProps) {
                                         key={`${r.type}-${r.id}`}
                                         value={`${r.type}-${r.id}`}
                                         onSelect={() => navigate(r.href)}
-                                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm cursor-pointer transition-colors data-[selected=true]:bg-[var(--hover-bg)]"
+                                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-colors data-[selected=true]:bg-[var(--hover-bg)]"
                                     >
                                         {iconForType(r.type)}
                                         <div className="flex-1 min-w-0">
@@ -144,50 +144,50 @@ export function CommandPalette({ userRole }: CommandPaletteProps) {
                                 <Command.Group heading="Acciones rápidas" className="[&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[var(--muted-text)] [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5">
                                     <Command.Item
                                         onSelect={() => navigate("/app/companies/new")}
-                                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm cursor-pointer transition-colors data-[selected=true]:bg-[var(--hover-bg)]"
+                                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-colors data-[selected=true]:bg-[var(--hover-bg)]"
                                     >
                                         <Plus size={16} className="text-nearby-accent" />
                                         <span className="text-[var(--foreground)]">Nueva Empresa</span>
                                     </Command.Item>
                                     <Command.Item
                                         onSelect={() => navigate("/app/contacts/new")}
-                                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm cursor-pointer transition-colors data-[selected=true]:bg-[var(--hover-bg)]"
+                                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-colors data-[selected=true]:bg-[var(--hover-bg)]"
                                     >
                                         <Plus size={16} className="text-ocean-blue" />
                                         <span className="text-[var(--foreground)]">Nuevo Contacto</span>
                                     </Command.Item>
                                     <Command.Item
                                         onSelect={() => navigate("/app/deals/new")}
-                                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm cursor-pointer transition-colors data-[selected=true]:bg-[var(--hover-bg)]"
+                                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-colors data-[selected=true]:bg-[var(--hover-bg)]"
                                     >
                                         <Plus size={16} className="text-success-green" />
                                         <span className="text-[var(--foreground)]">Nuevo Negocio</span>
                                     </Command.Item>
                                 </Command.Group>
                                 <Command.Group heading="Navegar" className="[&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[var(--muted-text)] [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5">
-                                    <Command.Item onSelect={() => navigate("/app")} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm cursor-pointer transition-colors data-[selected=true]:bg-[var(--hover-bg)]">
+                                    <Command.Item onSelect={() => navigate("/app")} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-colors data-[selected=true]:bg-[var(--hover-bg)]">
                                         <Search size={16} className="text-[var(--muted-text)]" />
                                         <span className="text-[var(--foreground)]">Dashboard</span>
                                     </Command.Item>
-                                    <Command.Item onSelect={() => navigate("/app/companies")} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm cursor-pointer transition-colors data-[selected=true]:bg-[var(--hover-bg)]">
+                                    <Command.Item onSelect={() => navigate("/app/companies")} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-colors data-[selected=true]:bg-[var(--hover-bg)]">
                                         <Building2 size={16} className="text-[var(--muted-text)]" />
                                         <span className="text-[var(--foreground)]">Empresas</span>
                                     </Command.Item>
-                                    <Command.Item onSelect={() => navigate("/app/contacts")} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm cursor-pointer transition-colors data-[selected=true]:bg-[var(--hover-bg)]">
+                                    <Command.Item onSelect={() => navigate("/app/contacts")} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-colors data-[selected=true]:bg-[var(--hover-bg)]">
                                         <Users size={16} className="text-[var(--muted-text)]" />
                                         <span className="text-[var(--foreground)]">Contactos</span>
                                     </Command.Item>
-                                    <Command.Item onSelect={() => navigate("/app/deals")} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm cursor-pointer transition-colors data-[selected=true]:bg-[var(--hover-bg)]">
+                                    <Command.Item onSelect={() => navigate("/app/deals")} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-colors data-[selected=true]:bg-[var(--hover-bg)]">
                                         <TrendingUp size={16} className="text-[var(--muted-text)]" />
                                         <span className="text-[var(--foreground)]">Negocios</span>
                                     </Command.Item>
                                     {isAdmin && (
-                                        <Command.Item onSelect={() => navigate("/app/settings")} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm cursor-pointer transition-colors data-[selected=true]:bg-[var(--hover-bg)]">
+                                        <Command.Item onSelect={() => navigate("/app/settings")} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-colors data-[selected=true]:bg-[var(--hover-bg)]">
                                             <Settings size={16} className="text-[var(--muted-text)]" />
                                             <span className="text-[var(--foreground)]">Configuración</span>
                                         </Command.Item>
                                     )}
-                                    <Command.Item onSelect={() => navigate("/app/profile")} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm cursor-pointer transition-colors data-[selected=true]:bg-[var(--hover-bg)]">
+                                    <Command.Item onSelect={() => navigate("/app/profile")} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-colors data-[selected=true]:bg-[var(--hover-bg)]">
                                         <User size={16} className="text-[var(--muted-text)]" />
                                         <span className="text-[var(--foreground)]">Mi Perfil</span>
                                     </Command.Item>

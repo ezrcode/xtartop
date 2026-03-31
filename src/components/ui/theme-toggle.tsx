@@ -79,7 +79,7 @@ export function ThemeToggle({ initialTheme, variant = "buttons", buttonClassName
                     value={theme}
                     onChange={(e) => handleThemeChange(e.target.value as ThemePreference)}
                     disabled={isUpdating}
-                    className="w-full h-11 px-4 text-base border-2 border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--foreground)] rounded-xl focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-all appearance-none pr-12 cursor-pointer"
+                    className="w-full h-11 px-4 text-base border-2 border-[var(--input-border)] bg-[var(--input-bg)] text-[var(--foreground)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-all appearance-none pr-12 cursor-pointer"
                 >
                     <option value="LIGHT">Claro</option>
                     <option value="DARK">Oscuro</option>
@@ -108,7 +108,7 @@ export function ThemeToggle({ initialTheme, variant = "buttons", buttonClassName
     ];
 
     return (
-        <div className="inline-flex items-center gap-1 p-1.5 bg-[var(--hover-bg)] rounded-xl">
+        <div className="inline-flex items-center gap-1 p-1.5 bg-[var(--hover-bg)] rounded-lg">
             {options.map((option) => {
                 const Icon = option.icon;
                 const isActive = theme === option.value;

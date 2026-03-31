@@ -397,8 +397,8 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                                                             </span>
                                                         )}
                                                     </td>
-                                                    <td className="px-4 py-3 text-right text-dark-slate">{formatMoney(Number(item.price))}</td>
-                                                    <td className="px-4 py-3 text-right font-medium text-dark-slate">{formatMoney(item.subtotal)}</td>
+                                                    <td className="px-4 py-3 text-right font-mono tabular-nums text-dark-slate">{formatMoney(Number(item.price))}</td>
+                                                    <td className="px-4 py-3 text-right font-medium font-mono tabular-nums text-dark-slate">{formatMoney(item.subtotal)}</td>
                                                     <td className="px-4 py-3">
                                                         <div className="flex items-center justify-end space-x-1">
                                                             <button
@@ -507,7 +507,7 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
 
                     <div className="flex items-center gap-2 ml-auto bg-gray-50 px-3 py-1.5 rounded-lg">
                         <span className="text-xs font-medium text-gray-500">Total:</span>
-                        <span className="text-base font-bold text-nearby-dark">
+                        <span className="text-base font-bold font-mono tabular-nums text-nearby-dark">
                             {formatMoney(billing?.total || 0)}
                         </span>
                     </div>
@@ -535,7 +535,7 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
             {/* Delete Confirmation Modal - Using Portal */}
             {deleteConfirmOpen && typeof document !== 'undefined' && createPortal(
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                    <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm">
+                    <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
                         <h3 className="text-lg font-bold text-dark-slate mb-2">Eliminar artículo</h3>
                         <p className="text-gray-600 mb-6 text-sm">
                             ¿Estás seguro de que deseas eliminar este artículo de la suscripción?
@@ -779,7 +779,7 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-            <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl shadow-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
                 <h3 className="text-lg font-bold text-[var(--foreground)] mb-4">
                     {item ? "Editar artículo" : "Agregar artículo"}
                 </h3>

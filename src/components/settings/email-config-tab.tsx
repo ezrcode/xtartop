@@ -57,7 +57,7 @@ export function EmailConfigTab({ emailConfig }: EmailConfigTabProps) {
 
             <form action={formAction} className="space-y-4">
                 {state?.message && (
-                    <div className={`p-3 rounded-xl text-sm ${
+                    <div className={`p-3 rounded-lg text-sm ${
                         state.message.includes("success")
                             ? "bg-success-green/10 text-success-green"
                             : "bg-error-red/10 text-error-red"
@@ -67,7 +67,7 @@ export function EmailConfigTab({ emailConfig }: EmailConfigTabProps) {
                 )}
 
                 {testResult && (
-                    <div className={`p-3 rounded-xl text-sm ${
+                    <div className={`p-3 rounded-lg text-sm ${
                         testResult.success
                             ? "bg-success-green/10 text-success-green"
                             : "bg-error-red/10 text-error-red"
@@ -163,7 +163,7 @@ export function EmailConfigTab({ emailConfig }: EmailConfigTabProps) {
             </form>
 
             {/* Instructions - collapsible style */}
-            <details className="rounded-xl border border-[var(--card-border)] bg-[var(--hover-bg)] overflow-hidden">
+            <details className="rounded-lg border border-[var(--card-border)] bg-[var(--hover-bg)] overflow-hidden">
                 <summary className="px-4 py-3 text-sm font-medium text-[var(--foreground)] cursor-pointer">
                     📌 Instrucciones
                 </summary>

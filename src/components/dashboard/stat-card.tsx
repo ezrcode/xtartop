@@ -44,7 +44,7 @@ export function StatCard({
     const styles = colorStyles[color];
 
     return (
-        <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-3 sm:p-5 hover:shadow-lg transition-all duration-300 active:scale-[0.98]">
+        <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-3 sm:p-5 hover:shadow-md transition-all duration-200">
             <div className="flex items-center justify-between mb-2 sm:mb-3">
                 <span className="text-[10px] sm:text-xs font-medium text-[var(--muted-text)] uppercase tracking-wide">
                     {title}
@@ -55,7 +55,7 @@ export function StatCard({
             </div>
             
             <div className="flex items-baseline gap-1.5 sm:gap-2">
-                <span className="text-xl sm:text-2xl font-bold text-[var(--foreground)]">
+                <span className="text-xl sm:text-2xl font-bold font-mono tabular-nums text-[var(--foreground)]">
                     {typeof value === "number" ? value.toLocaleString() : value}
                 </span>
                 

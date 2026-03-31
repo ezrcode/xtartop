@@ -44,11 +44,11 @@ export function PurchasesTable({ orders }: PurchasesTableProps) {
 
     if (orders.length === 0) {
         return (
-            <div className="bg-[var(--card-bg)] shadow-sm rounded-xl border border-[var(--card-border)] p-12 text-center">
+            <div className="bg-[var(--card-bg)] shadow-sm rounded-lg border border-[var(--card-border)] p-12 text-center">
                 <p className="text-[var(--muted-text)] text-sm">No hay órdenes de compra aún.</p>
                 <Link
                     href="/app/purchases/new"
-                    className="inline-flex items-center gap-2 mt-4 px-4 py-2 text-sm font-medium text-white bg-nearby-dark rounded-xl hover:bg-nearby-dark-600 transition-colors"
+                    className="inline-flex items-center gap-2 mt-4 px-4 py-2 text-sm font-medium text-white bg-nearby-dark rounded-lg hover:bg-nearby-dark-600 transition-colors"
                 >
                     Crear primera orden
                 </Link>
@@ -57,7 +57,7 @@ export function PurchasesTable({ orders }: PurchasesTableProps) {
     }
 
     return (
-        <div className="bg-[var(--card-bg)] shadow-sm rounded-xl border border-[var(--card-border)] overflow-hidden">
+        <div className="bg-[var(--card-bg)] shadow-sm rounded-lg border border-[var(--card-border)] overflow-hidden">
             <div className="overflow-x-auto">
                 <table className="w-full">
                     <thead>

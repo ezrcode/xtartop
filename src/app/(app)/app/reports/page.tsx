@@ -82,7 +82,7 @@ export default async function ReportsPage() {
                     {visibleGroups.map((group) => (
                         <section
                             key={group.key}
-                            className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl p-4 sm:p-5"
+                            className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-4 sm:p-5"
                         >
                             <div className="mb-4">
                                 <h2 className="text-base sm:text-lg font-semibold text-[var(--foreground)]">
@@ -97,11 +97,11 @@ export default async function ReportsPage() {
                                         <Link
                                             key={report.href}
                                             href={report.href}
-                                            className="group bg-[var(--surface-1)] rounded-xl border border-[var(--card-border)] p-5 hover:shadow-lg transition-all duration-300 hover:border-nearby-accent/30"
+                                            className="group bg-[var(--surface-1)] rounded-lg border border-[var(--card-border)] p-5 hover:shadow-lg transition-all duration-300 hover:border-nearby-accent/30"
                                         >
                                             <div className="flex items-start gap-4">
                                                 <div
-                                                    className={`w-11 h-11 rounded-xl bg-gradient-to-br ${report.gradient} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300`}
+                                                    className={`w-11 h-11 rounded-lg bg-gradient-to-br ${report.gradient} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300`}
                                                 >
                                                     <report.icon size={20} className={report.iconColor} />
                                                 </div>

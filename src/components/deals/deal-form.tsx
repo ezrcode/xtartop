@@ -256,7 +256,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                 </nav>
                             </div>
 
-                            <div className="bg-[var(--card-bg)] shadow-sm rounded-xl border border-[var(--card-border)] p-4 sm:p-6 space-y-4 sm:space-y-6">
+                            <div className="bg-[var(--card-bg)] shadow-sm rounded-lg border border-[var(--card-border)] p-4 sm:p-6 space-y-4 sm:space-y-6">
                                 
                                 {state?.message && (
                                     <div className={`p-4 rounded-md ${
@@ -518,7 +518,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
 
                         {/* Right Column: Activities */}
                         <div className="lg:col-span-5">
-                            <div className="bg-[var(--card-bg)] shadow-sm rounded-xl border border-[var(--card-border)] p-4 sm:p-6 h-full min-h-[300px] sm:min-h-[400px] max-h-[500px] lg:max-h-[calc(100vh-200px)]">
+                            <div className="bg-[var(--card-bg)] shadow-sm rounded-lg border border-[var(--card-border)] p-4 sm:p-6 h-full min-h-[300px] sm:min-h-[400px] max-h-[500px] lg:max-h-[calc(100vh-200px)]">
                                 {isEditMode && deal ? (
                                     <ActivitiesWithSuspense
                                         entityType="deal"
@@ -634,7 +634,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
             {/* Delete Confirmation Modal */}
             {deleteConfirmOpen && deal && (
                 <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4">
-                    <div className="bg-[var(--card-bg)] rounded-t-2xl sm:rounded-xl shadow-lg p-5 sm:p-6 w-full sm:max-w-md safe-bottom">
+                    <div className="bg-[var(--card-bg)] rounded-t-lg sm:rounded-lg shadow-lg p-5 sm:p-6 w-full sm:max-w-md safe-bottom">
                         <h3 className="text-lg font-bold text-[var(--foreground)] mb-2">Eliminar Negocio</h3>
                         <p className="text-[var(--muted-text)] mb-6 text-sm sm:text-base">
                             ¿Estás seguro de que deseas eliminar <strong>{deal.name}</strong>? Esta acción no se puede deshacer.

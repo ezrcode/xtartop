@@ -223,11 +223,11 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                     <div className="flex items-center gap-3">
                         <Link
                             href="/app/reports"
-                            className="h-10 w-10 rounded-xl bg-[var(--hover-bg)] flex items-center justify-center hover:bg-[var(--card-border)] transition-colors"
+                            className="h-10 w-10 rounded-lg bg-[var(--hover-bg)] flex items-center justify-center hover:bg-[var(--card-border)] transition-colors"
                         >
                             <ArrowLeft size={18} className="text-[var(--muted-text)]" />
                         </Link>
-                        <div className="hidden sm:flex h-10 w-10 rounded-xl bg-ocean-blue/10 items-center justify-center">
+                        <div className="hidden sm:flex h-10 w-10 rounded-lg bg-ocean-blue/10 items-center justify-center">
                             <FileSpreadsheet size={20} className="text-ocean-blue" />
                         </div>
                         <div>
@@ -242,7 +242,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                     {lines.length > 0 && (
                         <button
                             onClick={handleExport}
-                            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-success-green rounded-xl hover:bg-success-green/90 transition-colors shadow-sm"
+                            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-success-green rounded-lg hover:bg-success-green/90 transition-colors shadow-sm"
                         >
                             <Download size={16} />
                             Exportar Excel
@@ -251,7 +251,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                 </div>
 
                 {/* Filters */}
-                <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4 sm:p-5 mb-6 w-full min-w-0">
+                <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-4 sm:p-5 mb-6 w-full min-w-0">
                     <div className="flex items-center gap-2 mb-4">
                         <Filter size={16} className="text-[var(--muted-text)]" />
                         <h3 className="text-sm font-semibold text-[var(--foreground)]">Filtros</h3>
@@ -395,7 +395,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                         {showItemPicker && dropdownPos && (
                             <div
                                 ref={itemPickerRef}
-                                className="fixed z-50 max-h-60 overflow-y-auto bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-xl"
+                                className="fixed z-50 max-h-60 overflow-y-auto bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-lg"
                                 style={{ top: dropdownPos.top, left: dropdownPos.left, width: dropdownPos.width }}
                             >
                                 {filteredAvailableItems.length === 0 ? (
@@ -436,7 +436,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                     <button
                         onClick={handleQuery}
                         disabled={loading}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-nearby-dark rounded-xl hover:bg-nearby-dark-600 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-nearby-dark rounded-lg hover:bg-nearby-dark-600 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {loading ? (
                             <Loader2 size={16} className="animate-spin" />
@@ -457,7 +457,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
 
                 {/* Results */}
                 {hasQueried && !loading && lines.length > 0 && (
-                    <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] overflow-hidden">
+                    <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] overflow-hidden">
                         {/* Summary bar */}
                         <div className="flex items-center justify-between px-5 py-3 bg-[var(--hover-bg)] border-b border-[var(--card-border)]">
                             <span className="text-sm text-[var(--muted-text)]">
@@ -521,7 +521,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                 )}
 
                 {hasQueried && !loading && lines.length === 0 && !error && (
-                    <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-12 text-center">
+                    <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-12 text-center">
                         <FileSpreadsheet size={40} className="mx-auto text-[var(--muted-text)] mb-3" />
                         <p className="text-sm text-[var(--muted-text)]">No se encontraron documentos con los filtros seleccionados</p>
                     </div>

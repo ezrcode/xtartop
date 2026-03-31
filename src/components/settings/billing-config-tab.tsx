@@ -311,7 +311,7 @@ export function BillingConfigTab({ currentConfig, availableUsers, senderEmailCon
                 )}
 
                 {/* Enable/Disable Toggle */}
-                <div className="flex items-center justify-between p-4 bg-[var(--hover-bg)] rounded-xl border border-[var(--card-border)]">
+                <div className="flex items-center justify-between p-4 bg-[var(--hover-bg)] rounded-lg border border-[var(--card-border)]">
                     <div className="flex items-center gap-3">
                         <Mail className="h-5 w-5 text-[var(--muted-text)]" />
                         <div>
@@ -343,7 +343,7 @@ export function BillingConfigTab({ currentConfig, availableUsers, senderEmailCon
                                 id="fromUserId"
                                 value={fromUserId}
                                 onChange={(e) => setFromUserId(e.target.value)}
-                                className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                             >
                                 <option value="">Seleccionar usuario...</option>
                                 {availableUsers.map((user) => (
@@ -365,7 +365,7 @@ export function BillingConfigTab({ currentConfig, availableUsers, senderEmailCon
 
                         {/* Sender email config section */}
                         {fromUserId && (
-                            <div className="space-y-4 p-4 bg-[var(--hover-bg)] rounded-xl border border-[var(--card-border)]">
+                            <div className="space-y-4 p-4 bg-[var(--hover-bg)] rounded-lg border border-[var(--card-border)]">
                                 <div className="flex items-center justify-between gap-3">
                                     <div>
                                         <p className="text-sm font-medium text-[var(--foreground)]">
@@ -516,7 +516,7 @@ export function BillingConfigTab({ currentConfig, availableUsers, senderEmailCon
                         <div className="space-y-2">
                             <Label htmlFor="emailBody">Cuerpo del email</Label>
                             <div className="space-y-2">
-                                <div className="flex flex-wrap items-center gap-2 p-2 border border-[var(--card-border)] rounded-xl bg-[var(--hover-bg)]">
+                                <div className="flex flex-wrap items-center gap-2 p-2 border border-[var(--card-border)] rounded-lg bg-[var(--hover-bg)]">
                                     <Button type="button" variant="secondary" size="sm" onClick={() => applyCommand("bold")}>
                                         <Bold size={14} />
                                     </Button>
@@ -559,7 +559,7 @@ export function BillingConfigTab({ currentConfig, availableUsers, senderEmailCon
                                     contentEditable
                                     suppressContentEditableWarning
                                     onInput={(e) => setEmailBody((e.currentTarget as HTMLDivElement).innerHTML)}
-                                    className="min-h-[260px] w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] shadow-sm focus:outline-none focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors overflow-auto"
+                                    className="min-h-[260px] w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-sm focus:outline-none focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors overflow-auto"
                                 />
                                 <p className="text-xs text-[var(--muted-text)]">
                                     Usa Enter para saltos de línea. Puedes aplicar negritas, listas, enlaces e insertar imagen en la firma.
@@ -568,7 +568,7 @@ export function BillingConfigTab({ currentConfig, availableUsers, senderEmailCon
                         </div>
 
                         {/* Variables Info */}
-                        <div className="p-4 bg-[var(--hover-bg)] rounded-xl border border-[var(--card-border)]">
+                        <div className="p-4 bg-[var(--hover-bg)] rounded-lg border border-[var(--card-border)]">
                             <p className="text-sm font-medium text-[var(--foreground)] mb-2">Variables disponibles:</p>
                             <div className="flex flex-wrap gap-2 text-xs">
                                 <Badge variant="secondary">{"{{EMPRESA}}"}</Badge>
@@ -582,7 +582,7 @@ export function BillingConfigTab({ currentConfig, availableUsers, senderEmailCon
                         </div>
 
                         {/* How it works */}
-                        <div className="p-4 bg-blue-50 rounded-xl text-sm text-blue-800">
+                        <div className="p-4 bg-blue-50 rounded-lg text-sm text-blue-800">
                             <p className="font-medium mb-2">¿Cómo funciona?</p>
                             <ul className="list-disc list-inside space-y-1 text-xs">
                                 <li>Cada empresa tiene un "día de cobro" configurado en su pestaña de Suscripción</li>

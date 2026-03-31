@@ -26,7 +26,7 @@ export default async function ContactsPage() {
                     actions={
                         <Link
                             href="/app/contacts/new"
-                            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-nearby-dark rounded-xl hover:bg-nearby-dark-600 transition-colors shadow-sm"
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-nearby-dark rounded-lg hover:bg-nearby-dark-600 transition-colors shadow-sm"
                         >
                             <Plus size={16} />
                             Nuevo Contacto

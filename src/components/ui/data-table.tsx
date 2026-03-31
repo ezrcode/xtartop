@@ -260,7 +260,7 @@ export function DataTable<T>({
     const activeFiltersCount = Object.keys(filters).length;
 
     return (
-        <div className="bg-[var(--card-bg)] rounded-xl sm:rounded-2xl border border-[var(--card-border)] overflow-hidden shadow-sm">
+        <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] overflow-hidden shadow-sm">
             {/* Toolbar */}
             <div className="p-3 sm:p-4 border-b border-[var(--card-border)] flex flex-wrap items-center gap-2.5 sm:gap-3">
                 {/* Search */}
@@ -273,7 +273,7 @@ export function DataTable<T>({
                             placeholder={searchPlaceholder}
                             icon={<Search size={18} />}
                             iconPosition="left"
-                            className="h-11"
+                                    className="h-10"
                         />
                     </div>
                 )}
@@ -298,7 +298,7 @@ export function DataTable<T>({
                             </Button>
                             
                             {showFilters && (
-                                <div className="absolute right-0 top-full mt-2 w-[min(20rem,calc(100vw-1.5rem))] bg-[var(--card-bg)] rounded-xl shadow-xl border border-[var(--card-border)] z-50 p-4 animate-in fade-in-0 zoom-in-95">
+                                <div className="absolute right-0 top-full mt-2 w-[min(20rem,calc(100vw-1.5rem))] bg-[var(--card-bg)] rounded-lg shadow-lg border border-[var(--card-border)] z-50 p-4 animate-in fade-in-0 zoom-in-95">
                                     <div className="flex items-center justify-between mb-4">
                                         <h4 className="font-semibold text-[var(--foreground)]">Filtros</h4>
                                         {activeFiltersCount > 0 && (
@@ -321,7 +321,7 @@ export function DataTable<T>({
                                                 <select
                                                     value={filters[String(col.key)] || ""}
                                                     onChange={(e) => handleFilterChange(String(col.key), e.target.value)}
-                                                    className="w-full h-10 px-3 text-sm bg-[var(--input-bg)] text-[var(--foreground)] border-2 border-[var(--input-border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-all"
+                                                    className="w-full h-10 px-3 text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-md focus:outline-none focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
                                                 >
                                                     <option value="">Todos</option>
                                                     {col.filterOptions?.map(opt => (
@@ -352,7 +352,7 @@ export function DataTable<T>({
                             </Button>
                             
                             {showColumnSelector && (
-                                <div className="absolute right-0 top-full mt-2 w-[min(15rem,calc(100vw-1.5rem))] bg-[var(--card-bg)] rounded-xl shadow-xl border border-[var(--card-border)] z-50 p-2 animate-in fade-in-0 zoom-in-95">
+                                <div className="absolute right-0 top-full mt-2 w-[min(15rem,calc(100vw-1.5rem))] bg-[var(--card-bg)] rounded-lg shadow-lg border border-[var(--card-border)] z-50 p-2 animate-in fade-in-0 zoom-in-95">
                                     <div className="text-xs font-semibold text-[var(--muted-text)] px-3 py-2 uppercase tracking-wider">
                                         Mostrar columnas
                                     </div>
@@ -361,10 +361,10 @@ export function DataTable<T>({
                                             key={String(col.key)}
                                             type="button"
                                             onClick={() => toggleColumn(String(col.key))}
-                                            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-[var(--foreground)] hover:bg-[var(--hover-bg)] rounded-lg transition-colors"
+                                            className="w-full flex items-center gap-3 px-3 py-2 text-sm text-[var(--foreground)] hover:bg-[var(--hover-bg)] rounded-md transition-colors"
                                         >
                                             <div className={cn(
-                                                "w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all",
+                                                "w-5 h-5 rounded border flex items-center justify-center transition-colors",
                                                 visibleColumns.includes(String(col.key))
                                                     ? "bg-nearby-accent border-nearby-accent"
                                                     : "border-[var(--input-border)]"

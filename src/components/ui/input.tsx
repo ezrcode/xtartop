@@ -15,29 +15,29 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       return (
         <div className="relative">
           {iconPosition === "left" && (
-            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--muted-text)]">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted-text)]">
               {icon}
             </div>
           )}
           <input
             type={type}
             className={cn(
-              "flex h-11 w-full rounded-xl border-2 bg-[var(--input-bg)] px-4 py-2.5 text-base transition-all duration-200",
+              "flex h-10 w-full rounded-md border bg-[var(--input-bg)] px-3 py-2 text-sm transition-colors duration-150",
               "placeholder:text-[var(--muted-text)] text-[var(--foreground)]",
               "focus:outline-none focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent",
               "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-[var(--hover-bg)]",
               error
                 ? "border-error-red focus:ring-error-red/20 focus:border-error-red"
                 : "border-[var(--input-border)] hover:border-[var(--muted-text)]",
-              iconPosition === "left" && "pl-11",
-              iconPosition === "right" && "pr-11",
+              iconPosition === "left" && "pl-10",
+              iconPosition === "right" && "pr-10",
               className
             )}
             ref={ref}
             {...props}
           />
           {iconPosition === "right" && (
-            <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--muted-text)]">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted-text)]">
               {icon}
             </div>
           )}
@@ -49,7 +49,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <input
         type={type}
         className={cn(
-          "flex h-11 w-full rounded-xl border-2 bg-[var(--input-bg)] px-4 py-2.5 text-base transition-all duration-200",
+          "flex h-10 w-full rounded-md border bg-[var(--input-bg)] px-3 py-2 text-sm transition-colors duration-150",
           "placeholder:text-[var(--muted-text)] text-[var(--foreground)]",
           "focus:outline-none focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent",
           "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-[var(--hover-bg)]",

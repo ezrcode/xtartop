@@ -158,7 +158,7 @@ export function BillingHistoryTab({ companyId }: BillingHistoryTabProps) {
                                             </p>
                                         )}
                                     </td>
-                                    <td className="px-3 py-2.5 text-right text-[var(--foreground)] font-medium text-xs">
+                                    <td className="px-3 py-2.5 text-right text-[var(--foreground)] font-medium font-mono tabular-nums text-xs">
                                         {formatMoney(item.totalAmount)} {item.currency}
                                     </td>
                                     <td className="px-3 py-2.5 text-[var(--muted-text)] text-xs">

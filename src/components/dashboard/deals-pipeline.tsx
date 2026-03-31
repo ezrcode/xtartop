@@ -38,7 +38,7 @@ export function DealsPipeline({ data }: DealsPipelineProps) {
 
     if (filteredData.length === 0) {
         return (
-            <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4 sm:p-5">
+            <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-4 sm:p-5">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-sm font-semibold text-[var(--foreground)]">Pipeline de Negocios</h3>
                     <TrendingUp size={18} className="text-[var(--muted-text)]" />
@@ -51,7 +51,7 @@ export function DealsPipeline({ data }: DealsPipelineProps) {
     }
 
     return (
-        <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4 sm:p-5">
+        <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-4 sm:p-5">
             <div className="flex items-center justify-between mb-2">
                 <h3 className="text-sm font-semibold text-[var(--foreground)]">Pipeline de Negocios</h3>
                 <Link 
@@ -64,7 +64,7 @@ export function DealsPipeline({ data }: DealsPipelineProps) {
             
             <div className="flex items-baseline gap-2 mb-4">
                 <span className="text-xl sm:text-2xl font-bold text-[var(--foreground)]">{totalDeals}</span>
-                <span className="text-xs sm:text-sm text-[var(--muted-text)]">negocios · {formatCurrency(totalValue)}</span>
+                <span className="text-xs sm:text-sm text-[var(--muted-text)]">negocios · <span className="font-mono tabular-nums">{formatCurrency(totalValue)}</span></span>
             </div>
 
             <div className="space-y-2.5">

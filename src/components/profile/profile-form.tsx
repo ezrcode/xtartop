@@ -42,7 +42,7 @@ function ProfileTab({ user }: { user: ProfileFormProps['user'] }) {
     return (
         <form action={profileAction} className="space-y-6 max-w-lg">
             {profileState?.message && (
-                <div className={`p-4 rounded-xl ${profileState.message.includes("success") ? "bg-success-green/10 text-success-green" : "bg-error-red/10 text-error-red"}`}>
+                <div className={`p-4 rounded-lg ${profileState.message.includes("success") ? "bg-success-green/10 text-success-green" : "bg-error-red/10 text-error-red"}`}>
                     {profileState.message}
                 </div>
             )}
@@ -105,7 +105,7 @@ function PasswordTab() {
     return (
         <form action={passwordAction} className="space-y-6 max-w-lg">
             {passwordState?.message && (
-                <div className={`p-4 rounded-xl ${passwordState.message.includes("success") ? "bg-success-green/10 text-success-green" : "bg-error-red/10 text-error-red"}`}>
+                <div className={`p-4 rounded-lg ${passwordState.message.includes("success") ? "bg-success-green/10 text-success-green" : "bg-error-red/10 text-error-red"}`}>
                     {passwordState.message}
                 </div>
             )}

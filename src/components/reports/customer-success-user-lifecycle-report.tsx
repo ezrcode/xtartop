@@ -86,14 +86,14 @@ function MetricGroup({
     metrics: Array<{ label: string; value: number; tone: string }>;
 }) {
     return (
-        <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] overflow-hidden">
+        <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] overflow-hidden">
             <div className={`px-4 sm:px-5 py-4 border-b border-[var(--card-border)] bg-gradient-to-r ${accentClass}`}>
                 <h3 className="text-sm font-semibold text-[var(--foreground)]">{title}</h3>
                 <p className="text-xs text-[var(--muted-text)] mt-1">{description}</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 p-4">
                 {metrics.map((metric) => (
-                    <div key={metric.label} className={`rounded-xl border p-4 ${metric.tone}`}>
+                    <div key={metric.label} className={`rounded-lg border p-4 ${metric.tone}`}>
                         <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">{metric.label}</p>
                         <p className="text-3xl font-bold text-[var(--foreground)] mt-2">{metric.value}</p>
                     </div>
@@ -383,16 +383,16 @@ export function CustomerSuccessUserLifecycleReport() {
     return (
         <div className="min-h-screen bg-[var(--surface-0)] py-6 sm:py-8">
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)] p-4 sm:p-6 mb-6">
+                <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-4 sm:p-6 mb-6">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
                             <Link
                                 href="/app/reports"
-                                className="h-10 w-10 rounded-xl bg-[var(--hover-bg)] flex items-center justify-center hover:bg-[var(--card-border)] transition-colors"
+                                className="h-10 w-10 rounded-lg bg-[var(--hover-bg)] flex items-center justify-center hover:bg-[var(--card-border)] transition-colors"
                             >
                                 <ArrowLeft size={18} className="text-[var(--muted-text)]" />
                             </Link>
-                            <div className="hidden sm:flex h-10 w-10 rounded-xl bg-ocean-blue/15 items-center justify-center">
+                            <div className="hidden sm:flex h-10 w-10 rounded-lg bg-ocean-blue/15 items-center justify-center">
                                 <LineChartIcon size={20} className="text-ocean-blue" />
                             </div>
                             <div>
@@ -409,7 +409,7 @@ export function CustomerSuccessUserLifecycleReport() {
                             <button
                                 onClick={handleExportPdf}
                                 disabled={exportingPdf}
-                                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-ocean-blue rounded-xl hover:bg-ocean-blue/90 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-ocean-blue rounded-lg hover:bg-ocean-blue/90 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {exportingPdf ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
                                 {exportingPdf ? "Generando PDF..." : "Exportar PDF"}
@@ -418,7 +418,7 @@ export function CustomerSuccessUserLifecycleReport() {
                     </div>
                 </div>
 
-                <div className="bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)] p-4 sm:p-5 mb-6">
+                <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-4 sm:p-5 mb-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div>
                             <label className="block text-xs font-medium text-[var(--muted-text)] uppercase tracking-wider mb-2">Desde</label>
@@ -457,7 +457,7 @@ export function CustomerSuccessUserLifecycleReport() {
                             <button
                                 onClick={handleQuery}
                                 disabled={loading}
-                                className="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium text-white bg-nearby-dark rounded-xl hover:bg-nearby-dark-600 transition-colors disabled:opacity-50"
+                                className="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium text-white bg-nearby-dark rounded-lg hover:bg-nearby-dark-600 transition-colors disabled:opacity-50"
                             >
                                 {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
                                 {loading ? "Consultando..." : "Consultar"}
@@ -497,7 +497,7 @@ export function CustomerSuccessUserLifecycleReport() {
                             />
                         </div>
 
-                        <div ref={chartContainerRef} className="bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)] p-4 sm:p-5">
+                        <div ref={chartContainerRef} className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-4 sm:p-5">
                             <h3 className="text-sm font-semibold text-[var(--foreground)] mb-3">Línea de tiempo mensual</h3>
                             <div className="h-[320px]">
                                 <ResponsiveContainer width="100%" height="100%">
@@ -516,7 +516,7 @@ export function CustomerSuccessUserLifecycleReport() {
                             </div>
                         </div>
 
-                        <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] overflow-hidden">
+                        <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] overflow-hidden">
                             <div className="px-4 py-3 border-b border-[var(--card-border)] bg-[var(--hover-bg)]">
                                 <h3 className="text-sm font-semibold text-[var(--foreground)]">Resumen por cliente</h3>
                             </div>
@@ -546,7 +546,7 @@ export function CustomerSuccessUserLifecycleReport() {
                             </div>
                         </div>
 
-                        <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] overflow-hidden">
+                        <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] overflow-hidden">
                             <div className="px-4 py-3 border-b border-[var(--card-border)] bg-[var(--hover-bg)]">
                                 <h3 className="text-sm font-semibold text-[var(--foreground)]">Resumen por cliente - Proyectos</h3>
                             </div>
@@ -579,7 +579,7 @@ export function CustomerSuccessUserLifecycleReport() {
                 )}
 
                 {hasQueried && !loading && data && summaryByCompany.length === 0 && (
-                    <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-12 text-center">
+                    <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-12 text-center">
                         <p className="text-sm text-[var(--muted-text)]">No se encontraron eventos en el rango seleccionado.</p>
                     </div>
                 )}

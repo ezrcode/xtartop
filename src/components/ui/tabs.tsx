@@ -24,11 +24,8 @@ const TabsList = React.forwardRef<
       "[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]",
       // Variant styles
       {
-        // Default: pill-shaped background
-        "h-12 rounded-xl bg-[var(--hover-bg)] p-1.5": variant === "default",
-        // Underline: border at bottom
+        "h-10 rounded-lg bg-[var(--hover-bg)] p-1": variant === "default",
         "border-b border-[var(--card-border)] pb-0": variant === "underline",
-        // Pills: no background, pills on active
         "gap-2": variant === "pills",
       },
       className
@@ -57,12 +54,9 @@ const TabsTrigger = React.forwardRef<
       "[&_svg]:size-4 [&_svg]:shrink-0",
       // Variant styles
       {
-        // Default: active has white background
-        "rounded-lg text-[var(--muted-text)] data-[state=active]:bg-[var(--card-bg)] data-[state=active]:text-[var(--foreground)] data-[state=active]:shadow-md": variant === "default",
-        // Underline: active has bottom border
+        "rounded-md text-[var(--muted-text)] data-[state=active]:bg-[var(--card-bg)] data-[state=active]:text-[var(--foreground)] data-[state=active]:shadow-sm": variant === "default",
         "rounded-none border-b-2 border-transparent text-[var(--muted-text)] hover:text-[var(--foreground)] data-[state=active]:border-nearby-accent data-[state=active]:text-nearby-accent -mb-[1px]": variant === "underline",
-        // Pills: active has accent background
-        "rounded-full bg-transparent text-[var(--muted-text)] hover:bg-[var(--hover-bg)] data-[state=active]:bg-nearby-accent data-[state=active]:text-white": variant === "pills",
+        "rounded-md bg-transparent text-[var(--muted-text)] hover:bg-[var(--hover-bg)] data-[state=active]:bg-nearby-accent data-[state=active]:text-white": variant === "pills",
       },
       className
     )}

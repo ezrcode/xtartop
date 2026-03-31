@@ -15,7 +15,7 @@ export default function Error({
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4">
-            <div className="max-w-md w-full bg-white rounded-2xl border border-gray-200 shadow-lg p-8 text-center">
+            <div className="max-w-md w-full bg-white rounded-lg border border-gray-200 shadow-lg p-8 text-center">
                 <h2 className="text-xl font-bold text-gray-900 mb-2">
                     Algo salió mal
                 </h2>
@@ -29,7 +29,7 @@ export default function Error({
                 )}
                 <button
                     onClick={reset}
-                    className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors"
+                    className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
                 >
                     Intentar de nuevo
                 </button>

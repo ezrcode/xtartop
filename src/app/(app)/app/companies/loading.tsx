@@ -5,24 +5,24 @@ export default function Loading() {
                 {/* Header Skeleton */}
                 <div className="flex items-center justify-between mb-8">
                     <div className="space-y-2">
-                        <div className="h-8 w-48 skeleton rounded-xl animate-pulse" />
-                        <div className="h-4 w-64 skeleton rounded-xl animate-pulse" />
+                        <div className="h-8 w-48 skeleton rounded-lg animate-pulse" />
+                        <div className="h-4 w-64 skeleton rounded-lg animate-pulse" />
                     </div>
-                    <div className="h-10 w-32 skeleton rounded-xl animate-pulse" />
+                    <div className="h-10 w-32 skeleton rounded-lg animate-pulse" />
                 </div>
 
                 {/* Table Skeleton */}
-                <div className="bg-[var(--card-bg)] shadow-sm rounded-xl border border-[var(--card-border)] overflow-hidden">
+                <div className="bg-[var(--card-bg)] shadow-sm rounded-lg border border-[var(--card-border)] overflow-hidden">
                     <div className="px-6 py-4 border-b border-[var(--card-border)]">
-                        <div className="h-4 w-32 skeleton rounded-xl animate-pulse" />
+                        <div className="h-4 w-32 skeleton rounded-lg animate-pulse" />
                     </div>
                     <div className="divide-y divide-[var(--card-border)]">
                         {[...Array(5)].map((_, i) => (
                             <div key={i} className="px-6 py-4 flex items-center space-x-4">
-                                <div className="h-4 w-1/4 skeleton rounded-xl animate-pulse" />
-                                <div className="h-4 w-1/4 skeleton rounded-xl animate-pulse" />
-                                <div className="h-4 w-1/4 skeleton rounded-xl animate-pulse" />
-                                <div className="h-4 w-1/4 skeleton rounded-xl animate-pulse" />
+                                <div className="h-4 w-1/4 skeleton rounded-lg animate-pulse" />
+                                <div className="h-4 w-1/4 skeleton rounded-lg animate-pulse" />
+                                <div className="h-4 w-1/4 skeleton rounded-lg animate-pulse" />
+                                <div className="h-4 w-1/4 skeleton rounded-lg animate-pulse" />
                             </div>
                         ))}
                     </div>

@@ -60,7 +60,7 @@ export function EmptyState({
         >
             <motion.div 
                 className={cn(
-                    "rounded-2xl bg-gradient-to-br from-[var(--hover-bg)] to-[var(--card-border)]/30 flex items-center justify-center shadow-inner",
+                    "rounded-lg bg-[var(--hover-bg)] flex items-center justify-center",
                     s.iconBox
                 )}
                 initial={{ scale: 0.8, rotate: -10 }}

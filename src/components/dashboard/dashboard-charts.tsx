@@ -43,7 +43,7 @@ function CustomTooltip({ active, payload }: { active?: boolean; payload?: Array<
     if (!active || !payload?.length) return null;
     const d = payload[0].payload;
     return (
-        <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-xl px-3 py-2 text-xs">
+        <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-lg px-3 py-2 text-xs">
             <p className="font-semibold text-[var(--foreground)] mb-1">{d.label}</p>
             <p className="text-[var(--muted-text)]">
                 {d.count} negocio{d.count !== 1 ? "s" : ""} · {formatCurrency(d.value)}
@@ -59,7 +59,7 @@ export function DashboardCharts({ pipeline }: DashboardChartsProps) {
 
     if (visible.length === 0) {
         return (
-            <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-5">
+            <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-5">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-sm font-semibold text-[var(--foreground)]">Pipeline de Negocios</h3>
                     <TrendingUp size={18} className="text-[var(--muted-text)]" />
@@ -72,7 +72,7 @@ export function DashboardCharts({ pipeline }: DashboardChartsProps) {
     }
 
     return (
-        <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-5">
+        <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-5">
             <div className="flex items-center justify-between mb-1">
                 <h3 className="text-sm font-semibold text-[var(--foreground)]">Pipeline de Negocios</h3>
                 <Link

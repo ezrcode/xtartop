@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Outfit, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
+const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains" });
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -60,7 +61,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${inter.variable} antialiased`}>
+      <body className={`${outfit.variable} ${jetbrainsMono.variable} antialiased`}>
         {children}
         <Toaster 
           position="top-center"
@@ -69,8 +70,8 @@ export default function RootLayout({
               background: "var(--card-bg)",
               color: "var(--foreground)",
               border: "1px solid var(--card-border)",
-              borderRadius: "12px",
-              padding: "14px 16px",
+              borderRadius: "8px",
+              padding: "12px 16px",
               boxShadow: "0 10px 15px -3px rgb(45 62 80 / 0.1)",
             },
             className: "text-sm sm:text-[13px]",

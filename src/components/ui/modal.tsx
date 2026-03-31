@@ -95,7 +95,7 @@ export function Modal({
                         className={`
                             w-full ${sizeStyles[size]}
                             bg-[var(--card-bg)] border border-[var(--card-border)]
-                            rounded-xl shadow-xl
+                            rounded-lg shadow-xl
                             max-h-[90vh] overflow-hidden
                             flex flex-col
                         `}
@@ -119,7 +119,7 @@ export function Modal({
                                     <button
                                         type="button"
                                         onClick={onClose}
-                                        className="p-2 -m-2 text-[var(--muted-text)] hover:text-[var(--foreground)] hover:bg-[var(--hover-bg)] rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                                        className="p-1.5 -m-1.5 text-[var(--muted-text)] hover:text-[var(--foreground)] hover:bg-[var(--hover-bg)] rounded-md transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
                                         aria-label="Cerrar"
                                     >
                                         <X size={20} />
@@ -189,7 +189,7 @@ export function ConfirmModal({
                         type="button"
                         onClick={onClose}
                         disabled={isLoading}
-                        className="px-4 py-2.5 text-sm font-medium text-[var(--foreground)] bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg hover:bg-[var(--hover-bg)] transition-colors min-h-[44px] disabled:opacity-50"
+                        className="px-4 py-2 text-sm font-medium text-[var(--foreground)] bg-[var(--card-bg)] border border-[var(--card-border)] rounded-md hover:bg-[var(--hover-bg)] transition-colors min-h-[36px] disabled:opacity-50"
                     >
                         {cancelLabel}
                     </button>
@@ -197,7 +197,7 @@ export function ConfirmModal({
                         type="button"
                         onClick={onConfirm}
                         disabled={isLoading}
-                        className={`px-4 py-2.5 text-sm font-medium text-white rounded-lg transition-colors min-h-[44px] disabled:opacity-50 ${variantStyles[variant]}`}
+                        className={`px-4 py-2 text-sm font-medium text-white rounded-md transition-colors min-h-[36px] disabled:opacity-50 ${variantStyles[variant]}`}
                     >
                         {isLoading ? "Procesando..." : confirmLabel}
                     </button>

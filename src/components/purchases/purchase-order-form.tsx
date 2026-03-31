@@ -81,7 +81,7 @@ function SubmitButton({ label = "Guardar" }: { label?: string }) {
         <button
             type="submit"
             disabled={pending}
-            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-nearby-dark rounded-xl hover:bg-nearby-dark-600 transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-nearby-dark rounded-lg hover:bg-nearby-dark-600 transition-colors disabled:opacity-50"
         >
             {pending ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
             {pending ? "Guardando..." : label}
@@ -270,7 +270,7 @@ export function PurchaseOrderForm({
                     </Link>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-nearby-accent/10 rounded-xl">
+                            <div className="p-2.5 bg-nearby-accent/10 rounded-lg">
                                 <ShoppingCart size={24} className="text-nearby-accent" />
                             </div>
                             <div>
@@ -296,7 +296,7 @@ export function PurchaseOrderForm({
 
                 {/* Status messages */}
                 {state?.message && (
-                    <div className={`mb-4 p-4 rounded-xl text-sm ${
+                    <div className={`mb-4 p-4 rounded-lg text-sm ${
                         state.message.includes("exitosamente")
                             ? "bg-success-green/10 text-success-green"
                             : "bg-error-red/10 text-error-red"
@@ -306,7 +306,7 @@ export function PurchaseOrderForm({
                 )}
 
                 {decimaMessage && (
-                    <div className={`mb-4 flex items-center gap-2 p-4 rounded-xl text-sm ${
+                    <div className={`mb-4 flex items-center gap-2 p-4 rounded-lg text-sm ${
                         decimaMessage.type === "success"
                             ? "bg-success-green/10 text-success-green"
                             : "bg-error-red/10 text-error-red"
@@ -318,7 +318,7 @@ export function PurchaseOrderForm({
 
                 {/* Decima Actions Bar */}
                 {isEditMode && order && decimaEnabled && (
-                    <div className="mb-6 p-4 bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] flex items-center justify-between">
+                    <div className="mb-6 p-4 bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] flex items-center justify-between">
                         <div>
                             <p className="text-sm font-medium text-[var(--foreground)]">Décima Portal</p>
                             <p className="text-xs text-[var(--muted-text)]">
@@ -373,7 +373,7 @@ export function PurchaseOrderForm({
                     <input type="hidden" name="promoCode" value={promoCode} />
 
                     {/* Supplier & Period */}
-                    <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-6 space-y-4">
+                    <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-6 space-y-4">
                         <h2 className="text-base font-semibold text-[var(--foreground)]">Datos Generales</h2>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -387,7 +387,7 @@ export function PurchaseOrderForm({
                                     value={supplierId}
                                     onChange={(e) => setSupplierId(e.target.value)}
                                     disabled={!!isReadonly}
-                                    className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors disabled:opacity-50"
+                                    className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors disabled:opacity-50"
                                     required
                                 >
                                     <option value="">Selecciona un proveedor</option>
@@ -422,7 +422,7 @@ export function PurchaseOrderForm({
                                     value={period}
                                     onChange={(e) => setPeriod(e.target.value)}
                                     disabled={!!isReadonly}
-                                    className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors disabled:opacity-50"
+                                    className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors disabled:opacity-50"
                                     required
                                 />
                                 {state?.errors?.period && (
@@ -444,7 +444,7 @@ export function PurchaseOrderForm({
                                     onChange={(e) => setExternalReference(e.target.value)}
                                     disabled={!!isReadonly}
                                     placeholder="ej: REF-001"
-                                    className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors disabled:opacity-50"
+                                    className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors disabled:opacity-50"
                                 />
                             </div>
 
@@ -459,7 +459,7 @@ export function PurchaseOrderForm({
                                     onChange={(e) => setPromoCode(e.target.value)}
                                     disabled={!!isReadonly}
                                     placeholder="ej: SS2026"
-                                    className={`w-full px-3 py-2.5 text-sm border rounded-xl bg-[var(--card-bg)] shadow-sm focus:ring-2 transition-colors disabled:opacity-50 font-mono uppercase ${
+                                    className={`w-full px-3 py-2.5 text-sm border rounded-lg bg-[var(--card-bg)] shadow-sm focus:ring-2 transition-colors disabled:opacity-50 font-mono uppercase ${
                                         normalizedPromo && matchedPromo
                                             ? "border-success-green focus:ring-success-green/20 focus:border-success-green"
                                             : normalizedPromo && !matchedPromo
@@ -491,14 +491,14 @@ export function PurchaseOrderForm({
                                     onChange={(e) => setNotes(e.target.value)}
                                     disabled={!!isReadonly}
                                     placeholder="Notas adicionales..."
-                                    className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-xl bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors disabled:opacity-50"
+                                    className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors disabled:opacity-50"
                                 />
                             </div>
                         </div>
                     </div>
 
                     {/* Items */}
-                    <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-6 space-y-4">
+                    <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-6 space-y-4">
                         <div className="flex items-center justify-between">
                             <h2 className="text-base font-semibold text-[var(--foreground)]">
                                 Items ({items.length})
@@ -554,7 +554,7 @@ export function PurchaseOrderForm({
                             {items.map((item, index) => (
                                 <div
                                     key={index}
-                                    className="grid grid-cols-1 sm:grid-cols-none gap-3 p-3 bg-[var(--hover-bg)] rounded-xl border border-[var(--card-border)]"
+                                    className="grid grid-cols-1 sm:grid-cols-none gap-3 p-3 bg-[var(--hover-bg)] rounded-lg border border-[var(--card-border)]"
                                     style={{ gridTemplateColumns: undefined }}
                                 >
                                     <div className="hidden sm:grid gap-3" style={{ gridTemplateColumns: "2fr 4fr 1fr 1.5fr 1.5fr 40px" }}>
@@ -763,7 +763,7 @@ export function PurchaseOrderForm({
                                     type="submit"
                                     name="action"
                                     value="saveAndClose"
-                                    className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-[var(--foreground)] bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl hover:bg-[var(--hover-bg)] transition-colors"
+                                    className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-[var(--foreground)] bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg hover:bg-[var(--hover-bg)] transition-colors"
                                 >
                                     Guardar y Cerrar
                                 </button>

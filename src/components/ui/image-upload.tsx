@@ -94,7 +94,7 @@ export function ImageUpload({
         }
     };
 
-    const shapeClass = shape === "circle" ? "rounded-full" : "rounded-xl";
+    const shapeClass = shape === "circle" ? "rounded-full" : "rounded-lg";
 
     return (
         <div className={className}>

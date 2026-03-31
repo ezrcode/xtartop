@@ -27,7 +27,7 @@ const typeIcons: Record<string, { icon: typeof Mail; color: string; bg: string }
 export function RecentActivity({ activities }: RecentActivityProps) {
     if (activities.length === 0) {
         return (
-            <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4 sm:p-5">
+            <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-4 sm:p-5">
                 <h3 className="text-sm font-semibold text-[var(--foreground)] mb-4">
                     Actividad Reciente
                 </h3>
@@ -39,7 +39,7 @@ export function RecentActivity({ activities }: RecentActivityProps) {
     }
 
     return (
-        <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4 sm:p-5">
+        <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-4 sm:p-5">
             <h3 className="text-sm font-semibold text-[var(--foreground)] mb-3 sm:mb-4">
                 Actividad Reciente
             </h3>

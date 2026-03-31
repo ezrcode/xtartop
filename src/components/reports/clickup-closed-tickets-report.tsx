@@ -471,18 +471,18 @@ export function ClickUpClosedTicketsReport({
     return (
         <div className="min-h-screen bg-[var(--surface-0)] py-6 sm:py-8">
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="relative overflow-hidden bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)] p-4 sm:p-6 mb-6">
+                <div className="relative overflow-hidden bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-4 sm:p-6 mb-6">
                     <div className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-success-green/10 blur-2xl" />
                     <div className="absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-ocean-blue/10 blur-2xl" />
                     <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                         <Link
                             href="/app/reports"
-                            className="h-10 w-10 rounded-xl bg-[var(--hover-bg)] flex items-center justify-center hover:bg-[var(--card-border)] transition-colors"
+                            className="h-10 w-10 rounded-lg bg-[var(--hover-bg)] flex items-center justify-center hover:bg-[var(--card-border)] transition-colors"
                         >
                             <ArrowLeft size={18} className="text-[var(--muted-text)]" />
                         </Link>
-                        <div className="hidden sm:flex h-10 w-10 rounded-xl bg-success-green/15 items-center justify-center">
+                        <div className="hidden sm:flex h-10 w-10 rounded-lg bg-success-green/15 items-center justify-center">
                             <BarChart3 size={20} className="text-success-green" />
                         </div>
                         <div>
@@ -499,7 +499,7 @@ export function ClickUpClosedTicketsReport({
                         <button
                             onClick={handleExportPdf}
                             disabled={exportingPdf}
-                            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-success-green rounded-xl hover:bg-success-green/90 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-success-green rounded-lg hover:bg-success-green/90 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {exportingPdf ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
                             {exportingPdf ? "Generando PDF..." : "Exportar PDF"}
@@ -508,7 +508,7 @@ export function ClickUpClosedTicketsReport({
                 </div>
                 </div>
 
-                <div className="bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)] p-4 sm:p-5 mb-6">
+                <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-4 sm:p-5 mb-6">
                     <div className="mb-3">
                         <h3 className="text-sm font-semibold text-[var(--foreground)]">Filtros y agrupaciones</h3>
                         <p className="text-xs text-[var(--muted-text)] mt-0.5">Configura el rango de fechas y la forma de análisis.</p>
@@ -610,7 +610,7 @@ export function ClickUpClosedTicketsReport({
                             <button
                                 onClick={handleQuery}
                                 disabled={loading}
-                                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-nearby-dark rounded-xl hover:bg-nearby-dark-600 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-nearby-dark rounded-lg hover:bg-nearby-dark-600 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
                                 {loading ? "Consultando ClickUp..." : "Consultar"}
@@ -618,7 +618,7 @@ export function ClickUpClosedTicketsReport({
                             <button
                                 onClick={handleDebug}
                                 disabled={debugLoading}
-                                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-[var(--foreground)] border border-[var(--card-border)] rounded-xl bg-[var(--surface-0)] hover:bg-[var(--hover-bg)] transition-colors disabled:opacity-50"
+                                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-[var(--foreground)] border border-[var(--card-border)] rounded-lg bg-[var(--surface-0)] hover:bg-[var(--hover-bg)] transition-colors disabled:opacity-50"
                             >
                                 {debugLoading ? <Loader2 size={16} className="animate-spin" /> : <Bug size={16} />}
                                 {debugLoading ? "Leyendo debug..." : "Diagnóstico ClickUp"}
@@ -632,7 +632,7 @@ export function ClickUpClosedTicketsReport({
                 )}
 
                 {debugPayload && (
-                    <div className="mb-4 bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4">
+                    <div className="mb-4 bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-4">
                         <h3 className="text-sm font-semibold text-[var(--foreground)] mb-2">Diagnóstico ClickUp (raw)</h3>
                         <pre className="max-h-[420px] overflow-auto text-xs p-3 rounded-lg bg-[var(--surface-0)] border border-[var(--card-border)] text-[var(--foreground)] whitespace-pre-wrap">
                             {JSON.stringify(debugPayload, null, 2)}
@@ -643,21 +643,21 @@ export function ClickUpClosedTicketsReport({
                 {hasQueried && !loading && groupedRows.length > 0 && (
                     <div className="space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div className="bg-gradient-to-br from-success-green/10 to-success-green/5 rounded-xl border border-success-green/20 p-4">
+                            <div className="bg-gradient-to-br from-success-green/10 to-success-green/5 rounded-lg border border-success-green/20 p-4">
                                 <p className="text-xs text-[var(--muted-text)] uppercase tracking-wider">Tickets cerrados</p>
                                 <p className="text-2xl font-bold text-[var(--foreground)] mt-1">{filteredLines.length}</p>
                             </div>
-                            <div className="bg-gradient-to-br from-ocean-blue/10 to-ocean-blue/5 rounded-xl border border-ocean-blue/20 p-4">
+                            <div className="bg-gradient-to-br from-ocean-blue/10 to-ocean-blue/5 rounded-lg border border-ocean-blue/20 p-4">
                                 <p className="text-xs text-[var(--muted-text)] uppercase tracking-wider">Clientes</p>
                                 <p className="text-2xl font-bold text-[var(--foreground)] mt-1">{clients.length}</p>
                             </div>
-                            <div className="bg-gradient-to-br from-nearby-accent/10 to-nearby-accent/5 rounded-xl border border-nearby-accent/20 p-4">
+                            <div className="bg-gradient-to-br from-nearby-accent/10 to-nearby-accent/5 rounded-lg border border-nearby-accent/20 p-4">
                                 <p className="text-xs text-[var(--muted-text)] uppercase tracking-wider">Asignados</p>
                                 <p className="text-2xl font-bold text-[var(--foreground)] mt-1">{assignees.length}</p>
                             </div>
                         </div>
 
-                        <div ref={chartContainerRef} className="bg-[var(--card-bg)] rounded-2xl border border-[var(--card-border)] p-4 sm:p-5">
+                        <div ref={chartContainerRef} className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-4 sm:p-5">
                             <h3 className="text-sm font-semibold text-[var(--foreground)] mb-3">
                                 Distribución por {groupBy === "week" ? "semana" : groupBy === "client" ? "cliente" : "asignado"}
                             </h3>
@@ -675,7 +675,7 @@ export function ClickUpClosedTicketsReport({
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] overflow-hidden">
+                            <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] overflow-hidden">
                                 <div className="px-4 py-3 border-b border-[var(--card-border)] bg-[var(--hover-bg)]">
                                     <h3 className="text-sm font-semibold text-[var(--foreground)]">Resumen agrupado</h3>
                                 </div>
@@ -700,7 +700,7 @@ export function ClickUpClosedTicketsReport({
                             </div>
 
                             {breakdownBy !== "none" && (
-                                <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] overflow-hidden">
+                                <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] overflow-hidden">
                                     <div className="px-4 py-3 border-b border-[var(--card-border)] bg-[var(--hover-bg)]">
                                         <h3 className="text-sm font-semibold text-[var(--foreground)]">Desglose secundario</h3>
                                     </div>
@@ -726,7 +726,7 @@ export function ClickUpClosedTicketsReport({
                             )}
                         </div>
 
-                        <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] overflow-hidden">
+                        <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] overflow-hidden">
                             <div className="px-4 py-3 border-b border-[var(--card-border)] bg-[var(--hover-bg)]">
                                 <h3 className="text-sm font-semibold text-[var(--foreground)]">Tickets cerrados</h3>
                             </div>
@@ -765,7 +765,7 @@ export function ClickUpClosedTicketsReport({
                 )}
 
                 {hasQueried && !loading && groupedRows.length === 0 && !error && (
-                    <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-12 text-center">
+                    <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-12 text-center">
                         <p className="text-sm text-[var(--muted-text)]">
                             No se encontraron tickets cerrados en estado completado para el rango seleccionado.
                         </p>

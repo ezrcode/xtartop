@@ -138,7 +138,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
 
                         {/* Left Column: Form Fields */}
                         <div className="lg:col-span-7 space-y-4 sm:space-y-6">
-                            <div className="bg-white shadow-sm rounded-xl border border-graphite-gray p-4 sm:p-6 space-y-4 sm:space-y-6">
+                            <div className="bg-white shadow-sm rounded-lg border border-graphite-gray p-4 sm:p-6 space-y-4 sm:space-y-6">
                                 
                                 {state?.message && (
                                     <div className={`p-3 sm:p-4 rounded-lg text-sm ${
@@ -205,7 +205,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
                                                 id="companyId"
                                                 name="companyId"
                                                 defaultValue={contact?.companyId || "null"}
-                                                className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-xl shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--input-bg)]"
+                                                className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--input-bg)]"
                                             >
                                                 <option value="null">Sin empresa</option>
                                                 {companies.map((company) => (
@@ -358,7 +358,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
 
                         {/* Right Column: Activities */}
                         <div className="lg:col-span-5">
-                            <div className="bg-white shadow-sm rounded-xl border border-graphite-gray p-4 sm:p-6 h-full min-h-[300px] sm:min-h-[400px] max-h-[500px] lg:max-h-[calc(100vh-200px)]">
+                            <div className="bg-white shadow-sm rounded-lg border border-graphite-gray p-4 sm:p-6 h-full min-h-[300px] sm:min-h-[400px] max-h-[500px] lg:max-h-[calc(100vh-200px)]">
                                 {isEditMode && contact ? (
                                     <ActivitiesWithSuspense
                                         entityType="contact"
@@ -382,7 +382,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
             {/* Delete Confirmation Modal */}
             {deleteConfirmOpen && contact && (
                 <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4">
-                    <div className="bg-white rounded-t-2xl sm:rounded-xl shadow-lg p-5 sm:p-6 w-full sm:max-w-md safe-bottom">
+                    <div className="bg-white rounded-t-lg sm:rounded-lg shadow-lg p-5 sm:p-6 w-full sm:max-w-md safe-bottom">
                         <h3 className="text-lg font-bold text-dark-slate mb-2">Eliminar Contacto</h3>
                         <p className="text-gray-600 mb-6 text-sm sm:text-base">
                             ¿Estás seguro de que deseas eliminar a <strong>{contact.fullName}</strong>? Esta acción no se puede deshacer.

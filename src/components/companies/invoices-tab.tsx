@@ -321,7 +321,7 @@ export function InvoicesTab({
                                 <div className="flex items-start justify-between mb-2">
                                     <div className="flex items-center gap-2">
                                         <FileText className="text-gray-400" size={18} />
-                                        <span className="font-medium text-dark-slate">
+                                        <span className="font-medium font-mono text-dark-slate">
                                             #{getInvoiceNumber(invoice) || "N/A"}
                                         </span>
                                     </div>
@@ -334,7 +334,7 @@ export function InvoicesTab({
                                     </div>
                                     <div className="flex items-center gap-1.5 text-gray-600">
                                         <DollarSign size={14} className="text-gray-400" />
-                                        {formatCurrency(getInvoiceTotal(invoice), getInvoiceCurrency(invoice))}
+                                        <span className="font-mono tabular-nums">{formatCurrency(getInvoiceTotal(invoice), getInvoiceCurrency(invoice))}</span>
                                     </div>
                                     {invoice.DueDate && (
                                         <div className="flex items-center gap-1.5 text-gray-600">

@@ -35,7 +35,7 @@ export function CompaniesByStatus({ data }: CompaniesByStatusProps) {
 
     if (total === 0) {
         return (
-            <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4 sm:p-5">
+            <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-4 sm:p-5">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-sm font-semibold text-[var(--foreground)]">Empresas por Estado</h3>
                     <Building2 size={18} className="text-[var(--muted-text)]" />
@@ -48,7 +48,7 @@ export function CompaniesByStatus({ data }: CompaniesByStatusProps) {
     }
 
     return (
-        <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4 sm:p-5">
+        <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-4 sm:p-5">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <h3 className="text-sm font-semibold text-[var(--foreground)]">Empresas por Estado</h3>
                 <Link 

@@ -316,7 +316,7 @@ export function QuoteModal({
                 <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={onClose} />
 
                 {/* Modal */}
-                <div className="relative bg-[var(--card-bg)] rounded-t-2xl sm:rounded-xl shadow-xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto overflow-x-hidden safe-bottom">
+                <div className="relative bg-[var(--card-bg)] rounded-t-lg sm:rounded-lg shadow-xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto overflow-x-hidden safe-bottom">
                     {/* Header */}
                     <div className="sticky top-0 bg-[var(--card-bg)] z-10 flex items-center justify-between p-4 sm:p-6 border-b border-[var(--card-border)] safe-top">
                         <h2 className="text-base sm:text-xl font-semibold text-[var(--foreground)]">
@@ -602,7 +602,7 @@ export function QuoteModal({
                         </div>
 
                         {/* Taxes */}
-                        <div className="rounded-xl border border-[var(--card-border)] bg-[var(--surface-2)] p-4 sm:p-5 space-y-4">
+                        <div className="rounded-lg border border-[var(--card-border)] bg-[var(--surface-2)] p-4 sm:p-5 space-y-4">
                             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                                 <div>
                                     <p className="text-sm font-semibold text-[var(--foreground)]">Impuestos</p>

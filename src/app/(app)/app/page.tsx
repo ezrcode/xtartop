@@ -184,12 +184,12 @@ interface StatCardProps {
 
 function StatCard({ label, value, description, icon: Icon, gradient, iconColor }: StatCardProps) {
     return (
-        <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4 sm:p-5 hover:shadow-lg transition-all duration-300 group">
+        <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-4 sm:p-5 hover:shadow-lg transition-all duration-300 group">
             <div className="flex items-start justify-between mb-3">
                 <span className="text-[10px] sm:text-xs font-medium text-[var(--muted-text)] uppercase tracking-wider">
                     {label}
                 </span>
-                <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl ${gradient} flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-300`}>
+                <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg ${gradient} flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-300`}>
                     <Icon size={18} className={iconColor} />
                 </div>
             </div>
@@ -311,14 +311,14 @@ export default async function DashboardPage() {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-5">
+                <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-5">
                     <h3 className="text-sm font-semibold text-[var(--foreground)] mb-4">
                         Acciones Rápidas
                     </h3>
                     <div className="grid grid-cols-3 gap-3">
                         <Link
                             href="/app/companies/new"
-                            className="flex flex-col items-center p-4 rounded-xl bg-[var(--hover-bg)] hover:bg-[var(--surface-0)] transition-colors"
+                            className="flex flex-col items-center p-4 rounded-lg bg-[var(--hover-bg)] hover:bg-[var(--surface-0)] transition-colors"
                         >
                             <div className="w-12 h-12 rounded-full bg-nearby-accent flex items-center justify-center mb-2">
                                 <Building2 size={22} className="text-white" />
@@ -329,7 +329,7 @@ export default async function DashboardPage() {
                         </Link>
                         <Link
                             href="/app/contacts/new"
-                            className="flex flex-col items-center p-4 rounded-xl bg-[var(--hover-bg)] hover:bg-[var(--surface-0)] transition-colors"
+                            className="flex flex-col items-center p-4 rounded-lg bg-[var(--hover-bg)] hover:bg-[var(--surface-0)] transition-colors"
                         >
                             <div className="w-12 h-12 rounded-full bg-ocean-blue flex items-center justify-center mb-2">
                                 <Users size={22} className="text-white" />
@@ -340,7 +340,7 @@ export default async function DashboardPage() {
                         </Link>
                         <Link
                             href="/app/deals/new"
-                            className="flex flex-col items-center p-4 rounded-xl bg-[var(--hover-bg)] hover:bg-[var(--surface-0)] transition-colors"
+                            className="flex flex-col items-center p-4 rounded-lg bg-[var(--hover-bg)] hover:bg-[var(--surface-0)] transition-colors"
                         >
                             <div className="w-12 h-12 rounded-full bg-success-green flex items-center justify-center mb-2">
                                 <TrendingUp size={22} className="text-white" />
