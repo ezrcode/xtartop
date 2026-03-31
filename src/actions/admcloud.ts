@@ -202,54 +202,50 @@ export async function getCompanyInvoices(companyId: string): Promise<{
             };
         }
 
-        const company = await prisma.company.findUnique({
-            where: { id: companyId },
-            select: { admCloudRelationshipId: true, taxId: true, name: true }
+        const links = await prisma.companyAdmCloudLink.findMany({
+            where: { companyId },
         });
 
-        if (!company) {
-            return { success: false, error: "Empresa no encontrada", isConfigured: true };
-        }
-
-        const client = createAdmCloudClient(admCloudConfig.config);
-
-        // Si no tiene RelationshipId, intentar buscar por RNC
-        let relationshipId = company.admCloudRelationshipId;
-        
-        if (!relationshipId && company.taxId) {
-            const customerResult = await client.findCustomerByTaxId(company.taxId);
-            if (customerResult.success && customerResult.data) {
-                relationshipId = customerResult.data.ID;
-                
-                // Guardar el RelationshipId para futuras consultas
-                await prisma.company.update({
-                    where: { id: companyId },
-                    data: { 
-                        admCloudRelationshipId: relationshipId,
-                        admCloudLastSync: new Date()
-                    }
+        // Fallback: if no links, try legacy field
+        if (links.length === 0) {
+            const company = await prisma.company.findUnique({
+                where: { id: companyId },
+                select: { admCloudRelationshipId: true, taxId: true }
+            });
+            if (company?.admCloudRelationshipId) {
+                links.push({
+                    id: "legacy",
+                    companyId,
+                    admCloudRelationshipId: company.admCloudRelationshipId,
+                    name: "",
+                    fiscalId: company.taxId,
+                    isPrimary: true,
+                    createdAt: new Date(),
                 });
             }
         }
 
-        if (!relationshipId) {
+        if (links.length === 0) {
             return { 
                 success: false, 
-                error: "Esta empresa no está vinculada a un cliente en AdmCloud. Verifique que el RNC coincida.",
+                error: "Esta empresa no está vinculada a un cliente en AdmCloud. Agregue un vínculo por RNC.",
                 isConfigured: true
             };
         }
 
-        // Por ahora, consultar solo facturas a crédito
-        const invoicesResult = await client.getCreditInvoices(relationshipId);
-        
-        if (!invoicesResult.success) {
-            return { success: false, error: invoicesResult.error, isConfigured: true };
+        const client = createAdmCloudClient(admCloudConfig.config);
+
+        const allInvoices: AdmCloudInvoice[] = [];
+        for (const link of links) {
+            const invoicesResult = await client.getCreditInvoices(link.admCloudRelationshipId);
+            if (invoicesResult.success && invoicesResult.data) {
+                allInvoices.push(...invoicesResult.data);
+            }
         }
 
         return { 
             success: true, 
-            invoices: invoicesResult.data || [],
+            invoices: allInvoices,
             isConfigured: true
         };
     } catch (error) {
@@ -314,14 +310,45 @@ export async function syncCompanyWithAdmCloud(companyId: string): Promise<{
             };
         }
 
-        // Actualizar la empresa con el RelationshipId
+        const relId = customerResult.data.ID;
+        const custName = customerResult.data.Name || company.name;
+        const custFiscalId = customerResult.data.FiscalID || company.taxId;
+
+        // Update legacy field
         await prisma.company.update({
             where: { id: companyId },
             data: {
-                admCloudRelationshipId: customerResult.data.ID,
+                admCloudRelationshipId: relId,
                 admCloudLastSync: new Date()
             }
         });
+
+        // Upsert link: if one with this relId exists update it, else create
+        const existingLink = await prisma.companyAdmCloudLink.findFirst({
+            where: { companyId, admCloudRelationshipId: relId },
+        });
+
+        if (existingLink) {
+            await prisma.companyAdmCloudLink.update({
+                where: { id: existingLink.id },
+                data: { name: custName, fiscalId: custFiscalId, isPrimary: true },
+            });
+        } else {
+            // Set all existing as non-primary
+            await prisma.companyAdmCloudLink.updateMany({
+                where: { companyId, isPrimary: true },
+                data: { isPrimary: false },
+            });
+            await prisma.companyAdmCloudLink.create({
+                data: {
+                    companyId,
+                    admCloudRelationshipId: relId,
+                    name: custName,
+                    fiscalId: custFiscalId,
+                    isPrimary: true,
+                },
+            });
+        }
 
         revalidatePath(`/app/companies/${companyId}`);
 
@@ -420,5 +447,111 @@ export async function deleteAdmCloudTaxGroup(id: string) {
     });
 
     revalidatePath("/app/settings");
+    return { success: true };
+}
+
+// ─── Company ADMCloud Links ──────────────────────────────────────
+
+export async function getCompanyAdmCloudLinks(companyId: string) {
+    return prisma.companyAdmCloudLink.findMany({
+        where: { companyId },
+        orderBy: [{ isPrimary: "desc" }, { createdAt: "asc" }],
+    });
+}
+
+export async function addCompanyAdmCloudLink(
+    companyId: string,
+    taxId: string
+): Promise<{ success: boolean; error?: string }> {
+    const admCloudConfig = await getAdmCloudConfig();
+    if (!admCloudConfig) return { success: false, error: "ADMCloud no está configurado" };
+
+    const client = createAdmCloudClient(admCloudConfig.config);
+    const result = await client.findCustomerByTaxId(taxId);
+
+    if (!result.success || !result.data) {
+        return { success: false, error: `No se encontró un cliente en ADMCloud con el RNC: ${taxId}` };
+    }
+
+    const relId = result.data.ID;
+
+    const existing = await prisma.companyAdmCloudLink.findFirst({
+        where: { companyId, admCloudRelationshipId: relId },
+    });
+    if (existing) {
+        return { success: false, error: "Esta empresa de ADMCloud ya está vinculada" };
+    }
+
+    const hasLinks = await prisma.companyAdmCloudLink.count({ where: { companyId } });
+
+    await prisma.companyAdmCloudLink.create({
+        data: {
+            companyId,
+            admCloudRelationshipId: relId,
+            name: result.data.Name || "",
+            fiscalId: result.data.FiscalID || taxId,
+            isPrimary: hasLinks === 0,
+        },
+    });
+
+    // Keep legacy field in sync with primary
+    if (hasLinks === 0) {
+        await prisma.company.update({
+            where: { id: companyId },
+            data: { admCloudRelationshipId: relId, admCloudLastSync: new Date() },
+        });
+    }
+
+    revalidatePath(`/app/companies/${companyId}`);
+    return { success: true };
+}
+
+export async function setCompanyAdmCloudLinkPrimary(companyId: string, linkId: string) {
+    await prisma.companyAdmCloudLink.updateMany({
+        where: { companyId, isPrimary: true },
+        data: { isPrimary: false },
+    });
+    const link = await prisma.companyAdmCloudLink.update({
+        where: { id: linkId },
+        data: { isPrimary: true },
+    });
+
+    // Keep legacy field in sync
+    await prisma.company.update({
+        where: { id: companyId },
+        data: { admCloudRelationshipId: link.admCloudRelationshipId, admCloudLastSync: new Date() },
+    });
+
+    revalidatePath(`/app/companies/${companyId}`);
+    return { success: true };
+}
+
+export async function deleteCompanyAdmCloudLink(companyId: string, linkId: string) {
+    const link = await prisma.companyAdmCloudLink.findUnique({ where: { id: linkId } });
+    if (!link) return { success: false };
+
+    await prisma.companyAdmCloudLink.delete({ where: { id: linkId } });
+
+    // If deleted the primary, promote the next one
+    if (link.isPrimary) {
+        const next = await prisma.companyAdmCloudLink.findFirst({
+            where: { companyId },
+            orderBy: { createdAt: "asc" },
+        });
+        if (next) {
+            await prisma.companyAdmCloudLink.update({ where: { id: next.id }, data: { isPrimary: true } });
+            await prisma.company.update({
+                where: { id: companyId },
+                data: { admCloudRelationshipId: next.admCloudRelationshipId },
+            });
+        } else {
+            await prisma.company.update({
+                where: { id: companyId },
+                data: { admCloudRelationshipId: null, admCloudLastSync: null },
+            });
+        }
+    }
+
+    revalidatePath(`/app/companies/${companyId}`);
     return { success: true };
 }

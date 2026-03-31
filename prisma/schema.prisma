@@ -314,6 +314,20 @@ model Company {
   subscriptionBilling  SubscriptionBilling?
   billingHistory       BillingHistory[]
   supplierOrders       PurchaseOrder[]    @relation("SupplierOrders")
+  admCloudLinks        CompanyAdmCloudLink[]
+}
+
+model CompanyAdmCloudLink {
+  id                     String   @id @default(cuid())
+  companyId              String
+  company                Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  admCloudRelationshipId String
+  name                   String
+  fiscalId               String?
+  isPrimary              Boolean  @default(false)
+  createdAt              DateTime @default(now())
+
+  @@index([companyId])
 }
 
 enum ContactStatus {

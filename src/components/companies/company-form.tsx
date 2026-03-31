@@ -13,6 +13,7 @@ import { CompanyContactsTab } from "./company-contacts-tab";
 import { ImageUpload } from "../ui/image-upload";
 import { PdfUpload } from "../ui/pdf-upload";
 import { InvoicesTab } from "./invoices-tab";
+import { AdmCloudLinksSection } from "./admcloud-links-section";
 import { SubscriptionBillingSection } from "./subscription-billing-section";
 import { TicketsTab } from "./tickets-tab";
 import { BillingHistoryTab } from "./billing-history-tab";
@@ -1149,13 +1150,16 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
 
                                         {/* Section: Invoices */}
                                         {canViewFinancialSubscription && subscriptionSection === "invoices" && (
-                                            <InvoicesTab
-                                                companyId={company.id}
-                                                companyName={company.name}
-                                                taxId={company.taxId}
-                                                admCloudRelationshipId={company.admCloudRelationshipId || null}
-                                                admCloudLastSync={company.admCloudLastSync || null}
-                                            />
+                                            <>
+                                                <AdmCloudLinksSection companyId={company.id} />
+                                                <InvoicesTab
+                                                    companyId={company.id}
+                                                    companyName={company.name}
+                                                    taxId={company.taxId}
+                                                    admCloudRelationshipId={company.admCloudRelationshipId || null}
+                                                    admCloudLastSync={company.admCloudLastSync || null}
+                                                />
+                                            </>
                                         )}
                                     </div>
                                 )}

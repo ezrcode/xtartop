@@ -269,13 +269,13 @@ export async function GET(request: NextRequest) {
         const companies = await prisma.company.findMany({
             where: {
                 workspaceId: workspace.id,
-                admCloudRelationshipId: { not: null },
+                admCloudLinks: { some: {} },
             },
             select: {
                 id: true,
                 name: true,
                 legalName: true,
-                admCloudRelationshipId: true,
+                admCloudLinks: { select: { admCloudRelationshipId: true } },
             },
         });
 
@@ -289,73 +289,75 @@ export async function GET(request: NextRequest) {
         for (let i = 0; i < companies.length; i += BATCH_SIZE) {
             const batch = companies.slice(i, i + BATCH_SIZE);
             const batchPromises = batch.map(async (company) => {
-                const relId = company.admCloudRelationshipId!;
+                const relIds = company.admCloudLinks.map(l => l.admCloudRelationshipId);
                 const companyLabel = useLegalName
                     ? (company.legalName?.trim() || company.name)
                     : company.name;
                 const lines: ReportLine[] = [];
 
-                if (includeCredit) {
-                    const res = await client.getCreditInvoices(relId);
-                    if (res.success && res.data) {
-                        const INV_BATCH = 5;
-                        for (let q = 0; q < res.data.length; q += INV_BATCH) {
-                            const invBatch = res.data.slice(q, q + INV_BATCH);
-                            const detailResults = await Promise.all(
-                                invBatch.map(async (invoice) => {
-                                    if (invoice.Items && invoice.Items.length > 0) {
-                                        return invoice;
+                for (const relId of relIds) {
+                    if (includeCredit) {
+                        const res = await client.getCreditInvoices(relId);
+                        if (res.success && res.data) {
+                            const INV_BATCH = 5;
+                            for (let q = 0; q < res.data.length; q += INV_BATCH) {
+                                const invBatch = res.data.slice(q, q + INV_BATCH);
+                                const detailResults = await Promise.all(
+                                    invBatch.map(async (invoice) => {
+                                        if (invoice.Items && invoice.Items.length > 0) {
+                                            return invoice;
+                                        }
+                                        const invoiceId = invoice.ID || (invoice as unknown as Record<string, unknown>).id;
+                                        if (!invoiceId) return invoice;
+                                        const detail = await client.getCreditInvoice(String(invoiceId));
+                                        return detail.success && detail.data ? detail.data : invoice;
+                                    })
+                                );
+                                for (const fullInvoice of detailResults) {
+                                    const invoiceLines = normalizeInvoiceItems(fullInvoice, companyLabel, company.id);
+                                    if (invoiceLines.length > 0) {
+                                        lines.push(...invoiceLines);
+                                    } else {
+                                        lines.push({
+                                            clientName: companyLabel,
+                                            clientId: company.id,
+                                            itemDescription: "(Sin detalle de items)",
+                                            itemCode: "",
+                                            quantity: 1,
+                                            unitPrice: Number(fullInvoice.SubtotalAmount || fullInvoice.SubTotal || fullInvoice.Total || 0),
+                                            exchangeRate: extractExchangeRate(fullInvoice),
+                                            discountPercent: 0,
+                                            documentNumber: extractDocNumber(fullInvoice),
+                                            documentType: "credit_invoice",
+                                            documentDate: extractDocDate(fullInvoice)?.toISOString().split("T")[0] || "",
+                                            extendedPrice: Number(fullInvoice.TotalAmount || fullInvoice.Total || 0),
+                                        });
                                     }
-                                    const invoiceId = invoice.ID || (invoice as unknown as Record<string, unknown>).id;
-                                    if (!invoiceId) return invoice;
-                                    const detail = await client.getCreditInvoice(String(invoiceId));
-                                    return detail.success && detail.data ? detail.data : invoice;
-                                })
-                            );
-                            for (const fullInvoice of detailResults) {
-                                const invoiceLines = normalizeInvoiceItems(fullInvoice, companyLabel, company.id);
-                                if (invoiceLines.length > 0) {
-                                    lines.push(...invoiceLines);
-                                } else {
-                                    lines.push({
-                                        clientName: companyLabel,
-                                        clientId: company.id,
-                                        itemDescription: "(Sin detalle de items)",
-                                        itemCode: "",
-                                        quantity: 1,
-                                        unitPrice: Number(fullInvoice.SubtotalAmount || fullInvoice.SubTotal || fullInvoice.Total || 0),
-                                        exchangeRate: extractExchangeRate(fullInvoice),
-                                        discountPercent: 0,
-                                        documentNumber: extractDocNumber(fullInvoice),
-                                        documentType: "credit_invoice",
-                                        documentDate: extractDocDate(fullInvoice)?.toISOString().split("T")[0] || "",
-                                        extendedPrice: Number(fullInvoice.TotalAmount || fullInvoice.Total || 0),
-                                    });
                                 }
                             }
                         }
                     }
-                }
 
-                if (includeProformas) {
-                    const res = await client.getQuotesByCustomer(relId);
-                    if (res.success && res.data) {
-                        const QUOTE_BATCH = 5;
-                        for (let q = 0; q < res.data.length; q += QUOTE_BATCH) {
-                            const quoteBatch = res.data.slice(q, q + QUOTE_BATCH);
-                            const detailResults = await Promise.all(
-                                quoteBatch.map(async (quote) => {
-                                    if (quote.Items && quote.Items.length > 0) {
-                                        return quote;
-                                    }
-                                    const quoteId = quote.ID || (quote as Record<string, unknown>).id;
-                                    if (!quoteId) return quote;
-                                    const detail = await client.getQuote(String(quoteId));
-                                    return detail.success && detail.data ? detail.data : quote;
-                                })
-                            );
-                            for (const fullQuote of detailResults) {
-                                lines.push(...normalizeQuoteItems(fullQuote, companyLabel, company.id));
+                    if (includeProformas) {
+                        const res = await client.getQuotesByCustomer(relId);
+                        if (res.success && res.data) {
+                            const QUOTE_BATCH = 5;
+                            for (let q = 0; q < res.data.length; q += QUOTE_BATCH) {
+                                const quoteBatch = res.data.slice(q, q + QUOTE_BATCH);
+                                const detailResults = await Promise.all(
+                                    quoteBatch.map(async (quote) => {
+                                        if (quote.Items && quote.Items.length > 0) {
+                                            return quote;
+                                        }
+                                        const quoteId = quote.ID || (quote as Record<string, unknown>).id;
+                                        if (!quoteId) return quote;
+                                        const detail = await client.getQuote(String(quoteId));
+                                        return detail.success && detail.data ? detail.data : quote;
+                                    })
+                                );
+                                for (const fullQuote of detailResults) {
+                                    lines.push(...normalizeQuoteItems(fullQuote, companyLabel, company.id));
+                                }
                             }
                         }
                     }
