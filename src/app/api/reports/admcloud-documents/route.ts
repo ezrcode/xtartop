@@ -306,7 +306,7 @@ export async function GET(request: NextRequest) {
                                     if (invoice.Items && invoice.Items.length > 0) {
                                         return invoice;
                                     }
-                                    const invoiceId = invoice.ID || (invoice as Record<string, unknown>).id;
+                                    const invoiceId = invoice.ID || (invoice as unknown as Record<string, unknown>).id;
                                     if (!invoiceId) return invoice;
                                     const detail = await client.getCreditInvoice(String(invoiceId));
                                     return detail.success && detail.data ? detail.data : invoice;
