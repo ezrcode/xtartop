@@ -443,6 +443,10 @@ class AdmCloudClient {
         return { success: true, data: this.normalizeList(response.data) };
     }
 
+    async getCreditInvoice(id: string): Promise<AdmCloudApiResponse<AdmCloudInvoice>> {
+        return this.request<AdmCloudInvoice>(`/CreditInvoices/${id}`);
+    }
+
     /**
      * Obtener todas las facturas de un cliente (contado + crédito)
      */

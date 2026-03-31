@@ -298,25 +298,40 @@ export async function GET(request: NextRequest) {
                 if (includeCredit) {
                     const res = await client.getCreditInvoices(relId);
                     if (res.success && res.data) {
-                        for (const invoice of res.data) {
-                            const invoiceLines = normalizeInvoiceItems(invoice, companyLabel, company.id);
-                            if (invoiceLines.length > 0) {
-                                lines.push(...invoiceLines);
-                            } else {
-                                lines.push({
-                                    clientName: companyLabel,
-                                    clientId: company.id,
-                                    itemDescription: "(Sin detalle de items)",
-                                    itemCode: "",
-                                    quantity: 1,
-                                    unitPrice: Number(invoice.SubtotalAmount || invoice.SubTotal || invoice.Total || 0),
-                                    exchangeRate: extractExchangeRate(invoice),
-                                    discountPercent: 0,
-                                    documentNumber: extractDocNumber(invoice),
-                                    documentType: "credit_invoice",
-                                    documentDate: extractDocDate(invoice)?.toISOString().split("T")[0] || "",
-                                    extendedPrice: Number(invoice.TotalAmount || invoice.Total || 0),
-                                });
+                        const INV_BATCH = 5;
+                        for (let q = 0; q < res.data.length; q += INV_BATCH) {
+                            const invBatch = res.data.slice(q, q + INV_BATCH);
+                            const detailResults = await Promise.all(
+                                invBatch.map(async (invoice) => {
+                                    if (invoice.Items && invoice.Items.length > 0) {
+                                        return invoice;
+                                    }
+                                    const invoiceId = invoice.ID || (invoice as Record<string, unknown>).id;
+                                    if (!invoiceId) return invoice;
+                                    const detail = await client.getCreditInvoice(String(invoiceId));
+                                    return detail.success && detail.data ? detail.data : invoice;
+                                })
+                            );
+                            for (const fullInvoice of detailResults) {
+                                const invoiceLines = normalizeInvoiceItems(fullInvoice, companyLabel, company.id);
+                                if (invoiceLines.length > 0) {
+                                    lines.push(...invoiceLines);
+                                } else {
+                                    lines.push({
+                                        clientName: companyLabel,
+                                        clientId: company.id,
+                                        itemDescription: "(Sin detalle de items)",
+                                        itemCode: "",
+                                        quantity: 1,
+                                        unitPrice: Number(fullInvoice.SubtotalAmount || fullInvoice.SubTotal || fullInvoice.Total || 0),
+                                        exchangeRate: extractExchangeRate(fullInvoice),
+                                        discountPercent: 0,
+                                        documentNumber: extractDocNumber(fullInvoice),
+                                        documentType: "credit_invoice",
+                                        documentDate: extractDocDate(fullInvoice)?.toISOString().split("T")[0] || "",
+                                        extendedPrice: Number(fullInvoice.TotalAmount || fullInvoice.Total || 0),
+                                    });
+                                }
                             }
                         }
                     }
