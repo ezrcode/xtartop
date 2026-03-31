@@ -16,7 +16,7 @@ import {
     BarChart3,
     ShoppingCart,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { logout } from "@/actions/auth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const RAIL_WIDTH = 64;
+const EXPANDED_WIDTH = 240;
+const ICON_SIZE = 20;
+const NAV_PX = 12;
+const ITEM_PL = RAIL_WIDTH / 2 - ICON_SIZE / 2 - NAV_PX; // 10px — keeps icon centered at 32px
 
 const mainMenuItems = [
     { name: "Dashboard", href: "/app", icon: LayoutDashboard },
@@ -78,7 +82,8 @@ export function Sidebar({ userRole, user, isMobileOpen, setIsMobileOpen }: Sideb
             ? pathname === "/app"
             : pathname === href || pathname.startsWith(`${href}/`);
 
-    const RailIcon = ({ item }: { item: MenuItem }) => {
+    /* ─── Unified Desktop NavItem ─── */
+    const NavItem = ({ item }: { item: MenuItem }) => {
         const active = isActive(item.href);
         return (
             <Tooltip delayDuration={0}>
@@ -86,46 +91,56 @@ export function Sidebar({ userRole, user, isMobileOpen, setIsMobileOpen }: Sideb
                     <Link
                         href={item.href}
                         className={cn(
-                            "relative flex items-center justify-center w-10 h-10 rounded-md transition-colors",
+                            "relative flex items-center h-10 gap-3 rounded-md transition-colors overflow-hidden",
                             active
                                 ? "bg-nearby-accent/10 text-nearby-accent"
                                 : "text-[var(--muted-text)] hover:bg-[var(--hover-bg)] hover:text-[var(--foreground)]"
                         )}
+                        style={{ paddingLeft: ITEM_PL }}
                     >
                         {active && (
-                            <span className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-[13px] w-[3px] h-5 rounded-r-full bg-nearby-accent" />
+                            <span
+                                className="absolute top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-nearby-accent"
+                                style={{ left: -NAV_PX }}
+                            />
                         )}
-                        <item.icon size={20} strokeWidth={1.75} />
+                        <item.icon size={ICON_SIZE} strokeWidth={1.75} className="shrink-0" />
+                        <span
+                            className={cn(
+                                "text-sm font-medium whitespace-nowrap transition-opacity duration-150",
+                                isPanelOpen ? "opacity-100" : "opacity-0"
+                            )}
+                        >
+                            {item.name}
+                        </span>
                     </Link>
                 </TooltipTrigger>
                 {!isPanelOpen && (
-                    <TooltipContent side="right" sideOffset={8}>
-                        {item.name}
-                    </TooltipContent>
+                    <TooltipContent side="right" sideOffset={8}>{item.name}</TooltipContent>
                 )}
             </Tooltip>
         );
     };
 
-    const PanelItem = ({ item }: { item: MenuItem }) => {
-        const active = isActive(item.href);
-        return (
-            <Link
-                href={item.href}
-                onClick={() => setIsPanelOpen(false)}
-                className={cn(
-                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                    active
-                        ? "bg-nearby-accent/8 text-nearby-accent"
-                        : "text-[var(--muted-text)] hover:bg-[var(--hover-bg)] hover:text-[var(--foreground)]"
-                )}
-            >
-                <item.icon size={18} strokeWidth={1.75} />
-                {item.name}
-            </Link>
-        );
-    };
+    /* ─── Section divider — same height in both states ─── */
+    const SectionDivider = ({ label }: { label: string }) => (
+        <div className="flex items-center h-8 mt-1 overflow-hidden">
+            {isPanelOpen ? (
+                <p
+                    className="text-[11px] font-medium uppercase tracking-wider text-[var(--muted-text)] whitespace-nowrap"
+                    style={{ paddingLeft: ITEM_PL }}
+                >
+                    {label}
+                </p>
+            ) : (
+                <div className="flex items-center justify-center w-full">
+                    <div className="w-8 h-px bg-[var(--card-border)]" />
+                </div>
+            )}
+        </div>
+    );
 
+    /* ─── Mobile NavItem ─── */
     const MobileNavItem = ({ item }: { item: MenuItem }) => {
         const active = isActive(item.href);
         return (
@@ -144,12 +159,6 @@ export function Sidebar({ userRole, user, isMobileOpen, setIsMobileOpen }: Sideb
             </Link>
         );
     };
-
-    const allItems = [
-        ...mainMenuItems,
-        ...comprasMenuItems,
-        ...(isAdmin ? adminMenuItems : []),
-    ];
 
     return (
         <TooltipProvider>
@@ -230,150 +239,140 @@ export function Sidebar({ userRole, user, isMobileOpen, setIsMobileOpen }: Sideb
                 </div>
             </aside>
 
-            {/* ─── Desktop Icon Rail + Expanding Panel ─── */}
-            <div
-                className="hidden md:block fixed inset-y-0 left-0 z-50"
+            {/* ─── Desktop Sidebar (single tree, morphing width) ─── */}
+            <motion.aside
+                className="hidden md:flex fixed inset-y-0 left-0 z-50 flex-col bg-[var(--card-bg)] border-r border-[var(--card-border)] overflow-hidden"
+                animate={{ width: isPanelOpen ? EXPANDED_WIDTH : RAIL_WIDTH }}
+                transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                 onMouseEnter={() => setIsPanelOpen(true)}
                 onMouseLeave={() => setIsPanelOpen(false)}
             >
-                {/* Icon Rail (visible when panel is closed) */}
-                <AnimatePresence mode="wait">
-                    {!isPanelOpen ? (
-                        <motion.div
-                            key="rail"
-                            initial={false}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.1 }}
-                            className="h-full flex flex-col items-center bg-[var(--card-bg)] border-r border-[var(--card-border)]"
-                            style={{ width: RAIL_WIDTH }}
-                        >
-                            <div className="flex items-center justify-center h-14 w-full">
-                                <Image src="/nearby_isotipo.png" alt="NEARBY" width={28} height={28} className="w-7 h-7" />
-                            </div>
-
-                            <Tooltip delayDuration={0}>
-                                <TooltipTrigger asChild>
-                                    <button
-                                        onClick={openCommandPalette}
-                                        className="flex items-center justify-center w-10 h-10 rounded-md text-[var(--muted-text)] hover:bg-[var(--hover-bg)] hover:text-[var(--foreground)] transition-colors mb-2"
-                                    >
-                                        <Search size={18} strokeWidth={1.75} />
-                                    </button>
-                                </TooltipTrigger>
-                                <TooltipContent side="right" sideOffset={8}>Buscar (⌘K)</TooltipContent>
-                            </Tooltip>
-
-                            <div className="w-8 h-px bg-[var(--card-border)] mb-2" />
-
-                            <nav className="flex-1 flex flex-col items-center gap-1 py-1">
-                                {mainMenuItems.map((item) => <RailIcon key={item.name} item={item} />)}
-                                <div className="w-8 h-px bg-[var(--card-border)] my-1.5" />
-                                {comprasMenuItems.map((item) => <RailIcon key={item.name} item={item} />)}
-                                {isAdmin && (
-                                    <>
-                                        <div className="w-8 h-px bg-[var(--card-border)] my-1.5" />
-                                        {adminMenuItems.map((item) => <RailIcon key={item.name} item={item} />)}
-                                    </>
-                                )}
-                            </nav>
-
-                            <div className="flex flex-col items-center gap-1 pb-3">
-                                <div className="w-8 h-px bg-[var(--card-border)] mb-1" />
-                                <Tooltip delayDuration={0}>
-                                    <TooltipTrigger asChild>
-                                        <Link
-                                            href="/app/profile"
-                                            className={cn(
-                                                "flex items-center justify-center w-10 h-10 rounded-md transition-colors",
-                                                pathname === "/app/profile" ? "bg-nearby-accent/10" : "hover:bg-[var(--hover-bg)]"
-                                            )}
-                                        >
-                                            <Avatar size="xs">
-                                                <AvatarImage src={user.photoUrl || undefined} alt={user.name || "Profile"} />
-                                                <AvatarFallback className="text-[9px]">{getInitials()}</AvatarFallback>
-                                            </Avatar>
-                                        </Link>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="right" sideOffset={8}>Mi perfil</TooltipContent>
-                                </Tooltip>
-                                <Tooltip delayDuration={0}>
-                                    <TooltipTrigger asChild>
-                                        <form action={logout}>
-                                            <button
-                                                type="submit"
-                                                className="flex items-center justify-center w-10 h-10 rounded-md text-[var(--muted-text)] hover:bg-error-red/10 hover:text-error-red transition-colors"
-                                            >
-                                                <LogOut size={18} strokeWidth={1.75} />
-                                            </button>
-                                        </form>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="right" sideOffset={8}>Cerrar sesión</TooltipContent>
-                                </Tooltip>
-                            </div>
-                        </motion.div>
+                {/* Logo */}
+                <div className="flex items-center h-14 overflow-hidden shrink-0">
+                    {isPanelOpen ? (
+                        <div className="px-4">
+                            <Image src="/nearby_logo.png" alt="NEARBY" width={120} height={32} className="h-6 w-auto" />
+                        </div>
                     ) : (
-                        <motion.div
-                            key="expanded"
-                            initial={{ width: RAIL_WIDTH, opacity: 0.9 }}
-                            animate={{ width: 240, opacity: 1 }}
-                            exit={{ width: RAIL_WIDTH, opacity: 0.9 }}
-                            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-                            className="h-full flex flex-col bg-[var(--card-bg)] border-r border-[var(--card-border)] shadow-lg overflow-hidden"
-                        >
-                            <div className="flex items-center h-14 px-4">
-                                <Image src="/nearby_logo.png" alt="NEARBY" width={120} height={32} className="h-6 w-auto" />
-                            </div>
+                        <div className="flex items-center justify-center w-full">
+                            <Image src="/nearby_isotipo.png" alt="NEARBY" width={28} height={28} className="w-7 h-7" />
+                        </div>
+                    )}
+                </div>
 
-                            <div className="px-3 mb-2">
-                                <button
-                                    onClick={openCommandPalette}
-                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[var(--muted-text)] rounded-md border border-dashed border-[var(--card-border)] hover:border-nearby-accent/30 transition-colors"
-                                >
-                                    <Search size={14} strokeWidth={1.75} />
-                                    <span className="flex-1 text-left text-xs">Buscar...</span>
-                                    <kbd className="text-[10px] font-mono px-1.5 py-0.5 bg-[var(--hover-bg)] rounded border border-[var(--card-border)]">⌘K</kbd>
-                                </button>
-                            </div>
-
-                            <div className="h-px bg-[var(--card-border)] mx-3" />
-
-                            <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-1">
-                                <p className="px-3 mb-1 text-[11px] font-medium uppercase tracking-wider text-[var(--muted-text)]">Principal</p>
-                                {mainMenuItems.map((item) => <PanelItem key={item.name} item={item} />)}
-
-                                <div className="h-px bg-[var(--card-border)] my-3 mx-2" />
-                                <p className="px-3 mb-1 text-[11px] font-medium uppercase tracking-wider text-[var(--muted-text)]">Compras</p>
-                                {comprasMenuItems.map((item) => <PanelItem key={item.name} item={item} />)}
-
-                                {isAdmin && (
+                {/* Search */}
+                <div className="flex items-center h-10 px-3 mb-1 shrink-0">
+                    <Tooltip delayDuration={0}>
+                        <TooltipTrigger asChild>
+                            <button
+                                onClick={openCommandPalette}
+                                className={cn(
+                                    "flex items-center transition-colors text-[var(--muted-text)] hover:text-[var(--foreground)] overflow-hidden",
+                                    isPanelOpen
+                                        ? "w-full gap-2 px-3 py-2 rounded-md border border-dashed border-[var(--card-border)] hover:border-nearby-accent/30"
+                                        : "justify-center rounded-md hover:bg-[var(--hover-bg)]"
+                                )}
+                                style={!isPanelOpen ? { width: 40, height: 40 } : undefined}
+                            >
+                                <Search size={isPanelOpen ? 14 : 18} strokeWidth={1.75} className="shrink-0" />
+                                {isPanelOpen && (
                                     <>
-                                        <div className="h-px bg-[var(--card-border)] my-3 mx-2" />
-                                        <p className="px-3 mb-1 text-[11px] font-medium uppercase tracking-wider text-[var(--muted-text)]">Workspace</p>
-                                        {adminMenuItems.map((item) => <PanelItem key={item.name} item={item} />)}
+                                        <span className="flex-1 text-left text-xs whitespace-nowrap">Buscar...</span>
+                                        <kbd className="text-[10px] font-mono px-1.5 py-0.5 bg-[var(--hover-bg)] rounded border border-[var(--card-border)]">⌘K</kbd>
                                     </>
                                 )}
-                            </nav>
+                            </button>
+                        </TooltipTrigger>
+                        {!isPanelOpen && (
+                            <TooltipContent side="right" sideOffset={8}>Buscar (⌘K)</TooltipContent>
+                        )}
+                    </Tooltip>
+                </div>
 
-                            <div className="p-3 border-t border-[var(--card-border)]">
-                                <Link
-                                    href="/app/profile"
-                                    className="flex items-center gap-3 rounded-md px-3 py-2 transition-colors hover:bg-[var(--hover-bg)]"
-                                >
-                                    <Avatar size="xs">
-                                        <AvatarImage src={user.photoUrl || undefined} alt={user.name || "Profile"} />
-                                        <AvatarFallback className="text-[9px]">{getInitials()}</AvatarFallback>
-                                    </Avatar>
+                {/* Separator */}
+                <div className={cn("h-px bg-[var(--card-border)] shrink-0", isPanelOpen ? "mx-3" : "mx-4")} />
+
+                {/* Navigation */}
+                <nav className="flex-1 overflow-y-auto py-2 px-3">
+                    <div className="flex items-center h-8 overflow-hidden">
+                        {isPanelOpen ? (
+                            <p
+                                className="text-[11px] font-medium uppercase tracking-wider text-[var(--muted-text)] whitespace-nowrap"
+                                style={{ paddingLeft: ITEM_PL }}
+                            >
+                                Principal
+                            </p>
+                        ) : (
+                            <div className="w-full" />
+                        )}
+                    </div>
+                    {mainMenuItems.map((item) => <NavItem key={item.name} item={item} />)}
+
+                    <SectionDivider label="Compras" />
+                    {comprasMenuItems.map((item) => <NavItem key={item.name} item={item} />)}
+
+                    {isAdmin && (
+                        <>
+                            <SectionDivider label="Workspace" />
+                            {adminMenuItems.map((item) => <NavItem key={item.name} item={item} />)}
+                        </>
+                    )}
+                </nav>
+
+                {/* Footer */}
+                <div className="border-t border-[var(--card-border)] shrink-0">
+                    <Tooltip delayDuration={0}>
+                        <TooltipTrigger asChild>
+                            <Link
+                                href="/app/profile"
+                                className={cn(
+                                    "flex items-center h-12 gap-3 transition-colors overflow-hidden",
+                                    isPanelOpen ? "px-4" : "justify-center",
+                                    pathname === "/app/profile"
+                                        ? "bg-nearby-accent/10"
+                                        : "hover:bg-[var(--hover-bg)]"
+                                )}
+                            >
+                                <Avatar size="xs" className="shrink-0">
+                                    <AvatarImage src={user.photoUrl || undefined} alt={user.name || "Profile"} />
+                                    <AvatarFallback className="text-[9px]">{getInitials()}</AvatarFallback>
+                                </Avatar>
+                                {isPanelOpen && (
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium text-[var(--foreground)] truncate">{user.name || "Usuario"}</p>
                                         <p className="text-[10px] text-[var(--muted-text)] truncate">{user.email}</p>
                                     </div>
-                                </Link>
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </div>
+                                )}
+                            </Link>
+                        </TooltipTrigger>
+                        {!isPanelOpen && (
+                            <TooltipContent side="right" sideOffset={8}>Mi perfil</TooltipContent>
+                        )}
+                    </Tooltip>
+
+                    <Tooltip delayDuration={0}>
+                        <TooltipTrigger asChild>
+                            <form action={logout}>
+                                <button
+                                    type="submit"
+                                    className={cn(
+                                        "flex items-center h-10 w-full mb-1 transition-colors text-[var(--muted-text)] hover:bg-error-red/10 hover:text-error-red overflow-hidden",
+                                        isPanelOpen ? "px-4 gap-3" : "justify-center"
+                                    )}
+                                >
+                                    <LogOut size={18} strokeWidth={1.75} className="shrink-0" />
+                                    {isPanelOpen && (
+                                        <span className="text-sm font-medium whitespace-nowrap">Cerrar sesión</span>
+                                    )}
+                                </button>
+                            </form>
+                        </TooltipTrigger>
+                        {!isPanelOpen && (
+                            <TooltipContent side="right" sideOffset={8}>Cerrar sesión</TooltipContent>
+                        )}
+                    </Tooltip>
+                </div>
+            </motion.aside>
         </TooltipProvider>
     );
 }
