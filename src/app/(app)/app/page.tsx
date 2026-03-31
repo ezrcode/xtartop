@@ -10,7 +10,6 @@ import {
     TrendingUp,
     DollarSign,
     FolderOpen,
-    UserCheck,
     Repeat,
     CalendarRange,
 } from "lucide-react";
@@ -48,6 +47,7 @@ async function getBasicStats(workspaceId: string) {
             activeProjects,
             activeClientUsers,
             pipelineValue,
+            clientCompanies,
         ] = await Promise.all([
             prisma.company.count({ where: { workspaceId } }),
             prisma.company.count({ where: { workspaceId, status: "CLIENTE" } }),
@@ -72,9 +72,39 @@ async function getBasicStats(workspaceId: string) {
                 },
                 _sum: { value: true },
             }),
+            prisma.company.findMany({
+                where: { workspaceId, status: "CLIENTE", subscriptionBilling: { isNot: null } },
+                include: {
+                    subscriptionBilling: { include: { items: true } },
+                    projects: { where: { status: "ACTIVE" }, select: { id: true } },
+                    clientUsers: { where: { status: "ACTIVE" }, select: { id: true } },
+                },
+            }),
         ]);
 
-        const mrr = activeClientUsers * 55 + activeProjects * 105;
+        let mrr = 0;
+        for (const company of clientCompanies) {
+            const billing = company.subscriptionBilling;
+            if (!billing) continue;
+            const companyProjects = company.projects.length;
+            const companyUsers = company.clientUsers.length;
+
+            for (const item of billing.items) {
+                let quantity = item.manualQuantity || 0;
+                if (item.countType === "ACTIVE_PROJECTS") {
+                    quantity = companyProjects;
+                } else if (item.countType === "ACTIVE_USERS") {
+                    quantity = companyUsers;
+                } else if (item.countType === "CALCULATED") {
+                    const base = item.calculatedBase === "USERS" ? companyUsers : companyProjects;
+                    quantity = Math.max(0, base - (item.calculatedSubtract || 0));
+                }
+                if (quantity > 0) {
+                    mrr += Number(item.price) * quantity;
+                }
+            }
+        }
+
         const arr = mrr * 12;
         const pipeline = Number(pipelineValue._sum.value || 0);
 
@@ -243,20 +273,12 @@ export default async function DashboardPage() {
                 {/* Row 2 — Revenue */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
                     <StatCard
-                        label="Proyectos Activos"
-                        value={stats?.activeProjects ?? 0}
-                        description="$105 USD c/u"
+                        label="Proyectos y Usuarios"
+                        value={`${stats?.activeProjects ?? 0} / ${stats?.activeClientUsers ?? 0}`}
+                        description={`${(stats?.activeProjects ?? 0) + (stats?.activeClientUsers ?? 0)} activos en clientes`}
                         icon={FolderOpen}
                         gradient="bg-gradient-to-br from-nearby-accent/10 to-transparent"
                         iconColor="text-nearby-accent"
-                    />
-                    <StatCard
-                        label="Usuarios Activos"
-                        value={stats?.activeClientUsers ?? 0}
-                        description="$55 USD c/u"
-                        icon={UserCheck}
-                        gradient="bg-gradient-to-br from-ocean-blue/10 to-transparent"
-                        iconColor="text-ocean-blue"
                     />
                     <StatCard
                         label="MRR"
