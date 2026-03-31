@@ -74,7 +74,7 @@ async function getBasicStats(workspaceId: string) {
             }),
         ]);
 
-        const mrr = activeClientUsers * 50 + activeProjects * 100;
+        const mrr = activeClientUsers * 55 + activeProjects * 105;
         const arr = mrr * 12;
         const pipeline = Number(pipelineValue._sum.value || 0);
 
@@ -245,7 +245,7 @@ export default async function DashboardPage() {
                     <StatCard
                         label="Proyectos Activos"
                         value={stats?.activeProjects ?? 0}
-                        description="$100 USD c/u"
+                        description="$105 USD c/u"
                         icon={FolderOpen}
                         gradient="bg-gradient-to-br from-nearby-accent/10 to-transparent"
                         iconColor="text-nearby-accent"
@@ -253,7 +253,7 @@ export default async function DashboardPage() {
                     <StatCard
                         label="Usuarios Activos"
                         value={stats?.activeClientUsers ?? 0}
-                        description="$50 USD c/u"
+                        description="$55 USD c/u"
                         icon={UserCheck}
                         gradient="bg-gradient-to-br from-ocean-blue/10 to-transparent"
                         iconColor="text-ocean-blue"
