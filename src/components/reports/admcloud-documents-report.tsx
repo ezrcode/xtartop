@@ -239,7 +239,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                 </div>
 
                 {/* Filters */}
-                <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4 sm:p-5 mb-6 w-full min-w-0 overflow-hidden">
+                <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4 sm:p-5 mb-6 w-full min-w-0 overflow-visible">
                     <div className="flex items-center gap-2 mb-4">
                         <Filter size={16} className="text-[var(--muted-text)]" />
                         <h3 className="text-sm font-semibold text-[var(--foreground)]">Filtros</h3>
