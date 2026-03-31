@@ -220,6 +220,7 @@ model Workspace {
   projectRateReferences ProjectRateReference[]
   taxes        Tax[]
   purchaseOrders PurchaseOrder[]
+  admCloudTaxGroups AdmCloudTaxGroup[]
 }
 
 model WorkspaceMember {
@@ -596,14 +597,32 @@ model SubscriptionBilling {
   companyId          String      @unique
   company            Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
   billingType        BillingType @default(STANDARD)
-  autoBillingEnabled Boolean     @default(false) // Habilitar cobro automático
-  billingDay         Int         @default(1) // Día del mes para generar factura (1-31)
-  billingMonthOffset Int         @default(0) // 0 = mes actual, 1 = mes siguiente (anticipo), -1 = mes anterior (vencido)
+  autoBillingEnabled Boolean     @default(false)
+  billingDay         Int         @default(1)
+  billingMonthOffset Int         @default(0)
+  
+  admCloudTaxGroupId String?
+  admCloudTaxGroup   AdmCloudTaxGroup? @relation(fields: [admCloudTaxGroupId], references: [id], onDelete: SetNull)
   
   items        SubscriptionItem[]
   
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+model AdmCloudTaxGroup {
+  id              String   @id @default(cuid())
+  workspaceId     String
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name            String
+  taxScheduleId   String   // UUID del TaxSchedule en ADMCloud
+  
+  subscriptionBillings SubscriptionBilling[]
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([workspaceId])
 }
 
 model SubscriptionItem {

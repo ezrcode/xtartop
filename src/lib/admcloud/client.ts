@@ -170,12 +170,13 @@ export interface AdmCloudApiResponse<T> {
 
 // Quote/Proforma interfaces
 export interface AdmCloudQuoteItem {
-    ItemID: string;           // ID del artículo
-    Name?: string;            // Descripción/Nombre (opcional, se toma del artículo)
-    Quantity: number;         // Cantidad
-    Price?: number;           // Precio unitario (campo correcto según API ADMCloud)
-    DiscountPercent?: number; // Descuento en porcentaje
-    RowOrder?: number;        // Orden de la línea (para mantener orden de items)
+    ItemID: string;
+    Name?: string;
+    Quantity: number;
+    Price?: number;
+    DiscountPercent?: number;
+    RowOrder?: number;
+    TaxScheduleID?: string;
 }
 
 export interface AdmCloudQuoteRequest {

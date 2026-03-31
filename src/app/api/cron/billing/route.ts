@@ -278,6 +278,7 @@ export async function GET(request: NextRequest) {
                         subscriptionBilling: {
                             include: {
                                 items: true,
+                                admCloudTaxGroup: true,
                             },
                         },
                         contacts: {
@@ -367,6 +368,7 @@ export async function GET(request: NextRequest) {
                 results.processed++;
 
                 const billingData = company.subscriptionBilling;
+                const taxScheduleID = billingData?.admCloudTaxGroup?.taxScheduleId || undefined;
                 const monthOffset = billingData?.billingMonthOffset ?? 0;
                 const { month: targetMonth, year: targetYear } = applyMonthOffset(currentMonth, currentYear, monthOffset);
 
@@ -572,6 +574,7 @@ export async function GET(request: NextRequest) {
                             Quantity: item.calculatedQuantity,
                             Price: Number(item.price),
                             RowOrder: index + 1,
+                            ...(taxScheduleID && { TaxScheduleID: taxScheduleID }),
                         })),
                     };
 

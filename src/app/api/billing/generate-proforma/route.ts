@@ -214,6 +214,7 @@ export async function POST(request: NextRequest) {
                 subscriptionBilling: {
                     include: {
                         items: true,
+                        admCloudTaxGroup: true,
                     },
                 },
                 contacts: {
@@ -244,6 +245,8 @@ export async function POST(request: NextRequest) {
         if (!billing || billing.items.length === 0) {
             return NextResponse.json({ error: "No hay artículos de suscripción configurados" }, { status: 400 });
         }
+
+        const taxScheduleID = billing.admCloudTaxGroup?.taxScheduleId || undefined;
 
         const today = new Date();
         const currentMonth = today.getMonth() + 1;
@@ -374,6 +377,7 @@ export async function POST(request: NextRequest) {
                         Quantity: item.calculatedQuantity,
                         Price: Number(item.price),
                         RowOrder: index + 1,
+                        ...(taxScheduleID && { TaxScheduleID: taxScheduleID }),
                     })),
                 };
 

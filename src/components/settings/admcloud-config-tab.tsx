@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { Save, Loader2, Cloud, CloudOff, CheckCircle, XCircle, ExternalLink, RefreshCw } from "lucide-react";
-import { saveAdmCloudSettings, type AdmCloudSettingsState } from "@/actions/admcloud";
+import { Save, Loader2, Cloud, CloudOff, CheckCircle, XCircle, ExternalLink, RefreshCw, Plus, Trash2 } from "lucide-react";
+import { saveAdmCloudSettings, type AdmCloudSettingsState, getAdmCloudTaxGroups, createAdmCloudTaxGroup, deleteAdmCloudTaxGroup } from "@/actions/admcloud";
 
 interface SelectOption {
     id: string;
@@ -65,6 +65,14 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
     const [selectedPaymentTermName, setSelectedPaymentTermName] = useState(currentConfig.defaultPaymentTermName || "");
     const [selectedSalesStageId, setSelectedSalesStageId] = useState(currentConfig.defaultSalesStageId || "");
     const [selectedStageName, setSelectedStageName] = useState(currentConfig.defaultSalesStageNam || "");
+
+    // Tax Groups
+    interface TaxGroup { id: string; name: string; taxScheduleId: string; }
+    const [taxGroups, setTaxGroups] = useState<TaxGroup[]>([]);
+    const [loadingTaxGroups, setLoadingTaxGroups] = useState(false);
+    const [newTaxGroupName, setNewTaxGroupName] = useState("");
+    const [newTaxScheduleId, setNewTaxScheduleId] = useState("");
+    const [addingTaxGroup, setAddingTaxGroup] = useState(false);
     
     const initialState: AdmCloudSettingsState = { message: "" };
     const [state, formAction] = useFormState(saveAdmCloudSettings, initialState);
@@ -123,11 +131,48 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
         }
     };
 
+    const loadTaxGroups = async () => {
+        setLoadingTaxGroups(true);
+        try {
+            const groups = await getAdmCloudTaxGroups();
+            setTaxGroups(groups);
+        } catch (error) {
+            console.error("Error loading tax groups:", error);
+        } finally {
+            setLoadingTaxGroups(false);
+        }
+    };
+
+    const handleAddTaxGroup = async () => {
+        if (!newTaxGroupName.trim() || !newTaxScheduleId.trim()) return;
+        setAddingTaxGroup(true);
+        try {
+            await createAdmCloudTaxGroup(newTaxGroupName, newTaxScheduleId);
+            setNewTaxGroupName("");
+            setNewTaxScheduleId("");
+            await loadTaxGroups();
+        } catch (error) {
+            console.error("Error creating tax group:", error);
+        } finally {
+            setAddingTaxGroup(false);
+        }
+    };
+
+    const handleDeleteTaxGroup = async (id: string) => {
+        try {
+            await deleteAdmCloudTaxGroup(id);
+            await loadTaxGroups();
+        } catch (error) {
+            console.error("Error deleting tax group:", error);
+        }
+    };
+
     // Load all options when config is enabled
     const loadAllOptions = () => {
         loadPriceLists();
         loadPaymentTerms();
         loadSalesStages();
+        loadTaxGroups();
     };
 
     useEffect(() => {
@@ -458,6 +503,77 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                         </p>
                                     </div>
                                 </div>
+                            </div>
+
+                            {/* Tax Groups Section */}
+                            <div className="mt-6 pt-4 border-t border-[var(--card-border)]">
+                                <h3 className="text-sm font-medium text-[var(--foreground)] mb-1">
+                                    Grupos de Impuesto
+                                </h3>
+                                <p className="text-xs text-[var(--muted-text)] mb-4">
+                                    Configura los TaxScheduleID de ADMCloud. Se asignan por empresa en la sección de cobro mensual.
+                                </p>
+
+                                {loadingTaxGroups ? (
+                                    <div className="flex items-center gap-2 text-sm text-[var(--muted-text)]">
+                                        <Loader2 size={14} className="animate-spin" /> Cargando...
+                                    </div>
+                                ) : (
+                                    <>
+                                        {taxGroups.length > 0 && (
+                                            <div className="space-y-2 mb-4">
+                                                {taxGroups.map((group) => (
+                                                    <div key={group.id} className="flex items-center justify-between p-2.5 bg-soft-gray rounded-lg border border-[var(--card-border)]">
+                                                        <div className="min-w-0">
+                                                            <span className="text-sm font-medium text-[var(--foreground)]">{group.name}</span>
+                                                            <span className="ml-2 text-[10px] font-mono text-[var(--muted-text)]">{group.taxScheduleId}</span>
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleDeleteTaxGroup(group.id)}
+                                                            className="shrink-0 p-1.5 text-[var(--muted-text)] hover:text-error-red transition-colors"
+                                                            title="Eliminar"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        <div className="flex items-end gap-2">
+                                            <div className="flex-1 min-w-0">
+                                                <label className="block text-xs text-[var(--muted-text)] mb-1">Nombre</label>
+                                                <input
+                                                    type="text"
+                                                    value={newTaxGroupName}
+                                                    onChange={(e) => setNewTaxGroupName(e.target.value)}
+                                                    placeholder="Ej: ITBIS"
+                                                    className="w-full px-2.5 py-1.5 text-sm border border-[var(--card-border)] rounded-md focus:ring-nearby-accent focus:border-nearby-accent"
+                                                />
+                                            </div>
+                                            <div className="flex-[2] min-w-0">
+                                                <label className="block text-xs text-[var(--muted-text)] mb-1">TaxScheduleID (UUID de ADMCloud)</label>
+                                                <input
+                                                    type="text"
+                                                    value={newTaxScheduleId}
+                                                    onChange={(e) => setNewTaxScheduleId(e.target.value)}
+                                                    placeholder="Ej: 969a669b-c166-4b5a-b3c5-a4412ccafb54"
+                                                    className="w-full px-2.5 py-1.5 text-sm font-mono text-xs border border-[var(--card-border)] rounded-md focus:ring-nearby-accent focus:border-nearby-accent"
+                                                />
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={handleAddTaxGroup}
+                                                disabled={addingTaxGroup || !newTaxGroupName.trim() || !newTaxScheduleId.trim()}
+                                                className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-nearby-dark rounded-md hover:bg-nearby-dark-600 disabled:opacity-50 transition-colors"
+                                            >
+                                                {addingTaxGroup ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                                                Agregar
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
                     )}

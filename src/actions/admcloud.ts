@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { createAdmCloudClient, type AdmCloudInvoice, type AdmCloudCustomer } from "@/lib/admcloud/client";
+import { getCurrentWorkspace } from "./workspace";
 
 /**
  * Obtener la configuración de AdmCloud del workspace actual
@@ -376,4 +377,48 @@ export async function checkAdmCloudStatus(): Promise<{
         isConfigured,
         isEnabled: workspace.admCloudEnabled && isConfigured
     };
+}
+
+// ─── Tax Groups CRUD ─────────────────────────────────────────────
+
+export async function getAdmCloudTaxGroups() {
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) return [];
+
+    return prisma.admCloudTaxGroup.findMany({
+        where: { workspaceId: workspace.id },
+        orderBy: { createdAt: "asc" },
+    });
+}
+
+export async function createAdmCloudTaxGroup(name: string, taxScheduleId: string) {
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) throw new Error("Workspace no encontrado");
+
+    const trimmedName = name.trim();
+    const trimmedId = taxScheduleId.trim();
+    if (!trimmedName || !trimmedId) throw new Error("Nombre y TaxScheduleID son requeridos");
+
+    const group = await prisma.admCloudTaxGroup.create({
+        data: {
+            workspaceId: workspace.id,
+            name: trimmedName,
+            taxScheduleId: trimmedId,
+        },
+    });
+
+    revalidatePath("/app/settings");
+    return group;
+}
+
+export async function deleteAdmCloudTaxGroup(id: string) {
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) throw new Error("Workspace no encontrado");
+
+    await prisma.admCloudTaxGroup.delete({
+        where: { id, workspaceId: workspace.id },
+    });
+
+    revalidatePath("/app/settings");
+    return { success: true };
 }

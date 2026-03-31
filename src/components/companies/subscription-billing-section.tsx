@@ -7,11 +7,13 @@ import { BillingType, CountType, CalculatedBase } from "@prisma/client";
 import {
     getSubscriptionBilling,
     updateBillingSettings,
+    updateBillingTaxGroup,
     addSubscriptionItem,
     updateSubscriptionItem,
     deleteSubscriptionItem,
     toggleAutoBilling,
 } from "@/actions/subscription-billing";
+import { getAdmCloudTaxGroups } from "@/actions/admcloud";
 import { formatMoney } from "@/lib/format";
 
 interface PriceOption {
@@ -42,12 +44,20 @@ interface SubscriptionItemWithQuantity {
     subtotal: number;
 }
 
+interface TaxGroupOption {
+    id: string;
+    name: string;
+    taxScheduleId: string;
+}
+
 interface SubscriptionBillingData {
     id: string;
     billingType: BillingType;
     autoBillingEnabled: boolean;
     billingDay: number;
     billingMonthOffset: number;
+    admCloudTaxGroupId: string | null;
+    admCloudTaxGroup: TaxGroupOption | null;
     items: SubscriptionItemWithQuantity[];
     total: number;
     activeProjects: number;
@@ -66,6 +76,8 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
     const [autoBillingEnabled, setAutoBillingEnabled] = useState(false);
     const [billingDay, setBillingDay] = useState(1);
     const [billingMonthOffset, setBillingMonthOffset] = useState(0);
+    const [selectedTaxGroupId, setSelectedTaxGroupId] = useState<string>("");
+    const [taxGroups, setTaxGroups] = useState<TaxGroupOption[]>([]);
     const [modalOpen, setModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<SubscriptionItemWithQuantity | null>(null);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<string | null>(null);
@@ -82,13 +94,18 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
     const loadBillingData = useCallback(async () => {
         try {
             setLoading(true);
-            const data = await getSubscriptionBilling(companyId);
+            const [data, groups] = await Promise.all([
+                getSubscriptionBilling(companyId),
+                getAdmCloudTaxGroups(),
+            ]);
+            setTaxGroups(groups);
             if (data) {
-                setBilling(data);
+                setBilling(data as SubscriptionBillingData);
                 setBillingType(data.billingType);
                 setAutoBillingEnabled(data.autoBillingEnabled);
                 setBillingDay(data.billingDay);
                 setBillingMonthOffset(data.billingMonthOffset);
+                setSelectedTaxGroupId(data.admCloudTaxGroupId || "");
             }
         } catch (error) {
             console.error("Error loading billing data:", error);
@@ -133,6 +150,18 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
             await updateBillingSettings(companyId, billingType, billingDay, undefined, offset);
         } catch (error) {
             console.error("Error updating billing month offset:", error);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleTaxGroupChange = async (taxGroupId: string) => {
+        setSelectedTaxGroupId(taxGroupId);
+        setSaving(true);
+        try {
+            await updateBillingTaxGroup(companyId, taxGroupId || null);
+        } catch (error) {
+            console.error("Error updating tax group:", error);
         } finally {
             setSaving(false);
         }
@@ -458,6 +487,21 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                                     <option value={1}>Mes siguiente</option>
                                 </select>
                             </div>
+                            {taxGroups.length > 0 && (
+                                <div className="flex items-center gap-2">
+                                    <label className="text-xs font-medium text-gray-500 whitespace-nowrap">Impuesto:</label>
+                                    <select
+                                        value={selectedTaxGroupId}
+                                        onChange={(e) => handleTaxGroupChange(e.target.value)}
+                                        className="px-1.5 py-1 text-sm border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                    >
+                                        <option value="">Sin impuesto</option>
+                                        {taxGroups.map((g) => (
+                                            <option key={g.id} value={g.id}>{g.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
                         </>
                     )}
 

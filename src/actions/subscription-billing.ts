@@ -39,6 +39,7 @@ export async function getSubscriptionBilling(companyId: string) {
             items: {
                 orderBy: { createdAt: "asc" },
             },
+            admCloudTaxGroup: true,
         },
     });
 
@@ -52,6 +53,7 @@ export async function getSubscriptionBilling(companyId: string) {
             },
             include: {
                 items: true,
+                admCloudTaxGroup: true,
             },
         });
     }
@@ -155,6 +157,27 @@ export async function updateBillingSettings(
             autoBillingEnabled: autoBillingEnabled ?? false,
             billingMonthOffset: validOffset ?? 0,
         },
+    });
+
+    revalidatePath(`/app/companies/${companyId}`);
+    return { success: true };
+}
+
+export async function updateBillingTaxGroup(companyId: string, admCloudTaxGroupId: string | null) {
+    const session = await auth();
+    if (!session?.user?.email) throw new Error("No autorizado");
+
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) throw new Error("Workspace no encontrado");
+
+    const company = await prisma.company.findFirst({
+        where: { id: companyId, workspaceId: workspace.id },
+    });
+    if (!company) throw new Error("Empresa no encontrada");
+
+    await prisma.subscriptionBilling.update({
+        where: { companyId },
+        data: { admCloudTaxGroupId: admCloudTaxGroupId || null },
     });
 
     revalidatePath(`/app/companies/${companyId}`);
