@@ -413,64 +413,57 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
             </div>
 
             {/* Auto billing toggle, billing day and total */}
-            <div className="border-t border-graphite-gray pt-4 space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div className="flex items-center gap-6">
-                        {/* Auto billing toggle */}
-                        <label className="flex items-center cursor-pointer">
-                            <div className="relative">
-                                <input
-                                    type="checkbox"
-                                    checked={autoBillingEnabled}
-                                    onChange={(e) => handleAutoBillingChange(e.target.checked)}
-                                    className="sr-only"
-                                />
-                                <div className={`block w-10 h-6 rounded-full transition-colors ${autoBillingEnabled ? "bg-nearby-accent" : "bg-gray-300"}`}></div>
-                                <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${autoBillingEnabled ? "translate-x-4" : ""}`}></div>
-                            </div>
-                            <span className="ml-3 text-sm font-medium text-dark-slate">
-                                Cobro automático
-                            </span>
-                        </label>
+            <div className="border-t border-graphite-gray pt-4 space-y-3">
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                    {/* Auto billing toggle */}
+                    <label className="flex items-center cursor-pointer">
+                        <div className="relative">
+                            <input
+                                type="checkbox"
+                                checked={autoBillingEnabled}
+                                onChange={(e) => handleAutoBillingChange(e.target.checked)}
+                                className="sr-only"
+                            />
+                            <div className={`block w-10 h-6 rounded-full transition-colors ${autoBillingEnabled ? "bg-nearby-accent" : "bg-gray-300"}`}></div>
+                            <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${autoBillingEnabled ? "translate-x-4" : ""}`}></div>
+                        </div>
+                        <span className="ml-3 text-sm font-medium text-dark-slate">
+                            Cobro automático
+                        </span>
+                    </label>
 
-                        {/* Billing day and period - only show if auto billing is enabled */}
-                        {autoBillingEnabled && (
-                            <>
-                                <div className="flex items-center space-x-3">
-                                    <label className="text-sm font-medium text-dark-slate whitespace-nowrap">
-                                        Día de cobro:
-                                    </label>
-                                    <select
-                                        value={billingDay}
-                                        onChange={(e) => handleBillingDayChange(parseInt(e.target.value))}
-                                        className="w-20 px-2 py-1.5 text-sm border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
-                                    >
-                                        {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
-                                            <option key={day} value={day}>{day}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="flex items-center space-x-3">
-                                    <label className="text-sm font-medium text-dark-slate whitespace-nowrap">
-                                        Período a facturar:
-                                    </label>
-                                    <select
-                                        value={billingMonthOffset}
-                                        onChange={(e) => handleBillingMonthOffsetChange(parseInt(e.target.value))}
-                                        className="px-2 py-1.5 text-sm border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
-                                    >
-                                        <option value={-1}>Mes anterior</option>
-                                        <option value={0}>Mes actual</option>
-                                        <option value={1}>Mes siguiente</option>
-                                    </select>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                    
-                    <div className="flex items-center space-x-3 bg-gray-50 px-4 py-2 rounded-lg">
-                        <span className="text-sm font-medium text-gray-500">Total suscripción:</span>
-                        <span className="text-lg font-bold text-nearby-dark">
+                    {autoBillingEnabled && (
+                        <>
+                            <div className="flex items-center gap-2">
+                                <label className="text-xs font-medium text-gray-500 whitespace-nowrap">Día:</label>
+                                <select
+                                    value={billingDay}
+                                    onChange={(e) => handleBillingDayChange(parseInt(e.target.value))}
+                                    className="w-16 px-1.5 py-1 text-sm border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                >
+                                    {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+                                        <option key={day} value={day}>{day}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <label className="text-xs font-medium text-gray-500 whitespace-nowrap">Período:</label>
+                                <select
+                                    value={billingMonthOffset}
+                                    onChange={(e) => handleBillingMonthOffsetChange(parseInt(e.target.value))}
+                                    className="px-1.5 py-1 text-sm border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                >
+                                    <option value={-1}>Mes anterior</option>
+                                    <option value={0}>Mes actual</option>
+                                    <option value={1}>Mes siguiente</option>
+                                </select>
+                            </div>
+                        </>
+                    )}
+
+                    <div className="flex items-center gap-2 ml-auto bg-gray-50 px-3 py-1.5 rounded-lg">
+                        <span className="text-xs font-medium text-gray-500">Total:</span>
+                        <span className="text-base font-bold text-nearby-dark">
                             {formatMoney(billing?.total || 0)}
                         </span>
                     </div>
