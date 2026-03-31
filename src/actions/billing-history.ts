@@ -68,3 +68,21 @@ export async function getBillingHistory(companyId: string): Promise<BillingHisto
         recipients: item.recipients ? JSON.parse(item.recipients) : [],
     }));
 }
+
+export async function deleteBillingHistoryEntry(id: string): Promise<{ success: boolean; error?: string }> {
+    const session = await auth();
+    if (!session?.user?.email) return { success: false, error: "No autenticado" };
+
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) return { success: false, error: "Workspace no encontrado" };
+
+    const entry = await prisma.billingHistory.findFirst({
+        where: { id, workspaceId: workspace.id },
+    });
+
+    if (!entry) return { success: false, error: "Registro no encontrado" };
+
+    await prisma.billingHistory.delete({ where: { id } });
+
+    return { success: true };
+}

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Loader2, Download, CheckCircle, XCircle, Clock, AlertTriangle, FileText, ExternalLink } from "lucide-react";
-import { getBillingHistory, type BillingHistoryItem } from "@/actions/billing-history";
+import { Loader2, Download, CheckCircle, XCircle, Clock, AlertTriangle, FileText, ExternalLink, Printer, Trash2 } from "lucide-react";
+import { getBillingHistory, deleteBillingHistoryEntry, type BillingHistoryItem } from "@/actions/billing-history";
 import { formatMoney } from "@/lib/format";
 
 interface BillingHistoryTabProps {
@@ -16,31 +16,38 @@ function StatusBadge({ status }: { status: BillingHistoryItem["status"] }) {
         PENDING: {
             icon: Clock,
             label: "Pendiente",
-            className: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+            bg: "bg-amber-50 dark:bg-amber-950/30",
+            text: "text-amber-700 dark:text-amber-400",
+            dot: "bg-amber-500",
         },
         SENT: {
             icon: CheckCircle,
             label: "Enviada",
-            className: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+            bg: "bg-emerald-50 dark:bg-emerald-950/30",
+            text: "text-emerald-700 dark:text-emerald-400",
+            dot: "bg-emerald-500",
         },
         FAILED: {
             icon: XCircle,
             label: "Fallida",
-            className: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+            bg: "bg-red-50 dark:bg-red-950/30",
+            text: "text-red-700 dark:text-red-400",
+            dot: "bg-red-500",
         },
         CANCELLED: {
             icon: AlertTriangle,
             label: "Cancelada",
-            className: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
+            bg: "bg-gray-50 dark:bg-gray-900/30",
+            text: "text-gray-600 dark:text-gray-400",
+            dot: "bg-gray-400",
         },
     };
 
     const config = configs[status];
-    const Icon = config.icon;
 
     return (
-        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${config.className}`}>
-            <Icon size={12} />
+        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium ${config.bg} ${config.text}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`} />
             {config.label}
         </span>
     );
@@ -49,6 +56,8 @@ function StatusBadge({ status }: { status: BillingHistoryItem["status"] }) {
 export function BillingHistoryTab({ companyId }: BillingHistoryTabProps) {
     const [history, setHistory] = useState<BillingHistoryItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
     const loadHistory = useCallback(async () => {
         try {
@@ -66,6 +75,25 @@ export function BillingHistoryTab({ companyId }: BillingHistoryTabProps) {
         loadHistory();
     }, [loadHistory]);
 
+    const handleDelete = async (id: string) => {
+        setDeletingId(id);
+        const result = await deleteBillingHistoryEntry(id);
+        if (result.success) {
+            setHistory((prev) => prev.filter((h) => h.id !== id));
+        }
+        setDeletingId(null);
+        setConfirmDeleteId(null);
+    };
+
+    const handlePrint = (pdfUrl: string) => {
+        const printWindow = window.open(pdfUrl, "_blank");
+        if (printWindow) {
+            printWindow.addEventListener("load", () => {
+                printWindow.print();
+            });
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center py-12">
@@ -80,7 +108,7 @@ export function BillingHistoryTab({ companyId }: BillingHistoryTabProps) {
                 <FileText size={48} className="mx-auto text-gray-300 mb-4" />
                 <p className="text-gray-500">No hay historial de proformas</p>
                 <p className="text-gray-400 text-sm mt-1">
-                    Las proformas generadas aparecerán aquí
+                    Las proformas generadas desde este CRM aparecerán aquí
                 </p>
             </div>
         );
@@ -88,13 +116,18 @@ export function BillingHistoryTab({ companyId }: BillingHistoryTabProps) {
 
     return (
         <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <h3 className="text-md font-semibold text-[var(--foreground)]">
-                    Historial de Proformas
-                </h3>
-                <span className="text-sm text-[var(--muted-text)]">
-                    {history.length} registro{history.length !== 1 ? "s" : ""}
-                </span>
+            <div>
+                <div className="flex items-center justify-between">
+                    <h3 className="text-md font-semibold text-[var(--foreground)]">
+                        Historial de Proformas
+                    </h3>
+                    <span className="text-sm text-[var(--muted-text)]">
+                        {history.length} registro{history.length !== 1 ? "s" : ""}
+                    </span>
+                </div>
+                <p className="text-xs text-[var(--muted-text)] mt-0.5">
+                    Proformas generadas desde el CRM interno. Las creadas directamente en ADMCloud no aparecen aquí.
+                </p>
             </div>
 
             <div className="border border-[var(--card-border)] rounded-lg overflow-hidden">
@@ -161,7 +194,7 @@ export function BillingHistoryTab({ companyId }: BillingHistoryTabProps) {
                                                 })}
                                             </span>
                                             {item.sentAt && (
-                                                <span className="text-green-600">
+                                                <span className="text-emerald-600">
                                                     Enviado: {new Date(item.sentAt).toLocaleDateString("es-DO", {
                                                         day: "2-digit",
                                                         month: "short",
@@ -170,29 +203,67 @@ export function BillingHistoryTab({ companyId }: BillingHistoryTabProps) {
                                             )}
                                         </div>
                                     </td>
-                                    <td className="px-4 py-3 text-center">
-                                        <div className="flex items-center justify-center gap-2">
+                                    <td className="px-4 py-3">
+                                        <div className="flex items-center justify-center gap-1">
                                             {item.pdfUrl && (
-                                                <a
-                                                    href={item.pdfUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="p-1.5 text-[var(--muted-text)] hover:text-nearby-accent rounded transition-colors"
-                                                    title="Descargar PDF"
-                                                >
-                                                    <Download size={16} />
-                                                </a>
+                                                <>
+                                                    <a
+                                                        href={item.pdfUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="p-1.5 text-[var(--muted-text)] hover:text-nearby-accent rounded-lg hover:bg-nearby-accent/10 transition-colors"
+                                                        title="Descargar PDF"
+                                                    >
+                                                        <Download size={15} />
+                                                    </a>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handlePrint(item.pdfUrl!)}
+                                                        className="p-1.5 text-[var(--muted-text)] hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors"
+                                                        title="Reimprimir"
+                                                    >
+                                                        <Printer size={15} />
+                                                    </button>
+                                                </>
                                             )}
                                             {item.admCloudDocId && (
                                                 <a
                                                     href={`https://app.admcloud.com/quotes/${item.admCloudDocId}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="p-1.5 text-[var(--muted-text)] hover:text-blue-600 rounded transition-colors"
+                                                    className="p-1.5 text-[var(--muted-text)] hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
                                                     title="Ver en ADMCloud"
                                                 >
-                                                    <ExternalLink size={16} />
+                                                    <ExternalLink size={15} />
                                                 </a>
+                                            )}
+                                            {confirmDeleteId === item.id ? (
+                                                <div className="flex items-center gap-1 ml-1">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleDelete(item.id)}
+                                                        disabled={deletingId === item.id}
+                                                        className="px-2 py-1 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700 disabled:opacity-50"
+                                                    >
+                                                        {deletingId === item.id ? "..." : "Sí"}
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setConfirmDeleteId(null)}
+                                                        className="px-2 py-1 text-xs font-medium text-[var(--foreground)] bg-[var(--hover-bg)] rounded"
+                                                    >
+                                                        No
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setConfirmDeleteId(item.id)}
+                                                    className="p-1.5 text-[var(--muted-text)] hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                                                    title="Eliminar"
+                                                >
+                                                    <Trash2 size={15} />
+                                                </button>
                                             )}
                                         </div>
                                     </td>
