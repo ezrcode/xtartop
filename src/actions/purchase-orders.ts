@@ -296,6 +296,7 @@ export async function getSubscriptionSummaryForOrder(): Promise<{
     const companies = await prisma.company.findMany({
         where: {
             workspaceId: workspace.id,
+            status: "CLIENTE",
             subscriptionBilling: { isNot: null },
         },
         include: {
