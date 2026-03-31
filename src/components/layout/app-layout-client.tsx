@@ -36,48 +36,23 @@ interface AppLayoutClientProps {
 
 export function AppLayoutClient({ user, userRole, currentExchangeRate = null, children }: AppLayoutClientProps) {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-    // Apply theme on mount based on user preference
     useEffect(() => {
         const theme = user.themePreference || "LIGHT";
         const root = document.documentElement;
-        
-        // Remove all theme classes
         root.classList.remove("dark", "theme-system");
-        
         if (theme === "DARK") {
             root.classList.add("dark");
         } else if (theme === "SYSTEM") {
             root.classList.add("theme-system");
         }
-        // LIGHT is the default (no class needed)
     }, [user.themePreference]);
-
-    // Listen to sidebar collapse state from localStorage
-    useEffect(() => {
-        const checkCollapsed = () => {
-            const stored = localStorage.getItem("sidebarCollapsed");
-            if (stored && window.innerWidth >= 768) {
-                setSidebarCollapsed(JSON.parse(stored));
-            }
-        };
-        checkCollapsed();
-        
-        // Listen for storage events (when sidebar toggles)
-        const interval = setInterval(checkCollapsed, 100);
-        return () => clearInterval(interval);
-    }, []);
 
     return (
         <div className="flex min-h-[100dvh] bg-[var(--background)]">
-            {/* Command Palette */}
             <CommandPalette userRole={userRole} />
-            
-            {/* Offline Banner */}
             <OfflineBanner />
             
-            {/* Desktop Sidebar */}
             <Sidebar 
                 userRole={userRole}
                 user={user}
@@ -85,7 +60,7 @@ export function AppLayoutClient({ user, userRole, currentExchangeRate = null, ch
                 setIsMobileOpen={setIsMobileMenuOpen}
             />
             
-            <div className={`flex-1 min-w-0 transition-all duration-300 ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
+            <div className="flex-1 min-w-0 md:ml-16">
                 <Suspense fallback={<TopbarSkeleton />}>
                     <Topbar 
                         user={user} 
@@ -98,7 +73,6 @@ export function AppLayoutClient({ user, userRole, currentExchangeRate = null, ch
                 </main>
             </div>
             
-            {/* Mobile Bottom Navigation */}
             <BottomNav userRole={userRole} />
         </div>
     );
