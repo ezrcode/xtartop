@@ -96,7 +96,8 @@ export async function updateBillingSettings(
     companyId: string,
     billingType: BillingType,
     billingDay: number,
-    autoBillingEnabled?: boolean
+    autoBillingEnabled?: boolean,
+    billingMonthOffset?: number,
 ) {
     const session = await auth();
     if (!session?.user?.email) {
@@ -123,11 +124,14 @@ export async function updateBillingSettings(
     // Validate billingDay (1-31)
     const validBillingDay = Math.min(Math.max(1, billingDay), 31);
 
+    const validOffset = billingMonthOffset !== undefined ? Math.min(Math.max(-1, billingMonthOffset), 1) : undefined;
+
     // Prepare update data
     const updateData: {
         billingType: BillingType;
         billingDay: number;
         autoBillingEnabled?: boolean;
+        billingMonthOffset?: number;
     } = {
         billingType,
         billingDay: validBillingDay,
@@ -135,6 +139,9 @@ export async function updateBillingSettings(
 
     if (autoBillingEnabled !== undefined) {
         updateData.autoBillingEnabled = autoBillingEnabled;
+    }
+    if (validOffset !== undefined) {
+        updateData.billingMonthOffset = validOffset;
     }
 
     // Update or create billing settings
@@ -146,6 +153,7 @@ export async function updateBillingSettings(
             billingType,
             billingDay: validBillingDay,
             autoBillingEnabled: autoBillingEnabled ?? false,
+            billingMonthOffset: validOffset ?? 0,
         },
     });
 

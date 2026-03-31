@@ -47,6 +47,7 @@ interface SubscriptionBillingData {
     billingType: BillingType;
     autoBillingEnabled: boolean;
     billingDay: number;
+    billingMonthOffset: number;
     items: SubscriptionItemWithQuantity[];
     total: number;
     activeProjects: number;
@@ -64,6 +65,7 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
     const [billingType, setBillingType] = useState<BillingType>("STANDARD");
     const [autoBillingEnabled, setAutoBillingEnabled] = useState(false);
     const [billingDay, setBillingDay] = useState(1);
+    const [billingMonthOffset, setBillingMonthOffset] = useState(0);
     const [modalOpen, setModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<SubscriptionItemWithQuantity | null>(null);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState<string | null>(null);
@@ -86,6 +88,7 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                 setBillingType(data.billingType);
                 setAutoBillingEnabled(data.autoBillingEnabled);
                 setBillingDay(data.billingDay);
+                setBillingMonthOffset(data.billingMonthOffset);
             }
         } catch (error) {
             console.error("Error loading billing data:", error);
@@ -118,6 +121,18 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
             await updateBillingSettings(companyId, billingType, day);
         } catch (error) {
             console.error("Error updating billing day:", error);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleBillingMonthOffsetChange = async (offset: number) => {
+        setBillingMonthOffset(offset);
+        setSaving(true);
+        try {
+            await updateBillingSettings(companyId, billingType, billingDay, undefined, offset);
+        } catch (error) {
+            console.error("Error updating billing month offset:", error);
         } finally {
             setSaving(false);
         }
@@ -418,22 +433,38 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                             </span>
                         </label>
 
-                        {/* Billing day - only show if auto billing is enabled */}
+                        {/* Billing day and period - only show if auto billing is enabled */}
                         {autoBillingEnabled && (
-                            <div className="flex items-center space-x-3">
-                                <label className="text-sm font-medium text-dark-slate whitespace-nowrap">
-                                    Día de cobro:
-                                </label>
-                                <select
-                                    value={billingDay}
-                                    onChange={(e) => handleBillingDayChange(parseInt(e.target.value))}
-                                    className="w-20 px-2 py-1.5 text-sm border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
-                                >
-                                    {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
-                                        <option key={day} value={day}>{day}</option>
-                                    ))}
-                                </select>
-                            </div>
+                            <>
+                                <div className="flex items-center space-x-3">
+                                    <label className="text-sm font-medium text-dark-slate whitespace-nowrap">
+                                        Día de cobro:
+                                    </label>
+                                    <select
+                                        value={billingDay}
+                                        onChange={(e) => handleBillingDayChange(parseInt(e.target.value))}
+                                        className="w-20 px-2 py-1.5 text-sm border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                    >
+                                        {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+                                            <option key={day} value={day}>{day}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="flex items-center space-x-3">
+                                    <label className="text-sm font-medium text-dark-slate whitespace-nowrap">
+                                        Período a facturar:
+                                    </label>
+                                    <select
+                                        value={billingMonthOffset}
+                                        onChange={(e) => handleBillingMonthOffsetChange(parseInt(e.target.value))}
+                                        className="px-2 py-1.5 text-sm border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                    >
+                                        <option value={-1}>Mes anterior</option>
+                                        <option value={0}>Mes actual</option>
+                                        <option value={1}>Mes siguiente</option>
+                                    </select>
+                                </div>
+                            </>
                         )}
                     </div>
                     

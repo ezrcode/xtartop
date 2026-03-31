@@ -598,6 +598,7 @@ model SubscriptionBilling {
   billingType        BillingType @default(STANDARD)
   autoBillingEnabled Boolean     @default(false) // Habilitar cobro automático
   billingDay         Int         @default(1) // Día del mes para generar factura (1-31)
+  billingMonthOffset Int         @default(0) // 0 = mes actual, 1 = mes siguiente (anticipo), -1 = mes anterior (vencido)
   
   items        SubscriptionItem[]
   

@@ -31,6 +31,13 @@ function sanitizeForFileName(value: string): string {
         .trim();
 }
 
+function applyMonthOffset(month: number, year: number, offset: number): { month: number; year: number } {
+    const total = month - 1 + offset;
+    const y = year + Math.floor(total / 12);
+    const m = ((total % 12) + 12) % 12 + 1;
+    return { month: m, year: y };
+}
+
 function getBillingPeriodLabel(month: number, year: number): string {
     return `${String(month).padStart(2, "0")}${year}`;
 }
@@ -360,12 +367,17 @@ export async function GET(request: NextRequest) {
                 results.processed++;
 
                 try {
-                    // Check if already billed this month
+                    // Apply month offset for advance/arrears billing
+                    const billing = company.subscriptionBilling;
+                    const monthOffset = billing?.billingMonthOffset ?? 0;
+                    const { month: targetMonth, year: targetYear } = applyMonthOffset(currentMonth, currentYear, monthOffset);
+
+                    // Check if already billed for the target period
                     const existingBilling = await prisma.billingHistory.findFirst({
                         where: {
                             companyId: company.id,
-                            billingMonth: currentMonth,
-                            billingYear: currentYear,
+                            billingMonth: targetMonth,
+                            billingYear: targetYear,
                             status: "SENT",
                         },
                     });
@@ -389,13 +401,12 @@ export async function GET(request: NextRequest) {
                             error: "No contacts marked as receivesInvoices",
                         });
                         
-                        // Log in billing history
                         await prisma.billingHistory.create({
                             data: {
                                 companyId: company.id,
                                 workspaceId: workspace.id,
-                                billingMonth: currentMonth,
-                                billingYear: currentYear,
+                                billingMonth: targetMonth,
+                                billingYear: targetYear,
                                 status: "FAILED",
                                 errorMessage: "No hay contactos configurados para recibir facturas",
                                 recipients: "[]",
@@ -410,7 +421,6 @@ export async function GET(request: NextRequest) {
                     }
 
                     // Calculate billing items
-                    const billing = company.subscriptionBilling;
                     if (!billing || billing.items.length === 0) {
                         results.details.push({
                             companyId: company.id,
@@ -456,8 +466,8 @@ export async function GET(request: NextRequest) {
                             data: {
                                 companyId: company.id,
                                 workspaceId: workspace.id,
-                                billingMonth: currentMonth,
-                                billingYear: currentYear,
+                                billingMonth: targetMonth,
+                                billingYear: targetYear,
                                 status: "FAILED",
                                 errorMessage: errorMsg,
                                 recipients: JSON.stringify(company.contacts.map(c => c.email)),
@@ -483,8 +493,8 @@ export async function GET(request: NextRequest) {
 
                     // Create quote in ADMCloud - REQUIRED for automatic billing
                     let admCloudDocId: string | null = null;
-                    let proformaNumber = `PRO-${currentYear}${String(currentMonth).padStart(2, "0")}-${company.id.slice(-6)}`;
-                    const billingPeriodText = getBillingPeriodText(currentMonth, currentYear);
+                    let proformaNumber = `PRO-${targetYear}${String(targetMonth).padStart(2, "0")}-${company.id.slice(-6)}`;
+                    const billingPeriodText = getBillingPeriodText(targetMonth, targetYear);
                     let pdfNotes = billingPeriodText;
 
                     // Check if ADMCloud is properly configured for this company
@@ -496,8 +506,8 @@ export async function GET(request: NextRequest) {
                             data: {
                                 companyId: company.id,
                                 workspaceId: workspace.id,
-                                billingMonth: currentMonth,
-                                billingYear: currentYear,
+                                billingMonth: targetMonth,
+                                billingYear: targetYear,
                                 status: "FAILED",
                                 errorMessage: errorMsg,
                                 recipients: JSON.stringify(company.contacts.map(c => c.email)),
@@ -525,8 +535,8 @@ export async function GET(request: NextRequest) {
                             data: {
                                 companyId: company.id,
                                 workspaceId: workspace.id,
-                                billingMonth: currentMonth,
-                                billingYear: currentYear,
+                                billingMonth: targetMonth,
+                                billingYear: targetYear,
                                 status: "FAILED",
                                 errorMessage: errorMsg,
                                 recipients: JSON.stringify(company.contacts.map(c => c.email)),
@@ -595,8 +605,8 @@ export async function GET(request: NextRequest) {
                                         data: {
                                             companyId: company.id,
                                             workspaceId: workspace.id,
-                                            billingMonth: currentMonth,
-                                            billingYear: currentYear,
+                                            billingMonth: targetMonth,
+                                            billingYear: targetYear,
                                             status: "FAILED",
                                             errorMessage: errorMsg,
                                             recipients: JSON.stringify(company.contacts.map(c => c.email)),
@@ -623,8 +633,8 @@ export async function GET(request: NextRequest) {
                                     data: {
                                         companyId: company.id,
                                         workspaceId: workspace.id,
-                                        billingMonth: currentMonth,
-                                        billingYear: currentYear,
+                                        billingMonth: targetMonth,
+                                        billingYear: targetYear,
                                         status: "FAILED",
                                         errorMessage: errorMsg,
                                         recipients: JSON.stringify(company.contacts.map(c => c.email)),
@@ -651,8 +661,8 @@ export async function GET(request: NextRequest) {
                                 data: {
                                     companyId: company.id,
                                     workspaceId: workspace.id,
-                                    billingMonth: currentMonth,
-                                    billingYear: currentYear,
+                                    billingMonth: targetMonth,
+                                    billingYear: targetYear,
                                     status: "FAILED",
                                     errorMessage: errorMsg,
                                     recipients: JSON.stringify(company.contacts.map(c => c.email)),
@@ -680,8 +690,8 @@ export async function GET(request: NextRequest) {
                             data: {
                                 companyId: company.id,
                                 workspaceId: workspace.id,
-                                billingMonth: currentMonth,
-                                billingYear: currentYear,
+                                billingMonth: targetMonth,
+                                billingYear: targetYear,
                                 status: "FAILED",
                                 errorMessage: errorMsg,
                                 recipients: JSON.stringify(company.contacts.map(c => c.email)),
@@ -747,7 +757,7 @@ export async function GET(request: NextRequest) {
                     const pdfBuffer = await renderToBuffer(pdfDocument);
 
                     // Upload PDF to Vercel Blob
-                    const pdfBaseName = buildPdfBaseName(proformaNumber, company.name, currentMonth, currentYear);
+                    const pdfBaseName = buildPdfBaseName(proformaNumber, company.name, targetMonth, targetYear);
                     const pdfFileName = `proformas/${workspace.id}/${company.id}/${pdfBaseName}.pdf`;
                     const blob = await put(pdfFileName, pdfBuffer, {
                         access: "public",
@@ -760,8 +770,8 @@ export async function GET(request: NextRequest) {
                     
                     const emailSubject = (workspace.billingEmailSubject || "Proforma mensual - {{EMPRESA}} - {{MES}} {{AÑO}}")
                         .replace(/\{\{EMPRESA\}\}/g, company.name)
-                        .replace(/\{\{MES\}\}/g, monthNames[currentMonth - 1])
-                        .replace(/\{\{AÑO\}\}/g, String(currentYear))
+                        .replace(/\{\{MES\}\}/g, monthNames[targetMonth - 1])
+                        .replace(/\{\{AÑO\}\}/g, String(targetYear))
                         .replace(/\{\{NUMERO_PROFORMA\}\}/g, proformaNumber);
 
                     const emailBody = (workspace.billingEmailBody || `
@@ -775,8 +785,8 @@ export async function GET(request: NextRequest) {
                         <p>Saludos cordiales,<br/>{{PROVEEDOR_NOMBRE}}</p>
                     `)
                         .replace(/\{\{EMPRESA\}\}/g, company.name)
-                        .replace(/\{\{MES\}\}/g, monthNames[currentMonth - 1])
-                        .replace(/\{\{AÑO\}\}/g, String(currentYear))
+                        .replace(/\{\{MES\}\}/g, monthNames[targetMonth - 1])
+                        .replace(/\{\{AÑO\}\}/g, String(targetYear))
                         .replace(/\{\{NUMERO_PROFORMA\}\}/g, proformaNumber)
                         .replace(/\{\{TOTAL\}\}/g, `USD ${total.toLocaleString("en-US", { minimumFractionDigits: 2 })}`)
                         .replace(/\{\{PROVEEDOR_NOMBRE\}\}/g, workspace.legalName || workspace.name)
@@ -814,8 +824,8 @@ export async function GET(request: NextRequest) {
                             workspaceId: workspace.id,
                             admCloudDocId,
                             proformaNumber,
-                            billingMonth: currentMonth,
-                            billingYear: currentYear,
+                            billingMonth: targetMonth,
+                            billingYear: targetYear,
                             status: emailSent ? "SENT" : "FAILED",
                             sentAt: emailSent ? new Date() : null,
                             recipients: JSON.stringify(recipientEmails),
@@ -861,8 +871,8 @@ export async function GET(request: NextRequest) {
                         data: {
                             companyId: company.id,
                             workspaceId: workspace.id,
-                            billingMonth: currentMonth,
-                            billingYear: currentYear,
+                            billingMonth: targetMonth,
+                            billingYear: targetYear,
                             status: "FAILED",
                             errorMessage: error instanceof Error ? error.message : "Unknown error",
                             recipients: "[]",

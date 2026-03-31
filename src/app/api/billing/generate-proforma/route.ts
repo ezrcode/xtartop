@@ -47,6 +47,13 @@ function buildPdfBaseName(proformaNumber: string, companyShortName: string, mont
     return sanitizeForFileName(`${proformaNumber} ${companyShortName} ${getBillingPeriodLabel(month, year)}`);
 }
 
+function applyMonthOffset(month: number, year: number, offset: number): { month: number; year: number } {
+    const total = month - 1 + offset;
+    const y = year + Math.floor(total / 12);
+    const m = ((total % 12) + 12) % 12 + 1;
+    return { month: m, year: y };
+}
+
 function normalizeText(value: string): string {
     return value
         .normalize("NFD")
@@ -241,6 +248,8 @@ export async function POST(request: NextRequest) {
         const today = new Date();
         const currentMonth = today.getMonth() + 1;
         const currentYear = today.getFullYear();
+        const monthOffset = billing?.billingMonthOffset ?? 0;
+        const { month: targetMonth, year: targetYear } = applyMonthOffset(currentMonth, currentYear, monthOffset);
 
         // Calculate quantities for each item
         const activeProjects = company.projects.length;
@@ -289,8 +298,8 @@ export async function POST(request: NextRequest) {
         let admCloudDocId: string | null = null;
         let admCloudCreated = false;
         let admCloudError: string | null = null;
-        let proformaNumber = `PRO-${currentYear}${String(currentMonth).padStart(2, "0")}-${company.id.slice(-6)}-M`;
-        const billingPeriodText = getBillingPeriodText(currentMonth, currentYear);
+        let proformaNumber = `PRO-${targetYear}${String(targetMonth).padStart(2, "0")}-${company.id.slice(-6)}-M`;
+        const billingPeriodText = getBillingPeriodText(targetMonth, targetYear);
         let pdfNotes = billingPeriodText;
         let paymentTermConfig = resolvePaymentTermConfig(
             workspace.admCloudDefaultPaymentTermName
@@ -471,7 +480,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Upload PDF to Vercel Blob
-        const pdfBaseName = buildPdfBaseName(proformaNumber, company.name, currentMonth, currentYear);
+        const pdfBaseName = buildPdfBaseName(proformaNumber, company.name, targetMonth, targetYear);
         const pdfFileName = `proformas/${workspace.id}/${company.id}/${pdfBaseName}.pdf`;
         const blob = await put(pdfFileName, pdfBuffer, {
             access: "public",
@@ -487,8 +496,8 @@ export async function POST(request: NextRequest) {
                 workspaceId: workspace.id,
                 admCloudDocId,
                 proformaNumber,
-                billingMonth: currentMonth,
-                billingYear: currentYear,
+                billingMonth: targetMonth,
+                billingYear: targetYear,
                 status: "PENDING", // Not sent, just generated
                 recipients: JSON.stringify(recipientEmails),
                 pdfUrl: blob.url,
