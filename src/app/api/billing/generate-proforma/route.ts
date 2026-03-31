@@ -286,8 +286,8 @@ export async function POST(request: NextRequest) {
         }
 
         const subtotal = calculatedItems.reduce((sum, item) => sum + item.subtotal, 0);
-        const taxAmount = 0;
-        const total = subtotal + taxAmount;
+        let taxAmount = 0;
+        let total = subtotal;
 
         // Create quote in ADMCloud if enabled
         const admCloudEnabled = workspace.admCloudEnabled && 
@@ -384,6 +384,11 @@ export async function POST(request: NextRequest) {
                     if (directObservation) {
                         pdfNotes = directObservation;
                     }
+                    const directTax = Number(quoteResult.data.CalculatedTaxAmount) || 0;
+                    if (directTax > 0) {
+                        taxAmount = directTax;
+                        total = subtotal + taxAmount;
+                    }
                     admCloudDocId = extractAdmCloudQuoteId(quoteResult.data);
                     const directDocNumber = extractAdmCloudDocNumber(quoteResult.data);
                     if (directDocNumber) {
@@ -395,6 +400,11 @@ export async function POST(request: NextRequest) {
                             const detailObservation = extractAdmCloudObservation(quoteDetail.data);
                             if (detailObservation) {
                                 pdfNotes = detailObservation;
+                            }
+                            const detailTax = Number(quoteDetail.data.CalculatedTaxAmount) || 0;
+                            if (detailTax > 0) {
+                                taxAmount = detailTax;
+                                total = subtotal + taxAmount;
                             }
                             const detailDocNumber = extractAdmCloudDocNumber(quoteDetail.data);
                             if (detailDocNumber) {
