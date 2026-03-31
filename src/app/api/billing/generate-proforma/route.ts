@@ -340,7 +340,7 @@ export async function POST(request: NextRequest) {
                     DocDate: today.toISOString(),
                     CurrencyID: "USD",
                     Notes: billingPeriodText,
-                    Reference: latestExchangeRate ? Number(latestExchangeRate.rate).toFixed(4) : undefined,
+                    Reference: latestExchangeRate ? Number(latestExchangeRate.rate).toFixed(2) : undefined,
                     // Términos de pago y etapa de ventas predeterminados
                     ...(workspace.admCloudDefaultPaymentTermId && { PaymentTermID: workspace.admCloudDefaultPaymentTermId }),
                     ...(workspace.admCloudDefaultSalesStageId && { SalesStageID: workspace.admCloudDefaultSalesStageId }),
