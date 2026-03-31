@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Loader2, Download, CheckCircle, XCircle, Clock, AlertTriangle, FileText, ExternalLink, Printer, Trash2 } from "lucide-react";
+import { Loader2, Download, FileText, ExternalLink, Printer, Trash2 } from "lucide-react";
 import { getBillingHistory, deleteBillingHistoryEntry, type BillingHistoryItem } from "@/actions/billing-history";
 import { formatMoney } from "@/lib/format";
 
@@ -13,41 +13,17 @@ const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep
 
 function StatusBadge({ status }: { status: BillingHistoryItem["status"] }) {
     const configs = {
-        PENDING: {
-            icon: Clock,
-            label: "Pendiente",
-            bg: "bg-amber-50 dark:bg-amber-950/30",
-            text: "text-amber-700 dark:text-amber-400",
-            dot: "bg-amber-500",
-        },
-        SENT: {
-            icon: CheckCircle,
-            label: "Enviada",
-            bg: "bg-emerald-50 dark:bg-emerald-950/30",
-            text: "text-emerald-700 dark:text-emerald-400",
-            dot: "bg-emerald-500",
-        },
-        FAILED: {
-            icon: XCircle,
-            label: "Fallida",
-            bg: "bg-red-50 dark:bg-red-950/30",
-            text: "text-red-700 dark:text-red-400",
-            dot: "bg-red-500",
-        },
-        CANCELLED: {
-            icon: AlertTriangle,
-            label: "Cancelada",
-            bg: "bg-gray-50 dark:bg-gray-900/30",
-            text: "text-gray-600 dark:text-gray-400",
-            dot: "bg-gray-400",
-        },
+        PENDING: { label: "Pendiente", dot: "bg-amber-500", text: "text-amber-700" },
+        SENT: { label: "Enviada", dot: "bg-emerald-500", text: "text-emerald-700" },
+        FAILED: { label: "Fallida", dot: "bg-red-500", text: "text-red-700" },
+        CANCELLED: { label: "Cancelada", dot: "bg-gray-400", text: "text-gray-500" },
     };
 
     const config = configs[status];
 
     return (
-        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium ${config.bg} ${config.text}`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`} />
+        <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${config.text}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${config.dot} shrink-0`} />
             {config.label}
         </span>
     );
@@ -132,25 +108,33 @@ export function BillingHistoryTab({ companyId }: BillingHistoryTabProps) {
 
             <div className="border border-[var(--card-border)] rounded-lg overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                    <table className="w-full text-sm table-fixed">
+                        <colgroup>
+                            <col style={{ width: "80px" }} />
+                            <col style={{ width: "130px" }} />
+                            <col style={{ width: "85px" }} />
+                            <col style={{ width: "110px" }} />
+                            <col style={{ width: "100px" }} />
+                            <col style={{ width: "130px" }} />
+                        </colgroup>
                         <thead className="bg-[var(--hover-bg)]">
                             <tr>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-[var(--muted-text)] uppercase">
+                                <th className="px-3 py-3 text-left text-xs font-medium text-[var(--muted-text)] uppercase">
                                     Período
                                 </th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-[var(--muted-text)] uppercase">
+                                <th className="px-3 py-3 text-left text-xs font-medium text-[var(--muted-text)] uppercase">
                                     Nro. Proforma
                                 </th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-[var(--muted-text)] uppercase">
+                                <th className="px-3 py-3 text-left text-xs font-medium text-[var(--muted-text)] uppercase">
                                     Estado
                                 </th>
-                                <th className="px-4 py-3 text-right text-xs font-medium text-[var(--muted-text)] uppercase">
+                                <th className="px-3 py-3 text-right text-xs font-medium text-[var(--muted-text)] uppercase">
                                     Total
                                 </th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-[var(--muted-text)] uppercase">
+                                <th className="px-3 py-3 text-left text-xs font-medium text-[var(--muted-text)] uppercase">
                                     Fecha
                                 </th>
-                                <th className="px-4 py-3 text-center text-xs font-medium text-[var(--muted-text)] uppercase">
+                                <th className="px-3 py-3 text-center text-xs font-medium text-[var(--muted-text)] uppercase">
                                     Acciones
                                 </th>
                             </tr>
@@ -158,33 +142,26 @@ export function BillingHistoryTab({ companyId }: BillingHistoryTabProps) {
                         <tbody className="divide-y divide-[var(--card-border)]">
                             {history.map((item) => (
                                 <tr key={item.id} className="hover:bg-[var(--hover-bg)]">
-                                    <td className="px-4 py-3 text-[var(--foreground)]">
+                                    <td className="px-3 py-2.5 text-[var(--foreground)] text-xs">
                                         {monthNames[item.billingMonth - 1]} {item.billingYear}
                                     </td>
-                                    <td className="px-4 py-3">
-                                        <div className="flex flex-col">
-                                            <span className="text-[var(--foreground)] font-mono text-xs">
-                                                {item.proformaNumber || "-"}
-                                            </span>
-                                            {item.admCloudDocId && (
-                                                <span className="text-[var(--muted-text)] text-xs">
-                                                    ADMCloud: {item.admCloudDocId}
-                                                </span>
-                                            )}
-                                        </div>
+                                    <td className="px-3 py-2.5">
+                                        <span className="text-[var(--foreground)] font-mono text-xs block truncate" title={item.proformaNumber || undefined}>
+                                            {item.proformaNumber || "-"}
+                                        </span>
                                     </td>
-                                    <td className="px-4 py-3">
+                                    <td className="px-3 py-2.5">
                                         <StatusBadge status={item.status} />
                                         {item.errorMessage && (
-                                            <p className="text-xs text-red-600 mt-1 max-w-xs truncate" title={item.errorMessage}>
+                                            <p className="text-[10px] text-red-600 mt-0.5 truncate" title={item.errorMessage}>
                                                 {item.errorMessage}
                                             </p>
                                         )}
                                     </td>
-                                    <td className="px-4 py-3 text-right text-[var(--foreground)] font-medium">
+                                    <td className="px-3 py-2.5 text-right text-[var(--foreground)] font-medium text-xs">
                                         {formatMoney(item.totalAmount)} {item.currency}
                                     </td>
-                                    <td className="px-4 py-3 text-[var(--muted-text)] text-xs">
+                                    <td className="px-3 py-2.5 text-[var(--muted-text)] text-xs">
                                         <div className="flex flex-col">
                                             <span>
                                                 {new Date(item.generatedAt).toLocaleDateString("es-DO", {
@@ -195,7 +172,7 @@ export function BillingHistoryTab({ companyId }: BillingHistoryTabProps) {
                                             </span>
                                             {item.sentAt && (
                                                 <span className="text-emerald-600">
-                                                    Enviado: {new Date(item.sentAt).toLocaleDateString("es-DO", {
+                                                    Env: {new Date(item.sentAt).toLocaleDateString("es-DO", {
                                                         day: "2-digit",
                                                         month: "short",
                                                     })}
@@ -203,7 +180,7 @@ export function BillingHistoryTab({ companyId }: BillingHistoryTabProps) {
                                             )}
                                         </div>
                                     </td>
-                                    <td className="px-4 py-3">
+                                    <td className="px-3 py-2.5">
                                         <div className="flex items-center justify-center gap-1">
                                             {item.pdfUrl && (
                                                 <>
