@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
 import {
     ArrowLeft,
@@ -75,6 +75,16 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
 
     const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
     const itemPickerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        function handleClickOutside(e: MouseEvent) {
+            if (itemPickerRef.current && !itemPickerRef.current.contains(e.target as Node)) {
+                setShowItemPicker(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     const filteredAvailableItems = availableItems.filter((item) => {
         const search = itemSearch.toLowerCase();
@@ -354,7 +364,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                             </div>
                         )}
 
-                        <div className="relative w-full min-w-0">
+                        <div className="relative w-full md:w-96 min-w-0">
                             <input
                                 type="text"
                                 placeholder="Buscar artículos por código o nombre..."
@@ -364,12 +374,12 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                                     setShowItemPicker(true);
                                 }}
                                 onFocus={() => setShowItemPicker(true)}
-                                className="w-full md:w-96 max-w-full min-w-0 px-3 py-2 pl-9 text-sm rounded-lg border border-[var(--card-border)] bg-[var(--surface-0)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-accent/30 focus:border-nearby-accent outline-none transition-colors"
+                                className="w-full px-3 py-2 pl-9 text-sm rounded-lg border border-[var(--card-border)] bg-[var(--surface-0)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-accent/30 focus:border-nearby-accent outline-none transition-colors"
                             />
                             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted-text)]" />
 
                             {showItemPicker && (
-                                <div className="absolute z-20 mt-1 w-full md:w-96 max-h-60 overflow-y-auto bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-xl">
+                                <div className="absolute z-20 mt-1 w-full max-h-60 overflow-y-auto bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-xl">
                                     {filteredAvailableItems.length === 0 ? (
                                         <p className="px-3 py-3 text-xs text-[var(--muted-text)]">Sin resultados</p>
                                     ) : (
