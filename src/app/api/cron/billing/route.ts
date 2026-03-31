@@ -366,11 +366,11 @@ export async function GET(request: NextRequest) {
             for (const company of workspace.companies) {
                 results.processed++;
 
+                const billingData = company.subscriptionBilling;
+                const monthOffset = billingData?.billingMonthOffset ?? 0;
+                const { month: targetMonth, year: targetYear } = applyMonthOffset(currentMonth, currentYear, monthOffset);
+
                 try {
-                    // Apply month offset for advance/arrears billing
-                    const billing = company.subscriptionBilling;
-                    const monthOffset = billing?.billingMonthOffset ?? 0;
-                    const { month: targetMonth, year: targetYear } = applyMonthOffset(currentMonth, currentYear, monthOffset);
 
                     // Check if already billed for the target period
                     const existingBilling = await prisma.billingHistory.findFirst({
@@ -421,7 +421,7 @@ export async function GET(request: NextRequest) {
                     }
 
                     // Calculate billing items
-                    if (!billing || billing.items.length === 0) {
+                    if (!billingData || billingData.items.length === 0) {
                         results.details.push({
                             companyId: company.id,
                             companyName: company.name,
@@ -436,7 +436,7 @@ export async function GET(request: NextRequest) {
                     const activeProjects = company.projects.length;
                     const activeUsers = company.clientUsers.length;
 
-                    const calculatedItems = billing.items
+                    const calculatedItems = billingData.items
                         .map((item) => {
                             let quantity = item.manualQuantity || 0;
                             
