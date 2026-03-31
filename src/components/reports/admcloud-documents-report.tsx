@@ -75,16 +75,28 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
 
     const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
     const itemPickerRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null);
 
     useEffect(() => {
         function handleClickOutside(e: MouseEvent) {
-            if (itemPickerRef.current && !itemPickerRef.current.contains(e.target as Node)) {
+            if (
+                itemPickerRef.current && !itemPickerRef.current.contains(e.target as Node) &&
+                inputRef.current && !inputRef.current.contains(e.target as Node)
+            ) {
                 setShowItemPicker(false);
             }
         }
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
+
+    useEffect(() => {
+        if (showItemPicker && inputRef.current) {
+            const rect = inputRef.current.getBoundingClientRect();
+            setDropdownPos({ top: rect.bottom + 4, left: rect.left, width: rect.width });
+        }
+    }, [showItemPicker]);
 
     const filteredAvailableItems = availableItems.filter((item) => {
         const search = itemSearch.toLowerCase();
@@ -239,7 +251,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                 </div>
 
                 {/* Filters */}
-                <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4 sm:p-5 mb-6 w-full min-w-0 overflow-visible">
+                <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] p-4 sm:p-5 mb-6 w-full min-w-0">
                     <div className="flex items-center gap-2 mb-4">
                         <Filter size={16} className="text-[var(--muted-text)]" />
                         <h3 className="text-sm font-semibold text-[var(--foreground)]">Filtros</h3>
@@ -366,6 +378,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
 
                         <div className="relative w-full md:w-96 min-w-0">
                             <input
+                                ref={inputRef}
                                 type="text"
                                 placeholder="Buscar artículos por código o nombre..."
                                 value={itemSearch}
@@ -377,44 +390,46 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                                 className="w-full px-3 py-2 pl-9 text-sm rounded-lg border border-[var(--card-border)] bg-[var(--surface-0)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-accent/30 focus:border-nearby-accent outline-none transition-colors"
                             />
                             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted-text)]" />
-
-                            {showItemPicker && (
-                                <div className="absolute z-20 mt-1 w-full max-h-60 overflow-y-auto bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-xl">
-                                    {filteredAvailableItems.length === 0 ? (
-                                        <p className="px-3 py-3 text-xs text-[var(--muted-text)]">Sin resultados</p>
-                                    ) : (
-                                        filteredAvailableItems.slice(0, 50).map((item) => (
-                                            <button
-                                                key={item.id}
-                                                onClick={() => toggleItem(item.code)}
-                                                className={`w-full text-left px-3 py-2 text-sm hover:bg-[var(--hover-bg)] flex items-center gap-2 transition-colors ${
-                                                    selectedItems.includes(item.code) ? "bg-nearby-accent/5" : ""
-                                                }`}
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedItems.includes(item.code)}
-                                                    readOnly
-                                                    className="rounded border-[var(--card-border)] text-nearby-accent pointer-events-none"
-                                                />
-                                                <span className="font-mono text-xs text-[var(--muted-text)] w-28 shrink-0 truncate">
-                                                    {item.code}
-                                                </span>
-                                                <span className="truncate text-[var(--foreground)]">{item.name}</span>
-                                            </button>
-                                        ))
-                                    )}
-                                    {showItemPicker && (
-                                        <button
-                                            onClick={() => setShowItemPicker(false)}
-                                            className="w-full py-2 text-xs text-[var(--muted-text)] hover:bg-[var(--hover-bg)] border-t border-[var(--card-border)]"
-                                        >
-                                            Cerrar
-                                        </button>
-                                    )}
-                                </div>
-                            )}
                         </div>
+
+                        {showItemPicker && dropdownPos && (
+                            <div
+                                ref={itemPickerRef}
+                                className="fixed z-50 max-h-60 overflow-y-auto bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg shadow-xl"
+                                style={{ top: dropdownPos.top, left: dropdownPos.left, width: dropdownPos.width }}
+                            >
+                                {filteredAvailableItems.length === 0 ? (
+                                    <p className="px-3 py-3 text-xs text-[var(--muted-text)]">Sin resultados</p>
+                                ) : (
+                                    filteredAvailableItems.slice(0, 50).map((item) => (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => toggleItem(item.code)}
+                                            className={`w-full text-left px-3 py-2 text-sm hover:bg-[var(--hover-bg)] flex items-center gap-2 transition-colors ${
+                                                selectedItems.includes(item.code) ? "bg-nearby-accent/5" : ""
+                                            }`}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedItems.includes(item.code)}
+                                                readOnly
+                                                className="rounded border-[var(--card-border)] text-nearby-accent pointer-events-none"
+                                            />
+                                            <span className="font-mono text-xs text-[var(--muted-text)] w-28 shrink-0 truncate">
+                                                {item.code}
+                                            </span>
+                                            <span className="truncate text-[var(--foreground)]">{item.name}</span>
+                                        </button>
+                                    ))
+                                )}
+                                <button
+                                    onClick={() => setShowItemPicker(false)}
+                                    className="w-full py-2 text-xs text-[var(--muted-text)] hover:bg-[var(--hover-bg)] border-t border-[var(--card-border)]"
+                                >
+                                    Cerrar
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {/* Query button */}
