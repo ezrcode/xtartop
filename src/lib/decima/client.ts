@@ -187,6 +187,45 @@ class DecimaClient {
     }
 
     /**
+     * Descargar factura PDF de una orden (disponible cuando la orden es aprobada/confirmada)
+     */
+    async getOrderInvoice(orderId: string): Promise<{ success: boolean; data?: Buffer; error?: string }> {
+        if (!this.config) {
+            return { success: false, error: 'Cliente Decima no configurado' };
+        }
+
+        try {
+            const url = `${DECIMA_BASE_URL}/orders/${orderId}/invoice`;
+            console.log('[Decima] Request: GET', `/orders/${orderId}/invoice`);
+
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `Bearer ${this.config.apiKey}`,
+                    'X-API-Key': this.config.apiKey,
+                },
+            });
+
+            console.log('[Decima] Invoice response status:', response.status);
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    return { success: false, error: 'Factura no disponible aún' };
+                }
+                return { success: false, error: `Error ${response.status}: ${response.statusText}` };
+            }
+
+            const arrayBuffer = await response.arrayBuffer();
+            return { success: true, data: Buffer.from(arrayBuffer) };
+        } catch (error) {
+            console.error('[Decima] Invoice exception:', error);
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : 'Error desconocido',
+            };
+        }
+    }
+
+    /**
      * Obtener promociones activas, opcionalmente filtradas por código de producto
      */
     async getPromotions(productCode?: string): Promise<DecimaApiResponse<DecimaPromotion[]>> {

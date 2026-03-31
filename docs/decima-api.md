@@ -148,6 +148,20 @@ Campos de la promoción:
 - `value` — porcentaje o monto fijo del descuento
 - `products` — productos a los que aplica (con `cost` y `salePrice`)
 
+### `GET /orders/{id}/invoice`
+
+Descarga la factura PDF de una orden aprobada/confirmada. Devuelve el archivo binario (`application/pdf`).
+
+```bash
+curl --request GET \
+  --url https://portal.decima.us/api/v1/orders/ord_xxxxx/invoice \
+  --header "Authorization: Bearer decima_live_xxxxx" \
+  --output factura.pdf
+```
+
+- Devuelve `200` con el PDF cuando la factura está disponible
+- Devuelve `404` si la orden no tiene factura aún (no ha sido aprobada)
+
 ## Respuestas
 
 Exito:

@@ -758,6 +758,7 @@ model PurchaseOrder {
   decimaOrderId     String?             // Order ID in Decima Portal
   decimaStatus      String?             // Status from Decima API
   decimaLastSync    DateTime?
+  invoiceUrl        String?             // URL de la factura descargada de Décima (Vercel Blob)
 
   // Relations
   supplierId   String

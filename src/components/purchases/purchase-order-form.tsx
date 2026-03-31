@@ -15,6 +15,7 @@ import {
     XCircle,
     ShoppingCart,
     Download,
+    FileText,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -57,6 +58,7 @@ interface PurchaseOrderFormProps {
         supplierId: string;
         supplier: { id: string; name: string; logoUrl: string | null };
         items: { id: string; productCode: string; productName: string | null; quantity: number }[];
+        invoiceUrl: string | null;
     };
     suppliers: { id: string; name: string; logoUrl: string | null }[];
     decimaProducts: { code: string; name: string; cost: number }[];
@@ -338,15 +340,28 @@ export function PurchaseOrderForm({
                                 </button>
                             )}
                             {order.decimaOrderId && (
-                                <button
-                                    type="button"
-                                    onClick={handleSyncFromDecima}
-                                    disabled={syncingFromDecima}
-                                    className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-[var(--foreground)] bg-[var(--hover-bg)] rounded-lg border border-[var(--card-border)] hover:bg-[var(--surface-2)] transition-colors disabled:opacity-50"
-                                >
-                                    {syncingFromDecima ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
-                                    Sincronizar Estado
-                                </button>
+                                <>
+                                    <button
+                                        type="button"
+                                        onClick={handleSyncFromDecima}
+                                        disabled={syncingFromDecima}
+                                        className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-[var(--foreground)] bg-[var(--hover-bg)] rounded-lg border border-[var(--card-border)] hover:bg-[var(--surface-2)] transition-colors disabled:opacity-50"
+                                    >
+                                        {syncingFromDecima ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+                                        Sincronizar Estado
+                                    </button>
+                                    {order.invoiceUrl && (
+                                        <a
+                                            href={order.invoiceUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-success-green rounded-lg hover:bg-green-700 transition-colors"
+                                        >
+                                            <FileText size={14} />
+                                            Descargar Factura
+                                        </a>
+                                    )}
+                                </>
                             )}
                         </div>
                     </div>

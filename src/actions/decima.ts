@@ -3,6 +3,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { createDecimaClient, type DecimaProduct, type DecimaPromotion } from "@/lib/decima/client";
+import { put } from "@vercel/blob";
 import { revalidatePath } from "next/cache";
 
 export interface DecimaSettingsState {
@@ -209,12 +210,15 @@ export async function sendOrderToDecima(purchaseOrderId: string): Promise<{
 }
 
 /**
- * Sincronizar estado de una orden desde Décima
+ * Sincronizar estado de una orden desde Décima.
+ * Cuando la orden pasa a confirmada/aprobada y no tiene factura,
+ * intenta descargar el PDF de factura y guardarlo en Vercel Blob.
  */
 export async function syncOrderFromDecima(purchaseOrderId: string): Promise<{
     success: boolean;
     error?: string;
     status?: string;
+    invoiceUrl?: string;
 }> {
     const config = await getWorkspaceDecimaConfig();
     if (!config?.decimaEnabled || !config?.decimaApiKey) {
@@ -238,7 +242,6 @@ export async function syncOrderFromDecima(purchaseOrderId: string): Promise<{
 
     const decimaStatus = result.data?.status || order.decimaStatus;
 
-    // Mapear estado de Décima a estado local
     let localStatus = order.status;
     if (decimaStatus) {
         const statusLower = decimaStatus.toLowerCase();
@@ -251,17 +254,33 @@ export async function syncOrderFromDecima(purchaseOrderId: string): Promise<{
         }
     }
 
+    let invoiceUrl = order.invoiceUrl;
+
+    // Descargar factura si la orden fue confirmada/aprobada/recibida y aún no tenemos la factura
+    if (!invoiceUrl && ["CONFIRMADA", "RECIBIDA"].includes(localStatus)) {
+        const invoiceResult = await client.getOrderInvoice(order.decimaOrderId);
+        if (invoiceResult.success && invoiceResult.data) {
+            const blobPath = `invoices/decima/${order.workspaceId}/OC-${String(order.orderNumber).padStart(4, "0")}_${order.period}.pdf`;
+            const blob = await put(blobPath, invoiceResult.data, {
+                access: "public",
+                contentType: "application/pdf",
+            });
+            invoiceUrl = blob.url;
+        }
+    }
+
     await prisma.purchaseOrder.update({
         where: { id: purchaseOrderId },
         data: {
             decimaStatus,
             decimaLastSync: new Date(),
             status: localStatus,
+            invoiceUrl,
         },
     });
 
     revalidatePath("/app/purchases");
     revalidatePath(`/app/purchases/${purchaseOrderId}`);
 
-    return { success: true, status: decimaStatus || undefined };
+    return { success: true, status: decimaStatus || undefined, invoiceUrl: invoiceUrl || undefined };
 }
