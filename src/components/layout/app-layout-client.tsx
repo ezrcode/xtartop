@@ -15,8 +15,12 @@ function TopbarSkeleton() {
             className="bg-[var(--card-bg)] border-b border-[var(--card-border)] animate-pulse"
             style={{ paddingTop: "env(safe-area-inset-top)" }}
         >
-            <div className="h-16 flex items-center justify-end px-4">
-                <div className="h-8 w-8 rounded-full bg-[var(--hover-bg)]" />
+            <div className="h-[68px] flex items-center justify-between px-4">
+                <div className="h-10 w-28 rounded-2xl bg-[var(--hover-bg)]" />
+                <div className="flex items-center gap-2">
+                    <div className="h-10 w-10 rounded-2xl bg-[var(--hover-bg)]" />
+                    <div className="h-10 w-10 rounded-2xl bg-[var(--hover-bg)]" />
+                </div>
             </div>
         </div>
     );
@@ -68,7 +72,7 @@ export function AppLayoutClient({ user, userRole, currentExchangeRate = null, ch
                         onMenuClick={() => setIsMobileMenuOpen(true)}
                     />
                 </Suspense>
-                <main className="pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-0">
+                <main className="pb-[calc(6.25rem+env(safe-area-inset-bottom))] md:pb-0">
                     {children}
                 </main>
             </div>

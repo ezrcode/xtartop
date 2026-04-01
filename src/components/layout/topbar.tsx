@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+import { usePathname } from "next/navigation";
 import { Menu, Banknote, Search } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { ThemePreference } from "@prisma/client";
@@ -19,12 +21,34 @@ interface TopbarProps {
 }
 
 export function Topbar({ user, currentExchangeRate = null, onMenuClick }: TopbarProps) {
+    const pathname = usePathname();
     const formattedRate = currentExchangeRate !== null
         ? currentExchangeRate.toLocaleString("en-US", {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
         })
         : null;
+
+    const mobileTitle = useMemo(() => {
+        const routeNames: Record<string, string> = {
+            app: "Inicio",
+            contacts: "Contactos",
+            companies: "Empresas",
+            deals: "Negocios",
+            subscriptions: "Suscripciones",
+            customers: "Clientes",
+            purchases: "Compras",
+            reports: "Reportes",
+            settings: "Configuración",
+            profile: "Mi perfil",
+            new: "Nuevo",
+        };
+
+        const segments = pathname.split("/").filter(Boolean);
+        if (segments.length <= 1) return "Inicio";
+        const last = segments[segments.length - 1];
+        return routeNames[last] || "Detalle";
+    }, [pathname]);
 
     const openCommandPalette = () => {
         document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }));
@@ -39,18 +63,27 @@ export function Topbar({ user, currentExchangeRate = null, onMenuClick }: Topbar
                 paddingRight: "env(safe-area-inset-right)",
             }}
         >
-            <div className="relative flex items-center h-[60px] sm:h-14 px-3 sm:px-6 lg:px-8">
+            <div className="relative flex items-center h-[68px] sm:h-14 px-3 sm:px-6 lg:px-8">
                 {/* Left side */}
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                     <Button
                         variant="ghost"
                         size="icon-sm"
                         onClick={onMenuClick}
-                        className="md:hidden shrink-0"
+                        className="md:hidden shrink-0 rounded-2xl border border-[var(--card-border)] bg-[var(--surface-1)] shadow-sm"
                         aria-label="Abrir menú"
                     >
                         <Menu size={20} />
                     </Button>
+
+                    <div className="md:hidden min-w-0">
+                        <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">
+                            Nearby
+                        </p>
+                        <h1 className="text-base font-semibold text-[var(--foreground)] truncate">
+                            {mobileTitle}
+                        </h1>
+                    </div>
                     
                     <div className="hidden md:block min-w-0">
                         <Breadcrumbs />
@@ -58,13 +91,13 @@ export function Topbar({ user, currentExchangeRate = null, onMenuClick }: Topbar
                 </div>
 
                 {/* Right side */}
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 shrink-0 md:static md:translate-y-0">
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 shrink-0 md:static md:translate-y-0">
                     {/* Search button (mobile) */}
                     <Button
-                        variant="ghost"
+                        variant="secondary"
                         size="icon-sm"
                         onClick={openCommandPalette}
-                        className="md:hidden"
+                        className="md:hidden rounded-2xl shadow-sm"
                         aria-label="Buscar"
                     >
                         <Search size={18} />
@@ -95,7 +128,7 @@ export function Topbar({ user, currentExchangeRate = null, onMenuClick }: Topbar
                     <ThemeToggle 
                         initialTheme={user.themePreference || "LIGHT"} 
                         variant="icon"
-                        buttonClassName="h-9 w-9 min-h-0 min-w-0 md:h-11 md:w-11"
+                        buttonClassName="h-10 w-10 min-h-0 min-w-0 rounded-2xl border border-[var(--card-border)] bg-[var(--surface-1)] shadow-sm md:h-11 md:w-11 md:rounded-xl"
                     />
                 </div>
             </div>

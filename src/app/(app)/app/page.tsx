@@ -223,15 +223,82 @@ export default async function DashboardPage() {
         "Usuario";
 
     return (
-        <div className="min-h-screen bg-[var(--surface-0)] py-6 md:py-8">
+        <div className="min-h-screen bg-[var(--surface-0)] py-4 md:py-8">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
-                <div className="mb-8">
-                    <h1 className="text-2xl md:text-3xl font-bold text-[var(--foreground)]">
-                        Hola, {firstName}
-                    </h1>
-                    <p className="text-[var(--muted-text)] mt-1 text-sm md:text-base">
-                        Aquí tienes un resumen de tu CRM
+                <div className="mb-5 md:mb-8">
+                    <div className="rounded-[28px] border border-[var(--card-border)] bg-[linear-gradient(145deg,var(--surface-1),var(--surface-2))] p-5 shadow-sm md:rounded-2xl md:bg-transparent md:border-0 md:p-0 md:shadow-none">
+                        <div className="flex items-start justify-between gap-4">
+                            <div>
+                                <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted-text)]">
+                                    Dashboard
+                                </p>
+                                <h1 className="mt-1 text-2xl md:text-3xl font-bold text-[var(--foreground)]">
+                                    Hola, {firstName}
+                                </h1>
+                                <p className="text-[var(--muted-text)] mt-1.5 text-sm md:text-base">
+                                    Resumen operativo y comercial del workspace.
+                                </p>
+                            </div>
+                            <div className="hidden sm:flex items-center gap-2 rounded-2xl border border-[var(--card-border)] bg-[var(--surface-1)] px-3 py-2 shadow-sm">
+                                <span className="text-[10px] uppercase tracking-[0.16em] text-[var(--muted-text)]">
+                                    Hoy
+                                </span>
+                                <span className="text-sm font-semibold text-[var(--foreground)]">
+                                    {new Date().toLocaleDateString("es-DO", { day: "2-digit", month: "short" })}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="mb-5 md:mb-6">
+                    <div className="md:hidden mb-3">
+                        <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">
+                            Acciones rápidas
+                        </p>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3 md:rounded-lg md:border md:border-[var(--card-border)] md:bg-[var(--card-bg)] md:p-5">
+                        <Link
+                            href="/app/companies/new"
+                            className="flex flex-col items-center rounded-[24px] border border-[var(--card-border)] bg-[var(--surface-1)] p-4 shadow-sm transition-transform hover:-translate-y-0.5 md:rounded-lg md:border-0 md:bg-[var(--hover-bg)] md:hover:bg-[var(--surface-0)]"
+                        >
+                            <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-nearby-dark text-white shadow-sm">
+                                <Building2 size={22} />
+                            </div>
+                            <span className="text-center text-[11px] font-medium text-[var(--foreground)] md:text-xs">
+                                Nueva Empresa
+                            </span>
+                        </Link>
+                        <Link
+                            href="/app/contacts/new"
+                            className="flex flex-col items-center rounded-[24px] border border-[var(--card-border)] bg-[var(--surface-1)] p-4 shadow-sm transition-transform hover:-translate-y-0.5 md:rounded-lg md:border-0 md:bg-[var(--hover-bg)] md:hover:bg-[var(--surface-0)]"
+                        >
+                            <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-ocean-blue text-white shadow-sm">
+                                <Users size={22} />
+                            </div>
+                            <span className="text-center text-[11px] font-medium text-[var(--foreground)] md:text-xs">
+                                Nuevo Contacto
+                            </span>
+                        </Link>
+                        <Link
+                            href="/app/deals/new"
+                            className="flex flex-col items-center rounded-[24px] border border-[var(--card-border)] bg-[var(--surface-1)] p-4 shadow-sm transition-transform hover:-translate-y-0.5 md:rounded-lg md:border-0 md:bg-[var(--hover-bg)] md:hover:bg-[var(--surface-0)]"
+                        >
+                            <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-success-green text-white shadow-sm">
+                                <TrendingUp size={22} />
+                            </div>
+                            <span className="text-center text-[11px] font-medium text-[var(--foreground)] md:text-xs">
+                                Nuevo Negocio
+                            </span>
+                        </Link>
+                    </div>
+                </div>
+
+                <div className="mb-3 md:mb-4">
+                    <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">
+                        Comercial
                     </p>
                 </div>
 
@@ -271,6 +338,12 @@ export default async function DashboardPage() {
                     />
                 </div>
 
+                <div className="mb-3 md:mb-4">
+                    <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">
+                        Licencias e ingresos
+                    </p>
+                </div>
+
                 {/* Row 2 — Revenue */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
                     <StatCard
@@ -308,48 +381,6 @@ export default async function DashboardPage() {
                 {/* Pipeline Chart */}
                 <div className="mb-6">
                     <DashboardCharts pipeline={pipelineData} />
-                </div>
-
-                {/* Quick Actions */}
-                <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] p-5">
-                    <h3 className="text-sm font-semibold text-[var(--foreground)] mb-4">
-                        Acciones Rápidas
-                    </h3>
-                    <div className="grid grid-cols-3 gap-3">
-                        <Link
-                            href="/app/companies/new"
-                            className="flex flex-col items-center p-4 rounded-lg bg-[var(--hover-bg)] hover:bg-[var(--surface-0)] transition-colors"
-                        >
-                            <div className="w-12 h-12 rounded-full bg-nearby-dark flex items-center justify-center mb-2">
-                                <Building2 size={22} className="text-white" />
-                            </div>
-                            <span className="text-xs font-medium text-[var(--foreground)]">
-                                Nueva Empresa
-                            </span>
-                        </Link>
-                        <Link
-                            href="/app/contacts/new"
-                            className="flex flex-col items-center p-4 rounded-lg bg-[var(--hover-bg)] hover:bg-[var(--surface-0)] transition-colors"
-                        >
-                            <div className="w-12 h-12 rounded-full bg-ocean-blue flex items-center justify-center mb-2">
-                                <Users size={22} className="text-white" />
-                            </div>
-                            <span className="text-xs font-medium text-[var(--foreground)]">
-                                Nuevo Contacto
-                            </span>
-                        </Link>
-                        <Link
-                            href="/app/deals/new"
-                            className="flex flex-col items-center p-4 rounded-lg bg-[var(--hover-bg)] hover:bg-[var(--surface-0)] transition-colors"
-                        >
-                            <div className="w-12 h-12 rounded-full bg-success-green flex items-center justify-center mb-2">
-                                <TrendingUp size={22} className="text-white" />
-                            </div>
-                            <span className="text-xs font-medium text-[var(--foreground)]">
-                                Nuevo Negocio
-                            </span>
-                        </Link>
-                    </div>
                 </div>
             </div>
         </div>
