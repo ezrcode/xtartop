@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import Link from "next/link";
-import { Save, Trash2, ArrowLeft, Loader2, ChevronDown, Search, X, Building2, Users, FileText, Ticket, Download } from "lucide-react";
+import { Save, Trash2, ArrowLeft, Loader2, ChevronDown, Search, X, Building2, Users, FileText, Download } from "lucide-react";
 import { createCompanyAction, updateCompanyAction, deleteCompany, CompanyState } from "@/actions/companies";
 import { Company, Contact, CompanyStatus, CompanyType, ClientInvitation, Project, ClientUser } from "@prisma/client";
 import { CompanyActivitiesClient } from "../activities/company-activities-client";
@@ -12,7 +12,6 @@ import { ClientUsersTable } from "./client-users-table";
 import { CompanyContactsTab } from "./company-contacts-tab";
 import { ImageUpload } from "../ui/image-upload";
 import { PdfUpload } from "../ui/pdf-upload";
-import { TicketsTab } from "./tickets-tab";
 
 type CompanyWithTerms = Company & { 
     primaryContact?: Contact | null;
@@ -130,7 +129,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
     const formRef = useRef<HTMLFormElement>(null);
     const signedContractRef = useRef<HTMLDivElement>(null);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState<"general" | "contacts" | "subscription" | "tickets">("general");
+    const [activeTab, setActiveTab] = useState<"general" | "contacts" | "subscription">("general");
     const [subscriptionSection] = useState<"contract">("contract");
     const [pendingAction, setPendingAction] = useState<string | null>(null);
     const [isGeneratingContractPdf, setIsGeneratingContractPdf] = useState(false);
@@ -477,18 +476,6 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                 >
                                     <FileText size={16} className="shrink-0" />
                                     <span className="hidden sm:inline">Contrato</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setActiveTab("tickets")}
-                                    className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 py-3 px-2 sm:px-4 border-b-2 font-medium text-xs sm:text-sm transition-colors ${
-                                        activeTab === "tickets"
-                                            ? "border-purple-600 text-purple-600"
-                                            : "border-transparent text-[var(--muted-text)] hover:text-[var(--foreground)]"
-                                    }`}
-                                >
-                                    <Ticket size={16} className="shrink-0" />
-                                    <span className="hidden sm:inline">Tickets</span>
                                 </button>
                             </nav>
                         </div>
@@ -1126,14 +1113,6 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                     </div>
                                 )}
 
-                            {/* Tab Content: Tickets */}
-                            {activeTab === "tickets" && company && (
-                                <TicketsTab 
-                                    companyId={company.id}
-                                    companyName={company.name}
-                                    clickUpClientName={company.clickUpClientName || null}
-                                />
-                            )}
                         </form>
                     </div>
 

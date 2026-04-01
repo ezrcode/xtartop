@@ -22,7 +22,11 @@ interface CustomersTableProps {
 
 const typeLabels: Record<string, { label: string; className: string }> = {
     CLIENTE_SUSCRIPTOR: { label: "Suscriptor", className: "bg-success-green/10 text-success-green" },
-    CLIENTE_ONETIME: { label: "One-Time", className: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300" },
+    CLIENTE_ONETIME: {
+        label: "One-Time",
+        className:
+            "border border-[var(--card-border)] bg-[var(--surface-2)] text-[var(--foreground)] dark:bg-[var(--surface-3)]",
+    },
 };
 
 function getInitials(name: string) {

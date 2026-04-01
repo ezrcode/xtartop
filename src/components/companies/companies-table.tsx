@@ -38,7 +38,11 @@ const typeConfig: Record<CompanyType, { label: string; className: string }> = {
     PROSPECTO: { label: "Prospecto", className: "bg-[var(--surface-3)] text-gray-800 dark:text-gray-300" },
     POTENCIAL: { label: "Potencial", className: "bg-nearby-dark/8 text-nearby-dark dark:text-nearby-dark-300" },
     CLIENTE_SUSCRIPTOR: { label: "Cliente Suscriptor", className: "bg-success-green/10 text-success-green" },
-    CLIENTE_ONETIME: { label: "Cliente One-Time", className: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300" },
+    CLIENTE_ONETIME: {
+        label: "Cliente One-Time",
+        className:
+            "border border-[var(--card-border)] bg-[var(--surface-2)] text-[var(--foreground)] dark:bg-[var(--surface-3)]",
+    },
     PROVEEDOR: { label: "Proveedor", className: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300" },
     INVERSIONISTA: { label: "Inversionista", className: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300" },
     COMPETIDOR: { label: "Competidor", className: "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300" },
