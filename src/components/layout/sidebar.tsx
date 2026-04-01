@@ -15,6 +15,7 @@ import {
     Search,
     BarChart3,
     ShoppingCart,
+    CreditCard,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { logout } from "@/actions/auth";
@@ -27,21 +28,28 @@ const RAIL_WIDTH = 64;
 const EXPANDED_WIDTH = 240;
 const ICON_SIZE = 20;
 const NAV_PX = 12;
-const ITEM_PL = RAIL_WIDTH / 2 - ICON_SIZE / 2 - NAV_PX; // 10px — keeps icon centered at 32px
+const ITEM_PL = RAIL_WIDTH / 2 - ICON_SIZE / 2 - NAV_PX;
 
-const mainMenuItems = [
+const topMenuItems = [
     { name: "Dashboard", href: "/app", icon: LayoutDashboard },
+];
+
+const comercialMenuItems = [
     { name: "Contactos", href: "/app/contacts", icon: Users },
     { name: "Empresas", href: "/app/companies", icon: Building2 },
     { name: "Negocios", href: "/app/deals", icon: TrendingUp },
-    { name: "Reportes", href: "/app/reports", icon: BarChart3 },
 ];
 
-const comprasMenuItems = [
+const administrativoMenuItems = [
+    { name: "Suscripciones", href: "/app/subscriptions", icon: CreditCard },
     { name: "Órdenes de Compra", href: "/app/purchases", icon: ShoppingCart },
 ];
 
-const adminMenuItems = [
+const reportesMenuItems = [
+    { name: "Reportes", href: "/app/reports", icon: BarChart3 },
+];
+
+const workspaceMenuItems = [
     { name: "Configuración", href: "/app/settings", icon: Settings },
 ];
 
@@ -56,7 +64,7 @@ interface SidebarProps {
     setIsMobileOpen: (open: boolean) => void;
 }
 
-type MenuItem = typeof mainMenuItems[0];
+type MenuItem = typeof topMenuItems[0];
 
 export function Sidebar({ userRole, user, isMobileOpen, setIsMobileOpen }: SidebarProps) {
     const pathname = usePathname();
@@ -195,18 +203,24 @@ export function Sidebar({ userRole, user, isMobileOpen, setIsMobileOpen }: Sideb
                 </div>
 
                 <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-1">
-                    <p className="px-3 mb-1 text-[11px] font-medium uppercase tracking-wider text-[var(--muted-text)]">Principal</p>
-                    {mainMenuItems.map((item) => <MobileNavItem key={item.name} item={item} />)}
+                    {topMenuItems.map((item) => <MobileNavItem key={item.name} item={item} />)}
 
                     <div className="h-px bg-[var(--card-border)] my-3 mx-2" />
-                    <p className="px-3 mb-1 text-[11px] font-medium uppercase tracking-wider text-[var(--muted-text)]">Compras</p>
-                    {comprasMenuItems.map((item) => <MobileNavItem key={item.name} item={item} />)}
+                    <p className="px-3 mb-1 text-[11px] font-medium uppercase tracking-wider text-[var(--muted-text)]">Comercial</p>
+                    {comercialMenuItems.map((item) => <MobileNavItem key={item.name} item={item} />)}
+
+                    <div className="h-px bg-[var(--card-border)] my-3 mx-2" />
+                    <p className="px-3 mb-1 text-[11px] font-medium uppercase tracking-wider text-[var(--muted-text)]">Administrativo</p>
+                    {administrativoMenuItems.map((item) => <MobileNavItem key={item.name} item={item} />)}
+
+                    <div className="h-px bg-[var(--card-border)] my-3 mx-2" />
+                    {reportesMenuItems.map((item) => <MobileNavItem key={item.name} item={item} />)}
 
                     {isAdmin && (
                         <>
                             <div className="h-px bg-[var(--card-border)] my-3 mx-2" />
                             <p className="px-3 mb-1 text-[11px] font-medium uppercase tracking-wider text-[var(--muted-text)]">Workspace</p>
-                            {adminMenuItems.map((item) => <MobileNavItem key={item.name} item={item} />)}
+                            {workspaceMenuItems.map((item) => <MobileNavItem key={item.name} item={item} />)}
                         </>
                     )}
                 </nav>
@@ -294,27 +308,21 @@ export function Sidebar({ userRole, user, isMobileOpen, setIsMobileOpen }: Sideb
 
                 {/* Navigation */}
                 <nav className="flex-1 overflow-y-auto py-2 px-3">
-                    <div className="flex items-center h-8 overflow-hidden">
-                        {isPanelOpen ? (
-                            <p
-                                className="text-[11px] font-medium uppercase tracking-wider text-[var(--muted-text)] whitespace-nowrap"
-                                style={{ paddingLeft: ITEM_PL }}
-                            >
-                                Principal
-                            </p>
-                        ) : (
-                            <div className="w-full" />
-                        )}
-                    </div>
-                    {mainMenuItems.map((item) => <NavItem key={item.name} item={item} />)}
+                    {topMenuItems.map((item) => <NavItem key={item.name} item={item} />)}
 
-                    <SectionDivider label="Compras" />
-                    {comprasMenuItems.map((item) => <NavItem key={item.name} item={item} />)}
+                    <SectionDivider label="Comercial" />
+                    {comercialMenuItems.map((item) => <NavItem key={item.name} item={item} />)}
+
+                    <SectionDivider label="Administrativo" />
+                    {administrativoMenuItems.map((item) => <NavItem key={item.name} item={item} />)}
+
+                    <SectionDivider label="" />
+                    {reportesMenuItems.map((item) => <NavItem key={item.name} item={item} />)}
 
                     {isAdmin && (
                         <>
                             <SectionDivider label="Workspace" />
-                            {adminMenuItems.map((item) => <NavItem key={item.name} item={item} />)}
+                            {workspaceMenuItems.map((item) => <NavItem key={item.name} item={item} />)}
                         </>
                     )}
                 </nav>

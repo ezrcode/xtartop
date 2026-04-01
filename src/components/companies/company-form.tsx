@@ -12,11 +12,7 @@ import { ClientUsersTable } from "./client-users-table";
 import { CompanyContactsTab } from "./company-contacts-tab";
 import { ImageUpload } from "../ui/image-upload";
 import { PdfUpload } from "../ui/pdf-upload";
-import { InvoicesTab } from "./invoices-tab";
-import { AdmCloudLinksSection } from "./admcloud-links-section";
-import { SubscriptionBillingSection } from "./subscription-billing-section";
 import { TicketsTab } from "./tickets-tab";
-import { BillingHistoryTab } from "./billing-history-tab";
 
 type CompanyWithTerms = Company & { 
     primaryContact?: Contact | null;
@@ -135,7 +131,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
     const signedContractRef = useRef<HTMLDivElement>(null);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<"general" | "contacts" | "subscription" | "tickets">("general");
-    const [subscriptionSection, setSubscriptionSection] = useState<"contract" | "billing" | "proformas" | "invoices">("contract");
+    const [subscriptionSection] = useState<"contract">("contract");
     const [pendingAction, setPendingAction] = useState<string | null>(null);
     const [isGeneratingContractPdf, setIsGeneratingContractPdf] = useState(false);
     const [contractPdfError, setContractPdfError] = useState<string | null>(null);
@@ -196,12 +192,6 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
-
-    useEffect(() => {
-        if (!canViewFinancialSubscription && activeTab === "subscription" && subscriptionSection !== "contract") {
-            setSubscriptionSection("contract");
-        }
-    }, [activeTab, canViewFinancialSubscription, subscriptionSection]);
 
     const updateAction = company ? updateCompanyAction.bind(null, company.id) : () => Promise.resolve({ message: "Error" });
 
@@ -828,62 +818,9 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                     />
                                 )}
 
-                                {/* Tab Content: Subscription */}
+                                {/* Tab Content: Subscription (Contract only) */}
                                 {activeTab === "subscription" && company && (
                                     <div className="space-y-4">
-                                        {/* Sub-navigation */}
-                                        <div className="flex flex-wrap gap-2 p-1 bg-[var(--hover-bg)] rounded-lg">
-                                            <button
-                                                type="button"
-                                                onClick={() => setSubscriptionSection("contract")}
-                                                className={`flex-1 sm:flex-none px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                                                    subscriptionSection === "contract"
-                                                        ? "bg-[var(--card-bg)] text-[var(--foreground)] shadow-sm"
-                                                        : "text-[var(--muted-text)] hover:text-[var(--foreground)]"
-                                                }`}
-                                            >
-                                                Contrato
-                                            </button>
-                                            {canViewFinancialSubscription && (
-                                                <>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setSubscriptionSection("billing")}
-                                                        className={`flex-1 sm:flex-none px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                                                            subscriptionSection === "billing"
-                                                                ? "bg-[var(--card-bg)] text-[var(--foreground)] shadow-sm"
-                                                                : "text-[var(--muted-text)] hover:text-[var(--foreground)]"
-                                                        }`}
-                                                    >
-                                                        Cobro mensual
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setSubscriptionSection("proformas")}
-                                                        className={`flex-1 sm:flex-none px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                                                            subscriptionSection === "proformas"
-                                                                ? "bg-[var(--card-bg)] text-[var(--foreground)] shadow-sm"
-                                                                : "text-[var(--muted-text)] hover:text-[var(--foreground)]"
-                                                        }`}
-                                                    >
-                                                        Proformas
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => setSubscriptionSection("invoices")}
-                                                        className={`flex-1 sm:flex-none px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                                                            subscriptionSection === "invoices"
-                                                                ? "bg-[var(--card-bg)] text-[var(--foreground)] shadow-sm"
-                                                                : "text-[var(--muted-text)] hover:text-[var(--foreground)]"
-                                                        }`}
-                                                    >
-                                                        Facturas
-                                                    </button>
-                                                </>
-                                            )}
-                                        </div>
-
-                                        {/* Section: Contract */}
                                         {subscriptionSection === "contract" && (
                                             <div className="space-y-6">
                                                 {/* Company Data for Contract */}
@@ -1138,28 +1075,18 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                             </div>
                                         )}
 
-                                        {/* Section: Billing */}
-                                        {canViewFinancialSubscription && subscriptionSection === "billing" && (
-                                            <SubscriptionBillingSection companyId={company.id} />
-                                        )}
-
-                                        {/* Section: Proformas */}
-                                        {canViewFinancialSubscription && subscriptionSection === "proformas" && (
-                                            <BillingHistoryTab companyId={company.id} />
-                                        )}
-
-                                        {/* Section: Invoices */}
-                                        {canViewFinancialSubscription && subscriptionSection === "invoices" && (
-                                            <>
-                                                <AdmCloudLinksSection companyId={company.id} />
-                                                <InvoicesTab
-                                                    companyId={company.id}
-                                                    companyName={company.name}
-                                                    taxId={company.taxId}
-                                                    admCloudRelationshipId={company.admCloudRelationshipId || null}
-                                                    admCloudLastSync={company.admCloudLastSync || null}
-                                                />
-                                            </>
+                                        {canViewFinancialSubscription && (
+                                            <div className="mt-4 p-3 rounded-lg bg-[var(--surface-2)] border border-[var(--card-border)]">
+                                                <p className="text-xs text-[var(--muted-text)]">
+                                                    Cobro mensual, proformas y facturas están disponibles en{" "}
+                                                    <Link
+                                                        href={`/app/subscriptions/${company.id}`}
+                                                        className="font-medium text-[var(--foreground)] hover:underline"
+                                                    >
+                                                        Suscripciones → {company.name}
+                                                    </Link>
+                                                </p>
+                                            </div>
                                         )}
                                     </div>
                                 )}
