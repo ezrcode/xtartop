@@ -46,7 +46,7 @@ const TabsTrigger = React.forwardRef<
     className={cn(
       // Base styles
       "inline-flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap text-xs sm:text-sm font-medium transition-all",
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nearby-accent focus-visible:ring-offset-2",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nearby-dark/30 focus-visible:ring-offset-2",
       "disabled:pointer-events-none disabled:opacity-50",
       // Touch-friendly sizing - more compact on mobile
       "min-h-[40px] sm:min-h-[44px] px-2 sm:px-4 py-2",
@@ -55,8 +55,8 @@ const TabsTrigger = React.forwardRef<
       // Variant styles
       {
         "rounded-md text-[var(--muted-text)] data-[state=active]:bg-[var(--card-bg)] data-[state=active]:text-[var(--foreground)] data-[state=active]:shadow-sm": variant === "default",
-        "rounded-none border-b-2 border-transparent text-[var(--muted-text)] hover:text-[var(--foreground)] data-[state=active]:border-nearby-accent data-[state=active]:text-nearby-accent -mb-[1px]": variant === "underline",
-        "rounded-md bg-transparent text-[var(--muted-text)] hover:bg-[var(--hover-bg)] data-[state=active]:bg-nearby-accent data-[state=active]:text-white": variant === "pills",
+        "rounded-none border-b-2 border-transparent text-[var(--muted-text)] hover:text-[var(--foreground)] data-[state=active]:border-nearby-dark data-[state=active]:text-[var(--foreground)] dark:data-[state=active]:border-nearby-dark-300 -mb-[1px]": variant === "underline",
+        "rounded-md bg-transparent text-[var(--muted-text)] hover:bg-[var(--hover-bg)] data-[state=active]:bg-nearby-dark data-[state=active]:text-white": variant === "pills",
       },
       className
     )}
@@ -72,7 +72,7 @@ const TabsContent = React.forwardRef<
   <TabsPrimitive.Content
     ref={ref}
     className={cn(
-      "mt-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nearby-accent focus-visible:ring-offset-2",
+      "mt-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-nearby-dark/30 focus-visible:ring-offset-2",
       // Animate in
       "data-[state=active]:animate-in data-[state=active]:fade-in-0 data-[state=active]:slide-in-from-bottom-2",
       className

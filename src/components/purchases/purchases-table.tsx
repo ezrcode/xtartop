@@ -33,7 +33,7 @@ interface PurchasesTableProps {
 
 const statusConfig: Record<PurchaseOrderStatus, { label: string; className: string; dotColor: string }> = {
     BORRADOR: { label: "Borrador", className: "bg-[var(--surface-3)] text-gray-800", dotColor: "bg-gray-400" },
-    ENVIADA: { label: "Enviada", className: "bg-nearby-accent/10 text-nearby-accent", dotColor: "bg-nearby-accent" },
+    ENVIADA: { label: "Enviada", className: "bg-nearby-dark/8 text-nearby-dark dark:text-nearby-dark-300", dotColor: "bg-nearby-dark dark:bg-nearby-dark-300" },
     CONFIRMADA: { label: "Confirmada", className: "bg-success-green/10 text-success-green", dotColor: "bg-success-green" },
     RECIBIDA: { label: "Recibida", className: "bg-purple-100 text-purple-800", dotColor: "bg-purple-500" },
     CANCELADA: { label: "Cancelada", className: "bg-error-red/10 text-error-red", dotColor: "bg-error-red" },

@@ -321,7 +321,7 @@ export function DataTable<T>({
                                                 <select
                                                     value={filters[String(col.key)] || ""}
                                                     onChange={(e) => handleFilterChange(String(col.key), e.target.value)}
-                                                    className="w-full h-10 px-3 text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-md focus:outline-none focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                    className="w-full h-10 px-3 text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-md focus:outline-none focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                                                 >
                                                     <option value="">Todos</option>
                                                     {col.filterOptions?.map(opt => (
@@ -366,7 +366,7 @@ export function DataTable<T>({
                                             <div className={cn(
                                                 "w-5 h-5 rounded border flex items-center justify-center transition-colors",
                                                 visibleColumns.includes(String(col.key))
-                                                    ? "bg-nearby-accent border-nearby-accent"
+                                                    ? "bg-nearby-dark border-nearby-dark"
                                                     : "border-[var(--input-border)]"
                                             )}>
                                                 {visibleColumns.includes(String(col.key)) && (
@@ -507,7 +507,7 @@ export function DataTable<T>({
                                     <div className="flex items-center gap-1.5">
                                         {column.header}
                                         {column.sortable && sortKey === String(column.key) && (
-                                            <span className="text-nearby-accent">
+                                            <span className="text-nearby-dark dark:text-nearby-dark-300">
                                                 {sortDirection === "asc" 
                                                     ? <ChevronUp size={14} /> 
                                                     : <ChevronDown size={14} />

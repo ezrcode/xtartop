@@ -199,7 +199,7 @@ export function SubscriptionTab({ company, contacts, pendingInvitations }: Subsc
                                 <select
                                     value={selectedContactId}
                                     onChange={(e) => setSelectedContactId(e.target.value)}
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent text-sm"
+                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 text-sm"
                                 >
                                     <option value="">Seleccionar contacto...</option>
                                     {companyContacts.map((contact) => (
@@ -212,7 +212,7 @@ export function SubscriptionTab({ company, contacts, pendingInvitations }: Subsc
                             <button
                                 onClick={handleSendInvitation}
                                 disabled={loading || !selectedContactId}
-                                className="inline-flex items-center px-4 py-2 bg-nearby-accent text-white rounded-md hover:bg-nearby-dark transition-colors disabled:opacity-50"
+                                className="inline-flex items-center px-4 py-2 bg-nearby-dark text-white rounded-md hover:bg-nearby-dark-600 transition-colors disabled:opacity-50"
                             >
                                 <Send size={16} className="mr-2" />
                                 {loading ? "Enviando..." : "Enviar Invitación"}

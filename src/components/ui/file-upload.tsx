@@ -154,7 +154,7 @@ export function FileUpload({
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
-                    className="inline-flex items-center gap-1.5 px-2 py-1 text-xs text-gray-600 hover:text-nearby-accent border border-dashed border-gray-300 rounded-lg hover:border-nearby-accent transition-colors disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 px-2 py-1 text-xs text-gray-600 hover:text-nearby-dark dark:hover:text-nearby-dark-300 border border-dashed border-gray-300 rounded-lg hover:border-nearby-dark/30 transition-colors disabled:opacity-50"
                 >
                     {isUploading ? (
                         <Loader2 size={12} className="animate-spin" />

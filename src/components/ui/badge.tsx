@@ -12,7 +12,7 @@ const badgeVariants = cva(
         default:
           "bg-nearby-dark text-white",
         primary:
-          "bg-nearby-accent text-white",
+          "bg-nearby-dark/8 text-nearby-dark dark:text-nearby-dark-300",
         secondary:
           "bg-[var(--hover-bg)] text-[var(--foreground)] border border-[var(--card-border)]",
         success:

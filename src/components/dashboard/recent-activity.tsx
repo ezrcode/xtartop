@@ -18,7 +18,7 @@ interface RecentActivityProps {
 
 const typeIcons: Record<string, { icon: typeof Mail; color: string; bg: string }> = {
     EMAIL: { icon: Mail, color: "text-nearby-dark dark:text-nearby-dark-200", bg: "bg-nearby-dark-50 dark:bg-nearby-dark-600/30" },
-    PROJECT: { icon: FolderOpen, color: "text-nearby-accent", bg: "bg-nearby-accent-50 dark:bg-nearby-accent/10" },
+    PROJECT: { icon: FolderOpen, color: "text-nearby-dark dark:text-nearby-dark-300", bg: "bg-nearby-dark-50 dark:bg-nearby-dark/10" },
     CLIENT_USER: { icon: Users, color: "text-ocean-blue", bg: "bg-info-blue/10" },
     NOTE: { icon: StickyNote, color: "text-purple-600 dark:text-purple-400", bg: "bg-purple-50 dark:bg-purple-500/10" },
     CONTRACT: { icon: FileText, color: "text-success-green", bg: "bg-success-green/10" },

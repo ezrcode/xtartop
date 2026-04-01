@@ -33,7 +33,7 @@ export function SignupForm() {
                     type="text"
                     placeholder="Juan Pérez"
                     required
-                    className="mt-1 block w-full px-3 py-2.5 text-base sm:text-sm border border-[var(--input-border)] rounded-md shadow-sm bg-[var(--input-bg)] text-[var(--foreground)] focus:outline-none focus:ring-nearby-accent focus:border-nearby-accent"
+                    className="mt-1 block w-full px-3 py-2.5 text-base sm:text-sm border border-[var(--input-border)] rounded-md shadow-sm bg-[var(--input-bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                 />
                 {state?.errors?.name && (
                     <p className="mt-1 text-sm text-error-red">{state.errors.name}</p>
@@ -50,7 +50,7 @@ export function SignupForm() {
                     type="email"
                     placeholder="tu@ejemplo.com"
                     required
-                    className="mt-1 block w-full px-3 py-2.5 text-base sm:text-sm border border-[var(--input-border)] rounded-md shadow-sm bg-[var(--input-bg)] text-[var(--foreground)] focus:outline-none focus:ring-nearby-accent focus:border-nearby-accent"
+                    className="mt-1 block w-full px-3 py-2.5 text-base sm:text-sm border border-[var(--input-border)] rounded-md shadow-sm bg-[var(--input-bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                 />
                 {state?.errors?.email && (
                     <p className="mt-1 text-sm text-error-red">{state.errors.email}</p>
@@ -68,7 +68,7 @@ export function SignupForm() {
                     placeholder="••••••••"
                     required
                     minLength={6}
-                    className="mt-1 block w-full px-3 py-2.5 text-base sm:text-sm border border-[var(--input-border)] rounded-md shadow-sm bg-[var(--input-bg)] text-[var(--foreground)] focus:outline-none focus:ring-nearby-accent focus:border-nearby-accent"
+                    className="mt-1 block w-full px-3 py-2.5 text-base sm:text-sm border border-[var(--input-border)] rounded-md shadow-sm bg-[var(--input-bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                 />
                 {state?.errors?.password && (
                     <p className="mt-1 text-sm text-error-red">{state.errors.password}</p>
@@ -85,7 +85,7 @@ export function SignupForm() {
                     type="text"
                     placeholder="Mi Empresa"
                     required
-                    className="mt-1 block w-full px-3 py-2.5 text-base sm:text-sm border border-[var(--input-border)] rounded-md shadow-sm bg-[var(--input-bg)] text-[var(--foreground)] focus:outline-none focus:ring-nearby-accent focus:border-nearby-accent"
+                    className="mt-1 block w-full px-3 py-2.5 text-base sm:text-sm border border-[var(--input-border)] rounded-md shadow-sm bg-[var(--input-bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                 />
                 {state?.errors?.workspaceName && (
                     <p className="mt-1 text-sm text-error-red">{state.errors.workspaceName}</p>
@@ -102,7 +102,7 @@ export function SignupForm() {
 
             <div className="text-center text-sm text-[var(--foreground)]">
                 ¿Ya tienes una cuenta?{" "}
-                <Link href="/login" className="font-medium text-nearby-accent hover:text-nearby-dark-600">
+                <Link href="/login" className="font-medium text-nearby-dark dark:text-nearby-dark-300 hover:text-nearby-dark-600">
                     Iniciar sesión
                 </Link>
             </div>

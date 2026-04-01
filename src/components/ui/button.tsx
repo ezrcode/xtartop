@@ -13,17 +13,17 @@ const buttonVariants = cva(
         default:
           "bg-nearby-dark text-white shadow-sm hover:bg-nearby-dark-600 focus-visible:ring-nearby-dark",
         primary:
-          "bg-nearby-accent text-white shadow-sm hover:bg-nearby-accent-600 focus-visible:ring-nearby-accent",
+          "bg-nearby-accent text-white shadow-sm hover:bg-nearby-accent-600 focus-visible:ring-nearby-dark",
         destructive:
           "bg-error-red text-white shadow-sm hover:bg-red-600 focus-visible:ring-error-red",
         outline:
-          "border border-[var(--card-border)] bg-transparent text-[var(--foreground)] hover:bg-[var(--hover-bg)] focus-visible:ring-nearby-accent",
+          "border border-[var(--card-border)] bg-transparent text-[var(--foreground)] hover:bg-[var(--hover-bg)] focus-visible:ring-nearby-dark",
         secondary:
           "bg-[var(--hover-bg)] text-[var(--foreground)] border border-[var(--card-border)] hover:bg-[var(--card-border)] focus-visible:ring-nearby-dark",
         ghost:
           "text-[var(--foreground)] hover:bg-[var(--hover-bg)] focus-visible:ring-nearby-dark",
         link:
-          "text-nearby-accent underline-offset-4 hover:underline focus-visible:ring-nearby-accent",
+          "text-[var(--foreground)] underline-offset-4 hover:underline focus-visible:ring-nearby-dark",
         success:
           "bg-success-green text-white shadow-sm hover:bg-emerald-600 focus-visible:ring-success-green",
       },

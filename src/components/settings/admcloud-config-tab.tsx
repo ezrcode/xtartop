@@ -241,7 +241,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                         href="https://api.admcloud.net/swagger/ui/index" 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-sm text-nearby-accent hover:underline flex items-center gap-1"
+                        className="text-sm text-[var(--foreground)] font-medium hover:underline flex items-center gap-1"
                     >
                         Ver API <ExternalLink size={14} />
                     </a>
@@ -261,8 +261,8 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                         <button
                             type="button"
                             onClick={() => setEnabled(!enabled)}
-                            className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-nearby-accent focus:ring-offset-2 ${
-                                enabled ? 'bg-nearby-accent' : 'bg-[var(--surface-3)]'
+                            className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-nearby-dark/30 focus:ring-offset-2 ${
+                                enabled ? 'bg-nearby-dark' : 'bg-[var(--surface-3)]'
                             }`}
                         >
                             <span
@@ -291,7 +291,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                         id="appId"
                                         defaultValue={currentConfig.appId || ""}
                                         placeholder="ej: f9218618-ee43-4ca0-52f9-..."
-                                        className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm font-mono text-xs"
+                                        className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-nearby-dark/15 focus:border-nearby-dark/50 sm:text-sm font-mono text-xs"
                                     />
                                     {state?.errors?.appId && (
                                         <p className="mt-1 text-sm text-error-red">{state.errors.appId}</p>
@@ -308,7 +308,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                         id="company"
                                         defaultValue={currentConfig.company || ""}
                                         placeholder="ej: 030c4f39-3188-4485-b557-..."
-                                        className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm font-mono text-xs"
+                                        className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-nearby-dark/15 focus:border-nearby-dark/50 sm:text-sm font-mono text-xs"
                                     />
                                     {state?.errors?.company && (
                                         <p className="mt-1 text-sm text-error-red">{state.errors.company}</p>
@@ -325,7 +325,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                         id="username"
                                         defaultValue={currentConfig.username || ""}
                                         placeholder="Tu usuario de AdmCloud"
-                                        className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                        className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-nearby-dark/15 focus:border-nearby-dark/50 sm:text-sm"
                                     />
                                     {state?.errors?.username && (
                                         <p className="mt-1 text-sm text-error-red">{state.errors.username}</p>
@@ -342,7 +342,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                         id="password"
                                         defaultValue={currentConfig.password || ""}
                                         placeholder="Tu contraseña de AdmCloud"
-                                        className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                        className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-nearby-dark/15 focus:border-nearby-dark/50 sm:text-sm"
                                     />
                                     {state?.errors?.password && (
                                         <p className="mt-1 text-sm text-error-red">{state.errors.password}</p>
@@ -359,7 +359,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                         id="role"
                                         defaultValue={currentConfig.role || "Administradores"}
                                         placeholder="Administradores"
-                                        className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                        className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-nearby-dark/15 focus:border-nearby-dark/50 sm:text-sm"
                                     />
                                     <p className="mt-1 text-xs text-[var(--muted-text)]">
                                         Normalmente es "Administradores"
@@ -377,7 +377,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                         type="button"
                                         onClick={loadPriceLists}
                                         disabled={loadingPriceLists}
-                                        className="text-xs text-nearby-accent hover:text-nearby-accent-600 flex items-center gap-1"
+                                        className="text-xs text-[var(--foreground)] font-medium hover:text-[var(--foreground)] flex items-center gap-1"
                                     >
                                         <RefreshCw size={12} className={loadingPriceLists ? "animate-spin" : ""} />
                                         Actualizar listas
@@ -390,7 +390,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                     value={selectedPriceListId}
                                     onChange={(e) => setSelectedPriceListId(e.target.value)}
                                     disabled={loadingPriceLists || priceLists.length === 0}
-                                    className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:opacity-50"
+                                    className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 disabled:opacity-50"
                                 >
                                     <option value="">
                                         {loadingPriceLists 
@@ -427,7 +427,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                                 type="button"
                                                 onClick={loadPaymentTerms}
                                                 disabled={loadingPaymentTerms}
-                                                className="text-xs text-nearby-accent hover:text-nearby-accent-600 flex items-center gap-1"
+                                                className="text-xs text-[var(--foreground)] font-medium hover:text-[var(--foreground)] flex items-center gap-1"
                                             >
                                                 <RefreshCw size={12} className={loadingPaymentTerms ? "animate-spin" : ""} />
                                                 Actualizar
@@ -440,7 +440,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                             value={selectedPaymentTermId}
                                             onChange={(e) => setSelectedPaymentTermId(e.target.value)}
                                             disabled={loadingPaymentTerms || paymentTerms.length === 0}
-                                            className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:opacity-50"
+                                            className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 disabled:opacity-50"
                                         >
                                             <option value="">
                                                 {loadingPaymentTerms 
@@ -470,7 +470,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                                 type="button"
                                                 onClick={loadSalesStages}
                                                 disabled={loadingSalesStages}
-                                                className="text-xs text-nearby-accent hover:text-nearby-accent-600 flex items-center gap-1"
+                                                className="text-xs text-[var(--foreground)] font-medium hover:text-[var(--foreground)] flex items-center gap-1"
                                             >
                                                 <RefreshCw size={12} className={loadingSalesStages ? "animate-spin" : ""} />
                                                 Actualizar
@@ -483,7 +483,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                             value={selectedSalesStageId}
                                             onChange={(e) => setSelectedSalesStageId(e.target.value)}
                                             disabled={loadingSalesStages || salesStages.length === 0}
-                                            className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:opacity-50"
+                                            className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 disabled:opacity-50"
                                         >
                                             <option value="">
                                                 {loadingSalesStages 
@@ -549,7 +549,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                                     value={newTaxGroupName}
                                                     onChange={(e) => setNewTaxGroupName(e.target.value)}
                                                     placeholder="Ej: ITBIS"
-                                                    className="w-full px-2.5 py-1.5 text-sm border border-[var(--card-border)] rounded-md focus:ring-nearby-accent focus:border-nearby-accent"
+                                                    className="w-full px-2.5 py-1.5 text-sm border border-[var(--card-border)] rounded-md focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                                                 />
                                             </div>
                                             <div className="flex-[2] min-w-0">
@@ -559,7 +559,7 @@ export function AdmCloudConfigTab({ currentConfig }: AdmCloudConfigTabProps) {
                                                     value={newTaxScheduleId}
                                                     onChange={(e) => setNewTaxScheduleId(e.target.value)}
                                                     placeholder="Ej: 969a669b-c166-4b5a-b3c5-a4412ccafb54"
-                                                    className="w-full px-2.5 py-1.5 text-sm font-mono text-xs border border-[var(--card-border)] rounded-md focus:ring-nearby-accent focus:border-nearby-accent"
+                                                    className="w-full px-2.5 py-1.5 text-sm font-mono text-xs border border-[var(--card-border)] rounded-md focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                                                 />
                                             </div>
                                             <button

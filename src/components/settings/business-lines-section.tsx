@@ -120,7 +120,7 @@ export function BusinessLinesSection({ businessLines }: BusinessLinesSectionProp
                                 id="description"
                                 rows={2}
                                 placeholder="Descripción opcional de esta línea de negocio"
-                                className="w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors resize-none"
+                                className="w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors resize-none"
                             />
                         </div>
 
@@ -211,7 +211,7 @@ function BusinessLineItem({
 
     if (isEditing) {
         return (
-            <form action={action} className="p-3 border border-nearby-accent rounded-lg bg-nearby-accent/5 space-y-3">
+            <form action={action} className="p-3 border border-nearby-dark/30 rounded-lg bg-nearby-dark/5 space-y-3">
                 <div className="space-y-2">
                     <Label htmlFor={`edit-name-${businessLine.id}`} className="text-sm">Nombre *</Label>
                     <Input
@@ -231,7 +231,7 @@ function BusinessLineItem({
                         id={`edit-desc-${businessLine.id}`}
                         rows={2}
                         defaultValue={businessLine.description || ""}
-                        className="w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors resize-none"
+                        className="w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors resize-none"
                     />
                 </div>
 
@@ -300,7 +300,7 @@ function BusinessLineItem({
                 <button
                     type="button"
                     onClick={onEdit}
-                    className="p-1.5 text-[var(--muted-text)] hover:text-nearby-accent hover:bg-[var(--hover-bg)] rounded transition-colors"
+                    className="p-1.5 text-[var(--muted-text)] hover:text-[var(--foreground)] hover:bg-[var(--hover-bg)] rounded transition-colors"
                     title="Editar"
                 >
                     <Pencil size={14} />

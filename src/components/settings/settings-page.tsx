@@ -415,7 +415,7 @@ export function SettingsPage({
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="address">Dirección</Label>
-                                <textarea name="address" id="address" rows={2} defaultValue={workspace.address || ''} placeholder="Calle, Número, Sector, Ciudad, País" className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors resize-none" />
+                                <textarea name="address" id="address" rows={2} defaultValue={workspace.address || ''} placeholder="Calle, Número, Sector, Ciudad, País" className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors resize-none" />
                             </div>
                             <div className="space-y-2">
                                 <Label>Plan</Label>
@@ -461,7 +461,7 @@ export function SettingsPage({
                                         </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="role">Rol</Label>
-                                            <select name="role" id="role" defaultValue="MEMBER" className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors">
+                                            <select name="role" id="role" defaultValue="MEMBER" className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors">
                                                 <option value="MEMBER">Miembro</option>
                                                 <option value="ADMIN">Administrador</option>
                                                 <option value="VIEWER">Solo lectura</option>
@@ -522,7 +522,7 @@ export function SettingsPage({
                                             {workspace.owner.photoUrl ? (
                                                 <img src={workspace.owner.photoUrl} alt={workspace.owner.name || ""} className="h-9 w-9 rounded-full object-cover flex-shrink-0" />
                                             ) : (
-                                                <div className="h-9 w-9 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-dark flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">{getInitials(workspace.owner.name, workspace.owner.email)}</div>
+                                                <div className="h-9 w-9 rounded-full bg-gradient-to-br from-nearby-dark-400 to-nearby-dark flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">{getInitials(workspace.owner.name, workspace.owner.email)}</div>
                                             )}
                                             <div className="min-w-0 flex-1">
                                                 <p className="text-sm font-medium text-[var(--foreground)] truncate">{workspace.owner.name || workspace.owner.email}</p>
@@ -587,7 +587,7 @@ export function SettingsPage({
                                                 {member.user.photoUrl ? (
                                                     <img src={member.user.photoUrl} alt={member.user.name || ""} className="h-9 w-9 rounded-full object-cover flex-shrink-0" />
                                                 ) : (
-                                                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-dark flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">{getInitials(member.user.name, member.user.email)}</div>
+                                                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-nearby-dark-400 to-nearby-dark flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">{getInitials(member.user.name, member.user.email)}</div>
                                                 )}
                                                 <div className="min-w-0 flex-1">
                                                     <p className="text-sm font-medium text-[var(--foreground)] truncate">{member.user.name || member.user.email}</p>
@@ -651,7 +651,7 @@ export function SettingsPage({
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="contractContent">Contenido del Contrato (HTML)</Label>
-                                    <textarea id="contractContent" value={contractContent} onChange={(e) => setContractContent(e.target.value)} rows={20} className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--input-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors font-mono text-xs resize-none" placeholder="Ingrese el contenido del contrato..." />
+                                    <textarea id="contractContent" value={contractContent} onChange={(e) => setContractContent(e.target.value)} rows={20} className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--input-bg)] shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors font-mono text-xs resize-none" placeholder="Ingrese el contenido del contrato..." />
                                     <p className="text-xs text-[var(--muted-text)]">Puedes usar etiquetas HTML para dar formato.</p>
                                 </div>
                                 <div className="flex justify-between items-center pt-4 border-t border-[var(--card-border)]">
@@ -764,7 +764,7 @@ export function SettingsPage({
                         className="w-full flex items-center justify-between px-4 py-3 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg text-sm font-medium text-[var(--foreground)]"
                     >
                         <span className="flex items-center gap-2">
-                            {currentSectionMeta && <currentSectionMeta.icon size={16} className="text-nearby-accent" />}
+                            {currentSectionMeta && <currentSectionMeta.icon size={16} className="text-nearby-dark dark:text-nearby-dark-300" />}
                             {currentSectionMeta?.label}
                         </span>
                         <ChevronRight size={16} className={cn("text-[var(--muted-text)] transition-transform", mobileNavOpen && "rotate-90")} />
@@ -783,7 +783,7 @@ export function SettingsPage({
                                             className={cn(
                                                 "w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors",
                                                 activeSection === item.id
-                                                    ? "text-nearby-accent bg-nearby-accent/5"
+                                                    ? "text-[var(--foreground)] font-medium bg-nearby-dark/5"
                                                     : "text-[var(--foreground)] hover:bg-[var(--hover-bg)]"
                                             )}
                                         >
@@ -815,11 +815,11 @@ export function SettingsPage({
                                                 className={cn(
                                                     "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
                                                     activeSection === item.id
-                                                        ? "bg-gradient-to-r from-nearby-accent/15 to-nearby-accent/5 text-nearby-accent shadow-sm"
+                                                        ? "bg-gradient-to-r from-nearby-dark/15 to-nearby-dark/5 text-nearby-dark dark:text-nearby-dark-300 shadow-sm"
                                                         : "text-[var(--muted-text)] hover:bg-[var(--hover-bg)] hover:text-[var(--foreground)]"
                                                 )}
                                             >
-                                                <item.icon size={16} className={cn(activeSection === item.id ? "text-nearby-accent" : "")} />
+                                                <item.icon size={16} className={cn(activeSection === item.id ? "text-nearby-dark dark:text-nearby-dark-300" : "")} />
                                                 {item.label}
                                             </button>
                                         ))}

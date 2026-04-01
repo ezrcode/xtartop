@@ -107,7 +107,7 @@ export function ImageUpload({
             <div className="flex items-center gap-4">
                 {/* Image Preview */}
                 <div
-                    className={`${sizeClasses[size]} ${shapeClass} bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden relative group cursor-pointer hover:border-nearby-accent transition-colors`}
+                    className={`${sizeClasses[size]} ${shapeClass} bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden relative group cursor-pointer hover:border-nearby-dark/30 transition-colors`}
                     onClick={() => fileInputRef.current?.click()}
                 >
                     {isUploading ? (
@@ -135,7 +135,7 @@ export function ImageUpload({
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
                         disabled={isUploading}
-                        className="text-sm text-nearby-accent hover:text-nearby-accent-600 font-medium disabled:opacity-50"
+                        className="text-sm text-nearby-dark dark:text-nearby-dark-300 hover:text-nearby-dark-600 font-medium disabled:opacity-50"
                     >
                         {isUploading ? "Subiendo..." : preview ? "Cambiar" : "Subir imagen"}
                     </button>

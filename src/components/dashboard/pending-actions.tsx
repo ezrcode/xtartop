@@ -22,8 +22,8 @@ export function PendingActions({
             sublabel: "pendientes",
             count: pendingInvitations,
             icon: Send,
-            color: "text-nearby-accent",
-            bgColor: "bg-nearby-accent/10",
+            color: "text-nearby-dark dark:text-nearby-dark-300",
+            bgColor: "bg-nearby-dark/8 dark:bg-nearby-dark-300/10",
             href: "/app/companies",
         },
         {

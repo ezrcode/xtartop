@@ -199,7 +199,7 @@ export function InvoicesTab({
                 </p>
                 <a 
                     href="/app/settings"
-                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-nearby-accent hover:text-nearby-dark"
+                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-[var(--foreground)] underline-offset-2 hover:underline"
                 >
                     Ir a Configuración <ExternalLink size={14} className="ml-1" />
                 </a>
@@ -235,7 +235,7 @@ export function InvoicesTab({
                         <button
                             onClick={handleSync}
                             disabled={isPending}
-                            className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-nearby-accent border border-nearby-accent rounded-md hover:bg-nearby-accent hover:text-white transition-colors disabled:opacity-50"
+                            className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-[var(--foreground)] border border-nearby-dark/30 rounded-md hover:bg-nearby-dark hover:text-white transition-colors disabled:opacity-50"
                         >
                             {isPending ? (
                                 <Loader2 size={14} className="mr-1.5 animate-spin" />
@@ -283,7 +283,7 @@ export function InvoicesTab({
             {/* Estado de carga */}
             {loading && (
                 <div className="flex items-center justify-center py-12">
-                    <Loader2 className="animate-spin text-nearby-accent" size={32} />
+                    <Loader2 className="animate-spin text-nearby-dark dark:text-nearby-dark-300" size={32} />
                 </div>
             )}
 
@@ -298,7 +298,7 @@ export function InvoicesTab({
                         <button
                             onClick={handleSync}
                             disabled={isPending}
-                            className="text-sm text-nearby-accent hover:underline"
+                            className="text-sm text-[var(--foreground)] font-medium hover:text-[var(--foreground)] hover:underline"
                         >
                             Intentar vincular con el RNC
                         </button>

@@ -237,7 +237,7 @@ function ProjectRateReferenceItemRow({
 
     if (isEditing) {
         return (
-            <form action={action} className="p-3 border border-nearby-accent rounded-lg bg-nearby-accent/5 space-y-3">
+            <form action={action} className="p-3 border border-nearby-dark/30 rounded-lg bg-nearby-dark/5 space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-2">
                         <Label htmlFor={`edit-name-${reference.id}`} className="text-sm">Nombre *</Label>
@@ -325,7 +325,7 @@ function ProjectRateReferenceItemRow({
                         {estimatedTotal !== null && (
                             <p>
                                 Estimado ({hours}h):{" "}
-                                <span className="font-semibold text-nearby-accent">{asMoney(estimatedTotal)}</span>
+                                <span className="font-semibold text-nearby-dark dark:text-nearby-dark-300">{asMoney(estimatedTotal)}</span>
                             </p>
                         )}
                         {reference.notes && <p>Notas: {reference.notes}</p>}
@@ -335,7 +335,7 @@ function ProjectRateReferenceItemRow({
                     <button type="button" onClick={onToggle} disabled={isToggling} className="p-1.5 text-[var(--muted-text)] hover:text-[var(--foreground)] hover:bg-[var(--hover-bg)] rounded transition-colors disabled:opacity-50" title={reference.isActive ? "Desactivar" : "Activar"}>
                         {isToggling ? <Loader2 size={14} className="animate-spin" /> : reference.isActive ? <X size={14} /> : <Check size={14} />}
                     </button>
-                    <button type="button" onClick={onEdit} className="p-1.5 text-[var(--muted-text)] hover:text-nearby-accent hover:bg-[var(--hover-bg)] rounded transition-colors" title="Editar">
+                    <button type="button" onClick={onEdit} className="p-1.5 text-[var(--muted-text)] hover:text-[var(--foreground)] hover:bg-[var(--hover-bg)] rounded transition-colors" title="Editar">
                         <Pencil size={14} />
                     </button>
                     <button type="button" onClick={onDelete} disabled={isDeleting} className="p-1.5 text-[var(--muted-text)] hover:text-error-red hover:bg-error-red/10 rounded transition-colors disabled:opacity-50" title="Eliminar">

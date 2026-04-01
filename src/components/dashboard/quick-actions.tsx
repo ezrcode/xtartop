@@ -8,7 +8,7 @@ const actions = [
         name: "Nueva Empresa",
         href: "/app/companies/new",
         icon: Building2,
-        color: "bg-nearby-accent",
+        color: "bg-nearby-dark",
     },
     {
         name: "Nuevo Contacto",

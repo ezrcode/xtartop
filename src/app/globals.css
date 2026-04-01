@@ -284,7 +284,7 @@ button,
 }
 
 .focus-ring:focus-visible {
-  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--color-nearby-accent);
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--color-nearby-dark);
 }
 
 /* PWA Safe Areas */
@@ -421,7 +421,7 @@ button,
 /* Focus visible styles for accessibility */
 .focus-ring-accent:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--color-nearby-accent);
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--color-nearby-dark);
 }
 
 /* Loading skeleton animation with theme support */

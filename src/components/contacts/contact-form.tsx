@@ -27,7 +27,7 @@ function SubmitButton({ actionName, label, mobileLabel, loadingLabel, icon: Icon
     const baseClasses = "inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95";
     const variants = {
         primary: "text-white bg-nearby-dark hover:bg-nearby-dark-600 focus:ring-nearby-dark shadow-sm",
-        secondary: "text-dark-slate bg-white border border-graphite-gray hover:bg-gray-50 focus:ring-nearby-accent",
+        secondary: "text-dark-slate bg-white border border-graphite-gray hover:bg-gray-50 focus:ring-nearby-dark/30",
         danger: "text-white bg-error-red hover:bg-red-700 focus:ring-error-red shadow-sm",
     };
 
@@ -177,7 +177,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
                                                 id="fullName"
                                                 defaultValue={contact?.fullName}
                                                 required
-                                                className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                                             />
                                             {state?.errors?.fullName && (
                                                 <p className="mt-1.5 text-xs text-error-red">{state.errors.fullName}</p>
@@ -193,7 +193,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
                                                 name="title"
                                                 id="title"
                                                 defaultValue={contact?.title || ""}
-                                                className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                                             />
                                         </div>
 
@@ -205,7 +205,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
                                                 id="companyId"
                                                 name="companyId"
                                                 defaultValue={contact?.companyId || "null"}
-                                                className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--input-bg)]"
+                                                className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors bg-[var(--input-bg)]"
                                             >
                                                 <option value="null">Sin empresa</option>
                                                 {companies.map((company) => (
@@ -217,7 +217,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
                                             {contact?.companyId && contact.companyId !== "null" && (
                                                 <a
                                                     href={`/app/companies/${contact.companyId}`}
-                                                    className="inline-flex items-center gap-1 text-xs text-nearby-accent hover:underline mt-1.5"
+                                                    className="inline-flex items-center gap-1 text-xs text-[var(--foreground)] font-medium hover:text-[var(--foreground)] hover:underline mt-1.5"
                                                 >
                                                     Ver empresa →
                                                 </a>
@@ -239,7 +239,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
                                                 id="email"
                                                 defaultValue={contact?.email}
                                                 required
-                                                className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                                             />
                                             {state?.errors?.email && (
                                                 <p className="mt-1.5 text-xs text-error-red">{state.errors.email}</p>
@@ -255,7 +255,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
                                                 name="mobile"
                                                 id="mobile"
                                                 defaultValue={contact?.mobile || ""}
-                                                className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                                             />
                                         </div>
 
@@ -269,7 +269,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
                                                 id="instagramUrl"
                                                 defaultValue={contact?.instagramUrl || ""}
                                                 placeholder="https://instagram.com/..."
-                                                className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                                             />
                                             {state?.errors?.instagramUrl && (
                                                 <p className="mt-1.5 text-xs text-error-red">{state.errors.instagramUrl}</p>
@@ -286,7 +286,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
                                                 id="linkedinUrl"
                                                 defaultValue={contact?.linkedinUrl || ""}
                                                 placeholder="https://linkedin.com/in/..."
-                                                className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                                             />
                                             {state?.errors?.linkedinUrl && (
                                                 <p className="mt-1.5 text-xs text-error-red">{state.errors.linkedinUrl}</p>
@@ -306,7 +306,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
                                                 id="status"
                                                 name="status"
                                                 defaultValue={contact?.status || "PROSPECTO"}
-                                                className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-white"
+                                                className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-graphite-gray rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors bg-white"
                                             >
                                                 {Object.values(ContactStatus).map((status) => (
                                                     <option key={status} value={status}>
@@ -341,7 +341,7 @@ export function ContactForm({ contact, companies, isEditMode = false }: ContactF
                                             id="receivesInvoices"
                                             name="receivesInvoices"
                                             defaultChecked={contact?.receivesInvoices || false}
-                                            className="mt-1 h-4 w-4 rounded border-graphite-gray text-nearby-accent focus:ring-nearby-accent/20"
+                                            className="mt-1 h-4 w-4 rounded border-graphite-gray text-nearby-dark dark:text-nearby-dark-300 focus:ring-nearby-dark/15"
                                         />
                                         <div>
                                             <label htmlFor="receivesInvoices" className="text-sm font-medium text-dark-slate cursor-pointer">

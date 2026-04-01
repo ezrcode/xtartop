@@ -167,7 +167,7 @@ export function CompanyContactsTab({ companyId, contacts: initialContacts }: Com
                 <button
                     type="button"
                     onClick={handleOpenCreate}
-                    className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-nearby-accent text-white hover:bg-nearby-dark transition-colors"
+                    className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-nearby-dark text-white hover:bg-nearby-dark-600 transition-colors"
                 >
                     <Plus size={16} />
                 </button>
@@ -235,7 +235,7 @@ export function CompanyContactsTab({ companyId, contacts: initialContacts }: Com
                                                 <button
                                                     type="button"
                                                     onClick={() => handleOpenEdit(contact)}
-                                                    className="p-1.5 text-gray-400 hover:text-nearby-accent rounded transition-colors"
+                                                    className="p-1.5 text-gray-400 hover:text-nearby-dark dark:hover:text-nearby-dark-300 rounded transition-colors"
                                                     title="Editar"
                                                 >
                                                     <Pencil size={14} />
@@ -291,7 +291,7 @@ export function CompanyContactsTab({ companyId, contacts: initialContacts }: Com
                                     type="text"
                                     value={formData.fullName}
                                     onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent text-sm"
+                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 text-sm"
                                     placeholder="Juan Pérez"
                                 />
                             </div>
@@ -305,7 +305,7 @@ export function CompanyContactsTab({ companyId, contacts: initialContacts }: Com
                                     type="email"
                                     value={formData.email}
                                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent text-sm"
+                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 text-sm"
                                     placeholder="juan@empresa.com"
                                 />
                             </div>
@@ -319,7 +319,7 @@ export function CompanyContactsTab({ companyId, contacts: initialContacts }: Com
                                     type="text"
                                     value={formData.title}
                                     onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent text-sm"
+                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 text-sm"
                                     placeholder="Gerente General"
                                 />
                             </div>
@@ -333,7 +333,7 @@ export function CompanyContactsTab({ companyId, contacts: initialContacts }: Com
                                     type="tel"
                                     value={formData.mobile}
                                     onChange={(e) => setFormData(prev => ({ ...prev, mobile: e.target.value }))}
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent text-sm"
+                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 text-sm"
                                     placeholder="+1 809 555 1234"
                                 />
                             </div>
@@ -349,7 +349,7 @@ export function CompanyContactsTab({ companyId, contacts: initialContacts }: Com
                                         type="url"
                                         value={formData.instagramUrl}
                                         onChange={(e) => setFormData(prev => ({ ...prev, instagramUrl: e.target.value }))}
-                                        className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent text-sm"
+                                        className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 text-sm"
                                         placeholder="https://instagram.com/..."
                                     />
                                 </div>
@@ -362,7 +362,7 @@ export function CompanyContactsTab({ companyId, contacts: initialContacts }: Com
                                         type="url"
                                         value={formData.linkedinUrl}
                                         onChange={(e) => setFormData(prev => ({ ...prev, linkedinUrl: e.target.value }))}
-                                        className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent text-sm"
+                                        className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 text-sm"
                                         placeholder="https://linkedin.com/in/..."
                                     />
                                 </div>
@@ -377,7 +377,7 @@ export function CompanyContactsTab({ companyId, contacts: initialContacts }: Com
                                     <select
                                         value={formData.status}
                                         onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as ContactStatus }))}
-                                        className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent text-sm"
+                                        className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 text-sm"
                                     >
                                         <option value="PROSPECTO">Prospecto</option>
                                         <option value="POTENCIAL">Potencial</option>
@@ -401,7 +401,7 @@ export function CompanyContactsTab({ companyId, contacts: initialContacts }: Com
                                     type="button"
                                     onClick={handleSave}
                                     disabled={loading}
-                                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-nearby-accent rounded-md hover:bg-nearby-dark disabled:opacity-50"
+                                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-nearby-dark rounded-md hover:bg-nearby-dark-600 disabled:opacity-50"
                                 >
                                     {loading ? (
                                         <>

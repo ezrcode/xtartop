@@ -121,7 +121,7 @@ export function ComposeEmailModal({
                                 id="to"
                                 defaultValue={toEmail}
                                 required
-                                className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-nearby-dark/15 focus:border-nearby-dark/50 sm:text-sm"
                                 placeholder="destinatario@email.com"
                             />
                         </div>
@@ -136,7 +136,7 @@ export function ComposeEmailModal({
                                 name="subject"
                                 id="subject"
                                 required
-                                className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                                className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-nearby-dark/15 focus:border-nearby-dark/50 sm:text-sm"
                                 placeholder="Asunto del email"
                             />
                         </div>
@@ -151,7 +151,7 @@ export function ComposeEmailModal({
                                 id="body"
                                 rows={8}
                                 required
-                                className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent text-sm"
+                                className="w-full px-3 py-2 border border-[var(--card-border)] rounded-md shadow-sm focus:ring-nearby-dark/15 focus:border-nearby-dark/50 text-sm"
                                 placeholder="Escribe tu mensaje aquí..."
                             />
                         </div>
@@ -208,7 +208,7 @@ export function ComposeEmailModal({
                             <button
                                 type="submit"
                                 disabled={isPending}
-                                className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-accent hover:bg-nearby-dark transition-colors disabled:opacity-50"
+                                className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-nearby-dark-600 transition-colors disabled:opacity-50"
                             >
                                 {isPending ? (
                                     <>

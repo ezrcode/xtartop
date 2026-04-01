@@ -381,7 +381,7 @@ export function QuoteModal({
                                     id="quote-date"
                                     defaultValue={quote?.date ? new Date(quote.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]}
                                     required
-                                    className="w-full min-w-0 max-w-full appearance-none px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                    className="w-full min-w-0 max-w-full appearance-none px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                                 />
                             </div>
                             <div className="min-w-0">
@@ -392,7 +392,7 @@ export function QuoteModal({
                                     id="quote-validity"
                                     defaultValue={quote?.validity || "30 días"}
                                     required
-                                    className="w-full min-w-0 max-w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
+                                    className="w-full min-w-0 max-w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors bg-[var(--card-bg)]"
                                 >
                                     <option value="10 días">10 días</option>
                                     <option value="20 días">20 días</option>
@@ -408,7 +408,7 @@ export function QuoteModal({
                                     value={selectedCurrency}
                                     onChange={(e) => setSelectedCurrency(e.target.value as Currency)}
                                     required
-                                    className="w-full min-w-0 max-w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
+                                    className="w-full min-w-0 max-w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors bg-[var(--card-bg)]"
                                 >
                                     <option value="USD">USD</option>
                                     <option value="DOP">DOP</option>
@@ -425,7 +425,7 @@ export function QuoteModal({
                                 <button
                                     type="button"
                                     onClick={handleAddItem}
-                                    className="inline-flex items-center px-2 py-1 text-xs sm:text-sm text-nearby-accent hover:bg-blue-50 rounded transition-colors"
+                                    className="inline-flex items-center px-2 py-1 text-xs sm:text-sm text-[var(--foreground)] font-medium hover:bg-[var(--hover-bg)] rounded transition-colors"
                                 >
                                     <Plus size={16} className="mr-1" />
                                     <span className="hidden sm:inline">Agregar Producto</span>
@@ -611,7 +611,7 @@ export function QuoteModal({
                                     </p>
                                 </div>
                                 {showTaxBreakdown && (
-                                    <div className="inline-flex items-center rounded-full border border-nearby-accent/20 bg-nearby-accent/10 px-3 py-1 text-xs font-medium text-nearby-accent">
+                                    <div className="inline-flex items-center rounded-full border border-nearby-dark/30 bg-nearby-dark/8 dark:bg-nearby-dark-300/10 px-3 py-1 text-xs font-medium text-nearby-dark dark:text-nearby-dark-300">
                                         {taxSummaryLabel}
                                     </div>
                                 )}
@@ -633,7 +633,7 @@ export function QuoteModal({
                                             }
                                         }}
                                         required
-                                        className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
+                                        className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors bg-[var(--card-bg)]"
                                     >
                                         <option value="INCLUIDOS">Aplicar impuesto</option>
                                         <option value="NO_INCLUIDOS">Sin impuesto</option>
@@ -648,7 +648,7 @@ export function QuoteModal({
                                         value={selectedTaxId}
                                         onChange={(e) => setSelectedTaxId(e.target.value)}
                                         disabled={!showTaxSelector}
-                                        className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)] disabled:opacity-60"
+                                        className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors bg-[var(--card-bg)] disabled:opacity-60"
                                     >
                                         <option value="">
                                             {showTaxSelector ? "Seleccione un impuesto" : "Disponible cuando el impuesto esté activo"}
@@ -771,7 +771,7 @@ export function QuoteModal({
                                 rows={6}
                                 defaultValue={quote?.proposalDescription || ""}
                                 placeholder="Describa los detalles de la propuesta..."
-                                className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                             />
                         </div>
 
@@ -786,7 +786,7 @@ export function QuoteModal({
                                     rows={2}
                                     defaultValue={quote?.paymentConditions || ""}
                                     placeholder="Ej: 50% adelanto, 50% contra entrega"
-                                    className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                    className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                                 />
                             </div>
                             <div>
@@ -798,7 +798,7 @@ export function QuoteModal({
                                     id="quote-deliveryTime"
                                     defaultValue={quote?.deliveryTime || ""}
                                     placeholder="Ej: 15 días hábiles"
-                                    className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                    className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                                 />
                             </div>
                         </div>
@@ -813,7 +813,7 @@ export function QuoteModal({
                                     id="quote-status"
                                     defaultValue={quote?.status || "BORRADOR"}
                                     required
-                                    className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
+                                    className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors bg-[var(--card-bg)]"
                                 >
                                     <option value="BORRADOR">Borrador</option>
                                     <option value="ACTIVA">Activa</option>
@@ -832,7 +832,7 @@ export function QuoteModal({
 
                         {/* Reference catalog for sales */}
                         {projectRateReferences.length > 0 && (
-                            <div className="rounded-lg border border-nearby-accent/30 bg-nearby-accent/5 p-4">
+                            <div className="rounded-lg border border-nearby-dark/30 bg-nearby-dark/5 p-4">
                                 <h3 className="text-sm font-semibold text-[var(--foreground)] mb-1">
                                     Referencia comercial (solo guía)
                                 </h3>
@@ -863,7 +863,7 @@ export function QuoteModal({
                                                     Fijo: <span className="font-medium text-[var(--foreground)]">{formatUSD(reference.fixedPrice)}</span>
                                                 </p>
                                                 {estimated !== null && (
-                                                    <p className="text-[11px] text-nearby-accent font-semibold mt-1">
+                                                    <p className="text-[11px] text-nearby-dark dark:text-nearby-dark-300 font-semibold mt-1">
                                                         Estimado {hours}h: {formatUSD(estimated)}
                                                     </p>
                                                 )}
@@ -900,7 +900,7 @@ export function QuoteModal({
                                     type="button"
                                     onClick={handleSave}
                                     disabled={isPending}
-                                    className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-3 sm:py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-nearby-accent hover:bg-nearby-dark transition-all active:scale-95 disabled:opacity-50"
+                                    className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-3 sm:py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-nearby-dark-600 transition-all active:scale-95 disabled:opacity-50"
                                 >
                                     {isPending ? (
                                         <>Guardando...</>

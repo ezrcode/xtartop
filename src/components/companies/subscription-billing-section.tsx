@@ -245,7 +245,7 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
     if (loading) {
         return (
             <div className="flex items-center justify-center py-8">
-                <Loader2 className="animate-spin text-nearby-accent" size={24} />
+                <Loader2 className="animate-spin text-nearby-dark dark:text-nearby-dark-300" size={24} />
             </div>
         );
     }
@@ -267,7 +267,7 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                                     name="billingType"
                                     checked={billingType === "STANDARD"}
                                     onChange={() => handleBillingTypeChange("STANDARD")}
-                                    className="w-4 h-4 text-nearby-accent border-gray-300 focus:ring-nearby-accent"
+                                    className="w-4 h-4 text-nearby-dark dark:text-nearby-dark-300 border-gray-300 focus:ring-nearby-dark/30"
                                 />
                                 <span className="ml-2 text-sm font-medium text-dark-slate">Estándar</span>
                             </label>
@@ -277,7 +277,7 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                                     name="billingType"
                                     checked={billingType === "CUSTOM"}
                                     onChange={() => handleBillingTypeChange("CUSTOM")}
-                                    className="w-4 h-4 text-nearby-accent border-gray-300 focus:ring-nearby-accent"
+                                    className="w-4 h-4 text-nearby-dark dark:text-nearby-dark-300 border-gray-300 focus:ring-nearby-dark/30"
                                 />
                                 <span className="ml-2 text-sm font-medium text-dark-slate">Personalizado</span>
                             </label>
@@ -285,12 +285,12 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                         
                         {/* Manual proforma button */}
                         <div className="flex items-center gap-2 sm:ml-auto">
-                            {saving && <Loader2 className="animate-spin text-nearby-accent" size={16} />}
+                            {saving && <Loader2 className="animate-spin text-nearby-dark dark:text-nearby-dark-300" size={16} />}
                             <button
                                 type="button"
                                 onClick={handleGenerateProforma}
                                 disabled={generatingProforma || !billing?.items.length}
-                                className="flex items-center px-3 py-1.5 text-sm font-medium text-white bg-nearby-accent hover:bg-nearby-accent/90 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex items-center px-3 py-1.5 text-sm font-medium text-white bg-nearby-dark hover:bg-nearby-dark-600 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 title="Generar proforma manualmente"
                             >
                                 {generatingProforma ? (
@@ -360,7 +360,7 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                                 <button
                                     type="button"
                                     onClick={handleAddItem}
-                                    className="flex items-center px-2 py-1 text-xs font-medium text-nearby-accent hover:bg-nearby-accent/10 rounded-md transition-colors"
+                                    className="flex items-center px-2 py-1 text-xs font-medium text-[var(--foreground)] hover:bg-nearby-dark/8 dark:hover:bg-nearby-dark-300/10 rounded-md transition-colors"
                                 >
                                     <Plus size={14} className="mr-1" />
                                     Agregar
@@ -404,7 +404,7 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                                                             <button
                                                                 type="button"
                                                                 onClick={() => handleEditItem(item)}
-                                                                className="p-1 text-gray-400 hover:text-nearby-accent rounded transition-colors"
+                                                                className="p-1 text-gray-400 hover:text-nearby-dark dark:hover:text-nearby-dark-300 rounded transition-colors"
                                                             >
                                                                 <Pencil size={14} />
                                                             </button>
@@ -453,7 +453,7 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                                 onChange={(e) => handleAutoBillingChange(e.target.checked)}
                                 className="sr-only"
                             />
-                            <div className={`block w-10 h-6 rounded-full transition-colors ${autoBillingEnabled ? "bg-nearby-accent" : "bg-gray-300"}`}></div>
+                            <div className={`block w-10 h-6 rounded-full transition-colors ${autoBillingEnabled ? "bg-nearby-dark" : "bg-gray-300"}`}></div>
                             <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${autoBillingEnabled ? "translate-x-4" : ""}`}></div>
                         </div>
                         <span className="ml-3 text-sm font-medium text-dark-slate">
@@ -468,7 +468,7 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                                 <select
                                     value={billingDay}
                                     onChange={(e) => handleBillingDayChange(parseInt(e.target.value))}
-                                    className="w-16 px-1.5 py-1 text-sm border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                    className="w-16 px-1.5 py-1 text-sm border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                                 >
                                     {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
                                         <option key={day} value={day}>{day}</option>
@@ -480,7 +480,7 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                                 <select
                                     value={billingMonthOffset}
                                     onChange={(e) => handleBillingMonthOffsetChange(parseInt(e.target.value))}
-                                    className="px-1.5 py-1 text-sm border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                    className="px-1.5 py-1 text-sm border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                                 >
                                     <option value={-1}>Mes anterior</option>
                                     <option value={0}>Mes actual</option>
@@ -493,7 +493,7 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                                     <select
                                         value={selectedTaxGroupId}
                                         onChange={(e) => handleTaxGroupChange(e.target.value)}
-                                        className="px-1.5 py-1 text-sm border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                        className="px-1.5 py-1 text-sm border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                                     >
                                         <option value="">Sin impuesto</option>
                                         {taxGroups.map((g) => (
@@ -786,7 +786,7 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
 
                 {loadingItems ? (
                     <div className="flex items-center justify-center py-8">
-                        <Loader2 className="animate-spin text-nearby-accent" size={24} />
+                        <Loader2 className="animate-spin text-nearby-dark dark:text-nearby-dark-300" size={24} />
                         <span className="ml-2 text-sm text-[var(--muted-text)]">Cargando artículos de ADMCloud...</span>
                     </div>
                 ) : error && admCloudItems.length === 0 ? (
@@ -821,7 +821,7 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                             <select
                                 value={selectedItemId}
                                 onChange={(e) => handleItemChange(e.target.value)}
-                                className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                                 required
                             >
                                 <option value="">Seleccionar artículo...</option>
@@ -842,7 +842,7 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                                 <select
                                     value={selectedPriceListId}
                                     onChange={(e) => handlePriceListChange(e.target.value)}
-                                    className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                    className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                                     required
                                 >
                                     {selectedItem.prices.map((priceOption) => (
@@ -883,7 +883,7 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                             <select
                                 value={countType}
                                 onChange={(e) => setCountType(e.target.value as CountType)}
-                                className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                             >
                                 <option value="MANUAL">Manual</option>
                                 <option value="ACTIVE_PROJECTS">Proyectos activos</option>
@@ -902,7 +902,7 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                                     <select
                                         value={calculatedBase}
                                         onChange={(e) => setCalculatedBase(e.target.value as CalculatedBase)}
-                                        className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                        className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                                     >
                                         <option value="PROJECTS">Proyectos activos</option>
                                         <option value="USERS">Usuarios activos</option>
@@ -918,7 +918,7 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                                         value={calculatedSubtract}
                                         onChange={(e) => setCalculatedSubtract(e.target.value)}
                                         placeholder="Ej: 5"
-                                        className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] placeholder:text-[var(--muted-text)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                        className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] placeholder:text-[var(--muted-text)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                                     />
                                 </div>
                                 <p className="text-xs text-[var(--muted-text)]">
@@ -939,7 +939,7 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                                     value={manualQuantity}
                                     onChange={(e) => setManualQuantity(e.target.value)}
                                     placeholder="Ingrese la cantidad"
-                                    className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] placeholder:text-[var(--muted-text)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                    className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] placeholder:text-[var(--muted-text)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                                 />
                             </div>
                         )}

@@ -56,7 +56,7 @@ function SubmitButton({ actionName, label, mobileLabel, loadingLabel, icon: Icon
     const baseClasses = "inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95";
     const variants = {
         primary: "text-white bg-nearby-dark hover:bg-nearby-dark-600 focus:ring-nearby-dark shadow-sm",
-        secondary: "text-[var(--foreground)] bg-[var(--card-bg)] border border-[var(--card-border)] hover:bg-[var(--surface-2)] focus:ring-nearby-accent",
+        secondary: "text-[var(--foreground)] bg-[var(--card-bg)] border border-[var(--card-border)] hover:bg-[var(--surface-2)] focus:ring-nearby-dark/30",
         danger: "text-white bg-error-red hover:bg-red-700 focus:ring-error-red shadow-sm",
     };
 
@@ -416,7 +416,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                     setTimeout(() => formRef.current?.requestSubmit(), 0);
                                 }}
                                 disabled={pendingAction !== null}
-                                className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all active:scale-95 text-[var(--foreground)] bg-[var(--card-bg)] border border-[var(--card-border)] hover:bg-[var(--surface-2)] focus:ring-nearby-accent disabled:opacity-50"
+                                className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all active:scale-95 text-[var(--foreground)] bg-[var(--card-bg)] border border-[var(--card-border)] hover:bg-[var(--surface-2)] focus:ring-nearby-dark/30 disabled:opacity-50"
                             >
                                 {pendingAction === "saveAndClose" ? (
                                     <Loader2 size={16} className="animate-spin" />
@@ -456,7 +456,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                     onClick={() => setActiveTab("general")}
                                     className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 py-3 px-2 sm:px-4 border-b-2 font-medium text-xs sm:text-sm transition-colors ${
                                         activeTab === "general"
-                                            ? "border-nearby-accent text-nearby-accent"
+                                            ? "border-nearby-dark/50 text-[var(--foreground)] font-medium"
                                             : "border-transparent text-[var(--muted-text)] hover:text-[var(--foreground)]"
                                     }`}
                                 >
@@ -468,7 +468,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                     onClick={() => setActiveTab("contacts")}
                                     className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 py-3 px-2 sm:px-4 border-b-2 font-medium text-xs sm:text-sm transition-colors ${
                                         activeTab === "contacts"
-                                            ? "border-nearby-accent text-nearby-accent"
+                                            ? "border-nearby-dark/50 text-[var(--foreground)] font-medium"
                                             : "border-transparent text-[var(--muted-text)] hover:text-[var(--foreground)]"
                                     }`}
                                 >
@@ -480,7 +480,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                     onClick={() => setActiveTab("subscription")}
                                     className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 py-3 px-2 sm:px-4 border-b-2 font-medium text-xs sm:text-sm transition-colors ${
                                         activeTab === "subscription"
-                                            ? "border-nearby-accent text-nearby-accent"
+                                            ? "border-nearby-dark/50 text-[var(--foreground)] font-medium"
                                             : "border-transparent text-[var(--muted-text)] hover:text-[var(--foreground)]"
                                     }`}
                                 >
@@ -559,7 +559,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                     value={formData.name}
                                                     onChange={(e) => updateField("name", e.target.value)}
                                                     required
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                                                 />
                                                 {state?.errors?.name && (
                                                     <p className="mt-1.5 text-xs text-error-red">{state.errors.name}</p>
@@ -589,7 +589,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                     id="phone-input"
                                                     value={formData.phone}
                                                     onChange={(e) => updateField("phone", e.target.value)}
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                                                 />
                                             </div>
 
@@ -602,7 +602,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                     id="country-input"
                                                     value={formData.country}
                                                     onChange={(e) => updateField("country", e.target.value)}
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                                                 />
                                             </div>
 
@@ -615,7 +615,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                     id="city-input"
                                                     value={formData.city}
                                                     onChange={(e) => updateField("city", e.target.value)}
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                                                 />
                                             </div>
 
@@ -629,7 +629,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                     value={formData.website}
                                                     onChange={(e) => updateField("website", e.target.value)}
                                                     placeholder="https://example.com"
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                                                 />
                                                 {state?.errors?.website && (
                                                     <p className="mt-1.5 text-xs text-error-red">{state.errors.website}</p>
@@ -646,7 +646,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                     value={formData.instagramUrl}
                                                     onChange={(e) => updateField("instagramUrl", e.target.value)}
                                                     placeholder="https://instagram.com/..."
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                                                 />
                                                 {state?.errors?.instagramUrl && (
                                                     <p className="mt-1.5 text-xs text-error-red">{state.errors.instagramUrl}</p>
@@ -663,7 +663,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                     value={formData.linkedinUrl}
                                                     onChange={(e) => updateField("linkedinUrl", e.target.value)}
                                                     placeholder="https://linkedin.com/company/..."
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                                                 />
                                                 {state?.errors?.linkedinUrl && (
                                                     <p className="mt-1.5 text-xs text-error-red">{state.errors.linkedinUrl}</p>
@@ -681,7 +681,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                             setContactDropdownOpen(!contactDropdownOpen);
                                                             setContactSearchTerm("");
                                                         }}
-                                                        className="flex items-center justify-between w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)] text-left"
+                                                        className="flex items-center justify-between w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors bg-[var(--card-bg)] text-left"
                                                     >
                                                         <span className={selectedContact ? "text-[var(--foreground)]" : "text-[var(--muted-text)]"}>
                                                             {selectedContact ? selectedContact.fullName : "Sin contacto principal"}
@@ -700,7 +700,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                                         value={contactSearchTerm}
                                                                         onChange={(e) => setContactSearchTerm(e.target.value)}
                                                                         placeholder="Buscar contacto..."
-                                                                        className="w-full pl-8 pr-8 py-2 text-sm border border-[var(--card-border)] rounded-md focus:ring-nearby-accent focus:border-nearby-accent"
+                                                                        className="w-full pl-8 pr-8 py-2 text-sm border border-[var(--card-border)] rounded-md focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                                                                         autoFocus
                                                                     />
                                                                     {contactSearchTerm && (
@@ -724,7 +724,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                                         setContactDropdownOpen(false);
                                                                     }}
                                                                     className={`w-full px-3 py-2 text-left text-sm hover:bg-[var(--surface-2)] ${
-                                                                        formData.primaryContactId === "null" ? "bg-nearby-accent/10 text-nearby-accent font-medium" : "text-[var(--muted-text)]"
+                                                                        formData.primaryContactId === "null" ? "bg-nearby-dark/8 dark:bg-nearby-dark-300/10 text-[var(--foreground)] font-medium" : "text-[var(--muted-text)]"
                                                                     }`}
                                                                 >
                                                                     Sin contacto principal
@@ -739,7 +739,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                                                 setContactDropdownOpen(false);
                                                                             }}
                                                                             className={`w-full px-3 py-2 text-left text-sm hover:bg-[var(--surface-2)] ${
-                                                                                formData.primaryContactId === contact.id ? "bg-nearby-accent/10 text-nearby-accent font-medium" : "text-[var(--foreground)]"
+                                                                                formData.primaryContactId === contact.id ? "bg-nearby-dark/8 dark:bg-nearby-dark-300/10 text-[var(--foreground)] font-medium" : "text-[var(--foreground)]"
                                                                             }`}
                                                                         >
                                                                             <div>{contact.fullName}</div>
@@ -767,7 +767,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                     id="origin-input"
                                                     value={formData.origin}
                                                     onChange={(e) => updateField("origin", e.target.value)}
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors bg-[var(--card-bg)]"
                                                 >
                                                     <option value="null">Seleccionar origen</option>
                                                     <option value="PROSPECCION_MANUAL">Prospección manual</option>
@@ -791,7 +791,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                         id="status-input"
                                                         value={formData.status}
                                                         onChange={(e) => updateField("status", e.target.value)}
-                                                        className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
+                                                        className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors bg-[var(--card-bg)]"
                                                     >
                                                         {Object.values(CompanyStatus).map((status) => (
                                                             <option key={status} value={status}>
@@ -909,7 +909,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                                     value={formData.legalName}
                                                                     onChange={(e) => updateField("legalName", e.target.value)}
                                                                     placeholder="Nombre legal de la empresa"
-                                                                    className="block w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                                                    className="block w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-md shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                                                                 />
                                                             ) : (
                                                                 <div className="px-3 py-2 border border-[var(--card-border)] rounded-md bg-[var(--surface-2)] text-sm">
@@ -928,7 +928,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                                     value={formData.taxId}
                                                                     onChange={(e) => updateField("taxId", e.target.value)}
                                                                     placeholder="Ej: 1-23-45678-9"
-                                                                    className="block w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                                                    className="block w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-md shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                                                                 />
                                                             ) : (
                                                                 <div className="px-3 py-2 border border-[var(--card-border)] rounded-md bg-[var(--surface-2)] text-sm">
@@ -947,7 +947,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                                     onChange={(e) => updateField("fiscalAddress", e.target.value)}
                                                                     placeholder="Dirección fiscal de la empresa"
                                                                     rows={2}
-                                                                    className="block w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent resize-none"
+                                                                    className="block w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-md shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 resize-none"
                                                                 />
                                                             ) : (
                                                                 <div className="px-3 py-2 border border-[var(--card-border)] rounded-md bg-[var(--surface-2)] text-sm">
@@ -969,7 +969,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                                     value={formData.quoteId}
                                                                     onChange={(e) => updateField("quoteId", e.target.value)}
                                                                     disabled={company.termsAccepted}
-                                                                    className="block w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:bg-[var(--surface-3)] disabled:cursor-not-allowed"
+                                                                    className="block w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-md shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 disabled:bg-[var(--surface-3)] disabled:cursor-not-allowed"
                                                                 />
                                                                 {company.termsAccepted && (
                                                                     <p className="text-xs text-[var(--muted-text)] mt-1">No editable después de aceptar contrato</p>
@@ -991,7 +991,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                         </div>
 
                                                         {company.termsAccepted && (
-                                                            <div className="rounded-lg border border-nearby-accent/20 bg-nearby-accent/5 p-4 space-y-3">
+                                                            <div className="rounded-lg border border-nearby-dark/30 bg-nearby-dark/8 dark:bg-nearby-dark-300/10 p-4 space-y-3">
                                                                 <div>
                                                                     <h4 className="text-sm font-semibold text-[var(--foreground)]">
                                                                         Acuerdo firmado por el cliente
@@ -1023,7 +1023,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                                         type="button"
                                                                         onClick={handleDownloadSignedContract}
                                                                         disabled={isGeneratingContractPdf}
-                                                                        className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-white bg-nearby-accent rounded-md hover:bg-nearby-dark transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                                                                        className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-white bg-nearby-dark rounded-md hover:bg-nearby-dark-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                                                                     >
                                                                         {isGeneratingContractPdf ? (
                                                                             <>
@@ -1058,7 +1058,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                                     value={formData.initialProjects}
                                                                     onChange={(e) => updateField("initialProjects", e.target.value)}
                                                                     disabled={company.termsAccepted}
-                                                                    className="block w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:bg-[var(--surface-3)] disabled:cursor-not-allowed"
+                                                                    className="block w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-md shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 disabled:bg-[var(--surface-3)] disabled:cursor-not-allowed"
                                                                 />
                                                                 {company.termsAccepted && (
                                                                     <p className="text-xs text-[var(--muted-text)] mt-1">No editable después de aceptar contrato</p>
@@ -1075,7 +1075,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                                     value={formData.initialUsers}
                                                                     onChange={(e) => updateField("initialUsers", e.target.value)}
                                                                     disabled={company.termsAccepted}
-                                                                    className="block w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-md shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:bg-[var(--surface-3)] disabled:cursor-not-allowed"
+                                                                    className="block w-full px-3 py-2 text-sm border border-[var(--card-border)] rounded-md shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 disabled:bg-[var(--surface-3)] disabled:cursor-not-allowed"
                                                                 />
                                                                 {company.termsAccepted && (
                                                                     <p className="text-xs text-[var(--muted-text)] mt-1">No editable después de aceptar contrato</p>

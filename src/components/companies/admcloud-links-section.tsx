@@ -96,7 +96,7 @@ export function AdmCloudLinksSection({ companyId }: Props) {
                 </div>
                 <button
                     onClick={() => setShowAddForm(!showAddForm)}
-                    className="text-xs text-nearby-accent hover:text-nearby-accent-600 flex items-center gap-1"
+                    className="text-xs text-[var(--foreground)] font-medium hover:text-[var(--foreground)] flex items-center gap-1"
                 >
                     <Plus size={12} />
                     Agregar
@@ -110,13 +110,13 @@ export function AdmCloudLinksSection({ companyId }: Props) {
                             key={link.id}
                             className={`flex items-center justify-between px-3 py-2 rounded-lg border text-sm ${
                                 link.isPrimary
-                                    ? "bg-nearby-accent/5 border-nearby-accent/20"
+                                    ? "bg-nearby-dark/8 dark:bg-nearby-dark-300/10 border-nearby-dark/30"
                                     : "bg-gray-50 border-gray-200"
                             }`}
                         >
                             <div className="flex items-center gap-2 min-w-0">
                                 {link.isPrimary && (
-                                    <Star size={12} className="text-nearby-accent shrink-0" fill="currentColor" />
+                                    <Star size={12} className="text-nearby-dark dark:text-nearby-dark-300 shrink-0" fill="currentColor" />
                                 )}
                                 <span className="font-medium text-gray-800 truncate">{link.name}</span>
                                 {link.fiscalId && (
@@ -125,7 +125,7 @@ export function AdmCloudLinksSection({ companyId }: Props) {
                                     </span>
                                 )}
                                 {link.isPrimary && (
-                                    <span className="text-[10px] text-nearby-accent font-medium">Principal</span>
+                                    <span className="text-[10px] text-nearby-dark dark:text-nearby-dark-300 font-medium">Principal</span>
                                 )}
                             </div>
                             <div className="flex items-center gap-1 shrink-0">
@@ -133,7 +133,7 @@ export function AdmCloudLinksSection({ companyId }: Props) {
                                     <button
                                         onClick={() => handleSetPrimary(link.id)}
                                         title="Marcar como principal"
-                                        className="p-1 text-gray-400 hover:text-nearby-accent transition-colors"
+                                        className="p-1 text-gray-400 hover:text-nearby-dark dark:hover:text-nearby-dark-300 transition-colors"
                                     >
                                         <Star size={12} />
                                     </button>
@@ -170,7 +170,7 @@ export function AdmCloudLinksSection({ companyId }: Props) {
                                 onChange={(e) => setNewRnc(e.target.value)}
                                 onKeyDown={(e) => e.key === "Enter" && handleAdd()}
                                 placeholder="Ej: 132351584"
-                                className="w-full px-3 py-1.5 pl-8 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                className="w-full px-3 py-1.5 pl-8 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                             />
                             <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                         </div>

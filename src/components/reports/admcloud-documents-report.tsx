@@ -269,7 +269,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                                         type="checkbox"
                                         checked={includeProformas}
                                         onChange={(e) => setIncludeProformas(e.target.checked)}
-                                        className="rounded border-[var(--card-border)] text-nearby-accent focus:ring-nearby-accent"
+                                        className="rounded border-[var(--card-border)] text-nearby-dark focus:ring-nearby-dark/30"
                                     />
                                     <span className="text-sm text-[var(--foreground)]">Proformas</span>
                                 </label>
@@ -278,7 +278,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                                         type="checkbox"
                                         checked={includeCredit}
                                         onChange={(e) => setIncludeCredit(e.target.checked)}
-                                        className="rounded border-[var(--card-border)] text-nearby-accent focus:ring-nearby-accent"
+                                        className="rounded border-[var(--card-border)] text-nearby-dark focus:ring-nearby-dark/30"
                                     />
                                     <span className="text-sm text-[var(--foreground)]">Facturas a crédito</span>
                                 </label>
@@ -294,7 +294,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                                 type="date"
                                 value={dateFrom}
                                 onChange={(e) => setDateFrom(e.target.value)}
-                                className="w-full min-w-0 max-w-full appearance-none px-3 py-2 text-sm rounded-lg border border-[var(--card-border)] bg-[var(--surface-0)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-accent/30 focus:border-nearby-accent outline-none transition-colors"
+                                className="w-full min-w-0 max-w-full appearance-none px-3 py-2 text-sm rounded-lg border border-[var(--card-border)] bg-[var(--surface-0)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 outline-none transition-colors"
                             />
                         </div>
 
@@ -307,7 +307,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                                 type="date"
                                 value={dateTo}
                                 onChange={(e) => setDateTo(e.target.value)}
-                                className="w-full min-w-0 max-w-full appearance-none px-3 py-2 text-sm rounded-lg border border-[var(--card-border)] bg-[var(--surface-0)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-accent/30 focus:border-nearby-accent outline-none transition-colors"
+                                className="w-full min-w-0 max-w-full appearance-none px-3 py-2 text-sm rounded-lg border border-[var(--card-border)] bg-[var(--surface-0)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 outline-none transition-colors"
                             />
                         </div>
 
@@ -319,7 +319,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                             <select
                                 value={clientLabel}
                                 onChange={(e) => setClientLabel(e.target.value as "company" | "legal")}
-                                className="w-full min-w-0 max-w-full px-3 py-2 text-sm rounded-lg border border-[var(--card-border)] bg-[var(--surface-0)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-accent/30 focus:border-nearby-accent outline-none transition-colors"
+                                className="w-full min-w-0 max-w-full px-3 py-2 text-sm rounded-lg border border-[var(--card-border)] bg-[var(--surface-0)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 outline-none transition-colors"
                             >
                                 <option value="company">Nombre comercial</option>
                                 <option value="legal">Razón social</option>
@@ -335,8 +335,8 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                                 onClick={() => setGroupByClient(!groupByClient)}
                                 className={`w-full sm:w-auto inline-flex items-center justify-center sm:justify-start gap-2 px-3 py-2 text-sm rounded-lg border transition-colors ${
                                     groupByClient
-                                        ? "bg-nearby-accent/10 border-nearby-accent/30 text-nearby-accent"
-                                        : "border-[var(--card-border)] text-[var(--muted-text)] hover:border-nearby-accent/30"
+                                        ? "bg-nearby-dark/8 dark:bg-nearby-dark-300/10 border-nearby-dark/30 text-nearby-dark dark:text-nearby-dark-300"
+                                        : "border-[var(--card-border)] text-[var(--muted-text)] hover:border-nearby-dark/30"
                                 }`}
                             >
                                 <Users size={14} />
@@ -358,7 +358,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                                     return (
                                         <span
                                             key={code}
-                                            className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-md bg-nearby-accent/10 text-nearby-accent"
+                                            className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-md bg-nearby-dark/8 dark:bg-nearby-dark-300/10 text-nearby-dark dark:text-nearby-dark-300"
                                         >
                                             {item?.code || code}
                                             <button onClick={() => removeItem(code)} className="hover:text-error-red">
@@ -387,7 +387,7 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                                     setShowItemPicker(true);
                                 }}
                                 onFocus={() => setShowItemPicker(true)}
-                                className="w-full px-3 py-2 pl-9 text-sm rounded-lg border border-[var(--card-border)] bg-[var(--surface-0)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-accent/30 focus:border-nearby-accent outline-none transition-colors"
+                                className="w-full px-3 py-2 pl-9 text-sm rounded-lg border border-[var(--card-border)] bg-[var(--surface-0)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 outline-none transition-colors"
                             />
                             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted-text)]" />
                         </div>
@@ -406,14 +406,14 @@ export function AdmCloudDocumentsReport({ availableItems }: Props) {
                                             key={item.id}
                                             onClick={() => toggleItem(item.code)}
                                             className={`w-full text-left px-3 py-2 text-sm hover:bg-[var(--hover-bg)] flex items-center gap-2 transition-colors ${
-                                                selectedItems.includes(item.code) ? "bg-nearby-accent/5" : ""
+                                                selectedItems.includes(item.code) ? "bg-nearby-dark/5" : ""
                                             }`}
                                         >
                                             <input
                                                 type="checkbox"
                                                 checked={selectedItems.includes(item.code)}
                                                 readOnly
-                                                className="rounded border-[var(--card-border)] text-nearby-accent pointer-events-none"
+                                                className="rounded border-[var(--card-border)] text-nearby-dark pointer-events-none"
                                             />
                                             <span className="font-mono text-xs text-[var(--muted-text)] w-28 shrink-0 truncate">
                                                 {item.code}
@@ -588,7 +588,7 @@ function GroupedRows({
         <>
             <tr
                 onClick={onToggle}
-                className="bg-[var(--hover-bg)] cursor-pointer hover:bg-nearby-accent/5 transition-colors"
+                className="bg-[var(--hover-bg)] cursor-pointer hover:bg-nearby-dark/5 transition-colors"
             >
                 <td colSpan={7} className="px-4 py-2.5">
                     <div className="flex items-center gap-2">

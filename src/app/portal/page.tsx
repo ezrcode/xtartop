@@ -47,7 +47,7 @@ export default async function PortalDashboard() {
                     <form action={logout}>
                         <button
                             type="submit"
-                            className="px-4 py-2 bg-nearby-accent text-white rounded-md hover:bg-nearby-dark"
+                            className="px-4 py-2 bg-nearby-dark text-white rounded-md hover:bg-nearby-dark-600"
                         >
                             Cerrar sesión
                         </button>
@@ -155,7 +155,7 @@ export default async function PortalDashboard() {
                         </p>
                         <a
                             href={`/portal/company`}
-                            className="inline-flex items-center px-4 py-2 bg-nearby-accent text-white rounded-md hover:bg-nearby-dark transition-colors"
+                            className="inline-flex items-center px-4 py-2 bg-nearby-dark text-white rounded-md hover:bg-nearby-dark-600 transition-colors"
                         >
                             <FileText size={18} className="mr-2" />
                             Completar datos y aceptar contrato

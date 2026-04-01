@@ -330,7 +330,7 @@ export function BillingConfigTab({ currentConfig, availableUsers, senderEmailCon
                             onChange={(e) => setEnabled(e.target.checked)}
                             className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-nearby-accent/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-nearby-accent"></div>
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-nearby-dark/15 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-nearby-dark"></div>
                     </label>
                 </div>
 
@@ -343,7 +343,7 @@ export function BillingConfigTab({ currentConfig, availableUsers, senderEmailCon
                                 id="fromUserId"
                                 value={fromUserId}
                                 onChange={(e) => setFromUserId(e.target.value)}
-                                className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                             >
                                 <option value="">Seleccionar usuario...</option>
                                 {availableUsers.map((user) => (
@@ -430,7 +430,7 @@ export function BillingConfigTab({ currentConfig, availableUsers, senderEmailCon
                                             href="https://myaccount.google.com/apppasswords"
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="text-nearby-accent hover:underline"
+                                            className="text-[var(--foreground)] font-medium hover:underline"
                                         >
                                             myaccount.google.com/apppasswords
                                         </a>
@@ -559,7 +559,7 @@ export function BillingConfigTab({ currentConfig, availableUsers, senderEmailCon
                                     contentEditable
                                     suppressContentEditableWarning
                                     onInput={(e) => setEmailBody((e.currentTarget as HTMLDivElement).innerHTML)}
-                                    className="min-h-[260px] w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-sm focus:outline-none focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors overflow-auto"
+                                    className="min-h-[260px] w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-sm focus:outline-none focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors overflow-auto"
                                 />
                                 <p className="text-xs text-[var(--muted-text)]">
                                     Usa Enter para saltos de línea. Puedes aplicar negritas, listas, enlaces e insertar imagen en la firma.

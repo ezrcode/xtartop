@@ -11,7 +11,7 @@ function SubmitButton() {
         <button
             type="submit"
             disabled={pending}
-            className="w-full flex justify-center items-center min-h-[44px] px-4 border border-transparent rounded-md shadow-sm text-base sm:text-sm font-medium text-white bg-nearby-dark hover:bg-nearby-dark-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nearby-accent disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex justify-center items-center min-h-[44px] px-4 border border-transparent rounded-md shadow-sm text-base sm:text-sm font-medium text-white bg-nearby-dark hover:bg-nearby-dark-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nearby-dark/15 disabled:opacity-50 disabled:cursor-not-allowed"
         >
             {pending ? "Ingresando..." : "Ingresar"}
         </button>
@@ -39,7 +39,7 @@ export function PortalLoginForm() {
                     type="email"
                     autoComplete="email"
                     required
-                    className="mt-1 block w-full px-3 py-2.5 text-base sm:text-sm border border-[var(--input-border)] rounded-md shadow-sm bg-[var(--input-bg)] text-[var(--foreground)] focus:ring-nearby-accent focus:border-nearby-accent"
+                    className="mt-1 block w-full px-3 py-2.5 text-base sm:text-sm border border-[var(--input-border)] rounded-md shadow-sm bg-[var(--input-bg)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                     placeholder="tu@email.com"
                 />
             </div>
@@ -54,7 +54,7 @@ export function PortalLoginForm() {
                     type="password"
                     autoComplete="current-password"
                     required
-                    className="mt-1 block w-full px-3 py-2.5 text-base sm:text-sm border border-[var(--input-border)] rounded-md shadow-sm bg-[var(--input-bg)] text-[var(--foreground)] focus:ring-nearby-accent focus:border-nearby-accent"
+                    className="mt-1 block w-full px-3 py-2.5 text-base sm:text-sm border border-[var(--input-border)] rounded-md shadow-sm bg-[var(--input-bg)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                     placeholder="••••••••"
                 />
             </div>
@@ -62,7 +62,7 @@ export function PortalLoginForm() {
             <SubmitButton />
 
             <div className="text-center">
-                <Link href="/login" className="text-sm text-nearby-accent hover:text-nearby-dark-600">
+                <Link href="/login" className="text-sm text-nearby-dark dark:text-nearby-dark-300 hover:text-nearby-dark-600">
                     ¿Eres parte del equipo NEARBY? Ingresa aquí
                 </Link>
             </div>

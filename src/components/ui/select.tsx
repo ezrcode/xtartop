@@ -20,7 +20,7 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex h-10 w-full items-center justify-between rounded-md border bg-[var(--input-bg)] px-3 py-2 text-sm text-[var(--foreground)] transition-colors duration-150 placeholder:text-[var(--muted-text)] focus:outline-none focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+      "flex h-10 w-full items-center justify-between rounded-md border bg-[var(--input-bg)] px-3 py-2 text-sm text-[var(--foreground)] transition-colors duration-150 placeholder:text-[var(--muted-text)] focus:outline-none focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
       error
         ? "border-error-red focus:ring-error-red/20 focus:border-error-red"
         : "border-[var(--input-border)] hover:border-[var(--muted-text)]",
@@ -129,7 +129,7 @@ const SelectItem = React.forwardRef<
   >
     <span className="absolute left-2 flex h-4 w-4 items-center justify-center">
       <SelectPrimitive.ItemIndicator>
-        <Check className="h-4 w-4 text-nearby-accent" />
+        <Check className="h-4 w-4 text-nearby-dark dark:text-nearby-dark-200" />
       </SelectPrimitive.ItemIndicator>
     </span>
     <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>

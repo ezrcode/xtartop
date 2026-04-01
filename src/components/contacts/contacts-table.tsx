@@ -53,7 +53,7 @@ export function ContactsTable({ contacts, initialPreferences, itemsPerPage = 10 
             hideable: false,
             className: "w-12",
             render: (contact) => (
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-accent-600 text-white flex items-center justify-center text-xs font-semibold">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-nearby-dark to-nearby-dark-600 text-white flex items-center justify-center text-xs font-semibold">
                     {getInitials(contact.fullName)}
                 </div>
             ),
@@ -69,7 +69,7 @@ export function ContactsTable({ contacts, initialPreferences, itemsPerPage = 10 
                     className="group block"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <span className="text-sm font-medium text-nearby-accent group-hover:underline">
+                    <span className="text-sm font-medium text-[var(--foreground)] group-hover:underline">
                         {contact.fullName}
                     </span>
                     <span className="block text-xs text-[var(--muted-text)] truncate max-w-[220px]">
@@ -88,7 +88,7 @@ export function ContactsTable({ contacts, initialPreferences, itemsPerPage = 10 
                 contact.company ? (
                     <Link
                         href={`/app/companies/${contact.company.id}`}
-                        className="text-sm text-nearby-accent hover:underline"
+                        className="text-sm text-[var(--foreground)] font-medium hover:underline"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {contact.company.name}
@@ -183,7 +183,7 @@ export function ContactsTable({ contacts, initialPreferences, itemsPerPage = 10 
                     <p className="text-sm sm:text-base text-gray-500 mb-6">Comienza creando tu primer contacto.</p>
                     <Link
                         href="/app/contacts/new"
-                        className="inline-flex items-center px-4 py-2 text-sm font-medium text-nearby-accent bg-nearby-accent/10 rounded-md hover:bg-nearby-accent/20 transition-colors"
+                        className="inline-flex items-center px-4 py-2 text-sm font-medium text-[var(--foreground)] bg-nearby-dark/8 rounded-md hover:bg-nearby-dark/12 transition-colors"
                     >
                         Crear contacto
                     </Link>
@@ -222,11 +222,11 @@ export function ContactsTable({ contacts, initialPreferences, itemsPerPage = 10 
                             className="block w-full p-4 hover:bg-soft-gray transition-colors min-w-0 overflow-hidden"
                         >
                             <div className="flex items-start gap-3 mb-2">
-                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-accent-600 text-white flex items-center justify-center text-xs font-semibold flex-shrink-0">
+                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-nearby-dark to-nearby-dark-600 text-white flex items-center justify-center text-xs font-semibold flex-shrink-0">
                                     {getInitials(contact.fullName)}
                                 </div>
                                 <div className="flex-1 min-w-0 space-y-1.5">
-                                    <h3 className="text-base font-semibold text-nearby-accent truncate">
+                                    <h3 className="text-base font-medium text-[var(--foreground)] truncate">
                                         {contact.fullName}
                                     </h3>
                                     <div>

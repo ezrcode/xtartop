@@ -192,7 +192,7 @@ export function ActivitiesSection({
                         <button
                             type="button"
                             onClick={() => setShowMenu(!showMenu)}
-                            className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-nearby-accent text-white hover:bg-ocean-blue transition-colors"
+                            className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-nearby-dark text-white hover:bg-nearby-dark-600 transition-colors"
                         >
                             <Plus size={14} />
                         </button>

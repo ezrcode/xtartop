@@ -129,7 +129,7 @@ export function EmailConfigTab({ emailConfig }: EmailConfigTabProps) {
                             href="https://myaccount.google.com/apppasswords"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-nearby-accent hover:underline"
+                            className="text-[var(--foreground)] font-medium hover:underline"
                         >
                             myaccount.google.com/apppasswords
                         </a>

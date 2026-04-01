@@ -16,8 +16,8 @@ interface StatCardProps {
 
 const colorStyles = {
     accent: {
-        bg: "bg-nearby-accent-50 dark:bg-nearby-accent/10",
-        icon: "text-nearby-accent",
+        bg: "bg-nearby-dark-50 dark:bg-nearby-dark/10",
+        icon: "text-nearby-dark dark:text-nearby-dark-300",
     },
     success: {
         bg: "bg-success-green/10",

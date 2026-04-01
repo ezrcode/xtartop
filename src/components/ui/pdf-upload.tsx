@@ -97,7 +97,7 @@ export function PdfUpload({
             <div className="flex items-center gap-3">
                 {fileUrl ? (
                     <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-graphite-gray rounded-lg flex-1 min-w-0">
-                        <FileText size={18} className="text-nearby-accent flex-shrink-0" />
+                        <FileText size={18} className="text-nearby-dark dark:text-nearby-dark-300 flex-shrink-0" />
                         <span className="text-sm text-dark-slate truncate flex-1">
                             {fileName || "archivo.pdf"}
                         </span>
@@ -105,7 +105,7 @@ export function PdfUpload({
                             href={fileUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-nearby-accent hover:text-nearby-accent-600 flex-shrink-0"
+                            className="text-nearby-dark dark:text-nearby-dark-300 hover:text-nearby-dark-600 flex-shrink-0"
                             title="Abrir archivo"
                         >
                             <ExternalLink size={16} />

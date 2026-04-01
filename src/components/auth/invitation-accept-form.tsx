@@ -14,7 +14,7 @@
          <button
              type="submit"
              disabled={pending}
-             className="w-full inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md bg-nearby-accent text-white hover:bg-nearby-dark disabled:opacity-50 disabled:cursor-not-allowed"
+             className="w-full inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md bg-nearby-accent text-white hover:bg-nearby-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nearby-dark/15 disabled:opacity-50 disabled:cursor-not-allowed"
          >
              {pending ? "Creando cuenta..." : "Crear contraseña"}
          </button>
@@ -54,7 +54,7 @@
                      placeholder="••••••••"
                      required
                      minLength={6}
-                     className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:outline-none focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                     className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 sm:text-sm"
                  />
                  {state?.errors?.password && (
                      <p className="mt-1 text-sm text-error-red">{state.errors.password}</p>
@@ -72,7 +72,7 @@
                      placeholder="••••••••"
                      required
                      minLength={6}
-                     className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:outline-none focus:ring-nearby-accent focus:border-nearby-accent sm:text-sm"
+                     className="mt-1 block w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 sm:text-sm"
                  />
                  {state?.errors?.confirmPassword && (
                      <p className="mt-1 text-sm text-error-red">{state.errors.confirmPassword}</p>

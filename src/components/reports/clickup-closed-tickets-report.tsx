@@ -651,7 +651,7 @@ export function ClickUpClosedTicketsReport({
                                 <p className="text-xs text-[var(--muted-text)] uppercase tracking-wider">Clientes</p>
                                 <p className="text-2xl font-bold text-[var(--foreground)] mt-1">{clients.length}</p>
                             </div>
-                            <div className="bg-gradient-to-br from-nearby-accent/10 to-nearby-accent/5 rounded-lg border border-nearby-accent/20 p-4">
+                            <div className="bg-gradient-to-br from-nearby-dark/10 to-nearby-dark/5 rounded-lg border border-nearby-dark/30 p-4">
                                 <p className="text-xs text-[var(--muted-text)] uppercase tracking-wider">Asignados</p>
                                 <p className="text-2xl font-bold text-[var(--foreground)] mt-1">{assignees.length}</p>
                             </div>
@@ -668,7 +668,7 @@ export function ClickUpClosedTicketsReport({
                                         <XAxis dataKey="label" tick={{ fill: "var(--muted-text)", fontSize: 11 }} interval={0} angle={-18} height={58} />
                                         <YAxis allowDecimals={false} tick={{ fill: "var(--muted-text)", fontSize: 12 }} />
                                         <Tooltip />
-                                        <Bar dataKey="tickets" fill="#FC5A34" radius={[6, 6, 0, 0]} />
+                                        <Bar dataKey="tickets" fill="#2d3e50" radius={[6, 6, 0, 0]} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
@@ -746,8 +746,8 @@ export function ClickUpClosedTicketsReport({
                                                 <td className="px-4 py-2 text-[var(--foreground)] whitespace-nowrap">
                                                     {formatDate(line.closedDate)}
                                                 </td>
-                                                <td className="px-4 py-2 text-nearby-accent">
-                                                    <a href={line.url} target="_blank" rel="noreferrer" className="hover:underline">
+                                                <td className="px-4 py-2">
+                                                    <a href={line.url} target="_blank" rel="noreferrer" className="text-[var(--foreground)] font-medium hover:underline">
                                                         {line.name}
                                                     </a>
                                                 </td>

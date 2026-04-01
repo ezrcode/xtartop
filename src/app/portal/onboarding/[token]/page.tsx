@@ -178,7 +178,7 @@ export default async function OnboardingPage({ params }: OnboardingPageProps) {
                         </p>
                         <Link
                             href="/portal/login"
-                            className="inline-flex items-center px-6 py-3 bg-nearby-dark text-white rounded-md hover:bg-nearby-accent transition-colors"
+                            className="inline-flex items-center px-6 py-3 bg-nearby-dark text-white rounded-md hover:bg-nearby-dark-600 transition-colors"
                         >
                             Ir al Portal
                         </Link>

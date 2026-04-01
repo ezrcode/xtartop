@@ -32,7 +32,7 @@ export function LoginForm() {
                     type="email"
                     placeholder="tu@email.com"
                     required
-                    className="mt-1 block w-full px-3 py-2.5 text-base sm:text-sm border border-[var(--input-border)] rounded-md shadow-sm bg-[var(--input-bg)] text-[var(--foreground)] focus:outline-none focus:ring-nearby-accent focus:border-nearby-accent"
+                    className="mt-1 block w-full px-3 py-2.5 text-base sm:text-sm border border-[var(--input-border)] rounded-md shadow-sm bg-[var(--input-bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                 />
             </div>
 
@@ -46,7 +46,7 @@ export function LoginForm() {
                     type="password"
                     placeholder="••••••••"
                     required
-                    className="mt-1 block w-full px-3 py-2.5 text-base sm:text-sm border border-[var(--input-border)] rounded-md shadow-sm bg-[var(--input-bg)] text-[var(--foreground)] focus:outline-none focus:ring-nearby-accent focus:border-nearby-accent"
+                    className="mt-1 block w-full px-3 py-2.5 text-base sm:text-sm border border-[var(--input-border)] rounded-md shadow-sm bg-[var(--input-bg)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                 />
             </div>
 

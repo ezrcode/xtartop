@@ -258,7 +258,7 @@ export function ClientUsersTable({ companyId, clientUsers: initialClientUsers }:
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-                            className="pl-8 pr-7 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-nearby-accent focus:border-nearby-accent appearance-none bg-white cursor-pointer"
+                            className="pl-8 pr-7 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 appearance-none bg-white cursor-pointer"
                         >
                             <option value="ACTIVE">Activos</option>
                             <option value="INACTIVE">Inactivos</option>
@@ -274,7 +274,7 @@ export function ClientUsersTable({ companyId, clientUsers: initialClientUsers }:
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder="Buscar..."
-                            className="pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-nearby-accent focus:border-nearby-accent w-32 sm:w-40"
+                            className="pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 w-32 sm:w-40"
                         />
                     </div>
                     <button
@@ -289,7 +289,7 @@ export function ClientUsersTable({ companyId, clientUsers: initialClientUsers }:
                     <button
                         type="button"
                         onClick={() => setShowModal(true)}
-                        className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-nearby-accent text-white hover:bg-nearby-dark transition-colors"
+                        className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-nearby-dark text-white hover:bg-nearby-dark-600 transition-colors"
                     >
                         <Plus size={16} />
                     </button>
@@ -358,7 +358,7 @@ export function ClientUsersTable({ companyId, clientUsers: initialClientUsers }:
                                                 <button
                                                     type="button"
                                                     onClick={() => openEditModal(clientUser)}
-                                                    className="p-1.5 text-gray-400 hover:text-nearby-accent hover:bg-gray-100 rounded transition-colors"
+                                                    className="p-1.5 text-gray-400 hover:text-nearby-dark dark:hover:text-nearby-dark-300 hover:bg-gray-100 rounded transition-colors"
                                                     title="Editar"
                                                 >
                                                     <Pencil size={14} />
@@ -418,7 +418,7 @@ export function ClientUsersTable({ companyId, clientUsers: initialClientUsers }:
                                     type="text"
                                     value={fullName}
                                     onChange={(e) => setFullName(e.target.value)}
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent text-sm"
+                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 text-sm"
                                     placeholder="Juan Pérez"
                                     autoFocus
                                 />
@@ -437,7 +437,7 @@ export function ClientUsersTable({ companyId, clientUsers: initialClientUsers }:
                                             editingUser ? handleUpdate() : handleCreate();
                                         }
                                     }}
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-nearby-accent focus:border-nearby-accent text-sm"
+                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 text-sm"
                                     placeholder="juan@empresa.com"
                                 />
                             </div>
@@ -454,7 +454,7 @@ export function ClientUsersTable({ companyId, clientUsers: initialClientUsers }:
                                     type="button"
                                     onClick={editingUser ? handleUpdate : handleCreate}
                                     disabled={loading}
-                                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-nearby-accent rounded-md hover:bg-nearby-dark disabled:opacity-50"
+                                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-nearby-dark rounded-md hover:bg-nearby-dark-600 disabled:opacity-50"
                                 >
                                     {loading ? (
                                         <>

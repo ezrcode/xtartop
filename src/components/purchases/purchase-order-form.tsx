@@ -69,7 +69,7 @@ interface PurchaseOrderFormProps {
 
 const statusConfig: Record<PurchaseOrderStatus, { label: string; className: string }> = {
     BORRADOR: { label: "Borrador", className: "bg-[var(--surface-3)] text-gray-800" },
-    ENVIADA: { label: "Enviada", className: "bg-nearby-accent/10 text-nearby-accent" },
+    ENVIADA: { label: "Enviada", className: "bg-nearby-dark/8 dark:bg-nearby-dark-300/10 text-nearby-dark dark:text-nearby-dark-300" },
     CONFIRMADA: { label: "Confirmada", className: "bg-success-green/10 text-success-green" },
     RECIBIDA: { label: "Recibida", className: "bg-purple-100 text-purple-800" },
     CANCELADA: { label: "Cancelada", className: "bg-error-red/10 text-error-red" },
@@ -270,8 +270,8 @@ export function PurchaseOrderForm({
                     </Link>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-nearby-accent/10 rounded-lg">
-                                <ShoppingCart size={24} className="text-nearby-accent" />
+                            <div className="p-2.5 bg-nearby-dark/8 dark:bg-nearby-dark-300/10 rounded-lg">
+                                <ShoppingCart size={24} className="text-nearby-dark dark:text-nearby-dark-300" />
                             </div>
                             <div>
                                 <h1 className="text-2xl font-bold text-[var(--foreground)]">
@@ -387,7 +387,7 @@ export function PurchaseOrderForm({
                                     value={supplierId}
                                     onChange={(e) => setSupplierId(e.target.value)}
                                     disabled={!!isReadonly}
-                                    className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors disabled:opacity-50"
+                                    className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors disabled:opacity-50"
                                     required
                                 >
                                     <option value="">Selecciona un proveedor</option>
@@ -400,7 +400,7 @@ export function PurchaseOrderForm({
                                 {suppliers.length === 0 && (
                                     <p className="text-xs text-[var(--muted-text)]">
                                         No hay empresas con estado &quot;Proveedor&quot;.{" "}
-                                        <Link href="/app/companies" className="text-nearby-accent hover:underline">
+                                        <Link href="/app/companies" className="text-[var(--foreground)] font-medium hover:underline">
                                             Crear una empresa
                                         </Link>{" "}
                                         con ese estado primero.
@@ -422,7 +422,7 @@ export function PurchaseOrderForm({
                                     value={period}
                                     onChange={(e) => setPeriod(e.target.value)}
                                     disabled={!!isReadonly}
-                                    className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors disabled:opacity-50"
+                                    className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors disabled:opacity-50"
                                     required
                                 />
                                 {state?.errors?.period && (
@@ -444,7 +444,7 @@ export function PurchaseOrderForm({
                                     onChange={(e) => setExternalReference(e.target.value)}
                                     disabled={!!isReadonly}
                                     placeholder="ej: REF-001"
-                                    className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors disabled:opacity-50"
+                                    className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors disabled:opacity-50"
                                 />
                             </div>
 
@@ -464,7 +464,7 @@ export function PurchaseOrderForm({
                                             ? "border-success-green focus:ring-success-green/20 focus:border-success-green"
                                             : normalizedPromo && !matchedPromo
                                                 ? "border-amber-400 focus:ring-amber-400/20 focus:border-amber-400"
-                                                : "border-[var(--card-border)] focus:ring-nearby-accent/20 focus:border-nearby-accent"
+                                                : "border-[var(--card-border)] focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                                     }`}
                                 />
                                 {normalizedPromo && matchedPromo ? (
@@ -491,7 +491,7 @@ export function PurchaseOrderForm({
                                     onChange={(e) => setNotes(e.target.value)}
                                     disabled={!!isReadonly}
                                     placeholder="Notas adicionales..."
-                                    className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors disabled:opacity-50"
+                                    className="w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)] shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors disabled:opacity-50"
                                 />
                             </div>
                         </div>
@@ -517,7 +517,7 @@ export function PurchaseOrderForm({
                                     <button
                                         type="button"
                                         onClick={addItem}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-nearby-accent bg-nearby-accent/10 rounded-lg hover:bg-nearby-accent/20 transition-colors"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-nearby-dark dark:text-nearby-dark-300 bg-nearby-dark/8 dark:bg-nearby-dark-300/10 rounded-lg hover:bg-nearby-dark/15 transition-colors"
                                     >
                                         <Plus size={14} />
                                         Agregar Item

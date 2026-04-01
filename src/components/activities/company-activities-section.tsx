@@ -296,7 +296,7 @@ export function CompanyActivitiesSection({
     const getActivityConfig = (activity: ActivityWithUser) => {
         const typeMap: Record<string, { icon: typeof Mail; color: string; bgColor: string; label: string }> = {
             EMAIL: { icon: Mail, color: "text-nearby-dark", bgColor: "bg-nearby-dark/10", label: "Correo" },
-            PROJECT: { icon: FolderOpen, color: "text-nearby-accent", bgColor: "bg-nearby-accent/10", label: "Proyecto" },
+            PROJECT: { icon: FolderOpen, color: "text-nearby-dark dark:text-nearby-dark-300", bgColor: "bg-nearby-dark/8 dark:bg-nearby-dark-300/10", label: "Proyecto" },
             CLIENT_USER: { icon: UserIcon, color: "text-ocean-blue", bgColor: "bg-ocean-blue/10", label: "Usuario" },
             NOTE: { icon: StickyNote, color: "text-purple-600", bgColor: "bg-purple-100", label: "Nota" },
         };
@@ -384,7 +384,7 @@ export function CompanyActivitiesSection({
                     <select
                         value={filter}
                         onChange={(e) => setFilter(e.target.value as typeof filter)}
-                        className="text-xs border border-graphite-gray rounded px-1.5 py-0.5 text-gray-600 bg-white focus:ring-nearby-accent focus:border-nearby-accent cursor-pointer"
+                        className="text-xs border border-graphite-gray rounded px-1.5 py-0.5 text-gray-600 bg-white focus:ring-nearby-dark/15 focus:border-nearby-dark/50 cursor-pointer"
                     >
                         {filterOptions.map(opt => (
                             <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -393,7 +393,7 @@ export function CompanyActivitiesSection({
                     <select
                         value={dateFilter}
                         onChange={(e) => setDateFilter(e.target.value as DateFilter)}
-                        className="text-xs border border-graphite-gray rounded px-1.5 py-0.5 text-gray-600 bg-white focus:ring-nearby-accent focus:border-nearby-accent cursor-pointer"
+                        className="text-xs border border-graphite-gray rounded px-1.5 py-0.5 text-gray-600 bg-white focus:ring-nearby-dark/15 focus:border-nearby-dark/50 cursor-pointer"
                     >
                         {dateFilterOptions.map(opt => (
                             <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -405,7 +405,7 @@ export function CompanyActivitiesSection({
                         type="button"
                         onClick={handleDownloadExcel}
                         disabled={filteredTimelineItems.length === 0}
-                        className="inline-flex items-center justify-center w-6 h-6 rounded-full text-gray-400 hover:text-nearby-accent hover:bg-nearby-accent/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                        className="inline-flex items-center justify-center w-6 h-6 rounded-full text-gray-400 hover:text-nearby-dark hover:bg-nearby-dark/8 dark:hover:bg-nearby-dark-300/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                         title="Descargar Excel"
                     >
                         <Download size={14} />
@@ -414,7 +414,7 @@ export function CompanyActivitiesSection({
                     <button
                         type="button"
                         onClick={() => setShowMenu(!showMenu)}
-                        className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-nearby-accent text-white hover:bg-nearby-dark transition-colors"
+                        className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-nearby-dark text-white hover:bg-nearby-dark-600 transition-colors"
                     >
                         <Plus size={14} />
                     </button>
@@ -498,7 +498,7 @@ export function CompanyActivitiesSection({
                             <select
                                 value={selectedContactId}
                                 onChange={(e) => setSelectedContactId(e.target.value)}
-                                className="flex-1 px-2 py-1.5 border border-graphite-gray rounded text-xs focus:ring-nearby-accent focus:border-nearby-accent"
+                                className="flex-1 px-2 py-1.5 border border-graphite-gray rounded text-xs focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                             >
                                 <option value="">Seleccionar...</option>
                                 {companyContacts.map((contact) => (
@@ -511,7 +511,7 @@ export function CompanyActivitiesSection({
                                 type="button"
                                 onClick={handleSendInvitation}
                                 disabled={loading || !selectedContactId}
-                                className="inline-flex items-center px-2 py-1.5 bg-nearby-accent text-white rounded hover:bg-nearby-dark transition-colors disabled:opacity-50 text-xs"
+                                className="inline-flex items-center px-2 py-1.5 bg-nearby-dark text-white rounded hover:bg-nearby-dark-600 transition-colors disabled:opacity-50 text-xs"
                             >
                                 {loading ? <Loader2 size={12} className="animate-spin" /> : <Send size={12} />}
                             </button>
@@ -714,7 +714,7 @@ export function CompanyActivitiesSection({
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-1.5 mt-0.5">
-                                                    <span className="text-[10px] font-medium text-nearby-accent uppercase">
+                                                    <span className="text-[10px] font-medium text-nearby-dark dark:text-nearby-dark-300 uppercase">
                                                         Invitación
                                                     </span>
                                                     <span className="text-gray-300">·</span>

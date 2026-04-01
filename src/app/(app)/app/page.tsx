@@ -242,8 +242,8 @@ export default async function DashboardPage() {
                         value={stats?.clientCompaniesCount ?? 0}
                         description={`${stats?.allCompaniesCount ?? 0} empresas total`}
                         icon={Building2}
-                        gradient="bg-gradient-to-br from-nearby-accent/20 to-nearby-accent/5"
-                        iconColor="text-nearby-accent"
+                        gradient="bg-gradient-to-br from-nearby-dark/20 to-nearby-dark/5"
+                        iconColor="text-nearby-dark dark:text-nearby-dark-300"
                     />
                     <StatCard
                         label="Contactos"
@@ -277,8 +277,8 @@ export default async function DashboardPage() {
                         label="Proyectos Activos"
                         value={stats?.activeProjects ?? 0}
                         icon={FolderOpen}
-                        gradient="bg-gradient-to-br from-nearby-accent/10 to-transparent"
-                        iconColor="text-nearby-accent"
+                        gradient="bg-gradient-to-br from-nearby-dark/10 to-transparent"
+                        iconColor="text-nearby-dark dark:text-nearby-dark-300"
                     />
                     <StatCard
                         label="Usuarios Activos"
@@ -320,7 +320,7 @@ export default async function DashboardPage() {
                             href="/app/companies/new"
                             className="flex flex-col items-center p-4 rounded-lg bg-[var(--hover-bg)] hover:bg-[var(--surface-0)] transition-colors"
                         >
-                            <div className="w-12 h-12 rounded-full bg-nearby-accent flex items-center justify-center mb-2">
+                            <div className="w-12 h-12 rounded-full bg-nearby-dark flex items-center justify-center mb-2">
                                 <Building2 size={22} className="text-white" />
                             </div>
                             <span className="text-xs font-medium text-[var(--foreground)]">

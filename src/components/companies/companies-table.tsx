@@ -30,7 +30,7 @@ interface CompaniesTableProps {
 
 const statusConfig: Record<CompanyStatus, { label: string; className: string; dotColor: string }> = {
     CLIENTE: { label: "Cliente", className: "bg-success-green/10 text-success-green", dotColor: "bg-success-green" },
-    POTENCIAL: { label: "Potencial", className: "bg-nearby-accent/10 text-nearby-accent", dotColor: "bg-nearby-accent" },
+    POTENCIAL: { label: "Potencial", className: "bg-nearby-dark/8 text-nearby-dark dark:text-nearby-dark-300", dotColor: "bg-nearby-dark dark:bg-nearby-dark-300" },
     PROSPECTO: { label: "Prospecto", className: "bg-[var(--surface-3)] text-gray-800", dotColor: "bg-gray-400" },
     PROVEEDOR: { label: "Proveedor", className: "bg-purple-100 text-purple-800", dotColor: "bg-purple-500" },
     DESCARTADA: { label: "Descartada", className: "bg-error-red/10 text-error-red", dotColor: "bg-error-red" },
@@ -81,7 +81,7 @@ export function CompaniesTable({ companies, initialPreferences, itemsPerPage = 1
                     className="group block"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <span className="text-sm font-medium text-nearby-accent group-hover:underline">
+                    <span className="text-sm font-medium text-[var(--foreground)] group-hover:underline">
                         {company.name}
                     </span>
                     {company.city && (
@@ -121,7 +121,7 @@ export function CompaniesTable({ companies, initialPreferences, itemsPerPage = 1
                 company.primaryContact ? (
                     <Link
                         href={`/app/contacts/${company.primaryContact.id}`}
-                        className="text-sm text-nearby-accent hover:text-[var(--foreground)]"
+                        className="text-sm text-[var(--foreground)] font-medium hover:underline"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {company.primaryContact.fullName}
@@ -237,7 +237,7 @@ export function CompaniesTable({ companies, initialPreferences, itemsPerPage = 1
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-start justify-between">
                                         <div className="min-w-0">
-                                            <h3 className="text-base font-semibold text-nearby-accent truncate">
+                                            <h3 className="text-base font-medium text-[var(--foreground)] truncate">
                                                 {company.name}
                                             </h3>
                                             {company.city && (

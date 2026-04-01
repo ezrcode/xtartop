@@ -479,7 +479,7 @@ export function CustomerSuccessUserLifecycleReport() {
                                 accentClass="from-success-green/12 via-success-green/4 to-transparent"
                                 metrics={[
                                     { label: "Activaciones", value: userTotals.activated, tone: "bg-success-green/5 border-success-green/15" },
-                                    { label: "Desactivaciones", value: userTotals.deactivated, tone: "bg-nearby-accent/5 border-nearby-accent/15" },
+                                    { label: "Desactivaciones", value: userTotals.deactivated, tone: "bg-nearby-dark/5 border-nearby-dark/30" },
                                     { label: "Activos al inicio", value: userTotals.activeStart, tone: "bg-ocean-blue/5 border-ocean-blue/15" },
                                     { label: "Activos al cierre", value: userTotals.activeEnd, tone: "bg-info-blue/5 border-info-blue/15" },
                                 ]}
@@ -537,7 +537,7 @@ export function CustomerSuccessUserLifecycleReport() {
                                                 <td className="px-4 py-2 text-[var(--foreground)]">{row.companyName}</td>
                                                 <td className="px-4 py-2 text-right text-[var(--foreground)] font-semibold">{row.activeAtStart}</td>
                                                 <td className="px-4 py-2 text-right text-success-green font-semibold">{row.activated}</td>
-                                                <td className="px-4 py-2 text-right text-nearby-accent font-semibold">{row.deactivated}</td>
+                                                <td className="px-4 py-2 text-right text-nearby-dark dark:text-nearby-dark-300 font-semibold">{row.deactivated}</td>
                                                 <td className="px-4 py-2 text-right text-[var(--foreground)] font-semibold">{row.activeAtEnd}</td>
                                             </tr>
                                         ))}

@@ -141,7 +141,7 @@ export function ClickUpConfigTab({ currentConfig }: ClickUpConfigTabProps) {
                     href="https://clickup.com/api"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-nearby-accent hover:underline flex items-center gap-1"
+                    className="text-sm text-[var(--foreground)] font-medium hover:underline flex items-center gap-1"
                 >
                     Ver API <ExternalLink size={14} />
                 </a>

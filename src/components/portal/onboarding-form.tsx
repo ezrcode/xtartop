@@ -235,7 +235,7 @@ export function OnboardingForm({ token, company, contact, userExists = false, co
                 {step === "account" && (
                     <form onSubmit={handleAccountSubmit} className="space-y-6">
                         <div className="text-center mb-6">
-                            <User className="mx-auto text-nearby-accent mb-3" size={40} />
+                            <User className="mx-auto text-nearby-dark dark:text-nearby-dark-300 mb-3" size={40} />
                             <h2 className="text-xl font-semibold text-nearby-dark">
                                 Crear tu cuenta
                             </h2>
@@ -265,7 +265,7 @@ export function OnboardingForm({ token, company, contact, userExists = false, co
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 required
-                                className="w-full px-3 py-2 border border-graphite-gray rounded-md focus:ring-nearby-accent focus:border-nearby-accent"
+                                className="w-full px-3 py-2 border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                             />
                         </div>
 
@@ -279,7 +279,7 @@ export function OnboardingForm({ token, company, contact, userExists = false, co
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                                 minLength={6}
-                                className="w-full px-3 py-2 border border-graphite-gray rounded-md focus:ring-nearby-accent focus:border-nearby-accent"
+                                className="w-full px-3 py-2 border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                                 placeholder="Mínimo 6 caracteres"
                             />
                         </div>
@@ -293,14 +293,14 @@ export function OnboardingForm({ token, company, contact, userExists = false, co
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 required
-                                className="w-full px-3 py-2 border border-graphite-gray rounded-md focus:ring-nearby-accent focus:border-nearby-accent"
+                                className="w-full px-3 py-2 border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                             />
                         </div>
 
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-3 bg-nearby-accent text-white rounded-md hover:bg-nearby-dark transition-colors disabled:opacity-50"
+                            className="w-full py-3 bg-nearby-dark text-white rounded-md hover:bg-nearby-dark-600 transition-colors disabled:opacity-50"
                         >
                             {loading ? "Creando cuenta..." : "Continuar"}
                         </button>
@@ -310,7 +310,7 @@ export function OnboardingForm({ token, company, contact, userExists = false, co
                 {step === "company" && (
                     <form onSubmit={handleCompanySubmit} className="space-y-6">
                         <div className="text-center mb-6">
-                            <Building2 className="mx-auto text-nearby-accent mb-3" size={40} />
+                            <Building2 className="mx-auto text-nearby-dark dark:text-nearby-dark-300 mb-3" size={40} />
                             <h2 className="text-xl font-semibold text-nearby-dark">
                                 Datos de la Empresa
                             </h2>
@@ -331,7 +331,7 @@ export function OnboardingForm({ token, company, contact, userExists = false, co
                                 value={legalName}
                                 onChange={(e) => setLegalName(e.target.value)}
                                 required
-                                className="w-full px-3 py-2 border border-graphite-gray rounded-md focus:ring-nearby-accent focus:border-nearby-accent"
+                                className="w-full px-3 py-2 border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                                 placeholder="Nombre legal de la empresa"
                             />
                         </div>
@@ -345,7 +345,7 @@ export function OnboardingForm({ token, company, contact, userExists = false, co
                                 value={taxId}
                                 onChange={(e) => setTaxId(e.target.value)}
                                 required
-                                className="w-full px-3 py-2 border border-graphite-gray rounded-md focus:ring-nearby-accent focus:border-nearby-accent"
+                                className="w-full px-3 py-2 border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                                 placeholder="Ej: 123-45678-9"
                             />
                         </div>
@@ -359,7 +359,7 @@ export function OnboardingForm({ token, company, contact, userExists = false, co
                                 onChange={(e) => setFiscalAddress(e.target.value)}
                                 required
                                 rows={3}
-                                className="w-full px-3 py-2 border border-graphite-gray rounded-md focus:ring-nearby-accent focus:border-nearby-accent"
+                                className="w-full px-3 py-2 border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                                 placeholder="Dirección completa para facturación"
                             />
                         </div>
@@ -367,7 +367,7 @@ export function OnboardingForm({ token, company, contact, userExists = false, co
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-3 bg-nearby-accent text-white rounded-md hover:bg-nearby-dark transition-colors disabled:opacity-50"
+                            className="w-full py-3 bg-nearby-dark text-white rounded-md hover:bg-nearby-dark-600 transition-colors disabled:opacity-50"
                         >
                             {loading ? "Guardando..." : "Continuar"}
                         </button>
@@ -377,7 +377,7 @@ export function OnboardingForm({ token, company, contact, userExists = false, co
                 {step === "terms" && (
                     <div className="space-y-6">
                         <div className="text-center mb-6">
-                            <FileText className="mx-auto text-nearby-accent mb-3" size={40} />
+                            <FileText className="mx-auto text-nearby-dark dark:text-nearby-dark-300 mb-3" size={40} />
                             <h2 className="text-xl font-semibold text-nearby-dark">
                                 Términos y Condiciones
                             </h2>
@@ -406,7 +406,7 @@ export function OnboardingForm({ token, company, contact, userExists = false, co
                         {company.quoteFileUrl && (
                             <div className="bg-blue-50 border border-blue-200 rounded-md p-4 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <FileText className="text-nearby-accent" size={24} />
+                                    <FileText className="text-nearby-dark dark:text-nearby-dark-300" size={24} />
                                     <div>
                                         <p className="text-sm font-medium text-dark-slate">
                                             Cotización N° {company.quoteId || "—"}
@@ -420,7 +420,7 @@ export function OnboardingForm({ token, company, contact, userExists = false, co
                                     href={company.quoteFileUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="px-4 py-2 bg-nearby-accent text-white text-sm rounded-md hover:bg-nearby-dark transition-colors"
+                                    className="px-4 py-2 bg-nearby-dark text-white text-sm rounded-md hover:bg-nearby-dark-600 transition-colors"
                                 >
                                     Ver PDF
                                 </a>
@@ -433,7 +433,7 @@ export function OnboardingForm({ token, company, contact, userExists = false, co
                                 id="acceptTerms"
                                 checked={termsAccepted}
                                 onChange={(e) => setTermsAccepted(e.target.checked)}
-                                className="mt-1 h-4 w-4 text-nearby-accent focus:ring-nearby-accent border-graphite-gray rounded"
+                                className="mt-1 h-4 w-4 text-nearby-dark focus:ring-2 focus:ring-nearby-dark/15 border-graphite-gray rounded"
                             />
                             <label htmlFor="acceptTerms" className="text-sm text-dark-slate">
                                 He leído y acepto los Términos y Condiciones del contrato de servicios
@@ -445,7 +445,7 @@ export function OnboardingForm({ token, company, contact, userExists = false, co
                         <button
                             onClick={handleAcceptTerms}
                             disabled={loading || !termsAccepted}
-                            className="w-full py-3 bg-nearby-accent text-white rounded-md hover:bg-nearby-dark transition-colors disabled:opacity-50"
+                            className="w-full py-3 bg-nearby-dark text-white rounded-md hover:bg-nearby-dark-600 transition-colors disabled:opacity-50"
                         >
                             {loading ? "Procesando..." : "Aceptar y Firmar"}
                         </button>
@@ -464,7 +464,7 @@ export function OnboardingForm({ token, company, contact, userExists = false, co
                         </p>
                         <a
                             href="/portal/login"
-                            className="inline-block px-8 py-3 bg-nearby-accent text-white rounded-md hover:bg-nearby-dark transition-colors"
+                            className="inline-block px-8 py-3 bg-nearby-dark text-white rounded-md hover:bg-nearby-dark-600 transition-colors"
                         >
                             Ir al Portal
                         </a>
@@ -493,7 +493,7 @@ function StepIndicator({
                     completed
                         ? "bg-success-green text-white"
                         : active
-                        ? "bg-nearby-accent text-white"
+                        ? "bg-white text-nearby-dark"
                         : "bg-white/30 text-white"
                 }`}
             >

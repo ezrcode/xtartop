@@ -60,7 +60,7 @@ export function CommandPalette({ userRole }: CommandPaletteProps) {
 
     const iconForType = (type: string) => {
         switch (type) {
-            case "company": return <Building2 size={16} className="text-nearby-accent" />;
+            case "company": return <Building2 size={16} className="text-nearby-dark dark:text-nearby-dark-300" />;
             case "contact": return <Users size={16} className="text-ocean-blue" />;
             case "deal": return <TrendingUp size={16} className="text-success-green" />;
             default: return <Search size={16} />;
@@ -146,7 +146,7 @@ export function CommandPalette({ userRole }: CommandPaletteProps) {
                                         onSelect={() => navigate("/app/companies/new")}
                                         className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-colors data-[selected=true]:bg-[var(--hover-bg)]"
                                     >
-                                        <Plus size={16} className="text-nearby-accent" />
+                                        <Plus size={16} className="text-nearby-dark dark:text-nearby-dark-300" />
                                         <span className="text-[var(--foreground)]">Nueva Empresa</span>
                                     </Command.Item>
                                     <Command.Item

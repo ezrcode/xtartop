@@ -97,7 +97,7 @@ export default async function ReportsPage() {
                                         <Link
                                             key={report.href}
                                             href={report.href}
-                                            className="group bg-[var(--surface-1)] rounded-lg border border-[var(--card-border)] p-5 hover:shadow-lg transition-all duration-300 hover:border-nearby-accent/30"
+                                            className="group bg-[var(--surface-1)] rounded-lg border border-[var(--card-border)] p-5 hover:shadow-lg transition-all duration-300 hover:border-nearby-dark/30"
                                         >
                                             <div className="flex items-start gap-4">
                                                 <div

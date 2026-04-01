@@ -191,7 +191,7 @@ function TaxItemRow({
 
   if (isEditing) {
     return (
-      <form action={action} className="p-3 border border-nearby-accent rounded-lg bg-nearby-accent/5 space-y-3">
+      <form action={action} className="p-3 border border-nearby-dark/30 rounded-lg bg-nearby-dark/5 space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="space-y-2">
             <Label htmlFor={`edit-tax-name-${tax.id}`} className="text-sm">Nombre *</Label>

@@ -46,7 +46,7 @@ function SubmitButton({ actionName, label, mobileLabel, loadingLabel, icon: Icon
     const baseClasses = "inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95";
     const variants = {
         primary: "text-white bg-nearby-dark hover:bg-nearby-dark-600 focus:ring-nearby-dark shadow-sm",
-        secondary: "text-[var(--foreground)] bg-[var(--card-bg)] border border-[var(--card-border)] hover:bg-[var(--surface-2)] focus:ring-nearby-accent",
+        secondary: "text-[var(--foreground)] bg-[var(--card-bg)] border border-[var(--card-border)] hover:bg-[var(--surface-2)] focus:ring-nearby-dark/30",
         danger: "text-white bg-error-red hover:bg-red-700 focus:ring-error-red shadow-sm",
     };
 
@@ -236,7 +236,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                         onClick={() => setActiveTab("general")}
                                         className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
                                             activeTab === "general"
-                                                ? "border-nearby-accent text-nearby-accent"
+                                                ? "border-nearby-dark/50 text-[var(--foreground)] font-medium"
                                                 : "border-transparent text-[var(--muted-text)] hover:text-[var(--foreground)] hover:border-[var(--card-border)]"
                                         }`}
                                     >
@@ -247,7 +247,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                         onClick={() => setActiveTab("quotes")}
                                         className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
                                             activeTab === "quotes"
-                                                ? "border-nearby-accent text-nearby-accent"
+                                                ? "border-nearby-dark/50 text-[var(--foreground)] font-medium"
                                                 : "border-transparent text-[var(--muted-text)] hover:text-[var(--foreground)] hover:border-[var(--card-border)]"
                                         }`}
                                     >
@@ -283,7 +283,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                                     id="name"
                                                     defaultValue={deal?.name}
                                                     required
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                                                 />
                                                 {state?.errors?.name && (
                                                     <p className="mt-1.5 text-xs text-error-red">{state.errors.name}</p>
@@ -301,7 +301,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                                     rows={5}
                                                     defaultValue={deal?.description || ""}
                                                     placeholder="Describe brevemente el contexto, alcance y objetivos del negocio..."
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors resize-y"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors resize-y"
                                                 />
                                                 {state?.errors?.description && (
                                                     <p className="mt-1.5 text-xs text-error-red">{state.errors.description}</p>
@@ -326,7 +326,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                                         }
                                                         setSelectedCompanyId(value);
                                                     }}
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors bg-[var(--card-bg)]"
                                                 >
                                                     <option value="__create_company__">✨ + Crear nueva empresa</option>
                                                     <option value="null">Sin empresa</option>
@@ -355,7 +355,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                                         }
                                                         setSelectedContactId(value);
                                                     }}
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors bg-[var(--card-bg)]"
                                                 >
                                                     <option value="__create_contact__">✨ + Crear nuevo contacto</option>
                                                     <option value="null">Sin contacto</option>
@@ -377,7 +377,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                                     name="recurrence"
                                                     defaultValue={deal?.recurrence || "ONETIME_PROJECT"}
                                                     required
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors bg-[var(--card-bg)]"
                                                 >
                                                     <option value="ONETIME_PROJECT">Onetime Project</option>
                                                     <option value="SUSCRIPCION">Suscripción</option>
@@ -395,7 +395,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                                     id="type"
                                                     name="type"
                                                     defaultValue={deal?.type || "null"}
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors bg-[var(--card-bg)]"
                                                 >
                                                     <option value="null">Seleccionar tipo</option>
                                                     <option value="CLIENTE_NUEVO">Cliente nuevo</option>
@@ -412,7 +412,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                                     name="status"
                                                     defaultValue={deal?.status || "PROSPECCION"}
                                                     required
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors bg-[var(--card-bg)]"
                                                 >
                                                     <option value="PROSPECCION">Prospección</option>
                                                     <option value="CALIFICACION">Calificación</option>
@@ -439,7 +439,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                                         id="value"
                                                         step="0.01"
                                                         defaultValue={deal?.value ? deal.value.toString() : "0"}
-                                                        className="block w-full pl-7 pr-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                                        className="block w-full pl-7 pr-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                                                     />
                                                 </div>
                                             </div>
@@ -452,7 +452,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                                     id="businessLineId"
                                                     name="businessLineId"
                                                     defaultValue={deal?.businessLineId || "null"}
-                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors bg-[var(--card-bg)]"
+                                                    className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors bg-[var(--card-bg)]"
                                                 >
                                                     <option value="null">Sin línea</option>
                                                     {businessLines.map((bl) => (
@@ -553,7 +553,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                 value={newCompanyName}
                                 onChange={(e) => setNewCompanyName(e.target.value)}
                                 placeholder="Nombre de la empresa"
-                                className="block w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                className="block w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                             />
                         </div>
                         {createCompanyError && <p className="text-xs text-error-red">{createCompanyError}</p>}
@@ -596,7 +596,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                 value={newContactName}
                                 onChange={(e) => setNewContactName(e.target.value)}
                                 placeholder="Nombre del contacto"
-                                className="block w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                className="block w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                             />
                         </div>
                         <div>
@@ -606,7 +606,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                 value={newContactEmail}
                                 onChange={(e) => setNewContactEmail(e.target.value)}
                                 placeholder="correo@empresa.com"
-                                className="block w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-accent/20 focus:border-nearby-accent transition-colors"
+                                className="block w-full px-3 py-2.5 text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                             />
                         </div>
                         {createContactError && <p className="text-xs text-error-red">{createContactError}</p>}

@@ -75,11 +75,11 @@ export function Topbar({ user, currentExchangeRate = null, onMenuClick }: Topbar
                         <div className={cn(
                             "hidden sm:flex items-center gap-2",
                             "px-3 py-1.5 rounded-full border",
-                            "bg-gradient-to-r from-nearby-accent/10 via-nearby-accent/5 to-transparent",
-                            "border-nearby-accent/20 text-[var(--foreground)] shadow-sm"
+                            "bg-nearby-dark/5 dark:bg-nearby-dark-300/10",
+                            "border-nearby-dark/15 dark:border-nearby-dark-300/20 text-[var(--foreground)] shadow-sm"
                         )}>
-                            <div className="h-5 w-5 rounded-full bg-nearby-accent/15 flex items-center justify-center">
-                                <Banknote size={12} className="text-nearby-accent" />
+                            <div className="h-5 w-5 rounded-full bg-nearby-dark/10 dark:bg-nearby-dark-300/15 flex items-center justify-center">
+                                <Banknote size={12} className="text-nearby-dark dark:text-nearby-dark-300" />
                             </div>
                             <div className="leading-tight">
                                 <p className="text-[9px] uppercase tracking-wide text-[var(--muted-text)]">

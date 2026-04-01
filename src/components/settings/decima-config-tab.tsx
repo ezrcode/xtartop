@@ -77,7 +77,7 @@ export function DecimaConfigTab({ currentConfig }: DecimaConfigTabProps) {
                     href="https://portal.decima.us"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-nearby-accent hover:underline flex items-center gap-1"
+                    className="text-sm text-[var(--foreground)] font-medium hover:underline flex items-center gap-1"
                 >
                     Ir al Portal <ExternalLink size={14} />
                 </a>

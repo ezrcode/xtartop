@@ -91,7 +91,7 @@ function DealCard({ deal, isDragging = false }: { deal: DealWithRelations, isDra
                 <div className="flex-1 min-w-0">
                     <Link 
                         href={`/app/deals/${deal.id}`}
-                        className="text-sm font-semibold text-nearby-accent hover:text-[var(--foreground)] active:text-[var(--foreground)] line-clamp-2 block"
+                        className="text-sm font-semibold text-[var(--foreground)] hover:text-[var(--foreground)] active:text-[var(--foreground)] line-clamp-2 block"
                     >
                         {deal.name}
                     </Link>
@@ -156,7 +156,7 @@ function DealCard({ deal, isDragging = false }: { deal: DealWithRelations, isDra
                             className="h-5 w-5 rounded-full object-cover"
                         />
                     ) : (
-                        <div className="h-5 w-5 rounded-full bg-gradient-to-br from-nearby-accent to-nearby-dark flex items-center justify-center">
+                        <div className="h-5 w-5 rounded-full bg-nearby-dark flex items-center justify-center">
                             <span className="text-[10px] font-semibold text-white">
                                 {deal.createdBy?.name?.charAt(0) || deal.createdBy?.email?.charAt(0) || "?"}
                             </span>
@@ -193,7 +193,7 @@ function KanbanColumn({ status, deals }: { status: DealStatus, deals: DealWithRe
 
     return (
         <div className="flex-shrink-0 w-64 sm:w-72">
-            <div className={`bg-[var(--card-bg)] rounded-lg border shadow-sm transition-all ${isOver ? 'border-nearby-accent border-2 shadow-md' : 'border-[var(--card-border)]'}`}>
+            <div className={`bg-[var(--card-bg)] rounded-lg border shadow-sm transition-all ${isOver ? 'border-nearby-dark border-2 shadow-md' : 'border-[var(--card-border)]'}`}>
                 {/* Column Header */}
                 <div className="px-3 py-2.5 border-b border-[var(--card-border)] sticky top-0 bg-[var(--card-bg)] rounded-t-lg z-10">
                     <div className="flex items-center justify-between mb-1">
@@ -214,7 +214,7 @@ function KanbanColumn({ status, deals }: { status: DealStatus, deals: DealWithRe
                 {/* Cards Container - optimizado para touch scroll */}
                 <div
                     ref={setNodeRef}
-                    className={`p-2 sm:p-3 space-y-2 min-h-[150px] sm:min-h-[200px] max-h-[calc(100vh-280px)] sm:max-h-[calc(100vh-300px)] overflow-y-auto overscroll-contain transition-colors ${isOver ? 'bg-nearby-accent/5' : ''}`}
+                    className={`p-2 sm:p-3 space-y-2 min-h-[150px] sm:min-h-[200px] max-h-[calc(100vh-280px)] sm:max-h-[calc(100vh-300px)] overflow-y-auto overscroll-contain transition-colors ${isOver ? 'bg-nearby-dark/5' : ''}`}
                     style={{ WebkitOverflowScrolling: 'touch' }}
                 >
                     {deals.length > 0 ? (
@@ -255,7 +255,7 @@ function DealsTable({ deals, initialPreferences, itemsPerPage = 10 }: { deals: D
             render: (deal) => (
                 <Link
                     href={`/app/deals/${deal.id}`}
-                    className="text-sm font-medium text-nearby-accent hover:text-[var(--foreground)]"
+                    className="text-sm font-medium text-[var(--foreground)] hover:text-[var(--foreground)]"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {deal.name}
@@ -271,7 +271,7 @@ function DealsTable({ deals, initialPreferences, itemsPerPage = 10 }: { deals: D
                 deal.company ? (
                     <Link
                         href={`/app/companies/${deal.company.id}`}
-                        className="text-sm text-nearby-accent hover:text-[var(--foreground)]"
+                        className="text-sm text-[var(--foreground)] hover:text-[var(--foreground)]"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {deal.company.name}
@@ -290,7 +290,7 @@ function DealsTable({ deals, initialPreferences, itemsPerPage = 10 }: { deals: D
                 deal.contact ? (
                     <Link
                         href={`/app/contacts/${deal.contact.id}`}
-                        className="text-sm text-nearby-accent hover:text-[var(--foreground)]"
+                        className="text-sm text-[var(--foreground)] hover:text-[var(--foreground)]"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {deal.contact.fullName}
@@ -420,8 +420,8 @@ function DealsTable({ deals, initialPreferences, itemsPerPage = 10 }: { deals: D
                         >
                             <div className="flex items-start gap-3">
                                 {/* Value Badge */}
-                                <div className="flex-shrink-0 w-16 h-16 rounded-lg bg-gradient-to-br from-nearby-accent/10 to-nearby-accent/5 flex flex-col items-center justify-center border border-nearby-accent/20">
-                                    <span className="text-[10px] text-nearby-accent font-medium">VALOR</span>
+                                <div className="flex-shrink-0 w-16 h-16 rounded-lg bg-nearby-dark/8 dark:bg-nearby-dark-300/10 flex flex-col items-center justify-center border border-nearby-dark/15">
+                                    <span className="text-[10px] text-nearby-dark dark:text-nearby-dark-300 font-medium">VALOR</span>
                                     <span className="text-sm font-bold text-[var(--foreground)]">
                                         {formatCurrencyShort(Number(deal.value))}
                                     </span>
@@ -541,8 +541,8 @@ export function DealsClientPage({ deals: initialDeals, defaultView = "table", in
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                     <div className="flex items-center gap-3">
-                        <div className="hidden sm:flex h-10 w-10 rounded-lg bg-nearby-accent/10 items-center justify-center">
-                            <TrendingUp size={20} className="text-nearby-accent" />
+                        <div className="hidden sm:flex h-10 w-10 rounded-lg bg-nearby-dark/8 dark:bg-nearby-dark-300/10 items-center justify-center">
+                            <TrendingUp size={20} className="text-nearby-dark dark:text-nearby-dark-300" />
                         </div>
                         <div>
                             <h1 className="text-xl sm:text-2xl font-bold text-[var(--foreground)] flex items-center gap-2">

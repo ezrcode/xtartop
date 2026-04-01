@@ -77,7 +77,7 @@ export function DashboardCharts({ pipeline }: DashboardChartsProps) {
                 <h3 className="text-sm font-semibold text-[var(--foreground)]">Pipeline de Negocios</h3>
                 <Link
                     href="/app/deals"
-                    className="text-xs text-nearby-accent hover:underline py-1 px-2 -mr-2 rounded-lg active:bg-nearby-accent/10"
+                    className="text-xs text-[var(--foreground)] font-medium hover:underline py-1 px-2 -mr-2 rounded-lg active:bg-nearby-dark/8 dark:active:bg-nearby-dark-300/10"
                 >
                     Ver todos
                 </Link>

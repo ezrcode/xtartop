@@ -136,7 +136,7 @@ export function CompanyDataForm({ company, contact, userName }: CompanyDataFormP
                 {step === "company" && (
                     <form onSubmit={handleCompanySubmit} className="space-y-6">
                         <div className="text-center mb-6">
-                            <Building2 className="mx-auto text-nearby-accent mb-3" size={40} />
+                            <Building2 className="mx-auto text-nearby-dark dark:text-nearby-dark-300 mb-3" size={40} />
                             <p className="text-dark-slate">{company.name}</p>
                         </div>
 
@@ -149,7 +149,7 @@ export function CompanyDataForm({ company, contact, userName }: CompanyDataFormP
                                 value={legalName}
                                 onChange={(e) => setLegalName(e.target.value)}
                                 required
-                                className="w-full px-3 py-2 border border-graphite-gray rounded-md focus:ring-nearby-accent focus:border-nearby-accent"
+                                className="w-full px-3 py-2 border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                                 placeholder="Nombre legal de la empresa"
                             />
                         </div>
@@ -163,7 +163,7 @@ export function CompanyDataForm({ company, contact, userName }: CompanyDataFormP
                                 value={taxId}
                                 onChange={(e) => setTaxId(e.target.value)}
                                 required
-                                className="w-full px-3 py-2 border border-graphite-gray rounded-md focus:ring-nearby-accent focus:border-nearby-accent"
+                                className="w-full px-3 py-2 border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                                 placeholder="Ej: 123-45678-9"
                             />
                         </div>
@@ -177,7 +177,7 @@ export function CompanyDataForm({ company, contact, userName }: CompanyDataFormP
                                 onChange={(e) => setFiscalAddress(e.target.value)}
                                 required
                                 rows={3}
-                                className="w-full px-3 py-2 border border-graphite-gray rounded-md focus:ring-nearby-accent focus:border-nearby-accent"
+                                className="w-full px-3 py-2 border border-graphite-gray rounded-md focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50"
                                 placeholder="Dirección completa para facturación"
                             />
                         </div>
@@ -185,7 +185,7 @@ export function CompanyDataForm({ company, contact, userName }: CompanyDataFormP
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-3 bg-nearby-accent text-white rounded-md hover:bg-nearby-dark transition-colors disabled:opacity-50"
+                            className="w-full py-3 bg-nearby-dark text-white rounded-md hover:bg-nearby-dark-600 transition-colors disabled:opacity-50"
                         >
                             {loading ? "Guardando..." : "Continuar al Contrato"}
                         </button>
@@ -195,7 +195,7 @@ export function CompanyDataForm({ company, contact, userName }: CompanyDataFormP
                 {step === "terms" && (
                     <div className="space-y-6">
                         <div className="text-center mb-6">
-                            <FileText className="mx-auto text-nearby-accent mb-3" size={40} />
+                            <FileText className="mx-auto text-nearby-dark dark:text-nearby-dark-300 mb-3" size={40} />
                         </div>
 
                         {/* Contract Preview */}
@@ -260,7 +260,7 @@ export function CompanyDataForm({ company, contact, userName }: CompanyDataFormP
                                 id="acceptTerms"
                                 checked={termsAccepted}
                                 onChange={(e) => setTermsAccepted(e.target.checked)}
-                                className="mt-1 h-4 w-4 text-nearby-accent focus:ring-nearby-accent border-graphite-gray rounded"
+                                className="mt-1 h-4 w-4 text-nearby-dark focus:ring-2 focus:ring-nearby-dark/15 border-graphite-gray rounded"
                             />
                             <label htmlFor="acceptTerms" className="text-sm text-dark-slate">
                                 He leído y acepto los Términos y Condiciones del contrato de servicios
@@ -279,7 +279,7 @@ export function CompanyDataForm({ company, contact, userName }: CompanyDataFormP
                             <button
                                 onClick={handleAcceptTerms}
                                 disabled={loading || !termsAccepted}
-                                className="flex-1 py-3 bg-nearby-accent text-white rounded-md hover:bg-nearby-dark transition-colors disabled:opacity-50"
+                                className="flex-1 py-3 bg-nearby-dark text-white rounded-md hover:bg-nearby-dark-600 transition-colors disabled:opacity-50"
                             >
                                 {loading ? "Procesando..." : "Aceptar y Firmar"}
                             </button>
@@ -298,7 +298,7 @@ export function CompanyDataForm({ company, contact, userName }: CompanyDataFormP
                         </p>
                         <button
                             onClick={goToPortal}
-                            className="px-8 py-3 bg-nearby-accent text-white rounded-md hover:bg-nearby-dark transition-colors"
+                            className="px-8 py-3 bg-nearby-dark text-white rounded-md hover:bg-nearby-dark-600 transition-colors"
                         >
                             Volver al Portal
                         </button>

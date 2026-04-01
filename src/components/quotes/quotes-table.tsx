@@ -110,7 +110,7 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
                 </h3>
                 <button
                     onClick={() => setShowModal(true)}
-                    className="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-accent hover:bg-nearby-dark transition-colors"
+                    className="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-nearby-dark-600 transition-colors"
                 >
                     <Plus size={16} className="mr-1" />
                     Nueva Cotización
@@ -122,7 +122,7 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
                     <p className="text-gray-500 mb-4">No hay cotizaciones creadas</p>
                     <button
                         onClick={() => setShowModal(true)}
-                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-accent hover:bg-nearby-dark transition-colors"
+                        className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-nearby-dark-600 transition-colors"
                     >
                         <Plus size={16} className="mr-2" />
                         Crear Primera Cotización
@@ -156,7 +156,7 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <button
                                             onClick={() => handleEdit(quote)}
-                                            className="text-sm font-medium text-nearby-accent hover:text-nearby-dark hover:underline"
+                                            className="text-sm font-medium text-[var(--foreground)] hover:underline"
                                         >
                                             #{String(quote.number).padStart(3, "0")}
                                         </button>

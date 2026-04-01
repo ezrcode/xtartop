@@ -73,7 +73,7 @@ export function BillingHistoryTab({ companyId }: BillingHistoryTabProps) {
     if (loading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Loader2 className="animate-spin text-nearby-accent" size={24} />
+                <Loader2 className="animate-spin text-nearby-dark dark:text-nearby-dark-300" size={24} />
             </div>
         );
     }
@@ -188,7 +188,7 @@ export function BillingHistoryTab({ companyId }: BillingHistoryTabProps) {
                                                         href={item.pdfUrl}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="p-1.5 text-[var(--muted-text)] hover:text-nearby-accent rounded-lg hover:bg-nearby-accent/10 transition-colors"
+                                                        className="p-1.5 text-[var(--muted-text)] hover:text-nearby-dark dark:hover:text-nearby-dark-300 rounded-lg hover:bg-nearby-dark/8 dark:hover:bg-nearby-dark-300/10 transition-colors"
                                                         title="Descargar PDF"
                                                     >
                                                         <Download size={15} />

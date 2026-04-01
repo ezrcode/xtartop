@@ -216,7 +216,7 @@ function PreferencesTab({ user }: { user: ProfileFormProps['user'] }) {
                                 disabled={savingItemsPerPage}
                                 className={`px-4 py-2 text-sm font-medium transition-colors ${
                                     itemsPerPage === value
-                                        ? "bg-nearby-accent text-white"
+                                        ? "bg-nearby-dark text-white"
                                         : "bg-[var(--card-bg)] text-[var(--foreground)] hover:bg-[var(--hover-bg)]"
                                 } ${savingItemsPerPage ? "opacity-50 cursor-not-allowed" : ""}`}
                             >
@@ -257,7 +257,7 @@ function PreferencesTab({ user }: { user: ProfileFormProps['user'] }) {
                                 name="dealsViewPref"
                                 value="TABLE"
                                 defaultChecked={user.dealsViewPref === "TABLE"}
-                                className="h-4 w-4 text-nearby-accent focus:ring-nearby-accent border-gray-300"
+                                className="h-4 w-4 text-nearby-dark focus:ring-nearby-dark/30 border-gray-300"
                             />
                             <div className="ml-3">
                                 <span className="block text-sm font-medium text-[var(--foreground)]">
@@ -275,7 +275,7 @@ function PreferencesTab({ user }: { user: ProfileFormProps['user'] }) {
                                 name="dealsViewPref"
                                 value="KANBAN"
                                 defaultChecked={user.dealsViewPref === "KANBAN"}
-                                className="h-4 w-4 text-nearby-accent focus:ring-nearby-accent border-gray-300"
+                                className="h-4 w-4 text-nearby-dark focus:ring-nearby-dark/30 border-gray-300"
                             />
                             <div className="ml-3">
                                 <span className="block text-sm font-medium text-[var(--foreground)]">
