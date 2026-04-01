@@ -265,8 +265,8 @@ export function CustomerDetail({ company, contacts, userRole }: CustomerDetailPr
                     </div>
 
                     {/* Right Column: Activities */}
-                    <div className="lg:col-span-5 flex flex-col min-h-0">
-                        <div className="bg-[var(--card-bg)] shadow-sm rounded-lg border border-[var(--card-border)] p-4 sm:p-6 flex-1 flex flex-col min-h-[300px] sm:min-h-[400px] max-h-[500px] lg:max-h-[calc(100vh-200px)] overflow-hidden">
+                    <div className="lg:col-span-5 flex flex-col min-h-0 lg:sticky lg:top-24 self-start">
+                        <div className="bg-[var(--card-bg)] shadow-sm rounded-lg border border-[var(--card-border)] p-4 sm:p-6 flex flex-col h-[420px] sm:h-[500px] lg:h-[calc(100vh-150px)] lg:max-h-[calc(100vh-150px)] overflow-hidden">
                             <CompanyActivitiesClient
                                 companyId={company.id}
                                 defaultEmail={company.primaryContact?.email || ""}
