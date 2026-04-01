@@ -37,7 +37,7 @@ interface Props {
 // Loading skeleton for activities
 function ActivitiesSkeleton() {
     return (
-        <div className="space-y-4">
+        <div className="space-y-4 h-full min-h-0">
             <div className="flex items-center justify-between">
                 <div className="h-6 w-32 bg-gray-200 rounded animate-pulse" />
                 <div className="h-8 w-8 bg-gray-200 rounded-full animate-pulse" />
@@ -97,14 +97,16 @@ function CompanyActivitiesClientInner({
     }
 
     return (
-        <CompanyActivitiesSection
-            activities={activities}
-            companyId={companyId}
-            defaultEmail={defaultEmail}
-            clientInvitations={clientInvitations}
-            contractStatus={contractStatus}
-            companyContacts={companyContacts}
-        />
+        <div className="h-full min-h-0">
+            <CompanyActivitiesSection
+                activities={activities}
+                companyId={companyId}
+                defaultEmail={defaultEmail}
+                clientInvitations={clientInvitations}
+                contractStatus={contractStatus}
+                companyContacts={companyContacts}
+            />
+        </div>
     );
 }
 

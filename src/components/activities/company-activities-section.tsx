@@ -382,7 +382,7 @@ export function CompanyActivitiesSection({
     };
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full min-h-0 overflow-hidden">
             {/* Header - Fixed */}
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
@@ -591,7 +591,7 @@ export function CompanyActivitiesSection({
             )}
 
             {/* Timeline - Scrollable (fills remaining space) */}
-            <div className="flex-1 overflow-y-auto pr-1 -mr-1">
+            <div className="flex-1 min-h-0 overflow-y-auto pr-1 -mr-1">
                 {filteredTimelineItems.length === 0 ? (
                     <div className="text-center py-8 text-gray-400 text-xs">
                         {filter === "all" ? "Sin actividades" : "Sin actividades de este tipo"}
