@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { Plus, Pencil, Trash2, Loader2, FileText, Download } from "lucide-react";
 import { BillingType, CountType, CalculatedBase } from "@prisma/client";
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import {
     getSubscriptionBilling,
     updateBillingSettings,
@@ -62,6 +63,24 @@ interface SubscriptionBillingData {
     total: number;
     activeProjects: number;
     activeUsers: number;
+    usageInsights: {
+        users: Array<{
+            key: string;
+            label: string;
+            activated: number;
+            deactivated: number;
+            activeAtEnd: number;
+        }>;
+        projects: Array<{
+            key: string;
+            label: string;
+            activated: number;
+            deactivated: number;
+            activeAtEnd: number;
+        }>;
+        currentMonthLabel: string;
+        previousMonthLabel: string;
+    };
 }
 
 interface SubscriptionBillingSectionProps {
@@ -521,6 +540,38 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                 )}
             </div>
 
+            {billing?.usageInsights && (
+                <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] overflow-hidden">
+                    <div className="px-5 py-4 border-b border-[var(--card-border)] bg-[linear-gradient(135deg,rgba(252,90,52,0.08),rgba(34,197,94,0.04))]">
+                        <h4 className="text-sm font-semibold text-[var(--foreground)]">
+                            Movimiento de licencias
+                        </h4>
+                        <p className="text-xs text-[var(--muted-text)] mt-1">
+                            Comparativo entre {billing.usageInsights.previousMonthLabel} y {billing.usageInsights.currentMonthLabel} para explicar la base operativa del cobro recurrente.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 p-4">
+                        <UsageMiniChartCard
+                            title="Usuarios"
+                            subtitle="Altas e inactivaciones del cliente en los dos meses más recientes."
+                            currentActive={billing.activeUsers}
+                            series={billing.usageInsights.users}
+                            activatedColor="#10b981"
+                            deactivatedColor="#fc5a34"
+                        />
+                        <UsageMiniChartCard
+                            title="Proyectos"
+                            subtitle="Movimiento de proyectos que impacta el licenciamiento mensual."
+                            currentActive={billing.activeProjects}
+                            series={billing.usageInsights.projects}
+                            activatedColor="#3b82f6"
+                            deactivatedColor="#f97316"
+                        />
+                    </div>
+                </div>
+            )}
+
             {/* Add/Edit Item Modal - Using Portal to render outside parent form */}
             {modalOpen && typeof document !== 'undefined' && createPortal(
                 <SubscriptionItemModal
@@ -560,6 +611,108 @@ export function SubscriptionBillingSection({ companyId }: SubscriptionBillingSec
                 </div>,
                 document.body
             )}
+        </div>
+    );
+}
+
+function UsageMiniChartCard({
+    title,
+    subtitle,
+    currentActive,
+    series,
+    activatedColor,
+    deactivatedColor,
+}: {
+    title: string;
+    subtitle: string;
+    currentActive: number;
+    series: Array<{
+        key: string;
+        label: string;
+        activated: number;
+        deactivated: number;
+        activeAtEnd: number;
+    }>;
+    activatedColor: string;
+    deactivatedColor: string;
+}) {
+    const maxValue = Math.max(
+        1,
+        ...series.flatMap((point) => [point.activated, point.deactivated, point.activeAtEnd])
+    );
+
+    return (
+        <div className="rounded-xl border border-[var(--card-border)] bg-[var(--surface-1)] p-4">
+            <div className="flex items-start justify-between gap-3 mb-4">
+                <div>
+                    <h5 className="text-sm font-semibold text-[var(--foreground)]">{title}</h5>
+                    <p className="text-xs text-[var(--muted-text)] mt-1 max-w-md">{subtitle}</p>
+                </div>
+                <div className="shrink-0 rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] px-3 py-2 text-right shadow-sm">
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-[var(--muted-text)]">Activos hoy</p>
+                    <p className="text-xl font-bold text-[var(--foreground)]">{currentActive}</p>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-4">
+                {series.map((point) => (
+                    <div key={point.key} className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-3 py-3">
+                        <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">{point.label}</p>
+                        <div className="mt-2 flex items-center justify-between text-sm">
+                            <span className="text-[var(--muted-text)]">Activos al cierre</span>
+                            <span className="font-semibold text-[var(--foreground)]">{point.activeAtEnd}</span>
+                        </div>
+                        <div className="mt-2 flex items-center justify-between text-sm">
+                            <span className="text-[var(--muted-text)]">Activados</span>
+                            <span className="font-semibold" style={{ color: activatedColor }}>{point.activated}</span>
+                        </div>
+                        <div className="mt-1 flex items-center justify-between text-sm">
+                            <span className="text-[var(--muted-text)]">Inactivados</span>
+                            <span className="font-semibold" style={{ color: deactivatedColor }}>{point.deactivated}</span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <div className="h-48 rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] px-3 py-3">
+                <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={series} barCategoryGap={18}>
+                        <CartesianGrid stroke="rgba(148, 163, 184, 0.16)" vertical={false} />
+                        <XAxis
+                            dataKey="label"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fontSize: 11, fill: "var(--muted-text)" }}
+                        />
+                        <YAxis
+                            allowDecimals={false}
+                            axisLine={false}
+                            tickLine={false}
+                            domain={[0, maxValue]}
+                            tick={{ fontSize: 11, fill: "var(--muted-text)" }}
+                            width={26}
+                        />
+                        <Tooltip
+                            cursor={{ fill: "rgba(148, 163, 184, 0.08)" }}
+                            contentStyle={{
+                                borderRadius: 12,
+                                border: "1px solid rgba(148,163,184,0.24)",
+                                backgroundColor: "rgba(15, 23, 42, 0.96)",
+                                color: "#f8fafc",
+                            }}
+                            formatter={(value: number | string | undefined, name: string | undefined) => {
+                                const numericValue = typeof value === "number" ? value : Number(value || 0);
+                                if (name === "activated") return [numericValue, "Activados"];
+                                if (name === "deactivated") return [numericValue, "Inactivados"];
+                                return [numericValue, "Activos al cierre"];
+                            }}
+                            labelFormatter={(label) => `Mes: ${label}`}
+                        />
+                        <Bar dataKey="activated" name="activated" radius={[6, 6, 0, 0]} fill={activatedColor} />
+                        <Bar dataKey="deactivated" name="deactivated" radius={[6, 6, 0, 0]} fill={deactivatedColor} />
+                    </BarChart>
+                </ResponsiveContainer>
+            </div>
         </div>
     );
 }

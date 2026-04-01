@@ -6,6 +6,95 @@ import { revalidatePath } from "next/cache";
 import { getCurrentWorkspace } from "./workspace";
 import { BillingType, CountType, CalculatedBase } from "@prisma/client";
 
+type LifecycleEventType = "ACTIVATED" | "DEACTIVATED";
+
+interface MonthUsagePoint {
+    key: string;
+    label: string;
+    activated: number;
+    deactivated: number;
+    activeAtEnd: number;
+}
+
+function parseUserLifecycleStatus(subject: string | null): LifecycleEventType | null {
+    if (!subject) return null;
+    const normalized = subject.toLowerCase().trim();
+    if (normalized.startsWith("usuario activado")) return "ACTIVATED";
+    if (normalized.startsWith("usuario inactivado")) return "DEACTIVATED";
+    if (normalized.startsWith("usuario eliminado")) return "DEACTIVATED";
+    return null;
+}
+
+function parseProjectLifecycleStatus(subject: string | null): LifecycleEventType | null {
+    if (!subject) return null;
+    const normalized = subject.toLowerCase().trim();
+    if (normalized.startsWith("proyecto activado")) return "ACTIVATED";
+    if (normalized.startsWith("proyecto inactivado")) return "DEACTIVATED";
+    if (normalized.startsWith("proyecto eliminado")) return "DEACTIVATED";
+    return null;
+}
+
+function getMonthKey(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    return `${year}-${month}`;
+}
+
+function getMonthLabel(date: Date): string {
+    return date.toLocaleDateString("es-DO", { month: "short", year: "numeric" });
+}
+
+function buildMonthUsageSeries(
+    now: Date,
+    currentActive: number,
+    creationDates: Date[],
+    statusEvents: Array<{ date: Date; eventType: LifecycleEventType }>
+): MonthUsagePoint[] {
+    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const buckets = [
+        { start: previousMonthStart, end: currentMonthStart },
+        { start: currentMonthStart, end: nextMonthStart },
+    ];
+
+    const allEvents = [
+        ...creationDates.map((date) => ({ date, eventType: "ACTIVATED" as const })),
+        ...statusEvents,
+    ].sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    let activeAtStartOfPrevious = currentActive;
+    for (const event of allEvents) {
+        if (event.date >= previousMonthStart) {
+            activeAtStartOfPrevious = Math.max(
+                0,
+                activeAtStartOfPrevious + (event.eventType === "ACTIVATED" ? -1 : 1)
+            );
+        }
+    }
+
+    let runningActive = activeAtStartOfPrevious;
+
+    return buckets.map(({ start, end }) => {
+        const activated = allEvents.filter(
+            (event) => event.eventType === "ACTIVATED" && event.date >= start && event.date < end
+        ).length;
+        const deactivated = allEvents.filter(
+            (event) => event.eventType === "DEACTIVATED" && event.date >= start && event.date < end
+        ).length;
+
+        runningActive = Math.max(0, runningActive + activated - deactivated);
+
+        return {
+            key: getMonthKey(start),
+            label: getMonthLabel(start),
+            activated,
+            deactivated,
+            activeAtEnd: runningActive,
+        };
+    });
+}
+
 // Get or create subscription billing for a company
 export async function getSubscriptionBilling(companyId: string) {
     const session = await auth();
@@ -31,6 +120,53 @@ export async function getSubscriptionBilling(companyId: string) {
     });
 
     if (!company) return null;
+
+    const now = new Date();
+    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+    const [allClientUsers, userActivities, allProjects, projectActivities] = await Promise.all([
+        prisma.clientUser.findMany({
+            where: { companyId },
+            select: {
+                createdAt: true,
+                status: true,
+            },
+        }),
+        prisma.activity.findMany({
+            where: {
+                companyId,
+                workspaceId: workspace.id,
+                type: "CLIENT_USER",
+                createdAt: { gte: previousMonthStart },
+            },
+            select: {
+                createdAt: true,
+                emailSubject: true,
+            },
+            orderBy: { createdAt: "asc" },
+        }),
+        prisma.project.findMany({
+            where: { companyId },
+            select: {
+                createdAt: true,
+                status: true,
+            },
+        }),
+        prisma.activity.findMany({
+            where: {
+                companyId,
+                workspaceId: workspace.id,
+                type: "PROJECT",
+                createdAt: { gte: previousMonthStart },
+            },
+            select: {
+                createdAt: true,
+                emailSubject: true,
+            },
+            orderBy: { createdAt: "asc" },
+        }),
+    ]);
 
     // Get or create subscription billing
     let billing = await prisma.subscriptionBilling.findUnique({
@@ -84,12 +220,42 @@ export async function getSubscriptionBilling(companyId: string) {
 
     const total = itemsWithQuantities.reduce((sum, item) => sum + item.subtotal, 0);
 
+    const userUsage = buildMonthUsageSeries(
+        now,
+        allClientUsers.filter((clientUser) => clientUser.status === "ACTIVE").length,
+        allClientUsers.map((clientUser) => clientUser.createdAt),
+        userActivities
+            .map((activity) => ({
+                date: activity.createdAt,
+                eventType: parseUserLifecycleStatus(activity.emailSubject),
+            }))
+            .filter((activity): activity is { date: Date; eventType: LifecycleEventType } => Boolean(activity.eventType))
+    );
+
+    const projectUsage = buildMonthUsageSeries(
+        now,
+        allProjects.filter((project) => project.status === "ACTIVE").length,
+        allProjects.map((project) => project.createdAt),
+        projectActivities
+            .map((activity) => ({
+                date: activity.createdAt,
+                eventType: parseProjectLifecycleStatus(activity.emailSubject),
+            }))
+            .filter((activity): activity is { date: Date; eventType: LifecycleEventType } => Boolean(activity.eventType))
+    );
+
     return {
         ...billing,
         items: itemsWithQuantities,
         total,
         activeProjects: company.projects.length,
         activeUsers: company.clientUsers.length,
+        usageInsights: {
+            users: userUsage,
+            projects: projectUsage,
+            currentMonthLabel: getMonthLabel(currentMonthStart),
+            previousMonthLabel: getMonthLabel(previousMonthStart),
+        },
     };
 }
 
