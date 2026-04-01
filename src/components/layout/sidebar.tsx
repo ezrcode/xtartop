@@ -16,6 +16,7 @@ import {
     BarChart3,
     ShoppingCart,
     CreditCard,
+    HeartHandshake,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { logout } from "@/actions/auth";
@@ -43,6 +44,10 @@ const comercialMenuItems = [
 const administrativoMenuItems = [
     { name: "Suscripciones", href: "/app/subscriptions", icon: CreditCard },
     { name: "Órdenes de Compra", href: "/app/purchases", icon: ShoppingCart },
+];
+
+const customerSuccessMenuItems = [
+    { name: "Clientes", href: "/app/customers", icon: HeartHandshake },
 ];
 
 const reportesMenuItems = [
@@ -214,6 +219,10 @@ export function Sidebar({ userRole, user, isMobileOpen, setIsMobileOpen }: Sideb
                     {administrativoMenuItems.map((item) => <MobileNavItem key={item.name} item={item} />)}
 
                     <div className="h-px bg-[var(--card-border)] my-3 mx-2" />
+                    <p className="px-3 mb-1 text-[11px] font-medium uppercase tracking-wider text-[var(--muted-text)]">Customer Success</p>
+                    {customerSuccessMenuItems.map((item) => <MobileNavItem key={item.name} item={item} />)}
+
+                    <div className="h-px bg-[var(--card-border)] my-3 mx-2" />
                     {reportesMenuItems.map((item) => <MobileNavItem key={item.name} item={item} />)}
 
                     {isAdmin && (
@@ -315,6 +324,9 @@ export function Sidebar({ userRole, user, isMobileOpen, setIsMobileOpen }: Sideb
 
                     <SectionDivider label="Administrativo" />
                     {administrativoMenuItems.map((item) => <NavItem key={item.name} item={item} />)}
+
+                    <SectionDivider label="Customer Success" />
+                    {customerSuccessMenuItems.map((item) => <NavItem key={item.name} item={item} />)}
 
                     <SectionDivider label="" />
                     {reportesMenuItems.map((item) => <NavItem key={item.name} item={item} />)}
