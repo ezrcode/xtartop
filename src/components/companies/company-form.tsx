@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import Link from "next/link";
-import { Save, Trash2, ArrowLeft, Loader2, ChevronDown, Search, X, Building2, Users, CreditCard, Ticket, Download } from "lucide-react";
+import { Save, Trash2, ArrowLeft, Loader2, ChevronDown, Search, X, Building2, Users, FileText, Ticket, Download } from "lucide-react";
 import { createCompanyAction, updateCompanyAction, deleteCompany, CompanyState } from "@/actions/companies";
 import { Company, Contact, CompanyStatus, CompanyType, ClientInvitation, Project, ClientUser } from "@prisma/client";
 import { CompanyActivitiesClient } from "../activities/company-activities-client";
@@ -475,8 +475,8 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                             : "border-transparent text-[var(--muted-text)] hover:text-[var(--foreground)]"
                                     }`}
                                 >
-                                    <CreditCard size={16} className="shrink-0" />
-                                    <span className="hidden sm:inline">Suscripción</span>
+                                    <FileText size={16} className="shrink-0" />
+                                    <span className="hidden sm:inline">Contrato</span>
                                 </button>
                                 <button
                                     type="button"
@@ -569,7 +569,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                     readOnly
                                                     className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm bg-[var(--surface-2)] text-[var(--muted-text)] cursor-not-allowed"
                                                 />
-                                                <p className="mt-1 text-xs text-[var(--muted-text)]">Editable en la pestaña Suscripción</p>
+                                                <p className="mt-1 text-xs text-[var(--muted-text)]">Editable en la pestaña Contrato</p>
                                             </div>
 
                                             <div className="sm:col-span-3">

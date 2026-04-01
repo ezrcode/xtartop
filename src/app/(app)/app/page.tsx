@@ -238,7 +238,7 @@ export default async function DashboardPage() {
                 {/* Row 1 — CRM Stats */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4">
                     <StatCard
-                        label="Clientes"
+                        label="Clientes Suscriptores"
                         value={stats?.clientCompaniesCount ?? 0}
                         description={`${stats?.allCompaniesCount ?? 0} empresas total`}
                         icon={Building2}
