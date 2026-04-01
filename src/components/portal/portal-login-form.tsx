@@ -1,31 +1,31 @@
 "use client";
 
-import { useFormStatus } from "react-dom";
-import { useActionState } from "react";
+import { useState, useTransition, type FormEvent } from "react";
 import { portalLogin } from "@/actions/portal-auth";
 import Link from "next/link";
 
-function SubmitButton() {
-    const { pending } = useFormStatus();
-    return (
-        <button
-            type="submit"
-            disabled={pending}
-            className="w-full flex justify-center items-center min-h-[44px] px-4 border border-transparent rounded-md shadow-sm text-base sm:text-sm font-medium text-white bg-nearby-dark hover:bg-nearby-dark-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nearby-dark/15 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-            {pending ? "Ingresando..." : "Ingresar"}
-        </button>
-    );
-}
-
 export function PortalLoginForm() {
-    const [state, formAction] = useActionState(portalLogin, { error: null });
+    const [error, setError] = useState<string | null>(null);
+    const [isPending, startTransition] = useTransition();
+
+    function handleSubmit(e: FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        const form = e.currentTarget;
+        const formData = new FormData(form);
+        setError(null);
+        startTransition(async () => {
+            const result = await portalLogin({ error: null }, formData);
+            if (result?.error) {
+                setError(result.error);
+            }
+        });
+    }
 
     return (
-        <form action={formAction} className="space-y-6">
-            {state?.error && (
+        <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
                 <div className="bg-error-red/10 border border-error-red text-error-red px-4 py-3 rounded-md text-sm">
-                    {state.error}
+                    {error}
                 </div>
             )}
 
@@ -59,7 +59,13 @@ export function PortalLoginForm() {
                 />
             </div>
 
-            <SubmitButton />
+            <button
+                type="submit"
+                disabled={isPending}
+                className="w-full flex justify-center items-center min-h-[44px] px-4 border border-transparent rounded-md shadow-sm text-base sm:text-sm font-medium text-white bg-nearby-dark hover:bg-nearby-dark-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nearby-dark/15 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+                {isPending ? "Ingresando..." : "Ingresar"}
+            </button>
 
             <div className="text-center">
                 <Link href="/login" className="text-sm text-nearby-dark dark:text-nearby-dark-300 hover:text-nearby-dark-600">
