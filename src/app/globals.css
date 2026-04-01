@@ -56,104 +56,104 @@
 }
 
 :root {
-  --background: #f3f6fa;
-  --foreground: #1f2a37;
+  --background: #f1f4f7;
+  --foreground: #2d3e50;
   --card-bg: #ffffff;
-  --card-border: #d6dde8;
+  --card-border: #c9d9de;
   --input-bg: #ffffff;
-  --input-border: #c9d4e2;
-  --hover-bg: #edf2f8;
-  --muted-text: #5f6f83;
-  --skeleton-base: #f0f0f0;
-  --skeleton-shine: #e0e0e0;
+  --input-border: #c9d9de;
+  --hover-bg: #e8edf2;
+  --muted-text: #667892;
+  --skeleton-base: #e8edf2;
+  --skeleton-shine: #dce3eb;
   /* Surface levels for depth (light mode) */
-  --surface-0: #f3f6fa;
+  --surface-0: #f1f4f7;
   --surface-1: #ffffff;
-  --surface-2: #f7f9fc;
-  --surface-3: #eef3f9;
+  --surface-2: #f5f7fa;
+  --surface-3: #ebeff4;
   /* Accent color (same in light mode) */
   --accent-on-dark: #fc5a34;
-  --bg-gradient: linear-gradient(180deg, #f9fbfe 0%, #f1f5fb 100%);
+  --bg-gradient: linear-gradient(180deg, #f5f7fa 0%, #edf0f4 100%);
   /* Compatibility tokens for legacy Tailwind grays */
-  --legacy-surface-50: #f9fafb;
-  --legacy-surface-100: #f3f4f6;
-  --legacy-surface-200: #e5e7eb;
-  --legacy-gray-800: #1f2937;
-  --legacy-gray-700: #374151;
-  --legacy-gray-600: #4b5563;
-  --legacy-gray-500: #6b7280;
-  --legacy-gray-400: #9ca3af;
-  --legacy-gray-300: #d1d5db;
+  --legacy-surface-50: #f5f7fa;
+  --legacy-surface-100: #ebeff4;
+  --legacy-surface-200: #dce3eb;
+  --legacy-gray-800: #2d3e50;
+  --legacy-gray-700: #3d5168;
+  --legacy-gray-600: #4d6480;
+  --legacy-gray-500: #667892;
+  --legacy-gray-400: #9aa8b8;
+  --legacy-gray-300: #c9d9de;
 }
 
 .dark {
-  --background: #0a1017;
-  --foreground: #edf3fb;
-  --card-bg: #111a25;
-  --card-border: #253449;
-  --input-bg: #0f1823;
-  --input-border: #2c3c53;
-  --hover-bg: #192636;
-  --muted-text: #b2c0d3;
-  --skeleton-base: #121d2a;
-  --skeleton-shine: #1a2a3d;
+  --background: #0c1219;
+  --foreground: #e4ecf4;
+  --card-bg: #131d28;
+  --card-border: #2d3e50;
+  --input-bg: #101a24;
+  --input-border: #2d3e50;
+  --hover-bg: #1a2838;
+  --muted-text: #9aa8b8;
+  --skeleton-base: #141e2a;
+  --skeleton-shine: #1c2a3a;
   /* Surface levels for depth */
-  --surface-0: #0a1017;
-  --surface-1: #111a25;
-  --surface-2: #162332;
-  --surface-3: #1d2d40;
+  --surface-0: #0c1219;
+  --surface-1: #131d28;
+  --surface-2: #1a2838;
+  --surface-3: #243242;
   /* Adjusted accent for better contrast on dark */
   --accent-on-dark: #ff8a6a;
   --bg-gradient:
-    radial-gradient(1200px 380px at 15% -20%, rgba(252, 90, 52, 0.12), transparent 48%),
-    radial-gradient(900px 320px at 85% -25%, rgba(59, 130, 246, 0.09), transparent 45%),
-    linear-gradient(180deg, #0a1017 0%, #090f16 100%);
+    radial-gradient(1200px 380px at 15% -20%, rgba(252, 90, 52, 0.06), transparent 48%),
+    radial-gradient(900px 320px at 85% -25%, rgba(45, 62, 80, 0.15), transparent 45%),
+    linear-gradient(180deg, #0c1219 0%, #0a0f16 100%);
   /* Compatibility tokens for legacy Tailwind grays */
   --legacy-surface-50: var(--surface-2);
   --legacy-surface-100: #1e2a3a;
-  --legacy-surface-200: #2a3a4f;
-  --legacy-gray-800: #e2eaf6;
-  --legacy-gray-700: #d1dcec;
-  --legacy-gray-600: #c2cfe0;
-  --legacy-gray-500: #b2c0d3;
-  --legacy-gray-400: #9cafc5;
-  --legacy-gray-300: #8ea2b8;
+  --legacy-surface-200: #2d3e50;
+  --legacy-gray-800: #e4ecf4;
+  --legacy-gray-700: #c9d9de;
+  --legacy-gray-600: #b3c1ce;
+  --legacy-gray-500: #9aa8b8;
+  --legacy-gray-400: #8294a7;
+  --legacy-gray-300: #667892;
 }
 
 /* System preference detection */
 @media (prefers-color-scheme: dark) {
   .theme-system {
-    --background: #0a1017;
-    --foreground: #edf3fb;
-    --card-bg: #111a25;
-    --card-border: #253449;
-    --input-bg: #0f1823;
-    --input-border: #2c3c53;
-    --hover-bg: #192636;
-    --muted-text: #b2c0d3;
-    --skeleton-base: #121d2a;
-    --skeleton-shine: #1a2a3d;
+    --background: #0c1219;
+    --foreground: #e4ecf4;
+    --card-bg: #131d28;
+    --card-border: #2d3e50;
+    --input-bg: #101a24;
+    --input-border: #2d3e50;
+    --hover-bg: #1a2838;
+    --muted-text: #9aa8b8;
+    --skeleton-base: #141e2a;
+    --skeleton-shine: #1c2a3a;
     /* Surface levels for depth */
-    --surface-0: #0a1017;
-    --surface-1: #111a25;
-    --surface-2: #162332;
-    --surface-3: #1d2d40;
+    --surface-0: #0c1219;
+    --surface-1: #131d28;
+    --surface-2: #1a2838;
+    --surface-3: #243242;
     /* Adjusted accent for better contrast on dark */
     --accent-on-dark: #ff8a6a;
     --bg-gradient:
-      radial-gradient(1200px 380px at 15% -20%, rgba(252, 90, 52, 0.12), transparent 48%),
-      radial-gradient(900px 320px at 85% -25%, rgba(59, 130, 246, 0.09), transparent 45%),
-      linear-gradient(180deg, #0a1017 0%, #090f16 100%);
+      radial-gradient(1200px 380px at 15% -20%, rgba(252, 90, 52, 0.06), transparent 48%),
+      radial-gradient(900px 320px at 85% -25%, rgba(45, 62, 80, 0.15), transparent 45%),
+      linear-gradient(180deg, #0c1219 0%, #0a0f16 100%);
     /* Compatibility tokens for legacy Tailwind grays */
     --legacy-surface-50: var(--surface-2);
     --legacy-surface-100: #1e2a3a;
-    --legacy-surface-200: #2a3a4f;
-    --legacy-gray-800: #e2eaf6;
-    --legacy-gray-700: #d1dcec;
-    --legacy-gray-600: #c2cfe0;
-    --legacy-gray-500: #b2c0d3;
-    --legacy-gray-400: #9cafc5;
-    --legacy-gray-300: #8ea2b8;
+    --legacy-surface-200: #2d3e50;
+    --legacy-gray-800: #e4ecf4;
+    --legacy-gray-700: #c9d9de;
+    --legacy-gray-600: #b3c1ce;
+    --legacy-gray-500: #9aa8b8;
+    --legacy-gray-400: #8294a7;
+    --legacy-gray-300: #667892;
   }
 }
 
@@ -300,17 +300,17 @@ button,
 /* Mobile/PWA ergonomics (iOS-first) */
 @media (max-width: 767px) {
   :root {
-    --card-border: #c8d4e3;
-    --surface-2: #f4f8fd;
-    --surface-3: #e9f0f9;
-    --muted-text: #526983;
+    --card-border: #b8cad2;
+    --surface-2: #edf0f4;
+    --surface-3: #e3e8ee;
+    --muted-text: #4d6480;
   }
 
   .dark {
-    --card-border: #2d4260;
-    --surface-2: #18283a;
-    --surface-3: #22354b;
-    --muted-text: #bccce0;
+    --card-border: #3d5168;
+    --surface-2: #1a2838;
+    --surface-3: #243242;
+    --muted-text: #a3b3c3;
   }
 
   input,
