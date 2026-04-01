@@ -5,7 +5,7 @@ import { useFormState, useFormStatus } from "react-dom";
 import Link from "next/link";
 import { Save, Trash2, ArrowLeft, Loader2, ChevronDown, Search, X, Building2, Users, CreditCard, Ticket, Download } from "lucide-react";
 import { createCompanyAction, updateCompanyAction, deleteCompany, CompanyState } from "@/actions/companies";
-import { Company, Contact, CompanyStatus, ClientInvitation, Project, ClientUser } from "@prisma/client";
+import { Company, Contact, CompanyStatus, CompanyType, ClientInvitation, Project, ClientUser } from "@prisma/client";
 import { CompanyActivitiesClient } from "../activities/company-activities-client";
 import { ProjectsTable } from "./projects-table";
 import { ClientUsersTable } from "./client-users-table";
@@ -148,7 +148,8 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
         linkedinUrl: company?.linkedinUrl || "",
         primaryContactId: company?.primaryContactId || "null",
         origin: company?.origin || "null",
-        status: company?.status || "PROSPECTO",
+        status: company?.status || "ACTIVO",
+        type: company?.type || "PROSPECTO",
         logoUrl: company?.logoUrl || "",
         quoteId: company?.quoteId || "",
         quoteFileUrl: company?.quoteFileUrl || "",
@@ -506,6 +507,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                 <input type="hidden" name="primaryContactId" value={formData.primaryContactId} />
                                 <input type="hidden" name="origin" value={formData.origin} />
                                 <input type="hidden" name="status" value={formData.status} />
+                                <input type="hidden" name="type" value={formData.type} />
                                 <input type="hidden" name="logoUrl" value={formData.logoUrl} />
                                 <input type="hidden" name="quoteId" value={formData.quoteId} />
                                 <input type="hidden" name="quoteFileUrl" value={formData.quoteFileUrl} />
@@ -771,7 +773,7 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                         </div>
 
                                         <div className="border-t border-[var(--card-border)] pt-5">
-                                            <h3 className="text-base sm:text-lg font-medium text-[var(--foreground)] mb-4">Estado y Metadatos</h3>
+                                            <h3 className="text-base sm:text-lg font-medium text-[var(--foreground)] mb-4">Estado y Clasificación</h3>
                                             <div className="grid grid-cols-1 gap-4 sm:gap-y-5 sm:gap-x-4 sm:grid-cols-6">
                                                 <div className="sm:col-span-3">
                                                     <label htmlFor="status-input" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
@@ -780,14 +782,47 @@ export function CompanyForm({ company, contacts, isEditMode = false, userRole = 
                                                     <select
                                                         id="status-input"
                                                         value={formData.status}
-                                                        onChange={(e) => updateField("status", e.target.value)}
+                                                        onChange={(e) => {
+                                                            const newStatus = e.target.value;
+                                                            updateField("status", newStatus);
+                                                            const firstType = newStatus === "ACTIVO" ? "PROSPECTO" : "NO_CALIFICA";
+                                                            updateField("type", firstType);
+                                                        }}
                                                         className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors bg-[var(--card-bg)]"
                                                     >
-                                                        {Object.values(CompanyStatus).map((status) => (
-                                                            <option key={status} value={status}>
-                                                                {status}
-                                                            </option>
-                                                        ))}
+                                                        <option value="ACTIVO">Activo</option>
+                                                        <option value="INACTIVO">Inactivo</option>
+                                                    </select>
+                                                </div>
+                                                <div className="sm:col-span-3">
+                                                    <label htmlFor="type-input" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
+                                                        Tipo
+                                                    </label>
+                                                    <select
+                                                        id="type-input"
+                                                        value={formData.type}
+                                                        onChange={(e) => updateField("type", e.target.value)}
+                                                        className="block w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors bg-[var(--card-bg)]"
+                                                    >
+                                                        {formData.status === "ACTIVO" ? (
+                                                            <>
+                                                                <option value="PROSPECTO">Prospecto</option>
+                                                                <option value="POTENCIAL">Potencial</option>
+                                                                <option value="CLIENTE_SUSCRIPTOR">Cliente Suscriptor</option>
+                                                                <option value="CLIENTE_ONETIME">Cliente One-Time</option>
+                                                                <option value="PROVEEDOR">Proveedor</option>
+                                                                <option value="INVERSIONISTA">Inversionista</option>
+                                                                <option value="COMPETIDOR">Competidor</option>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <option value="NO_CALIFICA">No Califica</option>
+                                                                <option value="NO_RESPONDIO">No Respondió</option>
+                                                                <option value="DESISTIO">Desistió</option>
+                                                                <option value="RESCINDIO_CONTRATO">Rescindió Contrato</option>
+                                                                <option value="SIN_MOTIVO">Sin Motivo</option>
+                                                            </>
+                                                        )}
                                                     </select>
                                                 </div>
 

@@ -1,4 +1,4 @@
-import { PrismaClient, CompanyOrigin, CompanyStatus } from '@prisma/client';
+import { PrismaClient, CompanyOrigin, CompanyStatus, CompanyType } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -62,16 +62,17 @@ function mapOrigin(origin: string): CompanyOrigin | null {
   return mapping[origin] || null;
 }
 
-// Mapeo de status
-function mapStatus(status: string): CompanyStatus {
-  const mapping: Record<string, CompanyStatus> = {
-    'PROSPECTO': 'PROSPECTO',
-    'POTENCIAL': 'POTENCIAL',
-    'CLIENTE': 'CLIENTE',
-    'DESCARTADA': 'DESCARTADA',
-    'INACTIVA': 'INACTIVA',
+// Mapeo de status (old → new status + type)
+function mapStatusAndType(status: string): { status: CompanyStatus; type: CompanyType } {
+  const mapping: Record<string, { status: CompanyStatus; type: CompanyType }> = {
+    'PROSPECTO': { status: 'ACTIVO', type: 'PROSPECTO' },
+    'POTENCIAL': { status: 'ACTIVO', type: 'POTENCIAL' },
+    'CLIENTE': { status: 'ACTIVO', type: 'CLIENTE_SUSCRIPTOR' },
+    'PROVEEDOR': { status: 'ACTIVO', type: 'PROVEEDOR' },
+    'DESCARTADA': { status: 'INACTIVO', type: 'NO_CALIFICA' },
+    'INACTIVA': { status: 'INACTIVO', type: 'SIN_MOTIVO' },
   };
-  return mapping[status] || 'PROSPECTO';
+  return mapping[status] || { status: 'ACTIVO', type: 'PROSPECTO' };
 }
 
 async function main() {
@@ -141,7 +142,7 @@ async function main() {
           instagramUrl: record.instagramUrl || null,
           linkedinUrl: record.linkedinUrl || null,
           origin: mapOrigin(record.origin),
-          status: mapStatus(record.status),
+          ...mapStatusAndType(record.status),
           termsAccepted: record.termsAccepted?.toUpperCase() === 'TRUE',
           termsAcceptedAt: termsAcceptedAt,
           termsAcceptedByName: record.termsAcceptedByName || null,

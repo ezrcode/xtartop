@@ -51,18 +51,18 @@ async function getBasicStats(workspaceId: string) {
             clientCompanies,
         ] = await Promise.all([
             prisma.company.count({ where: { workspaceId } }),
-            prisma.company.count({ where: { workspaceId, status: "CLIENTE" } }),
+            prisma.company.count({ where: { workspaceId, status: "ACTIVO", type: "CLIENTE_SUSCRIPTOR" } }),
             prisma.contact.count({ where: { workspaceId } }),
             prisma.deal.count({ where: { workspaceId } }),
             prisma.project.count({
                 where: {
-                    company: { workspaceId, status: "CLIENTE" },
+                    company: { workspaceId, status: "ACTIVO", type: "CLIENTE_SUSCRIPTOR" },
                     status: "ACTIVE",
                 },
             }),
             prisma.clientUser.count({
                 where: {
-                    company: { workspaceId, status: "CLIENTE" },
+                    company: { workspaceId, status: "ACTIVO", type: "CLIENTE_SUSCRIPTOR" },
                     status: "ACTIVE",
                 },
             }),
@@ -74,7 +74,7 @@ async function getBasicStats(workspaceId: string) {
                 _sum: { value: true },
             }),
             prisma.company.findMany({
-                where: { workspaceId, status: "CLIENTE", subscriptionBilling: { isNot: null } },
+                where: { workspaceId, status: "ACTIVO", type: "CLIENTE_SUSCRIPTOR", subscriptionBilling: { isNot: null } },
                 include: {
                     subscriptionBilling: { include: { items: true } },
                     projects: { where: { status: "ACTIVE" }, select: { id: true } },

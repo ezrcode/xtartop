@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { CompanyStatus, CompanyOrigin } from "@prisma/client";
+import { CompanyStatus, CompanyType, CompanyOrigin } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -27,13 +27,20 @@ const CompanySchema = z.object({
         "OUTBOUND_MARKETING",
         "EVENTO_PRESENCIAL"
     ]).nullable().optional(),
-    status: z.enum([
+    status: z.enum(["ACTIVO", "INACTIVO"]),
+    type: z.enum([
         "PROSPECTO",
         "POTENCIAL",
-        "CLIENTE",
+        "CLIENTE_SUSCRIPTOR",
+        "CLIENTE_ONETIME",
         "PROVEEDOR",
-        "DESCARTADA",
-        "INACTIVA"
+        "INVERSIONISTA",
+        "COMPETIDOR",
+        "NO_CALIFICA",
+        "NO_RESPONDIO",
+        "DESISTIO",
+        "RESCINDIO_CONTRATO",
+        "SIN_MOTIVO",
     ]),
     initialProjects: z.number().int().min(0).optional(),
     initialUsers: z.number().int().min(0).optional(),
@@ -57,6 +64,7 @@ export type CompanyState = {
         primaryContactId?: string[];
         origin?: string[];
         status?: string[];
+        type?: string[];
     };
     message?: string;
 };
@@ -170,11 +178,11 @@ export async function createCompanyAction(prevState: CompanyState | undefined, f
         primaryContactId: formData.get("primaryContactId") === "null" ? null : formData.get("primaryContactId") || null,
         origin: formData.get("origin") === "null" ? null : formData.get("origin") || null,
         status: formData.get("status"),
+        type: formData.get("type"),
         initialProjects: initialProjectsValue ? parseInt(initialProjectsValue as string, 10) : 0,
         initialUsers: initialUsersValue ? parseInt(initialUsersValue as string, 10) : 0,
         quoteId: formData.get("quoteId") || "",
         quoteFileUrl: formData.get("quoteFileUrl") || "",
-        // Contract data fields
         legalName: formData.get("legalName") || "",
         fiscalAddress: formData.get("fiscalAddress") || "",
     };
@@ -212,9 +220,35 @@ export async function createCompanyAction(prevState: CompanyState | undefined, f
     }
 }
 
+const STATUS_LABELS: Record<string, string> = {
+    ACTIVO: "Activo",
+    INACTIVO: "Inactivo",
+};
+
+const TYPE_LABELS: Record<string, string> = {
+    PROSPECTO: "Prospecto",
+    POTENCIAL: "Potencial",
+    CLIENTE_SUSCRIPTOR: "Cliente Suscriptor",
+    CLIENTE_ONETIME: "Cliente One-Time",
+    PROVEEDOR: "Proveedor",
+    INVERSIONISTA: "Inversionista",
+    COMPETIDOR: "Competidor",
+    NO_CALIFICA: "No Califica",
+    NO_RESPONDIO: "No Respondió",
+    DESISTIO: "Desistió",
+    RESCINDIO_CONTRATO: "Rescindió Contrato",
+    SIN_MOTIVO: "Sin Motivo",
+};
+
 export async function updateCompanyAction(id: string, prevState: CompanyState | undefined, formData: FormData): Promise<CompanyState> {
     const session = await auth();
     if (!session?.user?.email) redirect("/login");
+
+    const user = await prisma.user.findUnique({ where: { email: session.user.email } });
+    if (!user) redirect("/login");
+
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) redirect("/login");
 
     const initialProjectsValue = formData.get("initialProjects");
     const initialUsersValue = formData.get("initialUsers");
@@ -232,11 +266,11 @@ export async function updateCompanyAction(id: string, prevState: CompanyState | 
         primaryContactId: formData.get("primaryContactId") === "null" ? null : formData.get("primaryContactId") || null,
         origin: formData.get("origin") === "null" ? null : formData.get("origin") || null,
         status: formData.get("status"),
+        type: formData.get("type"),
         initialProjects: initialProjectsValue ? parseInt(initialProjectsValue as string, 10) : undefined,
         initialUsers: initialUsersValue ? parseInt(initialUsersValue as string, 10) : undefined,
         quoteId: formData.get("quoteId") || "",
         quoteFileUrl: formData.get("quoteFileUrl") || "",
-        // Contract data fields
         legalName: formData.get("legalName") || "",
         fiscalAddress: formData.get("fiscalAddress") || "",
     };
@@ -251,10 +285,44 @@ export async function updateCompanyAction(id: string, prevState: CompanyState | 
     }
 
     try {
+        const existing = await prisma.company.findUnique({
+            where: { id },
+            select: { status: true, type: true },
+        });
+
         await prisma.company.update({
             where: { id },
             data: validatedFields.data,
         });
+
+        if (existing) {
+            const newStatus = validatedFields.data.status as CompanyStatus;
+            const newType = validatedFields.data.type as CompanyType;
+
+            if (existing.status !== newStatus) {
+                await prisma.activity.create({
+                    data: {
+                        type: "STATUS_CHANGE",
+                        companyId: id,
+                        workspaceId: workspace.id,
+                        createdById: user.id,
+                        emailSubject: `Estado: ${STATUS_LABELS[existing.status]} → ${STATUS_LABELS[newStatus]}`,
+                    },
+                });
+            }
+
+            if (existing.type !== newType) {
+                await prisma.activity.create({
+                    data: {
+                        type: "TYPE_CHANGE",
+                        companyId: id,
+                        workspaceId: workspace.id,
+                        createdById: user.id,
+                        emailSubject: `Tipo: ${TYPE_LABELS[existing.type]} → ${TYPE_LABELS[newType]}`,
+                    },
+                });
+            }
+        }
     } catch (error) {
         console.error("Database Error:", error);
         return { message: "Database Error: Failed to Update Company." };

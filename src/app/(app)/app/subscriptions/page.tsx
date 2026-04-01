@@ -11,7 +11,8 @@ async function getSubscriptions(workspaceId: string) {
     const companies = await prisma.company.findMany({
         where: {
             workspaceId,
-            status: "CLIENTE",
+            status: "ACTIVO",
+            type: "CLIENTE_SUSCRIPTOR",
             subscriptionBilling: { isNot: null },
         },
         include: {

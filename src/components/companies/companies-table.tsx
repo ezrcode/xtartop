@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Plus } from "lucide-react";
 import { DataTable, Column, TablePreferences, ItemsPerPage } from "@/components/ui/data-table";
 import { saveTablePreferences } from "@/actions/table-preferences";
-import { CompanyStatus } from "@prisma/client";
+import { CompanyStatus, CompanyType } from "@prisma/client";
 
 interface Company {
     id: string;
@@ -15,6 +15,7 @@ interface Company {
     city: string | null;
     country: string | null;
     status: CompanyStatus;
+    type: CompanyType;
     createdAt: Date;
     primaryContact: {
         id: string;
@@ -29,12 +30,23 @@ interface CompaniesTableProps {
 }
 
 const statusConfig: Record<CompanyStatus, { label: string; className: string; dotColor: string }> = {
-    CLIENTE: { label: "Cliente", className: "bg-success-green/10 text-success-green", dotColor: "bg-success-green" },
-    POTENCIAL: { label: "Potencial", className: "bg-nearby-dark/8 text-nearby-dark dark:text-nearby-dark-300", dotColor: "bg-nearby-dark dark:bg-nearby-dark-300" },
-    PROSPECTO: { label: "Prospecto", className: "bg-[var(--surface-3)] text-gray-800", dotColor: "bg-gray-400" },
-    PROVEEDOR: { label: "Proveedor", className: "bg-purple-100 text-purple-800", dotColor: "bg-purple-500" },
-    DESCARTADA: { label: "Descartada", className: "bg-error-red/10 text-error-red", dotColor: "bg-error-red" },
-    INACTIVA: { label: "Inactiva", className: "bg-[var(--surface-3)] text-[var(--muted-text)]", dotColor: "bg-gray-300" },
+    ACTIVO: { label: "Activo", className: "bg-success-green/10 text-success-green", dotColor: "bg-success-green" },
+    INACTIVO: { label: "Inactivo", className: "bg-[var(--surface-3)] text-[var(--muted-text)]", dotColor: "bg-gray-300" },
+};
+
+const typeConfig: Record<CompanyType, { label: string; className: string }> = {
+    PROSPECTO: { label: "Prospecto", className: "bg-[var(--surface-3)] text-gray-800 dark:text-gray-300" },
+    POTENCIAL: { label: "Potencial", className: "bg-nearby-dark/8 text-nearby-dark dark:text-nearby-dark-300" },
+    CLIENTE_SUSCRIPTOR: { label: "Cliente Suscriptor", className: "bg-success-green/10 text-success-green" },
+    CLIENTE_ONETIME: { label: "Cliente One-Time", className: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300" },
+    PROVEEDOR: { label: "Proveedor", className: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300" },
+    INVERSIONISTA: { label: "Inversionista", className: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300" },
+    COMPETIDOR: { label: "Competidor", className: "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300" },
+    NO_CALIFICA: { label: "No Califica", className: "bg-[var(--surface-3)] text-[var(--muted-text)]" },
+    NO_RESPONDIO: { label: "No Respondió", className: "bg-[var(--surface-3)] text-[var(--muted-text)]" },
+    DESISTIO: { label: "Desistió", className: "bg-[var(--surface-3)] text-[var(--muted-text)]" },
+    RESCINDIO_CONTRATO: { label: "Rescindió Contrato", className: "bg-error-red/10 text-error-red" },
+    SIN_MOTIVO: { label: "Sin Motivo", className: "bg-[var(--surface-3)] text-[var(--muted-text)]" },
 };
 
 function getCompanyInitials(name: string): string {
@@ -153,6 +165,26 @@ export function CompaniesTable({ companies, initialPreferences, itemsPerPage = 1
             },
         },
         {
+            key: "type" as keyof Company,
+            header: "Tipo",
+            sortable: true,
+            filterable: true,
+            filterOptions: Object.entries(typeConfig).map(([value, { label }]) => ({
+                value,
+                label,
+            })),
+            hideable: true,
+            defaultVisible: true,
+            render: (company) => {
+                const config = typeConfig[company.type];
+                return (
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium ${config.className}`}>
+                        {config.label}
+                    </span>
+                );
+            },
+        },
+        {
             key: "createdAt",
             header: "Fecha de creación",
             sortable: true,
@@ -244,9 +276,16 @@ export function CompaniesTable({ companies, initialPreferences, itemsPerPage = 1
                                                 <p className="text-xs text-[var(--muted-text)]">{company.city}</p>
                                             )}
                                         </div>
-                                        <span className={`ml-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold flex-shrink-0 ${config.className}`}>
-                                            <span className={`w-1.5 h-1.5 rounded-full ${config.dotColor}`} />
-                                            {config.label}
+                                        <div className="ml-2 flex items-center gap-1.5 flex-shrink-0">
+                                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${config.className}`}>
+                                                <span className={`w-1.5 h-1.5 rounded-full ${config.dotColor}`} />
+                                                {config.label}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 mt-1">
+                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium ${typeConfig[company.type].className}`}>
+                                            {typeConfig[company.type].label}
                                         </span>
                                     </div>
                                     <div className="space-y-1 text-sm text-[var(--foreground)] mt-1">

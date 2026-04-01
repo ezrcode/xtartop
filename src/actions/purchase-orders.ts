@@ -98,7 +98,8 @@ export async function getSuppliers() {
     return await prisma.company.findMany({
         where: {
             workspaceId: workspace.id,
-            status: "PROVEEDOR",
+            status: "ACTIVO",
+            type: "PROVEEDOR",
         },
         select: { id: true, name: true, logoUrl: true },
         orderBy: { name: "asc" },
@@ -296,7 +297,8 @@ export async function getSubscriptionSummaryForOrder(): Promise<{
     const companies = await prisma.company.findMany({
         where: {
             workspaceId: workspace.id,
-            status: "CLIENTE",
+            status: "ACTIVO",
+            type: "CLIENTE_SUSCRIPTOR",
             subscriptionBilling: { isNot: null },
         },
         include: {

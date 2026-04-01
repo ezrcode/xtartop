@@ -18,7 +18,9 @@ import {
     User as UserIcon,
     StickyNote,
     Paperclip,
-    Download
+    Download,
+    ArrowRightLeft,
+    Tag,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { ComposeEmailModal } from "./compose-email-modal";
@@ -299,6 +301,8 @@ export function CompanyActivitiesSection({
             PROJECT: { icon: FolderOpen, color: "text-nearby-dark dark:text-nearby-dark-300", bgColor: "bg-nearby-dark/8 dark:bg-nearby-dark-300/10", label: "Proyecto" },
             CLIENT_USER: { icon: UserIcon, color: "text-ocean-blue", bgColor: "bg-ocean-blue/10", label: "Usuario" },
             NOTE: { icon: StickyNote, color: "text-purple-600", bgColor: "bg-purple-100", label: "Nota" },
+            STATUS_CHANGE: { icon: ArrowRightLeft, color: "text-amber-600", bgColor: "bg-amber-100 dark:bg-amber-900/20", label: "Cambio de Estado" },
+            TYPE_CHANGE: { icon: Tag, color: "text-teal-600", bgColor: "bg-teal-100 dark:bg-teal-900/20", label: "Cambio de Tipo" },
         };
         return typeMap[activity.type] || typeMap.EMAIL;
     };
@@ -333,6 +337,8 @@ export function CompanyActivitiesSection({
         PROJECT: "Proyecto",
         CLIENT_USER: "Usuario",
         NOTE: "Nota",
+        STATUS_CHANGE: "Cambio de Estado",
+        TYPE_CHANGE: "Cambio de Tipo",
     };
 
     const handleDownloadExcel = () => {

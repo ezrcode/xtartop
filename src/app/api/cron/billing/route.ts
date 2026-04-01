@@ -268,7 +268,8 @@ export async function GET(request: NextRequest) {
             include: {
                 companies: {
                     where: {
-                        status: "CLIENTE",
+                        status: "ACTIVO",
+                        type: "CLIENTE_SUSCRIPTOR",
                         subscriptionBilling: {
                             billingDay: currentDay,
                             autoBillingEnabled: true, // Solo procesar empresas con cobro automático habilitado

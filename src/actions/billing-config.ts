@@ -341,7 +341,8 @@ export async function getCompaniesDueForBilling(day: number) {
     const companies = await prisma.company.findMany({
         where: {
             workspaceId: workspace.id,
-            status: "CLIENTE", // Only active clients
+            status: "ACTIVO",
+            type: "CLIENTE_SUSCRIPTOR",
             subscriptionBilling: {
                 billingDay: day,
             },

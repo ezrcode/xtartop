@@ -17,12 +17,23 @@ enum SubscriptionStatus {
 }
 
 enum CompanyStatus {
+  ACTIVO
+  INACTIVO
+}
+
+enum CompanyType {
   PROSPECTO
   POTENCIAL
-  CLIENTE
+  CLIENTE_SUSCRIPTOR
+  CLIENTE_ONETIME
   PROVEEDOR
-  DESCARTADA
-  INACTIVA
+  INVERSIONISTA
+  COMPETIDOR
+  NO_CALIFICA
+  NO_RESPONDIO
+  DESISTIO
+  RESCINDIO_CONTRATO
+  SIN_MOTIVO
 }
 
 enum PurchaseOrderStatus {
@@ -102,6 +113,8 @@ enum ActivityType {
   MEETING
   PROJECT
   CLIENT_USER
+  STATUS_CHANGE
+  TYPE_CHANGE
 }
 
 enum ProjectStatus {
@@ -279,7 +292,8 @@ model Company {
   primaryContactId String?
   primaryContact   Contact?       @relation("PrimaryContact", fields: [primaryContactId], references: [id])
   origin           CompanyOrigin?
-  status           CompanyStatus  @default(PROSPECTO)
+  status           CompanyStatus  @default(ACTIVO)
+  type             CompanyType    @default(PROSPECTO)
   
   // Terms & Conditions
   termsAccepted       Boolean   @default(false)
