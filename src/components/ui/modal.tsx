@@ -4,6 +4,7 @@ import { ReactNode, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 type ModalSize = "sm" | "md" | "lg" | "xl" | "full";
 
@@ -82,24 +83,27 @@ export function Modal({
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.15 }}
                     onClick={handleOverlayClick}
-                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+                    className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm p-0 sm:items-center sm:p-4"
                     aria-modal="true"
                     role="dialog"
                 >
                     <motion.div
                         ref={contentRef}
-                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                        initial={{ opacity: 0, scale: 0.98, y: 24 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                        exit={{ opacity: 0, scale: 0.98, y: 18 }}
                         transition={{ duration: 0.2, ease: "easeOut" }}
-                        className={`
-                            w-full ${sizeStyles[size]}
-                            bg-[var(--card-bg)] border border-[var(--card-border)]
-                            rounded-lg shadow-xl
-                            max-h-[90vh] overflow-hidden
-                            flex flex-col
-                        `}
+                        className={cn(
+                            "flex flex-col w-full bg-[var(--card-bg)] border border-[var(--card-border)] shadow-xl overflow-hidden",
+                            "rounded-t-[28px] sm:rounded-2xl",
+                            "max-h-[92vh] sm:max-h-[90vh]",
+                            "safe-bottom",
+                            sizeStyles[size]
+                        )}
                     >
+                        <div className="sm:hidden flex justify-center pt-2 pb-1">
+                            <span className="h-1.5 w-12 rounded-full bg-[var(--card-border)]" />
+                        </div>
                         {/* Header */}
                         {(title || showCloseButton) && (
                             <div className="flex items-start justify-between p-4 sm:p-6 border-b border-[var(--card-border)]">
@@ -129,13 +133,13 @@ export function Modal({
                         )}
 
                         {/* Content */}
-                        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+                        <div className="flex-1 overflow-y-auto p-4 sm:p-6 overscroll-contain">
                             {children}
                         </div>
 
                         {/* Footer */}
                         {footer && (
-                            <div className="p-4 sm:p-6 border-t border-[var(--card-border)] bg-[var(--hover-bg)]">
+                            <div className="p-4 sm:p-6 border-t border-[var(--card-border)] bg-[var(--hover-bg)] safe-bottom">
                                 {footer}
                             </div>
                         )}

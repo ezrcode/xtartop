@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, X, Loader2, FolderOpen, ChevronDown, Pencil, Trash2, Search, Download, Filter } from "lucide-react";
+import { Plus, Loader2, FolderOpen, ChevronDown, Pencil, Trash2, Search, Download, Filter } from "lucide-react";
 import { createProject, updateProject, deleteProject, updateProjectStatus } from "@/actions/projects";
+import { ConfirmModal, Modal } from "@/components/ui/modal";
 import type { Project } from "@prisma/client";
 
 type StatusFilter = "ACTIVE" | "INACTIVE" | "ALL";
@@ -279,8 +280,8 @@ export function ProjectsTable({ companyId, projects: initialProjects }: Projects
                 </div>
             </div>
 
-            {/* Projects Table */}
-            <div className="border border-graphite-gray rounded-lg overflow-hidden">
+            {/* Desktop table */}
+            <div className="hidden md:block border border-graphite-gray rounded-lg overflow-hidden">
                 <div className="max-h-[220px] overflow-y-auto">
                     <table className="min-w-full divide-y divide-graphite-gray">
                         <thead className="bg-soft-gray sticky top-0">
@@ -363,147 +364,165 @@ export function ProjectsTable({ companyId, projects: initialProjects }: Projects
                 </div>
             </div>
 
-            {/* Create/Edit Project Modal */}
-            {(showModal || editingProject) && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-bold text-nearby-dark">
-                                {editingProject ? "Editar Proyecto" : "Nuevo Proyecto"}
-                            </h3>
-                            <button
-                                type="button"
-                                onClick={closeModal}
-                                className="text-gray-400 hover:text-gray-600"
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
-
-                        {error && (
-                            <div className="mb-4 bg-error-red/10 border border-error-red text-error-red px-3 py-2 rounded-md text-sm">
-                                {error}
-                            </div>
-                        )}
-
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-dark-slate mb-1">
-                                    Nombre del proyecto <span className="text-error-red">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    value={projectName}
-                                    onChange={(e) => setProjectName(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === "Enter" && !loading) {
-                                            editingProject ? handleUpdate() : handleCreate();
-                                        }
-                                    }}
-                                    className="w-full px-3 py-2 border border-graphite-gray rounded-md shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 text-sm"
-                                    placeholder="RESIDENCIAL DEMO I"
-                                    autoFocus
-                                />
-                            </div>
-
-                            <div className="flex justify-end gap-3 pt-2">
+            {/* Mobile cards */}
+            <div className="md:hidden space-y-3">
+                {filteredProjects.length === 0 ? (
+                    <div className="rounded-2xl border border-graphite-gray bg-white px-4 py-8 text-center text-sm text-gray-500">
+                        {searchTerm ? "No se encontraron proyectos" : "No hay proyectos registrados"}
+                    </div>
+                ) : (
+                    filteredProjects.map((project) => (
+                        <div key={project.id} className="rounded-2xl border border-graphite-gray bg-white p-4 shadow-sm">
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                    <p className="text-base font-semibold text-dark-slate break-words">
+                                        {project.name}
+                                    </p>
+                                    <p className="mt-1 text-xs text-gray-400">Proyecto</p>
+                                </div>
                                 <button
                                     type="button"
-                                    onClick={closeModal}
-                                    className="px-4 py-2 text-sm font-medium text-dark-slate bg-white border border-graphite-gray rounded-md hover:bg-gray-50"
+                                    onClick={() => setShowStatusModal(project)}
+                                    disabled={updatingId === project.id}
+                                    className={`inline-flex items-center justify-between gap-1 px-3 py-1.5 text-xs font-medium rounded-xl transition-colors min-w-[96px] border ${
+                                        project.status === "ACTIVE"
+                                            ? "bg-success-green/10 text-success-green border-success-green/30"
+                                            : "bg-gray-50 text-gray-500 border-gray-200"
+                                    }`}
                                 >
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={editingProject ? handleUpdate : handleCreate}
-                                    disabled={loading}
-                                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-nearby-dark rounded-md hover:bg-nearby-dark-600 disabled:opacity-50"
-                                >
-                                    {loading ? (
-                                        <>
-                                            <Loader2 size={16} className="mr-2 animate-spin" />
-                                            Guardando...
-                                        </>
+                                    {updatingId === project.id ? (
+                                        <Loader2 size={12} className="animate-spin mx-auto" />
                                     ) : (
-                                        "Guardar"
+                                        <>
+                                            <span>{project.status === "ACTIVE" ? "Activo" : "Inactivo"}</span>
+                                            <ChevronDown size={12} />
+                                        </>
                                     )}
                                 </button>
                             </div>
+
+                            <div className="mt-4 flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => openEditModal(project)}
+                                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-graphite-gray px-3 py-2.5 text-sm font-medium text-dark-slate"
+                                >
+                                    <Pencil size={14} />
+                                    Editar
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowDeleteModal(project)}
+                                    disabled={deletingId === project.id}
+                                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-red-200 px-3 py-2.5 text-sm font-medium text-error-red"
+                                >
+                                    {deletingId === project.id ? (
+                                        <Loader2 size={14} className="animate-spin" />
+                                    ) : (
+                                        <Trash2 size={14} />
+                                    )}
+                                    Eliminar
+                                </button>
+                            </div>
                         </div>
+                    ))
+                )}
+            </div>
+
+            {/* Create/Edit Project Modal */}
+            <Modal
+                isOpen={showModal || Boolean(editingProject)}
+                onClose={closeModal}
+                title={editingProject ? "Editar Proyecto" : "Nuevo Proyecto"}
+                size="md"
+                footer={
+                    <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+                        <button
+                            type="button"
+                            onClick={closeModal}
+                            className="px-4 py-2.5 text-sm font-medium text-dark-slate bg-white border border-graphite-gray rounded-xl hover:bg-gray-50"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="button"
+                            onClick={editingProject ? handleUpdate : handleCreate}
+                            disabled={loading}
+                            className="inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-nearby-dark rounded-xl hover:bg-nearby-dark-600 disabled:opacity-50"
+                        >
+                            {loading ? (
+                                <>
+                                    <Loader2 size={16} className="mr-2 animate-spin" />
+                                    Guardando...
+                                </>
+                            ) : (
+                                "Guardar"
+                            )}
+                        </button>
+                    </div>
+                }
+            >
+                {error && (
+                    <div className="mb-4 bg-error-red/10 border border-error-red text-error-red px-3 py-2 rounded-md text-sm">
+                        {error}
+                    </div>
+                )}
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-dark-slate mb-1">
+                            Nombre del proyecto <span className="text-error-red">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            value={projectName}
+                            onChange={(e) => setProjectName(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" && !loading) {
+                                    editingProject ? handleUpdate() : handleCreate();
+                                }
+                            }}
+                            className="w-full px-3 py-3 border border-graphite-gray rounded-xl shadow-sm focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 text-sm"
+                            placeholder="RESIDENCIAL DEMO I"
+                            autoFocus
+                        />
                     </div>
                 </div>
-            )}
+            </Modal>
 
-            {/* Confirm Status Change Modal */}
-            {showStatusModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full mx-4">
-                        <h3 className="text-lg font-bold text-nearby-dark mb-2">
-                            Cambiar Estado
-                        </h3>
-                        <p className="text-sm text-dark-slate mb-4">
+            <ConfirmModal
+                isOpen={Boolean(showStatusModal)}
+                onClose={() => setShowStatusModal(null)}
+                onConfirm={handleConfirmStatusChange}
+                title="Cambiar Estado"
+                message={
+                    showStatusModal ? (
+                        <>
                             ¿Estás seguro que deseas{" "}
-                            <strong>
-                                {showStatusModal.status === "ACTIVE" ? "inactivar" : "activar"}
-                            </strong>{" "}
+                            <strong>{showStatusModal.status === "ACTIVE" ? "inactivar" : "activar"}</strong>{" "}
                             el proyecto <strong>&quot;{showStatusModal.name}&quot;</strong>?
-                        </p>
-                        <div className="flex justify-end gap-3">
-                            <button
-                                type="button"
-                                onClick={() => setShowStatusModal(null)}
-                                className="px-4 py-2 text-sm font-medium text-dark-slate bg-white border border-graphite-gray rounded-md hover:bg-gray-50"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                type="button"
-                                onClick={handleConfirmStatusChange}
-                                className={`px-4 py-2 text-sm font-medium text-white rounded-md ${
-                                    showStatusModal.status === "ACTIVE"
-                                        ? "bg-warning-amber hover:bg-amber-600"
-                                        : "bg-success-green hover:bg-green-600"
-                                }`}
-                            >
-                                {showStatusModal.status === "ACTIVE" ? "Inactivar" : "Activar"}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+                        </>
+                    ) : ""
+                }
+                confirmLabel={showStatusModal?.status === "ACTIVE" ? "Inactivar" : "Activar"}
+                variant={showStatusModal?.status === "ACTIVE" ? "warning" : "info"}
+            />
 
-            {/* Confirm Delete Modal */}
-            {showDeleteModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full mx-4">
-                        <h3 className="text-lg font-bold text-nearby-dark mb-2">
-                            Eliminar Proyecto
-                        </h3>
-                        <p className="text-sm text-dark-slate mb-4">
-                            ¿Estás seguro que deseas eliminar el proyecto{" "}
-                            <strong>&quot;{showDeleteModal.name}&quot;</strong>?
+            <ConfirmModal
+                isOpen={Boolean(showDeleteModal)}
+                onClose={() => setShowDeleteModal(null)}
+                onConfirm={handleDelete}
+                title="Eliminar Proyecto"
+                message={
+                    showDeleteModal ? (
+                        <>
+                            ¿Estás seguro que deseas eliminar el proyecto <strong>&quot;{showDeleteModal.name}&quot;</strong>?
                             Esta acción no se puede deshacer.
-                        </p>
-                        <div className="flex justify-end gap-3">
-                            <button
-                                type="button"
-                                onClick={() => setShowDeleteModal(null)}
-                                className="px-4 py-2 text-sm font-medium text-dark-slate bg-white border border-graphite-gray rounded-md hover:bg-gray-50"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                type="button"
-                                onClick={handleDelete}
-                                className="px-4 py-2 text-sm font-medium text-white bg-error-red rounded-md hover:bg-red-700"
-                            >
-                                Eliminar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+                        </>
+                    ) : ""
+                }
+                confirmLabel="Eliminar"
+                variant="danger"
+            />
         </div>
     );
 }
