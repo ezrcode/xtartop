@@ -30,6 +30,9 @@ const STATUS_ORDER: DealStatus[] = [
 const EMPTY_STATS = {
     allCompaniesCount: 0,
     clientCompaniesCount: 0,
+    oneTimeClientsCount: 0,
+    prospectsCount: 0,
+    potentialClientsCount: 0,
     contactsCount: 0,
     dealsCount: 0,
     activeProjects: 0,
@@ -44,6 +47,9 @@ async function getBasicStats(workspaceId: string) {
         const [
             allCompaniesCount,
             clientCompaniesCount,
+            oneTimeClientsCount,
+            prospectsCount,
+            potentialClientsCount,
             contactsCount,
             dealsCount,
             activeProjects,
@@ -53,6 +59,9 @@ async function getBasicStats(workspaceId: string) {
         ] = await Promise.all([
             prisma.company.count({ where: { workspaceId } }),
             prisma.company.count({ where: { workspaceId, status: "ACTIVO", type: "CLIENTE_SUSCRIPTOR" } }),
+            prisma.company.count({ where: { workspaceId, status: "ACTIVO", type: "CLIENTE_ONETIME" } }),
+            prisma.company.count({ where: { workspaceId, status: "ACTIVO", type: "PROSPECTO" } }),
+            prisma.company.count({ where: { workspaceId, status: "ACTIVO", type: "POTENCIAL" } }),
             prisma.contact.count({ where: { workspaceId } }),
             prisma.deal.count({ where: { workspaceId } }),
             prisma.project.count({
@@ -118,6 +127,9 @@ async function getBasicStats(workspaceId: string) {
         return {
             allCompaniesCount,
             clientCompaniesCount,
+            oneTimeClientsCount,
+            prospectsCount,
+            potentialClientsCount,
             contactsCount,
             dealsCount,
             activeProjects,

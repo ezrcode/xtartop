@@ -29,6 +29,9 @@ interface ExecutiveDashboardProps {
     stats: {
         allCompaniesCount: number;
         clientCompaniesCount: number;
+        oneTimeClientsCount: number;
+        prospectsCount: number;
+        potentialClientsCount: number;
         contactsCount: number;
         dealsCount: number;
         activeProjects: number;
@@ -164,6 +167,8 @@ function HaloPanel({
 
 export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDashboardProps) {
     const subscriberBase = stats.clientCompaniesCount || 0;
+    const clientBase = stats.clientCompaniesCount + stats.oneTimeClientsCount;
+    const futureClientPool = stats.prospectsCount + stats.potentialClientsCount;
     const openPipeline = pipeline.filter((item) => OPEN_STATUSES.includes(item.status));
     const wonStage = pipeline.find((item) => item.status === "CIERRE_GANADO");
     const lostStage = pipeline.find((item) => item.status === "CIERRE_PERDIDO");
@@ -177,15 +182,16 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
     const closeUniverse = (wonStage?.count || 0) + (lostStage?.count || 0);
     const winRate = closeUniverse > 0 ? ((wonStage?.count || 0) / closeUniverse) * 100 : 0;
     const lateStageShare = stats.pipeline > 0 ? (lateStageValue / stats.pipeline) * 100 : 0;
-    const subscriberShare = stats.allCompaniesCount > 0 ? (stats.clientCompaniesCount / stats.allCompaniesCount) * 100 : 0;
+    const subscriberShare = clientBase > 0 ? (stats.clientCompaniesCount / clientBase) * 100 : 0;
+    const oneTimeShare = clientBase > 0 ? (stats.oneTimeClientsCount / clientBase) * 100 : 0;
     const revenuePerSubscriber = subscriberBase > 0 ? stats.mrr / subscriberBase : 0;
     const usersPerSubscriber = subscriberBase > 0 ? stats.activeClientUsers / subscriberBase : 0;
     const projectsPerSubscriber = subscriberBase > 0 ? stats.activeProjects / subscriberBase : 0;
     const contactsPerSubscriber = subscriberBase > 0 ? stats.contactsCount / subscriberBase : 0;
-    const dealsPerSubscriber = subscriberBase > 0 ? stats.dealsCount / subscriberBase : 0;
     const licenseFootprint = stats.activeProjects + stats.activeClientUsers;
     const revenuePerLicense = licenseFootprint > 0 ? stats.mrr / licenseFootprint : 0;
     const pipelineCoverage = stats.mrr > 0 ? stats.pipeline / stats.mrr : 0;
+    const futureCoverage = clientBase > 0 ? futureClientPool / clientBase : 0;
     const projectMix = licenseFootprint > 0 ? (stats.activeProjects / licenseFootprint) * 100 : 0;
     const userMix = licenseFootprint > 0 ? (stats.activeClientUsers / licenseFootprint) * 100 : 0;
     const focusStages = [...openPipeline].sort((a, b) => b.value - a.value || b.count - a.count);
@@ -242,9 +248,11 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                                     <p className="mt-1 text-xs text-white/56">{openOpportunityCount} frentes comerciales abiertos</p>
                                 </div>
                                 <div className="rounded-[24px] border border-white/10 bg-white/6 px-4 py-4 backdrop-blur-sm">
-                                    <p className="text-[11px] uppercase tracking-[0.18em] text-white/52">Penetración suscriptora</p>
-                                    <p className="mt-2 text-2xl font-semibold text-white">{Math.round(subscriberShare)}%</p>
-                                    <p className="mt-1 text-xs text-white/56">{stats.clientCompaniesCount} de {stats.allCompaniesCount} empresas</p>
+                                    <p className="text-[11px] uppercase tracking-[0.18em] text-white/52">Base de clientes</p>
+                                    <p className="mt-2 text-2xl font-semibold text-white">{clientBase.toLocaleString()}</p>
+                                    <p className="mt-1 text-xs text-white/56">
+                                        {stats.clientCompaniesCount} suscriptores · {stats.oneTimeClientsCount} one-time
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -274,9 +282,9 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                                     <p className="mt-1 text-[11px] text-white/52">pipeline / MRR</p>
                                 </div>
                                 <div className="absolute right-[18px] bottom-[14px] rounded-2xl border border-white/10 bg-white/8 px-4 py-3 backdrop-blur-sm">
-                                    <p className="text-[10px] uppercase tracking-[0.16em] text-white/50">Capital relacional</p>
-                                    <p className="mt-1 text-xl font-semibold text-white">{stats.contactsCount.toLocaleString()}</p>
-                                    <p className="mt-1 text-[11px] text-white/52">contactos en cartera</p>
+                                    <p className="text-[10px] uppercase tracking-[0.16em] text-white/50">Cartera futura</p>
+                                    <p className="mt-1 text-xl font-semibold text-white">{futureClientPool.toLocaleString()}</p>
+                                    <p className="mt-1 text-[11px] text-white/52">prospectos + potenciales</p>
                                 </div>
                             </div>
                         </div>
@@ -287,7 +295,7 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                     <SignalCard
                         label="Clientes suscriptores"
                         value={stats.clientCompaniesCount.toLocaleString()}
-                        footnote={`${Math.round(subscriberShare)}% de la base empresarial ya es recurrente`}
+                        footnote={`${Math.round(subscriberShare)}% de la base de clientes ya es recurrente`}
                         icon={Building2}
                         accent="linear-gradient(145deg,#2d3e50,#42576f)"
                     />
@@ -339,8 +347,8 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                             <div className="rounded-[28px] border border-[var(--card-border)] bg-[linear-gradient(155deg,var(--surface-1),var(--surface-2))] p-5">
                                 <div className="flex items-start justify-between gap-4">
                                     <div>
-                                        <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted-text)]">Base monetizada</p>
-                                        <h3 className="mt-2 text-xl font-semibold text-[var(--foreground)]">Penetración suscriptora</h3>
+                                        <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted-text)]">Base de clientes</p>
+                                        <h3 className="mt-2 text-xl font-semibold text-[var(--foreground)]">Mix suscriptor vs. one-time</h3>
                                     </div>
                                     <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-nearby-dark/10 text-nearby-dark dark:bg-nearby-dark-300/10 dark:text-nearby-dark-300">
                                         <Compass size={18} />
@@ -357,18 +365,19 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                                         <div className="absolute inset-[12px] rounded-full bg-[var(--card-bg)]" />
                                         <div className="relative text-center">
                                             <p className="text-3xl font-semibold text-[var(--foreground)]">{Math.round(subscriberShare)}%</p>
-                                            <p className="text-[10px] uppercase tracking-[0.18em] text-[var(--muted-text)]">suscrita</p>
+                                            <p className="text-[10px] uppercase tracking-[0.18em] text-[var(--muted-text)]">suscriptora</p>
                                         </div>
                                     </div>
 
                                     <div className="space-y-3">
                                         <div className="rounded-[22px] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
-                                            <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">Empresas recurrentes</p>
+                                            <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">Clientes suscriptores</p>
                                             <p className="mt-1 text-2xl font-semibold text-[var(--foreground)]">{stats.clientCompaniesCount}</p>
                                         </div>
                                         <div className="rounded-[22px] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
-                                            <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">Base total de empresas</p>
-                                            <p className="mt-1 text-2xl font-semibold text-[var(--foreground)]">{stats.allCompaniesCount}</p>
+                                            <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">Clientes one-time</p>
+                                            <p className="mt-1 text-2xl font-semibold text-[var(--foreground)]">{stats.oneTimeClientsCount}</p>
+                                            <p className="mt-1 text-xs text-[var(--muted-text)]">{Math.round(oneTimeShare)}% de la base de clientes</p>
                                         </div>
                                     </div>
                                 </div>
@@ -378,8 +387,8 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                                 <div className="rounded-[28px] border border-[var(--card-border)] bg-[var(--surface-1)] p-5">
                                     <div className="flex items-start justify-between gap-3">
                                         <div>
-                                            <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted-text)]">Capital comercial</p>
-                                            <h3 className="mt-2 text-xl font-semibold text-[var(--foreground)]">Capilaridad de cartera</h3>
+                                            <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted-text)]">Cartera futura</p>
+                                            <h3 className="mt-2 text-xl font-semibold text-[var(--foreground)]">Prospección y potencial</h3>
                                         </div>
                                         <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-500/10 text-sky-500">
                                             <Users size={18} />
@@ -387,14 +396,26 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                                     </div>
                                     <div className="mt-5 grid gap-3 sm:grid-cols-2">
                                         <div className="rounded-[22px] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
-                                            <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">Contactos</p>
-                                            <p className="mt-1 text-3xl font-semibold text-[var(--foreground)]">{stats.contactsCount.toLocaleString()}</p>
-                                            <p className="mt-1 text-xs text-[var(--muted-text)]">{formatMetric(contactsPerSubscriber)} por cliente suscriptor</p>
+                                            <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">Prospectos</p>
+                                            <p className="mt-1 text-3xl font-semibold text-[var(--foreground)]">{stats.prospectsCount.toLocaleString()}</p>
+                                            <p className="mt-1 text-xs text-[var(--muted-text)]">entrada temprana del embudo</p>
                                         </div>
                                         <div className="rounded-[22px] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
-                                            <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">Negocios</p>
-                                            <p className="mt-1 text-3xl font-semibold text-[var(--foreground)]">{stats.dealsCount.toLocaleString()}</p>
-                                            <p className="mt-1 text-xs text-[var(--muted-text)]">{formatMetric(dealsPerSubscriber)} por cliente suscriptor</p>
+                                            <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">Potenciales</p>
+                                            <p className="mt-1 text-3xl font-semibold text-[var(--foreground)]">{stats.potentialClientsCount.toLocaleString()}</p>
+                                            <p className="mt-1 text-xs text-[var(--muted-text)]">más cerca de convertirse</p>
+                                        </div>
+                                    </div>
+                                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                                        <div className="rounded-[22px] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
+                                            <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">Cobertura futura</p>
+                                            <p className="mt-1 text-3xl font-semibold text-[var(--foreground)]">{formatRatio(futureCoverage)}</p>
+                                            <p className="mt-1 text-xs text-[var(--muted-text)]">prospectos + potenciales / base de clientes</p>
+                                        </div>
+                                        <div className="rounded-[22px] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
+                                            <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">Capital relacional</p>
+                                            <p className="mt-1 text-3xl font-semibold text-[var(--foreground)]">{stats.contactsCount.toLocaleString()}</p>
+                                            <p className="mt-1 text-xs text-[var(--muted-text)]">{formatMetric(contactsPerSubscriber)} contactos por suscriptor</p>
                                         </div>
                                     </div>
                                 </div>
@@ -641,7 +662,7 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                                     <p className="text-sm font-medium text-[var(--foreground)]">Motor recurrente</p>
                                     <p className="mt-1 text-xs leading-6 text-[var(--muted-text)]">
                                         {subscriberBase > 0
-                                            ? `${stats.clientCompaniesCount} clientes sostienen ${formatCurrency(stats.mrr)} de MRR con un ticket medio de ${formatCurrency(revenuePerSubscriber)}.`
+                                            ? `${stats.clientCompaniesCount} clientes suscriptores sostienen ${formatCurrency(stats.mrr)} de MRR con un ticket medio de ${formatCurrency(revenuePerSubscriber)}.`
                                             : "Todavía no hay base suscriptora activa para medir ingresos recurrentes."}
                                     </p>
                                 </div>
@@ -654,11 +675,13 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                                     </p>
                                 </div>
                                 <div className="rounded-[22px] border border-[var(--card-border)] bg-[var(--surface-1)] px-4 py-4">
-                                    <p className="text-sm font-medium text-[var(--foreground)]">Tensión comercial</p>
+                                    <p className="text-sm font-medium text-[var(--foreground)]">Reserva comercial</p>
                                     <p className="mt-1 text-xs leading-6 text-[var(--muted-text)]">
-                                        {stats.pipeline > 0
-                                            ? `El pipeline abierto suma ${formatCurrency(stats.pipeline, true)} y el ${Math.round(lateStageShare)}% ya está en negociación o formalización.`
-                                            : "No hay pipeline abierto; conviene concentrar la vista en expansión de la base existente."}
+                                        {futureClientPool > 0
+                                            ? `${futureClientPool} empresas están en prospecto o potencial, mientras el pipeline abierto suma ${formatCurrency(stats.pipeline, true)}.`
+                                            : stats.pipeline > 0
+                                                ? `El pipeline abierto suma ${formatCurrency(stats.pipeline, true)} y el ${Math.round(lateStageShare)}% ya está en negociación o formalización.`
+                                                : "No hay prospectos, potenciales ni pipeline abierto; conviene concentrar la vista en expansión de la base existente."}
                                     </p>
                                 </div>
                             </div>
