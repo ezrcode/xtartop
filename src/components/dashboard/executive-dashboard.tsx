@@ -102,7 +102,7 @@ function SignalCard({
     accent: string;
 }) {
     return (
-        <article className="group relative overflow-hidden rounded-[30px] border border-[var(--card-border)] bg-[var(--card-bg)] p-5 shadow-sm transition-transform duration-300 hover:-translate-y-1">
+        <article className="group relative overflow-hidden rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] p-5 shadow-sm transition-transform duration-300 hover:-translate-y-1">
             <div
                 className="absolute inset-x-0 top-0 h-1.5"
                 style={{ background: accent }}
@@ -142,7 +142,7 @@ function HaloPanel({
     const safeValue = Math.max(0, Math.min(100, value));
 
     return (
-        <div className="rounded-[28px] border border-[var(--card-border)] bg-[var(--card-bg)] p-5 shadow-sm">
+        <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] p-5 shadow-sm">
             <div className="flex items-center justify-between gap-4">
                 <div>
                     <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted-text)]">{label}</p>
@@ -199,7 +199,7 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
     return (
         <div className="min-h-screen bg-[var(--surface-0)] py-4 md:py-8">
             <div className="mx-auto max-w-7xl space-y-5 px-4 sm:px-6 lg:px-8 md:space-y-6">
-                <section className="relative overflow-hidden rounded-[36px] border border-[#1a2430] bg-[#0b1420] text-white shadow-[0_35px_100px_rgba(15,23,42,0.28)]">
+                <section className="relative overflow-hidden rounded-[var(--radius-lg)] border border-[#1a2430] bg-[#0b1420] text-white shadow-[0_35px_100px_rgba(15,23,42,0.28)]">
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(252,90,52,0.24),transparent_32%),radial-gradient(circle_at_84%_18%,rgba(59,130,246,0.24),transparent_28%),radial-gradient(circle_at_78%_82%,rgba(20,184,166,0.22),transparent_26%),linear-gradient(180deg,rgba(11,20,32,0.98),rgba(8,13,22,0.98))]" />
                     <div className="absolute left-1/2 top-[12%] h-64 w-64 -translate-x-1/2 rounded-full border border-white/6 bg-white/5 blur-3xl" />
                     <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[1.08fr_0.92fr] lg:p-10">
@@ -207,7 +207,7 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                             <div className="flex flex-wrap items-center gap-2">
                                 <span className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/6 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-white/76">
                                     <Sparkles size={12} />
-                                    CEO / CFO dashboard
+                                    CEO dashboard
                                 </span>
                                 <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/16 bg-emerald-300/10 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-emerald-100">
                                     <CircleDollarSign size={12} />
@@ -237,17 +237,17 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                             </div>
 
                             <div className="grid gap-3 sm:grid-cols-3">
-                                <div className="rounded-[24px] border border-white/10 bg-white/6 px-4 py-4 backdrop-blur-sm">
+                                <div className="rounded-[var(--radius-lg)] border border-white/10 bg-white/6 px-4 py-4 backdrop-blur-sm">
                                     <p className="text-[11px] uppercase tracking-[0.18em] text-white/52">ARR</p>
                                     <p className="mt-2 text-2xl font-semibold text-white">{formatCurrency(stats.arr, true)}</p>
                                     <p className="mt-1 text-xs text-white/56">ritmo anualizado actual</p>
                                 </div>
-                                <div className="rounded-[24px] border border-white/10 bg-white/6 px-4 py-4 backdrop-blur-sm">
+                                <div className="rounded-[var(--radius-lg)] border border-white/10 bg-white/6 px-4 py-4 backdrop-blur-sm">
                                     <p className="text-[11px] uppercase tracking-[0.18em] text-white/52">Pipeline abierto</p>
                                     <p className="mt-2 text-2xl font-semibold text-white">{formatCurrency(stats.pipeline, true)}</p>
                                     <p className="mt-1 text-xs text-white/56">{openOpportunityCount} frentes comerciales abiertos</p>
                                 </div>
-                                <div className="rounded-[24px] border border-white/10 bg-white/6 px-4 py-4 backdrop-blur-sm">
+                                <div className="rounded-[var(--radius-lg)] border border-white/10 bg-white/6 px-4 py-4 backdrop-blur-sm">
                                     <p className="text-[11px] uppercase tracking-[0.18em] text-white/52">Base de clientes</p>
                                     <p className="mt-2 text-2xl font-semibold text-white">{clientBase.toLocaleString()}</p>
                                     <p className="mt-1 text-xs text-white/56">
@@ -323,7 +323,7 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                 </section>
 
                 <section className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
-                    <div className="rounded-[32px] border border-[var(--card-border)] bg-[var(--card-bg)] p-5 shadow-sm sm:p-6">
+                    <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] p-5 shadow-sm sm:p-6">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                             <div>
                                 <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted-text)]">Executive posture</p>
@@ -344,7 +344,7 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                         </div>
 
                         <div className="mt-6 grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-                            <div className="rounded-[28px] border border-[var(--card-border)] bg-[linear-gradient(155deg,var(--surface-1),var(--surface-2))] p-5">
+                            <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[linear-gradient(155deg,var(--surface-1),var(--surface-2))] p-5">
                                 <div className="flex items-start justify-between gap-4">
                                     <div>
                                         <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted-text)]">Base de clientes</p>
@@ -370,11 +370,11 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                                     </div>
 
                                     <div className="space-y-3">
-                                        <div className="rounded-[22px] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
+                                        <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
                                             <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">Clientes suscriptores</p>
                                             <p className="mt-1 text-2xl font-semibold text-[var(--foreground)]">{stats.clientCompaniesCount}</p>
                                         </div>
-                                        <div className="rounded-[22px] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
+                                        <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
                                             <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">Clientes one-time</p>
                                             <p className="mt-1 text-2xl font-semibold text-[var(--foreground)]">{stats.oneTimeClientsCount}</p>
                                             <p className="mt-1 text-xs text-[var(--muted-text)]">{Math.round(oneTimeShare)}% de la base de clientes</p>
@@ -384,7 +384,7 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                             </div>
 
                             <div className="space-y-4">
-                                <div className="rounded-[28px] border border-[var(--card-border)] bg-[var(--surface-1)] p-5">
+                                <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--surface-1)] p-5">
                                     <div className="flex items-start justify-between gap-3">
                                         <div>
                                             <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted-text)]">Cartera futura</p>
@@ -395,24 +395,24 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                                         </div>
                                     </div>
                                     <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                                        <div className="rounded-[22px] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
+                                        <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
                                             <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">Prospectos</p>
                                             <p className="mt-1 text-3xl font-semibold text-[var(--foreground)]">{stats.prospectsCount.toLocaleString()}</p>
                                             <p className="mt-1 text-xs text-[var(--muted-text)]">entrada temprana del embudo</p>
                                         </div>
-                                        <div className="rounded-[22px] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
+                                        <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
                                             <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">Potenciales</p>
                                             <p className="mt-1 text-3xl font-semibold text-[var(--foreground)]">{stats.potentialClientsCount.toLocaleString()}</p>
                                             <p className="mt-1 text-xs text-[var(--muted-text)]">más cerca de convertirse</p>
                                         </div>
                                     </div>
                                     <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                                        <div className="rounded-[22px] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
+                                        <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
                                             <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">Cobertura futura</p>
                                             <p className="mt-1 text-3xl font-semibold text-[var(--foreground)]">{formatRatio(futureCoverage)}</p>
                                             <p className="mt-1 text-xs text-[var(--muted-text)]">prospectos + potenciales / base de clientes</p>
                                         </div>
-                                        <div className="rounded-[22px] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
+                                        <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
                                             <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">Capital relacional</p>
                                             <p className="mt-1 text-3xl font-semibold text-[var(--foreground)]">{stats.contactsCount.toLocaleString()}</p>
                                             <p className="mt-1 text-xs text-[var(--muted-text)]">{formatMetric(contactsPerSubscriber)} contactos por suscriptor</p>
@@ -420,7 +420,7 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                                     </div>
                                 </div>
 
-                                <div className="rounded-[28px] border border-[var(--card-border)] bg-[linear-gradient(155deg,var(--surface-1),var(--surface-2))] p-5">
+                                <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[linear-gradient(155deg,var(--surface-1),var(--surface-2))] p-5">
                                     <div className="flex items-start justify-between gap-3">
                                         <div>
                                             <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted-text)]">Unit economics</p>
@@ -431,14 +431,14 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                                         </div>
                                     </div>
                                     <div className="mt-5 space-y-3">
-                                        <div className="flex items-center justify-between rounded-[22px] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
+                                        <div className="flex items-center justify-between rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
                                             <div>
                                                 <p className="text-sm font-medium text-[var(--foreground)]">Ingreso por licencia activa</p>
                                                 <p className="text-xs text-[var(--muted-text)]">MRR distribuido sobre usuarios + proyectos</p>
                                             </div>
                                             <span className="text-xl font-semibold text-[var(--foreground)]">{formatCurrency(revenuePerLicense)}</span>
                                         </div>
-                                        <div className="flex items-center justify-between rounded-[22px] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
+                                        <div className="flex items-center justify-between rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
                                             <div>
                                                 <p className="text-sm font-medium text-[var(--foreground)]">Huella licenciada por cliente</p>
                                                 <p className="text-xs text-[var(--muted-text)]">Promedio de activos en cartera suscriptora</p>
@@ -465,7 +465,7 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                             detail="Peso de negociación y formalización dentro del pipeline actualmente abierto." 
                         />
 
-                        <div className="rounded-[30px] border border-[var(--card-border)] bg-[var(--card-bg)] p-5 shadow-sm sm:p-6">
+                        <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] p-5 shadow-sm sm:p-6">
                             <div className="flex items-center gap-3">
                                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-500/10 text-violet-500">
                                     <Waypoints size={20} />
@@ -502,11 +502,11 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                                 </div>
                             </div>
                             <div className="mt-5 grid grid-cols-2 gap-3">
-                                <div className="rounded-[22px] border border-[var(--card-border)] bg-[var(--surface-1)] px-4 py-4">
+                                <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--surface-1)] px-4 py-4">
                                     <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">Usuarios / cliente</p>
                                     <p className="mt-1 text-2xl font-semibold text-[var(--foreground)]">{formatMetric(usersPerSubscriber)}</p>
                                 </div>
-                                <div className="rounded-[22px] border border-[var(--card-border)] bg-[var(--surface-1)] px-4 py-4">
+                                <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--surface-1)] px-4 py-4">
                                     <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">Proyectos / cliente</p>
                                     <p className="mt-1 text-2xl font-semibold text-[var(--foreground)]">{formatMetric(projectsPerSubscriber)}</p>
                                 </div>
@@ -516,7 +516,7 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                 </section>
 
                 <section className="grid gap-5 lg:grid-cols-[1.16fr_0.84fr]">
-                    <div className="rounded-[32px] border border-[var(--card-border)] bg-[var(--card-bg)] p-5 shadow-sm sm:p-6">
+                    <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] p-5 shadow-sm sm:p-6">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                             <div>
                                 <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted-text)]">Pipeline theater</p>
@@ -536,7 +536,7 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
 
                         <div className="mt-6 grid gap-3 md:grid-cols-2">
                             {focusStages.length === 0 ? (
-                                <div className="md:col-span-2 rounded-[26px] border border-dashed border-[var(--card-border)] bg-[var(--surface-1)] px-5 py-12 text-center text-sm text-[var(--muted-text)]">
+                                <div className="md:col-span-2 rounded-[var(--radius-lg)] border border-dashed border-[var(--card-border)] bg-[var(--surface-1)] px-5 py-12 text-center text-sm text-[var(--muted-text)]">
                                     No hay pipeline abierto en este momento.
                                 </div>
                             ) : (
@@ -547,7 +547,7 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                                     return (
                                         <article
                                             key={stage.status}
-                                            className={`relative overflow-hidden rounded-[28px] border p-5 shadow-[0_20px_36px_rgba(15,23,42,0.18)] ${
+                                            className={`relative overflow-hidden rounded-[var(--radius-lg)] border p-5 shadow-[0_20px_36px_rgba(15,23,42,0.18)] ${
                                                 index === 0 ? "min-h-[220px] md:col-span-2" : "min-h-[176px]"
                                             }`}
                                             style={{
@@ -589,7 +589,7 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                     </div>
 
                     <div className="space-y-5">
-                        <div className="rounded-[32px] border border-[var(--card-border)] bg-[linear-gradient(155deg,var(--surface-1),var(--surface-2))] p-5 shadow-sm sm:p-6">
+                        <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[linear-gradient(155deg,var(--surface-1),var(--surface-2))] p-5 shadow-sm sm:p-6">
                             <div className="flex items-center gap-3">
                                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-nearby-accent/10 text-nearby-accent">
                                     <Radar size={20} />
@@ -601,12 +601,12 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                             </div>
 
                             <div className="mt-5 grid grid-cols-2 gap-3">
-                                <div className="rounded-[22px] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
+                                <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
                                     <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">Ganados</p>
                                     <p className="mt-2 text-3xl font-semibold text-[var(--foreground)]">{wonStage?.count || 0}</p>
                                     <p className="mt-1 text-xs text-[var(--muted-text)]">{formatCurrency(wonStage?.value || 0, true)}</p>
                                 </div>
-                                <div className="rounded-[22px] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
+                                <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
                                     <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted-text)]">Perdidos</p>
                                     <p className="mt-2 text-3xl font-semibold text-[var(--foreground)]">{lostStage?.count || 0}</p>
                                     <p className="mt-1 text-xs text-[var(--muted-text)]">{formatCurrency(lostStage?.value || 0, true)}</p>
@@ -614,7 +614,7 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                             </div>
 
                             <div className="mt-4 space-y-3">
-                                <div className="rounded-[22px] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
+                                <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
                                     <div className="flex items-center justify-between gap-3">
                                         <div>
                                             <p className="text-sm font-medium text-[var(--foreground)]">Presión de cierre</p>
@@ -629,7 +629,7 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                                         </div>
                                     </div>
                                 </div>
-                                <div className="rounded-[22px] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
+                                <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-4">
                                     <div className="flex items-center justify-between gap-3">
                                         <div>
                                             <p className="text-sm font-medium text-[var(--foreground)]">Cobertura comercial</p>
@@ -647,7 +647,7 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                             </div>
                         </div>
 
-                        <div className="rounded-[32px] border border-[var(--card-border)] bg-[var(--card-bg)] p-5 shadow-sm sm:p-6">
+                        <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] p-5 shadow-sm sm:p-6">
                             <div className="flex items-center gap-3">
                                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-500">
                                     <Trophy size={20} />
@@ -658,7 +658,7 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                                 </div>
                             </div>
                             <div className="mt-5 space-y-3">
-                                <div className="rounded-[22px] border border-[var(--card-border)] bg-[var(--surface-1)] px-4 py-4">
+                                <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--surface-1)] px-4 py-4">
                                     <p className="text-sm font-medium text-[var(--foreground)]">Motor recurrente</p>
                                     <p className="mt-1 text-xs leading-6 text-[var(--muted-text)]">
                                         {subscriberBase > 0
@@ -666,7 +666,7 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                                             : "Todavía no hay base suscriptora activa para medir ingresos recurrentes."}
                                     </p>
                                 </div>
-                                <div className="rounded-[22px] border border-[var(--card-border)] bg-[var(--surface-1)] px-4 py-4">
+                                <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--surface-1)] px-4 py-4">
                                     <p className="text-sm font-medium text-[var(--foreground)]">Escala operativa</p>
                                     <p className="mt-1 text-xs leading-6 text-[var(--muted-text)]">
                                         {licenseFootprint > 0
@@ -674,7 +674,7 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
                                             : "Aún no hay licencias activas para analizar la huella operativa."}
                                     </p>
                                 </div>
-                                <div className="rounded-[22px] border border-[var(--card-border)] bg-[var(--surface-1)] px-4 py-4">
+                                <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--surface-1)] px-4 py-4">
                                     <p className="text-sm font-medium text-[var(--foreground)]">Reserva comercial</p>
                                     <p className="mt-1 text-xs leading-6 text-[var(--muted-text)]">
                                         {futureClientPool > 0
