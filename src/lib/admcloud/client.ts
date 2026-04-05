@@ -168,6 +168,73 @@ export interface AdmCloudApiResponse<T> {
     error?: string;
 }
 
+export interface AdmCloudTransaction {
+    ID?: string;
+    DocID?: string;
+    DocType?: string;
+    DocDate?: string;
+    DateFrom?: string;
+    DateTo?: string;
+    CreationDate?: string;
+    PostDate?: string;
+    Reference?: string;
+    RelationshipID?: string;
+    RelationshipName?: string;
+    FiscalID?: string;
+    PaymentTermID?: string;
+    PaymentTermName?: string;
+    CurrencyID?: string;
+    ExchangeRate?: number | string;
+    TaxAmount?: number | string;
+    TotalAmount?: number | string;
+    CalculatedTotalAmount?: number | string;
+    CalculatedNetAmount?: number | string;
+    CalculatedTaxAmount?: number | string;
+    AppliedPayments?: number | string;
+    ManualPayments?: number | string;
+    UnappliedAmount?: number | string;
+    Balance?: number | string;
+    EstimatedCollectionDate?: string;
+    ExpirationDate?: string;
+    NCF?: string;
+    DocumentTypeName?: string;
+    Status?: number | string;
+    StatusDesc?: string;
+    Void?: boolean;
+    Printed?: boolean;
+    Mailed?: boolean;
+    PaymentMethodID?: string;
+    PaymentMethodName?: string;
+    CashAccountID?: string;
+    SalesRepID?: string;
+    SalesRepName?: string;
+    ProjectID?: string;
+    ProjectName?: string;
+    Notes?: string;
+    Description?: string;
+    Items?: AdmCloudInvoiceItem[];
+    [key: string]: unknown;
+}
+
+export interface AdmCloudCollectionSummary {
+    ID?: string;
+    DocDate?: string;
+    YearString?: string;
+    MonthString?: string;
+    DayString?: string;
+    Customer?: string;
+    ParentCustomer?: string;
+    CustomerClass?: string;
+    CustomerSalesRep?: string;
+    CollectionSalesRep?: string;
+    PaidDocSalesRep?: string;
+    Amount?: number | string;
+    Location?: string;
+    Subsidiary?: string;
+    SalesTerritory?: string;
+    [key: string]: unknown;
+}
+
 // Quote/Proforma interfaces
 export interface AdmCloudQuoteItem {
     ItemID: string;
@@ -371,7 +438,61 @@ class AdmCloudClient {
 
     private normalizeList<T>(data: T | T[] | null | undefined): T[] {
         if (!data) return [];
-        return Array.isArray(data) ? data : [data];
+        if (Array.isArray(data)) return data;
+
+        if (typeof data === "object") {
+            const candidate = data as Record<string, unknown>;
+            const embeddedList =
+                candidate.Items ||
+                candidate.items ||
+                candidate.Data ||
+                candidate.data ||
+                candidate.Results ||
+                candidate.results;
+
+            if (Array.isArray(embeddedList)) {
+                return embeddedList as T[];
+            }
+        }
+
+        return [data];
+    }
+
+    private async getTransactionCollection(
+        endpoint: string,
+        filters: Record<string, string> = {}
+    ): Promise<AdmCloudApiResponse<AdmCloudTransaction[]>> {
+        const response = await this.request<AdmCloudTransaction[] | AdmCloudTransaction>(
+            endpoint,
+            {},
+            { skip: "0", ...filters }
+        );
+
+        if (!response.success) {
+            return { success: false, error: response.error };
+        }
+
+        return { success: true, data: this.normalizeList(response.data) };
+    }
+
+    private async getCollectionSummary(
+        year: number,
+        subsidiaryId?: string
+    ): Promise<AdmCloudApiResponse<AdmCloudCollectionSummary[]>> {
+        const response = await this.request<AdmCloudCollectionSummary[] | AdmCloudCollectionSummary>(
+            "/Collections",
+            {},
+            {
+                Year: String(year),
+                ...(subsidiaryId ? { SubsidiaryID: subsidiaryId } : {}),
+            }
+        );
+
+        if (!response.success) {
+            return { success: false, error: response.error };
+        }
+
+        return { success: true, data: this.normalizeList(response.data) };
     }
 
     /**
@@ -445,6 +566,59 @@ class AdmCloudClient {
 
     async getCreditInvoice(id: string): Promise<AdmCloudApiResponse<AdmCloudInvoice>> {
         return this.request<AdmCloudInvoice>(`/CreditInvoices/${id}`);
+    }
+
+    async getCreditInvoicesByDateRange(dateFrom: string, dateTo: string): Promise<AdmCloudApiResponse<AdmCloudTransaction[]>> {
+        return this.getTransactionCollection("/CreditInvoices", {
+            DateFrom: dateFrom,
+            DateTo: dateTo,
+        });
+    }
+
+    async getCashInvoicesByDateRange(dateFrom: string, dateTo: string): Promise<AdmCloudApiResponse<AdmCloudTransaction[]>> {
+        return this.getTransactionCollection("/CashInvoices", {
+            DateFrom: dateFrom,
+            DateTo: dateTo,
+        });
+    }
+
+    async getCustomerCreditNotesByDateRange(dateFrom: string, dateTo: string): Promise<AdmCloudApiResponse<AdmCloudTransaction[]>> {
+        return this.getTransactionCollection("/CustomerCreditNotes", {
+            DateFrom: dateFrom,
+            DateTo: dateTo,
+        });
+    }
+
+    async getCustomerDebitNotesByDateRange(dateFrom: string, dateTo: string): Promise<AdmCloudApiResponse<AdmCloudTransaction[]>> {
+        return this.getTransactionCollection("/CustomerDebitNotes", {
+            DateFrom: dateFrom,
+            DateTo: dateTo,
+        });
+    }
+
+    async getCashReceiptsByDateRange(dateFrom: string, dateTo: string): Promise<AdmCloudApiResponse<AdmCloudTransaction[]>> {
+        return this.getTransactionCollection("/CashReceipts", {
+            DateFrom: dateFrom,
+            DateTo: dateTo,
+        });
+    }
+
+    async getDepositsByDateRange(dateFrom: string, dateTo: string): Promise<AdmCloudApiResponse<AdmCloudTransaction[]>> {
+        return this.getTransactionCollection("/Deposits", {
+            DateFrom: dateFrom,
+            DateTo: dateTo,
+        });
+    }
+
+    async getAccountsReceivableSnapshot(dateTo: string): Promise<AdmCloudApiResponse<AdmCloudTransaction[]>> {
+        return this.getTransactionCollection("/AR", {
+            DateTo: dateTo,
+            IncludePrepayments: "true",
+        });
+    }
+
+    async getCollectionsByYear(year: number): Promise<AdmCloudApiResponse<AdmCloudCollectionSummary[]>> {
+        return this.getCollectionSummary(year);
     }
 
     /**
