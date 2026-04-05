@@ -3,7 +3,9 @@ import { ExecutiveDashboard } from "@/components/dashboard/executive-dashboard";
 import { getCurrentWorkspace } from "@/actions/workspace";
 import { prisma } from "@/lib/prisma";
 import { DealStatus } from "@prisma/client";
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import type { ReactNode } from "react";
 
 export const revalidate = 60;
 
@@ -26,6 +28,16 @@ const STATUS_ORDER: DealStatus[] = [
     "CIERRE_PERDIDO",
     "NO_CALIFICADOS",
 ];
+
+type DashboardPreference = "ALL" | "CEO" | "CFO" | "CUSTOMER_SUCCESS";
+
+const DASHBOARD_LABELS: Record<Exclude<DashboardPreference, "ALL">, string> = {
+    CEO: "CEO",
+    CFO: "CFO",
+    CUSTOMER_SUCCESS: "Customer Success",
+};
+
+const DASHBOARD_ORDER: Array<Exclude<DashboardPreference, "ALL">> = ["CEO", "CFO", "CUSTOMER_SUCCESS"];
 
 const EMPTY_STATS = {
     allCompaniesCount: 0,
@@ -175,7 +187,83 @@ async function getPipelineBreakdown(workspaceId: string) {
     }
 }
 
-export default async function DashboardPage() {
+function normalizeDashboardView(value: string | string[] | undefined): Exclude<DashboardPreference, "ALL"> | null {
+    const rawValue = Array.isArray(value) ? value[0] : value;
+    if (!rawValue) return null;
+    return DASHBOARD_ORDER.includes(rawValue as Exclude<DashboardPreference, "ALL">)
+        ? (rawValue as Exclude<DashboardPreference, "ALL">)
+        : null;
+}
+
+function DashboardSwitcher({ currentView }: { currentView: Exclude<DashboardPreference, "ALL"> }) {
+    return (
+        <div className="rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)] p-2 shadow-sm">
+            <div className="flex flex-wrap gap-2">
+                {DASHBOARD_ORDER.map((view) => {
+                    const isActive = view === currentView;
+                    const isAvailable = view === "CEO";
+
+                    return (
+                        <Link
+                            key={view}
+                            href={{ pathname: "/app", query: { dashboard: view } }}
+                            className={`inline-flex items-center gap-2 rounded-[var(--radius-lg)] px-4 py-2 text-sm font-medium transition-colors ${
+                                isActive
+                                    ? "bg-nearby-dark text-white"
+                                    : "bg-[var(--surface-1)] text-[var(--foreground)] hover:bg-[var(--hover-bg)]"
+                            }`}
+                            aria-disabled={!isAvailable}
+                        >
+                            {DASHBOARD_LABELS[view]}
+                            {!isAvailable && (
+                                <span className={`rounded-full px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] ${isActive ? "bg-white/14 text-white/80" : "bg-[var(--hover-bg)] text-[var(--muted-text)]"}`}>
+                                    Próximamente
+                                </span>
+                            )}
+                        </Link>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
+function ComingSoonDashboard({
+    title,
+    description,
+    selector,
+}: {
+    title: string;
+    description: string;
+    selector?: ReactNode;
+}) {
+    return (
+        <div className="min-h-screen bg-[var(--surface-0)] py-4 md:py-8">
+            <div className="mx-auto max-w-7xl space-y-5 px-4 sm:px-6 lg:px-8 md:space-y-6">
+                {selector}
+                <section className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[linear-gradient(155deg,var(--surface-1),var(--surface-2))] p-8 shadow-sm sm:p-10">
+                    <div className="max-w-2xl">
+                        <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--muted-text)]">Dashboard asignado</p>
+                        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[var(--foreground)] sm:text-4xl">{title}</h1>
+                        <p className="mt-4 text-base leading-7 text-[var(--muted-text)]">{description}</p>
+                        <div className="mt-8 rounded-[var(--radius-lg)] border border-dashed border-[var(--card-border)] bg-[var(--card-bg)] p-6">
+                            <p className="text-sm font-medium text-[var(--foreground)]">Pendiente de diseño e implementación</p>
+                            <p className="mt-2 text-sm leading-6 text-[var(--muted-text)]">
+                                Ya quedó habilitada la asignación por usuario y el intercambio desde `Todos`. Sobre esta base podemos construir el dashboard CFO y Customer Success sin volver a tocar permisos ni preferencias.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    );
+}
+
+export default async function DashboardPage({
+    searchParams,
+}: {
+    searchParams?: { dashboard?: string | string[] };
+}) {
     const session = await auth();
 
     if (!session?.user?.email) {
@@ -184,12 +272,43 @@ export default async function DashboardPage() {
 
     const workspace = await getCurrentWorkspace();
 
-    const [stats, pipeline] = await Promise.all([
+    const [stats, pipeline, currentUser] = await Promise.all([
         workspace ? getBasicStats(workspace.id) : Promise.resolve(EMPTY_STATS),
         workspace ? getPipelineBreakdown(workspace.id) : Promise.resolve([]),
+        prisma.user.findUnique({
+            where: { email: session.user.email },
+            select: { dashboardPreference: true },
+        }),
     ]);
 
     const firstName = session.user.name?.split(" ")[0] || session.user.email.split("@")[0] || "Equipo";
+    const dashboardPreference = currentUser?.dashboardPreference || "ALL";
+    const requestedView = normalizeDashboardView(searchParams?.dashboard);
+    const currentView =
+        dashboardPreference === "ALL"
+            ? requestedView || "CEO"
+            : dashboardPreference;
+    const selector = dashboardPreference === "ALL" ? <DashboardSwitcher currentView={currentView} /> : undefined;
 
-    return <ExecutiveDashboard firstName={firstName} stats={stats} pipeline={pipeline} />;
+    if (currentView === "CEO") {
+        return <ExecutiveDashboard firstName={firstName} stats={stats} pipeline={pipeline} selector={selector} />;
+    }
+
+    if (currentView === "CFO") {
+        return (
+            <ComingSoonDashboard
+                title="Dashboard CFO"
+                description="Esta vista se reservará para rentabilidad, cuentas por cobrar, márgenes, cash conversion y control financiero del negocio."
+                selector={selector}
+            />
+        );
+    }
+
+    return (
+        <ComingSoonDashboard
+            title="Dashboard Customer Success"
+            description="Esta vista se enfocará en salud de cuentas, adopción, soporte, riesgo de churn y expansión de clientes."
+            selector={selector}
+        />
+    );
 }

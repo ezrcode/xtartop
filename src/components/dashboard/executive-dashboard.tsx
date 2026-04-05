@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import {
     ArrowUpRight,
@@ -26,6 +27,7 @@ interface PipelineItem {
 
 interface ExecutiveDashboardProps {
     firstName: string;
+    selector?: ReactNode;
     stats: {
         allCompaniesCount: number;
         clientCompaniesCount: number;
@@ -165,7 +167,7 @@ function HaloPanel({
     );
 }
 
-export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDashboardProps) {
+export function ExecutiveDashboard({ firstName, stats, pipeline, selector }: ExecutiveDashboardProps) {
     const subscriberBase = stats.clientCompaniesCount || 0;
     const clientBase = stats.clientCompaniesCount + stats.oneTimeClientsCount;
     const futureClientPool = stats.prospectsCount + stats.potentialClientsCount;
@@ -199,6 +201,7 @@ export function ExecutiveDashboard({ firstName, stats, pipeline }: ExecutiveDash
     return (
         <div className="min-h-screen bg-[var(--surface-0)] py-4 md:py-8">
             <div className="mx-auto max-w-7xl space-y-5 px-4 sm:px-6 lg:px-8 md:space-y-6">
+                {selector}
                 <section className="relative overflow-hidden rounded-[var(--radius-lg)] border border-[#1a2430] bg-[#0b1420] text-white shadow-[0_35px_100px_rgba(15,23,42,0.28)]">
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(252,90,52,0.24),transparent_32%),radial-gradient(circle_at_84%_18%,rgba(59,130,246,0.24),transparent_28%),radial-gradient(circle_at_78%_82%,rgba(20,184,166,0.22),transparent_26%),linear-gradient(180deg,rgba(11,20,32,0.98),rgba(8,13,22,0.98))]" />
                     <div className="absolute left-1/2 top-[12%] h-64 w-64 -translate-x-1/2 rounded-full border border-white/6 bg-white/5 blur-3xl" />

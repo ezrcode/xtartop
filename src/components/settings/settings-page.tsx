@@ -32,10 +32,12 @@ import { Label } from "../ui/label";
 import { Badge } from "../ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 
+type DashboardPreference = "ALL" | "CEO" | "CFO" | "CUSTOMER_SUCCESS";
+
 type WorkspaceWithDetails = Workspace & {
-    owner: Pick<User, 'id' | 'name' | 'email' | 'photoUrl'>;
+    owner: Pick<User, 'id' | 'name' | 'email' | 'photoUrl' | 'dashboardPreference'>;
     members: (WorkspaceMember & {
-        user: Pick<User, 'id' | 'name' | 'email' | 'photoUrl'>;
+        user: Pick<User, 'id' | 'name' | 'email' | 'photoUrl' | 'dashboardPreference'>;
     })[];
     invitations: (Invitation & {
         inviter: Pick<User, 'name' | 'email'>;
@@ -74,6 +76,13 @@ type WorkspaceWithDetails = Workspace & {
         deals: number;
     };
 };
+
+const dashboardOptions: Array<{ value: DashboardPreference; label: string }> = [
+    { value: "ALL", label: "Todos" },
+    { value: "CEO", label: "CEO" },
+    { value: "CFO", label: "CFO" },
+    { value: "CUSTOMER_SUCCESS", label: "Customer Success" },
+];
 
 type WorkspaceUser = {
     id: string;
@@ -248,7 +257,7 @@ export function SettingsPage({
     const [editingUserId, setEditingUserId] = useState<string | null>(null);
     const [savingUserId, setSavingUserId] = useState<string | null>(null);
     const [profileErrorByUser, setProfileErrorByUser] = useState<Record<string, string>>({});
-    const [userDrafts, setUserDrafts] = useState<Record<string, { name: string; photoUrl: string | null }>>({});
+    const [userDrafts, setUserDrafts] = useState<Record<string, { name: string; photoUrl: string | null; dashboardPreference: DashboardPreference }>>({});
     const [logoUrl, setLogoUrl] = useState<string | null>(workspace.logoUrl || null);
     
     // Contract state
@@ -291,7 +300,7 @@ export function SettingsPage({
         return userId !== workspace.owner.id;
     };
 
-    const startEditingUser = (user: Pick<User, "id" | "name" | "photoUrl">) => {
+    const startEditingUser = (user: Pick<User, "id" | "name" | "photoUrl" | "dashboardPreference">) => {
         if (!canEditUser(user.id)) return;
 
         setProfileErrorByUser((prev) => {
@@ -305,14 +314,15 @@ export function SettingsPage({
             [user.id]: {
                 name: user.name || "",
                 photoUrl: user.photoUrl || null,
+                dashboardPreference: user.dashboardPreference || "ALL",
             },
         }));
         setEditingUserId(user.id);
     };
 
-    const updateUserDraft = (userId: string, patch: Partial<{ name: string; photoUrl: string | null }>) => {
+    const updateUserDraft = (userId: string, patch: Partial<{ name: string; photoUrl: string | null; dashboardPreference: DashboardPreference }>) => {
         setUserDrafts((prev) => {
-            const current = prev[userId] || { name: "", photoUrl: null };
+            const current = prev[userId] || { name: "", photoUrl: null, dashboardPreference: "ALL" as DashboardPreference };
             return {
                 ...prev,
                 [userId]: { ...current, ...patch },
@@ -334,7 +344,7 @@ export function SettingsPage({
         if (!draft) return;
 
         setSavingUserId(userId);
-        const result = await updateWorkspaceUserProfile(userId, draft.name, draft.photoUrl);
+        const result = await updateWorkspaceUserProfile(userId, draft.name, draft.photoUrl, draft.dashboardPreference);
         setSavingUserId(null);
 
         if (!result.success) {
@@ -493,13 +503,28 @@ export function SettingsPage({
                                                     placeholder="Nombre del usuario"
                                                 />
                                             </div>
-                                            <div className="space-y-1">
-                                                <p className="text-xs text-[var(--muted-text)]">Correo (solo lectura)</p>
-                                                <p className="text-sm text-[var(--foreground)] break-all">{workspace.owner.email}</p>
-                                            </div>
-                                            {profileErrorByUser[workspace.owner.id] && (
-                                                <p className="text-xs text-error-red">{profileErrorByUser[workspace.owner.id]}</p>
-                                            )}
+                                                <div className="space-y-1">
+                                                    <p className="text-xs text-[var(--muted-text)]">Correo (solo lectura)</p>
+                                                    <p className="text-sm text-[var(--foreground)] break-all">{workspace.owner.email}</p>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label htmlFor={`owner-dashboard-${workspace.owner.id}`}>Dashboard</Label>
+                                                    <select
+                                                        id={`owner-dashboard-${workspace.owner.id}`}
+                                                        value={userDrafts[workspace.owner.id]?.dashboardPreference || "ALL"}
+                                                        onChange={(e) => updateUserDraft(workspace.owner.id, { dashboardPreference: e.target.value as DashboardPreference })}
+                                                        className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--input-bg)] px-3 py-2.5 text-sm text-[var(--foreground)] shadow-sm focus:border-nearby-dark/50 focus:outline-none focus:ring-2 focus:ring-nearby-dark/15"
+                                                    >
+                                                        {dashboardOptions.map((option) => (
+                                                            <option key={option.value} value={option.value}>
+                                                                {option.label}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                                {profileErrorByUser[workspace.owner.id] && (
+                                                    <p className="text-xs text-error-red">{profileErrorByUser[workspace.owner.id]}</p>
+                                                )}
                                             <div className="flex items-center justify-between gap-2">
                                                 <Badge variant="secondary" className="text-xs">Owner</Badge>
                                                 <div className="flex items-center gap-2">
@@ -528,6 +553,9 @@ export function SettingsPage({
                                                 <p className="text-sm font-medium text-[var(--foreground)] truncate">{workspace.owner.name || workspace.owner.email}</p>
                                                 <p className="text-xs text-[var(--muted-text)] truncate">{workspace.owner.email}</p>
                                             </div>
+                                            <Badge variant="outline" className="hidden sm:inline-flex flex-shrink-0 text-xs">
+                                                {dashboardOptions.find((option) => option.value === workspace.owner.dashboardPreference)?.label || "Todos"}
+                                            </Badge>
                                             <Badge variant="secondary" className="flex-shrink-0 text-xs">Owner</Badge>
                                             {canEditUser(workspace.owner.id) && (
                                                 <Button type="button" variant="ghost" size="sm" onClick={() => startEditingUser(workspace.owner)}>
@@ -562,6 +590,21 @@ export function SettingsPage({
                                                     <p className="text-xs text-[var(--muted-text)]">Correo (solo lectura)</p>
                                                     <p className="text-sm text-[var(--foreground)] break-all">{member.user.email}</p>
                                                 </div>
+                                                <div className="space-y-2">
+                                                    <Label htmlFor={`member-dashboard-${member.user.id}`}>Dashboard</Label>
+                                                    <select
+                                                        id={`member-dashboard-${member.user.id}`}
+                                                        value={userDrafts[member.user.id]?.dashboardPreference || "ALL"}
+                                                        onChange={(e) => updateUserDraft(member.user.id, { dashboardPreference: e.target.value as DashboardPreference })}
+                                                        className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--input-bg)] px-3 py-2.5 text-sm text-[var(--foreground)] shadow-sm focus:border-nearby-dark/50 focus:outline-none focus:ring-2 focus:ring-nearby-dark/15"
+                                                    >
+                                                        {dashboardOptions.map((option) => (
+                                                            <option key={option.value} value={option.value}>
+                                                                {option.label}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
                                                 {profileErrorByUser[member.user.id] && (
                                                     <p className="text-xs text-error-red">{profileErrorByUser[member.user.id]}</p>
                                                 )}
@@ -593,6 +636,9 @@ export function SettingsPage({
                                                     <p className="text-sm font-medium text-[var(--foreground)] truncate">{member.user.name || member.user.email}</p>
                                                     <p className="text-xs text-[var(--muted-text)] truncate">{member.user.email}</p>
                                                 </div>
+                                                <Badge variant="outline" className="hidden sm:inline-flex flex-shrink-0 text-xs">
+                                                    {dashboardOptions.find((option) => option.value === member.user.dashboardPreference)?.label || "Todos"}
+                                                </Badge>
                                                 <Badge variant={member.role === 'ADMIN' ? 'info' : 'success'} className="flex-shrink-0 text-xs">{member.role}</Badge>
                                                 {canEditUser(member.user.id) && (
                                                     <Button type="button" variant="ghost" size="sm" onClick={() => startEditingUser(member.user)}>

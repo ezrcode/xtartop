@@ -107,6 +107,7 @@ export async function getWorkspaceWithMembers() {
                     name: true,
                     email: true,
                     photoUrl: true,
+                    dashboardPreference: true,
                 }
             },
             members: {
@@ -117,6 +118,7 @@ export async function getWorkspaceWithMembers() {
                             name: true,
                             email: true,
                             photoUrl: true,
+                            dashboardPreference: true,
                         }
                     }
                 },
@@ -516,9 +518,15 @@ const UpdateWorkspaceUserProfileSchema = z.object({
     userId: z.string().min(1, "Usuario inválido"),
     name: z.string().trim().min(1, "El nombre es obligatorio").max(120, "Nombre demasiado largo"),
     photoUrl: z.union([z.string().url("URL de foto inválida"), z.literal(""), z.null()]).optional(),
+    dashboardPreference: z.enum(["ALL", "CEO", "CFO", "CUSTOMER_SUCCESS"]),
 });
 
-export async function updateWorkspaceUserProfile(userId: string, name: string, photoUrl: string | null) {
+export async function updateWorkspaceUserProfile(
+    userId: string,
+    name: string,
+    photoUrl: string | null,
+    dashboardPreference: "ALL" | "CEO" | "CFO" | "CUSTOMER_SUCCESS"
+) {
     const session = await auth();
     if (!session?.user?.email) redirect("/login");
 
@@ -531,6 +539,7 @@ export async function updateWorkspaceUserProfile(userId: string, name: string, p
         userId,
         name,
         photoUrl,
+        dashboardPreference,
     });
 
     if (!validatedFields.success) {
@@ -573,6 +582,7 @@ export async function updateWorkspaceUserProfile(userId: string, name: string, p
             data: {
                 name: validatedFields.data.name,
                 photoUrl: validatedFields.data.photoUrl || null,
+                dashboardPreference: validatedFields.data.dashboardPreference,
             },
         });
 

@@ -64,6 +64,13 @@ enum ThemePreference {
   SYSTEM
 }
 
+enum UserDashboardPreference {
+  ALL
+  CEO
+  CFO
+  CUSTOMER_SUCCESS
+}
+
 enum QuoteStatus {
   BORRADOR
   ACTIVA
@@ -142,6 +149,7 @@ model User {
   userType        UserType           @default(INTERNAL)
   dealsViewPref   DealViewPreference @default(TABLE)
   themePreference ThemePreference    @default(LIGHT)
+  dashboardPreference UserDashboardPreference @default(ALL)
   itemsPerPage    Int                @default(10)
   
   // Table Preferences (sorting, filters, visible columns per table)
