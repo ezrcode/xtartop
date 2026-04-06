@@ -676,7 +676,6 @@ function DashboardSwitcher({ currentView }: { currentView: Exclude<DashboardPref
             <div className="flex flex-wrap gap-2">
                 {DASHBOARD_ORDER.map((view) => {
                     const isActive = view === currentView;
-                    const isAvailable = view === "CEO";
 
                     return (
                         <Link
@@ -687,14 +686,8 @@ function DashboardSwitcher({ currentView }: { currentView: Exclude<DashboardPref
                                     ? "bg-nearby-dark text-white"
                                     : "bg-[var(--surface-1)] text-[var(--foreground)] hover:bg-[var(--hover-bg)]"
                             }`}
-                            aria-disabled={!isAvailable}
                         >
                             {DASHBOARD_LABELS[view]}
-                            {!isAvailable && (
-                                <span className={`rounded-full px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] ${isActive ? "bg-white/14 text-white/80" : "bg-[var(--hover-bg)] text-[var(--muted-text)]"}`}>
-                                    Próximamente
-                                </span>
-                            )}
                         </Link>
                     );
                 })}

@@ -117,17 +117,28 @@ function HeroMetric({
     icon: typeof CircleDollarSign;
     accent: string;
 }) {
+    const [prefix, rawAmount] = value.startsWith("US$") ? ["US$", value.replace(/^US\$/, "")] : ["", value];
+
     return (
         <article className="relative overflow-hidden rounded-[var(--radius-lg)] border border-white/10 bg-white/6 p-5 backdrop-blur-md">
             <div className="absolute inset-x-0 top-0 h-1" style={{ background: accent }} />
             <div className="flex items-start justify-between gap-4">
-                <div>
+                <div className="min-w-0 flex-1">
                     <p className="text-[11px] uppercase tracking-[0.2em] text-white/55">{label}</p>
-                    <p className="mt-3 text-3xl font-semibold tracking-tight text-white">{value}</p>
-                    <p className="mt-2 text-xs leading-5 text-white/62">{footnote}</p>
+                    <div className="mt-3 flex min-w-0 items-end gap-1.5 text-white">
+                        {prefix ? (
+                            <span className="shrink-0 pb-1 text-base font-semibold uppercase tracking-[0.14em] text-white/76 sm:text-lg">
+                                {prefix}
+                            </span>
+                        ) : null}
+                        <span className="min-w-0 truncate text-[clamp(2.35rem,3vw,4rem)] font-semibold leading-none tracking-[-0.05em]">
+                            {rawAmount}
+                        </span>
+                    </div>
+                    <p className="mt-3 text-xs leading-6 text-white/62">{footnote}</p>
                 </div>
                 <div
-                    className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 text-white shadow-sm"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 text-white shadow-sm"
                     style={{ background: accent }}
                 >
                     <Icon size={18} />
