@@ -14,9 +14,9 @@ import { rejectApprovedQuoteArtifacts, syncApprovedQuoteArtifacts } from "./deal
 
 const UNIQUE_FINAL_STATUSES: QuoteStatus[] = ["ACTIVA", "APROBADA"];
 
-function calculateCommissionableBase(totalOneTime: number, marginRate: unknown) {
+function calculateCommissionableBase(totalBase: number, marginRate: unknown) {
     const normalizedMargin = Math.max(0, Math.min(100, Number(marginRate || 0)));
-    return Number(((totalOneTime * normalizedMargin) / 100).toFixed(2));
+    return Number(((totalBase * normalizedMargin) / 100).toFixed(2));
 }
 
 const QuoteItemSchema = z.object({
@@ -367,7 +367,7 @@ export async function createQuoteAction(
                     dealId: deal.id,
                     approvedQuoteId: createdQuote.id,
                     totalBase: totalOneTime + totalMonthly,
-                    commissionableBase: calculateCommissionableBase(totalOneTime, workspace.commissionMarginRate),
+                    commissionableBase: calculateCommissionableBase(totalOneTime + totalMonthly, workspace.commissionMarginRate),
                     marginRate: Number(workspace.commissionMarginRate || 0),
                     userId: user.id,
                 });
@@ -589,7 +589,7 @@ export async function updateQuoteAction(
                     dealId: existingQuote.dealId,
                     approvedQuoteId: quoteId,
                     totalBase: totalOneTime + totalMonthly,
-                    commissionableBase: calculateCommissionableBase(totalOneTime, workspace.commissionMarginRate),
+                    commissionableBase: calculateCommissionableBase(totalOneTime + totalMonthly, workspace.commissionMarginRate),
                     marginRate: Number(workspace.commissionMarginRate || 0),
                     userId: currentUser.id,
                 });

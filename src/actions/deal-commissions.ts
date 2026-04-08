@@ -180,6 +180,7 @@ export async function saveDealCommission(input: unknown) {
                 select: {
                     id: true,
                     totalOneTime: true,
+                    totalMonthly: true,
                 },
             },
         },
@@ -218,12 +219,14 @@ export async function saveDealCommission(input: unknown) {
         }
     }
 
-    const commissionableBase = Number(approvedQuote.totalOneTime || 0);
+    const totalDealBase = Number(approvedQuote.totalOneTime || 0) + Number(approvedQuote.totalMonthly || 0);
+    const marginRate = Math.max(0, Math.min(100, Number(workspace.commissionMarginRate || 0)));
+    const commissionableBase = Number(((totalDealBase * marginRate) / 100).toFixed(2));
     const normalizedEntries = validated.data.entries.map((entry) => {
         const percentage = entry.type === "PERCENTAGE" ? Number(entry.percentage || 0) : null;
         const fixedAmount = entry.type === "FIXED_AMOUNT" ? Number(entry.fixedAmount || 0) : null;
         const calculatedAmount = entry.type === "PERCENTAGE"
-            ? Number(((commissionableBase * Number(entry.percentage || 0)) / 100).toFixed(2))
+            ? Number(((totalDealBase * Number(entry.percentage || 0)) / 100).toFixed(2))
             : Number((fixedAmount || 0).toFixed(2));
 
         return {
@@ -249,7 +252,7 @@ export async function saveDealCommission(input: unknown) {
                     data: {
                         dealId: validated.data.dealId,
                         approvedQuoteId: approvedQuote.id,
-                        marginRate: Number(workspace.commissionMarginRate || 100),
+                        marginRate,
                         commissionableBase,
                         notes: validated.data.notes?.trim() || null,
                         status: DealCommissionStatus.ACTIVE,
@@ -263,7 +266,7 @@ export async function saveDealCommission(input: unknown) {
                     where: { id: commission.id },
                     data: {
                         notes: validated.data.notes?.trim() || null,
-                        marginRate: commission.marginRate,
+                        marginRate,
                         commissionableBase,
                         status: DealCommissionStatus.ACTIVE,
                         updatedById: user.id,
