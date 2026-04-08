@@ -9,6 +9,7 @@ import { Deal, Company, Contact, User, BusinessLine } from "@prisma/client";
 import { ActivitiesWithSuspense } from "../activities/activities-with-suspense";
 import { QuotesTable } from "../quotes/quotes-table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
+import { formatDealNumber } from "@/lib/deal-number";
 
 interface DealFormProps {
     deal?: (Deal & {
@@ -113,6 +114,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
 
     const initialState: DealState = { message: "", errors: {} };
     const [state, action] = useFormState(isEditMode ? updateAction : createDealAction, initialState);
+    const dealCode = isEditMode && typeof deal?.number === "number" ? formatDealNumber(deal.number) : null;
 
     const filteredContacts = useMemo(() => {
         if (selectedCompanyId === "null") return contactsState;
@@ -186,7 +188,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                     <ArrowLeft size={20} />
                                 </Link>
                                 <h1 className="text-base sm:text-xl font-bold text-[var(--foreground)] truncate">
-                                    {isEditMode ? deal?.name : "Nuevo Negocio"}
+                                    {isEditMode ? `${dealCode ? `${dealCode} · ` : ""}${deal?.name}` : "Nuevo Negocio"}
                                 </h1>
                             </div>
                             <div className="flex items-center space-x-2 flex-shrink-0">
@@ -272,6 +274,15 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                 {activeTab === "general" && (
                                     <div className="space-y-5">
                                         <div className="grid grid-cols-1 gap-4 sm:gap-y-5 sm:gap-x-4 sm:grid-cols-6">
+                                            <div className="sm:col-span-6">
+                                                <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
+                                                    Código del negocio
+                                                </label>
+                                                <div className="inline-flex items-center rounded-lg border border-[var(--card-border)] bg-[var(--surface-2)] px-3 py-2 text-sm font-semibold tracking-[0.08em] text-[var(--foreground)]">
+                                                    {dealCode || "Se asigna al guardar"}
+                                                </div>
+                                            </div>
+
                                             {/* Nombre del Negocio */}
                                             <div className="sm:col-span-6">
                                                 <label htmlFor="name" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">

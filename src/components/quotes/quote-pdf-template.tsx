@@ -2,6 +2,7 @@
 
 import { PaymentFrequency } from "@prisma/client";
 import { calculateQuoteTaxBreakdown } from "@/lib/quote-taxes";
+import { formatQuoteNumber } from "@/lib/deal-number";
 
 interface QuoteItem {
     name: string;
@@ -62,6 +63,7 @@ export function QuotePDFTemplate({
     });
     const showTaxBreakdown = quote.taxType === "INCLUIDOS" && Number(quote.taxRate || 0) > 0;
     const grandTotal = breakdown.grandTotal;
+    const quoteCode = formatQuoteNumber(quote.deal?.number, quote.number);
 
     return (
         <div
@@ -139,7 +141,7 @@ export function QuotePDFTemplate({
                 <div style={{ width: "58%" }}>
                     <div style={{ marginBottom: "3px" }}>
                         <span style={{ fontWeight: 700, display: "inline-block", width: "95px" }}>Cotización Nro.:</span>
-                        <span>{String(quote.number).padStart(3, "0")}</span>
+                        <span>{quoteCode}</span>
                     </div>
                     <div style={{ marginBottom: "3px" }}>
                         <span style={{ fontWeight: 700, display: "inline-block", width: "95px" }}>Cliente:</span>

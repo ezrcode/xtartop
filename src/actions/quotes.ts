@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { QuoteStatus, Currency, TaxType, PaymentFrequency } from "@prisma/client";
 import { calculateQuoteTaxBreakdown } from "@/lib/quote-taxes";
+import { formatQuoteNumber } from "@/lib/deal-number";
 
 const UNIQUE_FINAL_STATUSES: QuoteStatus[] = ["ACTIVA", "APROBADA"];
 
@@ -140,6 +141,7 @@ export async function getQuotesByDeal(dealId: string) {
             },
         },
         include: {
+            deal: { select: { number: true } },
             company: { select: { name: true } },
             contact: { select: { fullName: true } },
             createdBy: { select: { name: true, email: true } },
@@ -171,7 +173,7 @@ export async function getQuote(id: string) {
         include: {
             company: { select: { id: true, name: true } },
             contact: { select: { id: true, fullName: true } },
-            deal: { select: { id: true, name: true } },
+            deal: { select: { id: true, name: true, number: true } },
             items: true,
         },
     });
@@ -199,6 +201,7 @@ export async function createQuoteAction(
         },
         select: {
             id: true,
+            number: true,
             companyId: true,
             contactId: true,
         },
@@ -260,7 +263,7 @@ export async function createQuoteAction(
 
         if (existingFinalQuote) {
             return {
-                message: `Ya existe una cotización ${existingFinalQuote.status === "APROBADA" ? "aprobada" : "activa"} (#${String(existingFinalQuote.number).padStart(3, "0")}) para este negocio. Solo puede haber una cotización activa o aprobada a la vez.`,
+                message: `Ya existe una cotización ${existingFinalQuote.status === "APROBADA" ? "aprobada" : "activa"} (${formatQuoteNumber(deal.number, existingFinalQuote.number)}) para este negocio. Solo puede haber una cotización activa o aprobada a la vez.`,
             };
         }
     }
@@ -365,6 +368,7 @@ export async function updateQuoteAction(
         select: {
             dealId: true,
             number: true,
+            deal: { select: { number: true } },
         },
     });
 
@@ -418,7 +422,7 @@ export async function updateQuoteAction(
 
         if (existingFinalQuote) {
             return {
-                message: `No se puede actualizar la cotización #${String(existingQuote.number).padStart(3, "0")} a ${validatedFields.data.status === "APROBADA" ? "aprobada" : "activa"} porque ya existe otra cotización ${existingFinalQuote.status === "APROBADA" ? "aprobada" : "activa"} (#${String(existingFinalQuote.number).padStart(3, "0")}) en este negocio.`,
+                message: `No se puede actualizar la cotización ${formatQuoteNumber(existingQuote.deal.number, existingQuote.number)} a ${validatedFields.data.status === "APROBADA" ? "aprobada" : "activa"} porque ya existe otra cotización ${existingFinalQuote.status === "APROBADA" ? "aprobada" : "activa"} (${formatQuoteNumber(existingQuote.deal.number, existingFinalQuote.number)}) en este negocio.`,
             };
         }
     }

@@ -6,6 +6,7 @@ import { QuoteModal } from "./quote-modal";
 import { getQuotesByDeal } from "@/actions/quotes";
 import { getProjectRateReferences } from "@/actions/project-rate-references";
 import { getTaxes } from "@/actions/taxes";
+import { formatQuoteNumber } from "@/lib/deal-number";
 
 interface QuotesTableProps {
     dealId: string;
@@ -161,7 +162,7 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
                                             onClick={() => handleEdit(quote)}
                                             className="text-sm font-medium text-[var(--foreground)] hover:underline"
                                         >
-                                            #{String(quote.number).padStart(3, "0")}
+                                            {formatQuoteNumber(quote.deal?.number, quote.number)}
                                         </button>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

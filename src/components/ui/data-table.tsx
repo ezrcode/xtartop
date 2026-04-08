@@ -184,8 +184,8 @@ export function DataTable<T>({
             result = result.filter(item => 
                 searchKeys.some(key => {
                     const value = item[key];
-                    if (typeof value === "string") {
-                        return value.toLowerCase().includes(query);
+                    if (typeof value === "string" || typeof value === "number") {
+                        return String(value).toLowerCase().includes(query);
                     }
                     return false;
                 })
@@ -246,7 +246,7 @@ export function DataTable<T>({
     }, [searchQuery, filters]);
 
     const displayColumns = useMemo(() => {
-        return columns.filter(col => visibleColumns.includes(String(col.key)));
+        return columns.filter(col => col.hideable === false || visibleColumns.includes(String(col.key)));
     }, [columns, visibleColumns]);
 
     const filterableColumns = useMemo(() => {

@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getCurrentWorkspace } from "./workspace";
+import { DEAL_NUMBER_START } from "@/lib/deal-number";
 
 const DealSchema = z.object({
     name: z.string().min(1, "Deal name is required"),
@@ -322,13 +323,23 @@ export async function createDealAction(prevState: DealState | undefined, formDat
     let deal;
     try {
         const { businessLineId, ...dealData } = validatedFields.data;
-        deal = await prisma.deal.create({
-            data: {
-                ...dealData,
-                businessLineId: businessLineId || null,
-                workspaceId: workspace.id,
-                createdById: user.id,
-            },
+        deal = await prisma.$transaction(async (tx) => {
+            const currentMax = await tx.deal.aggregate({
+                where: { workspaceId: workspace.id },
+                _max: { number: true },
+            });
+
+            const nextNumber = currentMax._max.number ? currentMax._max.number + 1 : DEAL_NUMBER_START;
+
+            return tx.deal.create({
+                data: {
+                    ...dealData,
+                    number: nextNumber,
+                    businessLineId: businessLineId || null,
+                    workspaceId: workspace.id,
+                    createdById: user.id,
+                },
+            });
         });
     } catch (error) {
         console.error("Database Error:", error);

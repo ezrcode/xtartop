@@ -21,6 +21,7 @@ import {
 import { updateDealStatus } from "@/actions/deals";
 import { saveTablePreferences } from "@/actions/table-preferences";
 import { DataTable, Column, TablePreferences, ItemsPerPage } from "@/components/ui/data-table";
+import { formatDealNumber } from "@/lib/deal-number";
 
 type DealWithRelations = Deal & {
     company?: Company | null;
@@ -95,6 +96,9 @@ function DealCard({ deal, isDragging = false }: { deal: DealWithRelations, isDra
                     >
                         {deal.name}
                     </Link>
+                    <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--muted-text)]">
+                        {formatDealNumber(deal.number)}
+                    </p>
                 </div>
                 {/* Drag Handle - más grande para touch */}
                 <div 
@@ -248,6 +252,22 @@ function DealsTable({ deals, initialPreferences, itemsPerPage = 10 }: { deals: D
 
     const columns: Column<DealWithRelations>[] = [
         {
+            key: "number",
+            header: "Código",
+            sortable: true,
+            hideable: false,
+            defaultVisible: true,
+            render: (deal) => (
+                <Link
+                    href={`/app/deals/${deal.id}`}
+                    className="text-sm font-semibold tracking-[0.08em] text-[var(--foreground)] hover:underline"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    {formatDealNumber(deal.number)}
+                </Link>
+            ),
+        },
+        {
             key: "name",
             header: "Nombre",
             sortable: true,
@@ -395,7 +415,7 @@ function DealsTable({ deals, initialPreferences, itemsPerPage = 10 }: { deals: D
                     onRowClick={(deal) => router.push(`/app/deals/${deal.id}`)}
                     searchable
                     searchPlaceholder="Buscar negocios..."
-                    searchKeys={["name"]}
+                    searchKeys={["name", "number"]}
                     initialPreferences={initialPreferences || undefined}
                     onSavePreferences={handleSavePreferences}
                     paginated
@@ -439,6 +459,9 @@ function DealsTable({ deals, initialPreferences, itemsPerPage = 10 }: { deals: D
                                     </div>
                                     
                                     <div className="space-y-0.5 text-xs text-[var(--muted-text)]">
+                                        <p className="font-semibold uppercase tracking-[0.14em] text-[var(--muted-text)]">
+                                            {formatDealNumber(deal.number)}
+                                        </p>
                                         {deal.company && (
                                             <p className="truncate">
                                                 <span className="text-[var(--muted-text)]">Empresa:</span> {deal.company.name}

@@ -8,6 +8,7 @@ import { QuoteStatus, Currency, TaxType, PaymentFrequency } from "@prisma/client
 import { QuotePDFTemplate } from "./quote-pdf-template";
 import { formatNumber } from "@/lib/format";
 import { calculateQuoteTaxBreakdown } from "@/lib/quote-taxes";
+import { formatQuoteNumber } from "@/lib/deal-number";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -88,6 +89,7 @@ export function QuoteModal({
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
     const [mounted, setMounted] = useState(false);
+    const quoteCode = isEditMode ? formatQuoteNumber(quote?.deal?.number, quote?.number) : null;
 
     useEffect(() => {
         setMounted(true);
@@ -109,7 +111,7 @@ export function QuoteModal({
     const handleDelete = async () => {
         if (!quote?.id) return;
 
-        const quoteNumber = `#${String(quote.number).padStart(3, "0")}`;
+        const quoteNumber = quoteCode || `#${String(quote.number).padStart(3, "0")}`;
         const confirmed = window.confirm(`¿Eliminar la cotización ${quoteNumber}? Esta acción no se puede deshacer.`);
         if (!confirmed) return;
 
@@ -324,7 +326,7 @@ export function QuoteModal({
             pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
             
             // Download the PDF
-            const fileName = `Cotizacion_${String(quote.number).padStart(3, '0')}_${companyName.replace(/\s+/g, '_')}.pdf`;
+            const fileName = `Cotizacion_${(quoteCode || String(quote.number).padStart(3, '0')).replace(/[^a-zA-Z0-9-]/g, "_")}_${companyName.replace(/\s+/g, '_')}.pdf`;
             pdf.save(fileName);
         } catch (error) {
             console.error('Error generating PDF:', error);
@@ -355,7 +357,7 @@ export function QuoteModal({
                     {/* Header */}
                     <div className="sticky top-0 bg-[var(--card-bg)] z-10 flex items-center justify-between p-4 sm:p-6 border-b border-[var(--card-border)] safe-top">
                         <h2 className="text-base sm:text-xl font-semibold text-[var(--foreground)]">
-                            {isEditMode ? `Editar Cotización #${String(quote.number).padStart(3, "0")}` : "Nueva Cotización"}
+                            {isEditMode ? `Editar Cotización ${quoteCode}` : "Nueva Cotización"}
                         </h2>
                         <button
                             type="button"
