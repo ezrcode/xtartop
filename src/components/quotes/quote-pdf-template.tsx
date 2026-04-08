@@ -3,6 +3,7 @@
 import { PaymentFrequency } from "@prisma/client";
 import { calculateQuoteTaxBreakdown } from "@/lib/quote-taxes";
 import { formatQuoteNumber } from "@/lib/deal-number";
+import { normalizeQuoteRichText } from "@/lib/rich-text";
 
 interface QuoteItem {
     name: string;
@@ -64,6 +65,7 @@ export function QuotePDFTemplate({
     const showTaxBreakdown = quote.taxType === "INCLUIDOS" && Number(quote.taxRate || 0) > 0;
     const grandTotal = breakdown.grandTotal;
     const quoteCode = formatQuoteNumber(quote.deal?.number, quote.number);
+    const proposalDescriptionHtml = normalizeQuoteRichText(quote.proposalDescription || "—");
 
     return (
         <div
@@ -177,13 +179,12 @@ export function QuotePDFTemplate({
                 <div
                     style={{
                         minHeight: "34px",
-                        whiteSpace: "pre-wrap",
                         fontSize: "8.2pt",
                         lineHeight: "1.55",
                     }}
-                >
-                    {quote.proposalDescription || "—"}
-                </div>
+                    className="quote-pdf-rich-text"
+                    dangerouslySetInnerHTML={{ __html: proposalDescriptionHtml || "—" }}
+                />
                 <div
                     style={{
                         height: "12px",

@@ -629,3 +629,53 @@ button,
 .theme-system textarea::placeholder {
   color: var(--muted-text);
 }
+
+.quote-rich-editor:empty::before {
+  content: "Describe los detalles de la propuesta...";
+  color: var(--muted-text);
+  pointer-events: none;
+}
+
+.quote-rich-editor ul,
+.quote-pdf-rich-text ul {
+  list-style: disc;
+  margin: 0.35rem 0 0.35rem 1.25rem;
+  padding-left: 0.75rem;
+}
+
+.quote-rich-editor ol,
+.quote-pdf-rich-text ol {
+  list-style: decimal;
+  margin: 0.35rem 0 0.35rem 1.25rem;
+  padding-left: 0.75rem;
+}
+
+.quote-rich-editor li,
+.quote-pdf-rich-text li {
+  margin: 0.2rem 0;
+}
+
+.quote-rich-editor p,
+.quote-rich-editor div,
+.quote-pdf-rich-text p,
+.quote-pdf-rich-text div {
+  margin: 0.25rem 0;
+}
+
+.quote-rich-editor img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+}
+
+.quote-rich-editor img:hover {
+  outline: 2px solid rgba(255, 91, 53, 0.45);
+  outline-offset: 2px;
+}
+
+.quote-pdf-rich-text img {
+  max-width: 100%;
+  height: auto;
+  margin-top: 6px;
+  margin-bottom: 6px;
+}

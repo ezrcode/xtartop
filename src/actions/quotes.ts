@@ -9,6 +9,7 @@ import { z } from "zod";
 import { QuoteStatus, Currency, TaxType, PaymentFrequency } from "@prisma/client";
 import { calculateQuoteTaxBreakdown } from "@/lib/quote-taxes";
 import { formatQuoteNumber } from "@/lib/deal-number";
+import { sanitizeQuoteRichText } from "@/lib/rich-text";
 
 const UNIQUE_FINAL_STATUSES: QuoteStatus[] = ["ACTIVA", "APROBADA"];
 
@@ -229,7 +230,7 @@ export async function createQuoteAction(
         date: formData.get("date"),
         validity: formData.get("validity"),
         status: formData.get("status") || "BORRADOR",
-        proposalDescription: formData.get("proposalDescription") || undefined,
+        proposalDescription: sanitizeQuoteRichText(String(formData.get("proposalDescription") || "")) || undefined,
         paymentConditions: formData.get("paymentConditions") || undefined,
         currency: formData.get("currency"),
         deliveryTime: formData.get("deliveryTime") || undefined,
@@ -392,7 +393,7 @@ export async function updateQuoteAction(
         date: formData.get("date"),
         validity: formData.get("validity"),
         status: formData.get("status"),
-        proposalDescription: formData.get("proposalDescription") || undefined,
+        proposalDescription: sanitizeQuoteRichText(String(formData.get("proposalDescription") || "")) || undefined,
         paymentConditions: formData.get("paymentConditions") || undefined,
         currency: formData.get("currency"),
         deliveryTime: formData.get("deliveryTime") || undefined,

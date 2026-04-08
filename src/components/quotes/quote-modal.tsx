@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { X, Plus, Trash2, Save, Printer } from "lucide-react";
+import { AlignCenter, AlignJustify, AlignLeft, AlignRight, Bold, ImagePlus, Italic, List, Plus, Printer, Save, Trash2, X } from "lucide-react";
 import { createQuoteAction, deleteQuote, updateQuoteAction, QuoteState } from "@/actions/quotes";
 import { QuoteStatus, Currency, TaxType, PaymentFrequency } from "@prisma/client";
 import { QuotePDFTemplate } from "./quote-pdf-template";
 import { formatNumber } from "@/lib/format";
 import { calculateQuoteTaxBreakdown } from "@/lib/quote-taxes";
 import { formatQuoteNumber } from "@/lib/deal-number";
+import { normalizeQuoteRichText, sanitizeQuoteRichText } from "@/lib/rich-text";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -55,6 +56,191 @@ interface QuoteModalProps {
     }>;
 }
 
+interface RichTextEditorProps {
+    id: string;
+    value: string;
+    onChange: (value: string) => void;
+}
+
+function QuoteRichTextEditor({ id, value, onChange }: RichTextEditorProps) {
+    const editorRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const savedRangeRef = useRef<Range | null>(null);
+    const selectedImageRef = useRef<HTMLImageElement | null>(null);
+    const [uploadingImage, setUploadingImage] = useState(false);
+
+    useEffect(() => {
+        const editor = editorRef.current;
+        if (!editor) return;
+        if (editor.innerHTML !== value) {
+            editor.innerHTML = value || "";
+        }
+    }, [value]);
+
+    const syncValue = () => {
+        onChange(sanitizeQuoteRichText(editorRef.current?.innerHTML || ""));
+    };
+
+    const rememberSelection = () => {
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) return;
+        const range = selection.getRangeAt(0);
+        if (editorRef.current?.contains(range.commonAncestorContainer)) {
+            savedRangeRef.current = range.cloneRange();
+        }
+    };
+
+    const restoreSelection = () => {
+        const range = savedRangeRef.current;
+        if (!range) return;
+
+        const selection = window.getSelection();
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+    };
+
+    const focusEditor = () => {
+        editorRef.current?.focus();
+        restoreSelection();
+    };
+
+    const applyCommand = (command: string, value?: string) => {
+        focusEditor();
+        document.execCommand(command, false, value);
+        syncValue();
+    };
+
+    const applyTextOrImageAlignment = (alignment: "left" | "center" | "right" | "justify") => {
+        const selectedImage = selectedImageRef.current;
+
+        if (selectedImage && editorRef.current?.contains(selectedImage)) {
+            selectedImage.style.display = "block";
+            selectedImage.style.maxWidth = "100%";
+            selectedImage.style.height = "auto";
+            selectedImage.style.marginLeft = alignment === "right" || alignment === "center" ? "auto" : "0";
+            selectedImage.style.marginRight = alignment === "left" || alignment === "center" ? "auto" : "0";
+            if (alignment === "justify") {
+                selectedImage.style.marginLeft = "auto";
+                selectedImage.style.marginRight = "auto";
+            }
+            syncValue();
+            return;
+        }
+
+        const command = alignment === "justify" ? "justifyFull" : `justify${alignment[0].toUpperCase()}${alignment.slice(1)}`;
+        applyCommand(command);
+    };
+
+    const insertImage = async (file: File) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("category", "logo");
+        formData.append("folder", "quote-proposals");
+
+        const response = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+        });
+        const data = await response.json();
+
+        if (!response.ok || !data.url) {
+            throw new Error(data.error || "No fue posible subir la imagen");
+        }
+
+        const imageHtml = `<img src="${data.url}" alt="Imagen de propuesta" style="max-width: 100%; width: 360px; height: auto; display: block; margin-left: auto; margin-right: auto;" />`;
+        applyCommand("insertHTML", imageHtml);
+    };
+
+    const handleImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        try {
+            setUploadingImage(true);
+            await insertImage(file);
+        } catch (error) {
+            alert(error instanceof Error ? error.message : "No fue posible insertar la imagen");
+        } finally {
+            setUploadingImage(false);
+            if (fileInputRef.current) fileInputRef.current.value = "";
+        }
+    };
+
+    const toolbarButtonClass = "inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--card-border)] bg-[var(--card-bg)] text-[var(--muted-text)] transition-colors hover:bg-[var(--hover-bg)] hover:text-[var(--foreground)] disabled:cursor-not-allowed disabled:opacity-50";
+
+    return (
+        <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] overflow-hidden">
+            <div className="flex flex-wrap items-center gap-1 border-b border-[var(--card-border)] bg-[var(--surface-2)] px-2 py-2">
+                <button type="button" className={toolbarButtonClass} onMouseDown={(event) => event.preventDefault()} onClick={() => applyCommand("bold")} aria-label="Negrita">
+                    <Bold size={16} />
+                </button>
+                <button type="button" className={toolbarButtonClass} onMouseDown={(event) => event.preventDefault()} onClick={() => applyCommand("italic")} aria-label="Cursiva">
+                    <Italic size={16} />
+                </button>
+                <button type="button" className={toolbarButtonClass} onMouseDown={(event) => event.preventDefault()} onClick={() => applyCommand("insertUnorderedList")} aria-label="Viñetas">
+                    <List size={16} />
+                </button>
+                <div className="mx-1 h-6 w-px bg-[var(--card-border)]" />
+                <button type="button" className={toolbarButtonClass} onMouseDown={(event) => event.preventDefault()} onClick={() => applyTextOrImageAlignment("left")} aria-label="Alinear a la izquierda">
+                    <AlignLeft size={16} />
+                </button>
+                <button type="button" className={toolbarButtonClass} onMouseDown={(event) => event.preventDefault()} onClick={() => applyTextOrImageAlignment("center")} aria-label="Centrar">
+                    <AlignCenter size={16} />
+                </button>
+                <button type="button" className={toolbarButtonClass} onMouseDown={(event) => event.preventDefault()} onClick={() => applyTextOrImageAlignment("right")} aria-label="Alinear a la derecha">
+                    <AlignRight size={16} />
+                </button>
+                <button type="button" className={toolbarButtonClass} onMouseDown={(event) => event.preventDefault()} onClick={() => applyTextOrImageAlignment("justify")} aria-label="Justificar">
+                    <AlignJustify size={16} />
+                </button>
+                <div className="mx-1 h-6 w-px bg-[var(--card-border)]" />
+                <button
+                    type="button"
+                    className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-[var(--card-border)] bg-[var(--card-bg)] px-3 text-xs font-medium text-[var(--muted-text)] transition-colors hover:bg-[var(--hover-bg)] hover:text-[var(--foreground)] disabled:cursor-not-allowed disabled:opacity-50"
+                    onMouseDown={(event) => {
+                        event.preventDefault();
+                        rememberSelection();
+                    }}
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingImage}
+                >
+                    <ImagePlus size={16} />
+                    {uploadingImage ? "Subiendo..." : "Imagen"}
+                </button>
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/gif"
+                    className="hidden"
+                    onChange={handleImageChange}
+                />
+            </div>
+            <div
+                id={id}
+                ref={editorRef}
+                contentEditable
+                role="textbox"
+                aria-multiline="true"
+                aria-label="Descripción de la propuesta"
+                suppressContentEditableWarning
+                onInput={syncValue}
+                onKeyUp={rememberSelection}
+                onMouseUp={rememberSelection}
+                onBlur={rememberSelection}
+                onClick={(event) => {
+                    const target = event.target;
+                    selectedImageRef.current = target instanceof HTMLImageElement ? target : null;
+                    rememberSelection();
+                }}
+                className="quote-rich-editor min-h-[180px] w-full px-3 py-3 text-base sm:text-sm leading-relaxed text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-nearby-dark/15"
+            />
+            <p className="border-t border-[var(--card-border)] px-3 py-2 text-xs text-[var(--muted-text)]">
+                Tip: selecciona una imagen y usa los botones de alineación para ubicarla en el PDF.
+            </p>
+        </div>
+    );
+}
+
 export function QuoteModal({
     isOpen,
     onClose,
@@ -88,12 +274,21 @@ export function QuoteModal({
     const [isDeleting, setIsDeleting] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
+    const [hasSavedNewQuote, setHasSavedNewQuote] = useState(false);
     const [mounted, setMounted] = useState(false);
+    const [proposalDescription, setProposalDescription] = useState(() => normalizeQuoteRichText(quote?.proposalDescription || ""));
     const quoteCode = isEditMode ? formatQuoteNumber(quote?.deal?.number, quote?.number) : null;
 
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    useEffect(() => {
+        setProposalDescription(normalizeQuoteRichText(quote?.proposalDescription || ""));
+        setHasSavedNewQuote(false);
+        setSuccess(false);
+        setError("");
+    }, [quote?.id, isOpen]);
 
     const handleAddItem = () => {
         setItems([
@@ -226,6 +421,11 @@ export function QuoteModal({
             return;
         }
 
+        if (!isEditMode && hasSavedNewQuote) {
+            setError("Esta cotización ya fue creada. Cierra el modal para verla en el listado antes de crear otra.");
+            return;
+        }
+
         setIsPending(true);
 
         // Manually create FormData from inputs
@@ -235,7 +435,6 @@ export function QuoteModal({
         const dateInput = document.getElementById('quote-date') as HTMLInputElement;
         const validityInput = document.getElementById('quote-validity') as HTMLSelectElement;
         const currencyInput = document.getElementById('quote-currency') as HTMLSelectElement;
-        const proposalInput = document.getElementById('quote-proposalDescription') as HTMLTextAreaElement;
         const paymentInput = document.getElementById('quote-paymentConditions') as HTMLTextAreaElement;
         const deliveryInput = document.getElementById('quote-deliveryTime') as HTMLInputElement;
         const taxInput = document.getElementById('quote-taxType') as HTMLSelectElement;
@@ -246,7 +445,7 @@ export function QuoteModal({
         if (dateInput) formData.append('date', dateInput.value);
         if (validityInput) formData.append('validity', validityInput.value);
         if (currencyInput) formData.append('currency', currencyInput.value);
-        if (proposalInput) formData.append('proposalDescription', proposalInput.value);
+        formData.append('proposalDescription', sanitizeQuoteRichText(proposalDescription));
         if (paymentInput) formData.append('paymentConditions', paymentInput.value);
         if (deliveryInput) formData.append('deliveryTime', deliveryInput.value);
         if (taxInput) formData.append('taxType', taxInput.value);
@@ -275,10 +474,7 @@ export function QuoteModal({
                 // Success case
                 console.log('Quote saved successfully, showing success message');
                 setSuccess(true);
-                setTimeout(() => {
-                    console.log('Closing modal after success');
-                    onClose();
-                }, 1000);
+                if (!isEditMode) setHasSavedNewQuote(true);
             }
         } catch (err: any) {
             console.error('Quote save error:', err);
@@ -378,7 +574,7 @@ export function QuoteModal({
 
                         {success && (
                             <div className="p-4 rounded-md bg-green-50 text-green-800 text-sm">
-                                ¡Cotización guardada exitosamente!
+                                ¡Cotización guardada exitosamente! Puedes cerrar el modal cuando termines.
                             </div>
                         )}
 
@@ -804,12 +1000,10 @@ export function QuoteModal({
                             <label htmlFor="quote-proposalDescription" className="block text-sm font-medium text-[var(--foreground)] mb-1.5">
                                 Descripción de la Propuesta
                             </label>
-                            <textarea
+                            <QuoteRichTextEditor
                                 id="quote-proposalDescription"
-                                rows={6}
-                                defaultValue={quote?.proposalDescription || ""}
-                                placeholder="Describa los detalles de la propuesta..."
-                                className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
+                                value={proposalDescription}
+                                onChange={setProposalDescription}
                             />
                         </div>
 
@@ -945,12 +1139,12 @@ export function QuoteModal({
                                     disabled={isDeleting}
                                     className="w-full sm:w-auto px-4 py-3 sm:py-2 border border-[var(--card-border)] rounded-lg shadow-sm text-sm font-medium text-[var(--foreground)] bg-[var(--card-bg)] hover:bg-[var(--surface-2)] transition-colors"
                                 >
-                                    Cancelar
+                                    Cerrar
                                 </button>
                                 <button
                                     type="button"
                                     onClick={handleSave}
-                                    disabled={isPending || isDeleting}
+                                    disabled={isPending || isDeleting || (!isEditMode && hasSavedNewQuote)}
                                     className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-3 sm:py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-nearby-dark-600 transition-all active:scale-95 disabled:opacity-50"
                                 >
                                     {isPending ? (
@@ -973,6 +1167,7 @@ export function QuoteModal({
                 <QuotePDFTemplate
                     quote={{
                         ...quote,
+                        proposalDescription,
                         currency: selectedCurrency,
                         taxType: selectedTaxType,
                         taxId: selectedTaxId || null,
