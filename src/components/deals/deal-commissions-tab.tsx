@@ -94,7 +94,7 @@ function toNumber(value: unknown) {
 
 function buildInitialEntries(
     commission: DealCommissionsTabProps["commission"],
-    totalDealBase: number
+    oneTimeBase: number
 ): CommissionEntryState[] {
     if (!commission?.entries?.length) {
         return [{
@@ -112,7 +112,7 @@ function buildInitialEntries(
         const percentage = type === CommissionValueType.PERCENTAGE ? String(toNumber(entry.percentage) || "") : "";
         const fixedAmount = type === CommissionValueType.FIXED_AMOUNT ? String(toNumber(entry.fixedAmount) || "") : "";
         const calculatedAmount = type === CommissionValueType.PERCENTAGE
-            ? (totalDealBase * toNumber(entry.percentage)) / 100
+            ? (oneTimeBase * toNumber(entry.percentage)) / 100
             : toNumber(entry.calculatedAmount);
 
         return {
@@ -137,9 +137,10 @@ export function DealCommissionsTab({
     currentUserName,
 }: DealCommissionsTabProps) {
     const totalDealBase = toNumber(approvedQuote.totalOneTime) + toNumber(approvedQuote.totalMonthly);
+    const oneTimeBase = toNumber(approvedQuote.totalOneTime);
     const marginRate = toNumber(commission?.marginRate ?? 100);
-    const commissionableBase = Number(((totalDealBase * marginRate) / 100).toFixed(2));
-    const [entries, setEntries] = useState<CommissionEntryState[]>(() => buildInitialEntries(commission, totalDealBase));
+    const commissionableBase = Number(((oneTimeBase * marginRate) / 100).toFixed(2));
+    const [entries, setEntries] = useState<CommissionEntryState[]>(() => buildInitialEntries(commission, oneTimeBase));
     const [notes, setNotes] = useState(commission?.notes || "");
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<string | null>(null);
@@ -167,7 +168,7 @@ export function DealCommissionsTab({
                 const percentageValue = Number(next.percentage || 0);
                 next.fixedAmount = "";
                 next.calculatedAmount = Number.isFinite(percentageValue)
-                    ? Number(((totalDealBase * percentageValue) / 100).toFixed(2))
+                    ? Number(((oneTimeBase * percentageValue) / 100).toFixed(2))
                     : 0;
             } else {
                 const fixedValue = Number(next.fixedAmount || 0);

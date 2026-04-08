@@ -367,7 +367,7 @@ export async function createQuoteAction(
                     dealId: deal.id,
                     approvedQuoteId: createdQuote.id,
                     totalBase: totalOneTime + totalMonthly,
-                    commissionableBase: calculateCommissionableBase(totalOneTime + totalMonthly, workspace.commissionMarginRate),
+                    commissionableBase: calculateCommissionableBase(totalOneTime, workspace.commissionMarginRate),
                     marginRate: Number(workspace.commissionMarginRate || 0),
                     userId: user.id,
                 });
@@ -589,7 +589,7 @@ export async function updateQuoteAction(
                     dealId: existingQuote.dealId,
                     approvedQuoteId: quoteId,
                     totalBase: totalOneTime + totalMonthly,
-                    commissionableBase: calculateCommissionableBase(totalOneTime + totalMonthly, workspace.commissionMarginRate),
+                    commissionableBase: calculateCommissionableBase(totalOneTime, workspace.commissionMarginRate),
                     marginRate: Number(workspace.commissionMarginRate || 0),
                     userId: currentUser.id,
                 });

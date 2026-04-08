@@ -219,14 +219,14 @@ export async function saveDealCommission(input: unknown) {
         }
     }
 
-    const totalDealBase = Number(approvedQuote.totalOneTime || 0) + Number(approvedQuote.totalMonthly || 0);
+    const oneTimeBase = Number(approvedQuote.totalOneTime || 0);
     const marginRate = Math.max(0, Math.min(100, Number(workspace.commissionMarginRate || 0)));
-    const commissionableBase = Number(((totalDealBase * marginRate) / 100).toFixed(2));
+    const commissionableBase = Number(((oneTimeBase * marginRate) / 100).toFixed(2));
     const normalizedEntries = validated.data.entries.map((entry) => {
         const percentage = entry.type === "PERCENTAGE" ? Number(entry.percentage || 0) : null;
         const fixedAmount = entry.type === "FIXED_AMOUNT" ? Number(entry.fixedAmount || 0) : null;
         const calculatedAmount = entry.type === "PERCENTAGE"
-            ? Number(((totalDealBase * Number(entry.percentage || 0)) / 100).toFixed(2))
+            ? Number(((oneTimeBase * Number(entry.percentage || 0)) / 100).toFixed(2))
             : Number((fixedAmount || 0).toFixed(2));
 
         return {
