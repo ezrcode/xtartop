@@ -492,11 +492,38 @@ export function QuoteModal({
             return;
         }
 
+        let spacer: HTMLDivElement | null = null;
+        const originalLeft = element.style.left;
+        const originalTop = element.style.top;
+
         try {
             // Show a loading indicator
-            const originalLeft = element.style.left;
             element.style.left = '0';
             element.style.top = '0';
+
+            const totalsBlock = element.querySelector<HTMLElement>('#quote-pdf-totals');
+            if (totalsBlock) {
+                const pageHeightPx = (element.offsetWidth * 297) / 210;
+                const safeTopPx = 28;
+                const safeBottomPx = 24;
+                const totalsTop = totalsBlock.offsetTop;
+                const totalsHeight = totalsBlock.offsetHeight;
+                const currentPageStart = Math.floor(totalsTop / pageHeightPx) * pageHeightPx;
+                const currentPageEnd = currentPageStart + pageHeightPx - safeBottomPx;
+
+                if (totalsTop + totalsHeight > currentPageEnd) {
+                    const targetTop = currentPageStart + pageHeightPx + safeTopPx;
+                    const spacerHeight = Math.max(0, targetTop - totalsTop);
+
+                    if (spacerHeight > 0) {
+                        spacer = document.createElement('div');
+                        spacer.setAttribute('data-pdf-generated-spacer', 'true');
+                        spacer.style.height = `${spacerHeight}px`;
+                        spacer.style.width = '100%';
+                        totalsBlock.parentElement?.insertBefore(spacer, totalsBlock);
+                    }
+                }
+            }
 
             // Capture the element as canvas
             const canvas = await html2canvas(element, {
@@ -509,7 +536,12 @@ export function QuoteModal({
             });
 
             // Hide the element again
+            if (spacer) {
+                spacer.remove();
+                spacer = null;
+            }
             element.style.left = originalLeft;
+            element.style.top = originalTop;
 
             // Convert canvas to PDF
             const imgData = canvas.toDataURL('image/png');
@@ -545,8 +577,14 @@ export function QuoteModal({
             const fileName = `Propuesta ${safeClientName} ${safeQuoteCode}.pdf`;
             pdf.save(fileName);
         } catch (error) {
+            if (spacer) {
+                spacer.remove();
+            }
             console.error('Error generating PDF:', error);
             alert('Error al generar el PDF');
+        } finally {
+            element.style.left = originalLeft;
+            element.style.top = originalTop;
         }
     };
 

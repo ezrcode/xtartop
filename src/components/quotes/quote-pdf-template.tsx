@@ -272,7 +272,11 @@ export function QuotePDFTemplate({
             </div>
 
             {/* Totals */}
-            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "14px" }}>
+            <div
+                id="quote-pdf-totals"
+                data-pdf-keep-together="true"
+                style={{ display: "flex", justifyContent: "flex-end", marginBottom: "14px" }}
+            >
                 <div style={{ width: "300px" }}>
                     {hasOneTime && (
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
@@ -515,7 +519,11 @@ function AdvancedQuotePDFTemplate({
                 </div>
 
                 {/* Totals */}
-                <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "14px" }}>
+                <div
+                    id="quote-pdf-totals"
+                    data-pdf-keep-together="true"
+                    style={{ display: "flex", justifyContent: "flex-end", marginBottom: "14px" }}
+                >
                     <div style={{ width: "330px", border: `1px solid ${line}`, borderRadius: "7px", background: "#ffffff", padding: "12px 14px" }}>
                         {hasOneTime && (
                             <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", marginBottom: "6px" }}>
