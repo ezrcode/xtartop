@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { AlignCenter, AlignJustify, AlignLeft, AlignRight, Bold, ImagePlus, Italic, List, Plus, Printer, Save, Trash2, X } from "lucide-react";
 import { createQuoteAction, deleteQuote, updateQuoteAction, QuoteState } from "@/actions/quotes";
 import { QuoteStatus, Currency, TaxType, PaymentFrequency } from "@prisma/client";
-import { QuotePDFTemplate } from "./quote-pdf-template";
+import { QuotePDFFormat, QuotePDFTemplate } from "./quote-pdf-template";
 import { formatNumber } from "@/lib/format";
 import { calculateQuoteTaxBreakdown } from "@/lib/quote-taxes";
 import { formatQuoteNumber } from "@/lib/deal-number";
@@ -277,6 +277,7 @@ export function QuoteModal({
     const [hasSavedNewQuote, setHasSavedNewQuote] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [proposalDescription, setProposalDescription] = useState(() => normalizeQuoteRichText(quote?.proposalDescription || ""));
+    const [pdfFormat, setPdfFormat] = useState<QuotePDFFormat>("basic");
     const quoteCode = isEditMode ? formatQuoteNumber(quote?.deal?.number, quote?.number) : null;
 
     useEffect(() => {
@@ -522,7 +523,8 @@ export function QuoteModal({
             pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
             
             // Download the PDF
-            const fileName = `Cotizacion_${(quoteCode || String(quote.number).padStart(3, '0')).replace(/[^a-zA-Z0-9-]/g, "_")}_${companyName.replace(/\s+/g, '_')}.pdf`;
+            const formatLabel = pdfFormat === "advanced" ? "Avanzado" : "Basico";
+            const fileName = `Cotizacion_${formatLabel}_${(quoteCode || String(quote.number).padStart(3, '0')).replace(/[^a-zA-Z0-9-]/g, "_")}_${companyName.replace(/\s+/g, '_')}.pdf`;
             pdf.save(fileName);
         } catch (error) {
             console.error('Error generating PDF:', error);
@@ -1111,15 +1113,28 @@ export function QuoteModal({
                             <div>
                                 {isEditMode && (
                                     <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                                        <button
-                                            type="button"
-                                            onClick={generatePDF}
-                                            disabled={isDeleting}
-                                            className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-3 sm:py-2 border border-[var(--card-border)] rounded-lg shadow-sm text-sm font-medium text-[var(--foreground)] bg-[var(--card-bg)] hover:bg-[var(--surface-2)] transition-colors disabled:opacity-50"
-                                        >
-                                            <Printer size={16} className="mr-2" />
-                                            Imprimir PDF
-                                        </button>
+                                        <div className="flex flex-col sm:flex-row gap-2 rounded-lg border border-[var(--card-border)] bg-[var(--surface-2)] p-2">
+                                            <label className="sr-only" htmlFor="quote-pdf-format">Formato de impresión</label>
+                                            <select
+                                                id="quote-pdf-format"
+                                                value={pdfFormat}
+                                                onChange={(event) => setPdfFormat(event.target.value as QuotePDFFormat)}
+                                                disabled={isDeleting}
+                                                className="w-full sm:w-36 px-3 py-3 sm:py-2 border border-[var(--card-border)] rounded-md text-sm font-medium text-[var(--foreground)] bg-[var(--card-bg)] disabled:opacity-50"
+                                            >
+                                                <option value="basic">Básico</option>
+                                                <option value="advanced">Avanzado</option>
+                                            </select>
+                                            <button
+                                                type="button"
+                                                onClick={generatePDF}
+                                                disabled={isDeleting}
+                                                className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-3 sm:py-2 border border-[var(--card-border)] rounded-md shadow-sm text-sm font-medium text-[var(--foreground)] bg-[var(--card-bg)] hover:bg-[var(--surface-2)] transition-colors disabled:opacity-50"
+                                            >
+                                                <Printer size={16} className="mr-2" />
+                                                Imprimir PDF
+                                            </button>
+                                        </div>
                                         <button
                                             type="button"
                                             onClick={handleDelete}
@@ -1178,6 +1193,7 @@ export function QuoteModal({
                     companyName={companyName}
                     contactName={contactName}
                     totals={totals}
+                    format={pdfFormat}
                     workspace={workspace}
                 />
             )}
