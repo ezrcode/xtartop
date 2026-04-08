@@ -38,6 +38,7 @@ interface DealCommissionsTabProps {
     };
     commission?: {
         id: string;
+        marginRate: unknown;
         commissionableBase: unknown;
         notes?: string | null;
         entries: Array<{
@@ -73,6 +74,10 @@ const TYPE_LABELS: Record<CommissionValueType, string> = {
     PERCENTAGE: "Porcentaje",
     FIXED_AMOUNT: "Monto fijo",
 };
+
+function formatPercent(value: number) {
+    return `${value.toLocaleString("es-DO", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}%`;
+}
 
 function formatCurrency(value: number, currency: "USD" | "DOP") {
     return new Intl.NumberFormat("es-DO", {
@@ -132,6 +137,7 @@ export function DealCommissionsTab({
     currentUserName,
 }: DealCommissionsTabProps) {
     const commissionableBase = toNumber(commission?.commissionableBase ?? approvedQuote.totalOneTime);
+    const marginRate = toNumber(commission?.marginRate ?? 100);
     const totalDealBase = toNumber(approvedQuote.totalOneTime) + toNumber(approvedQuote.totalMonthly);
     const [entries, setEntries] = useState<CommissionEntryState[]>(() => buildInitialEntries(commission, commissionableBase));
     const [notes, setNotes] = useState(commission?.notes || "");
@@ -286,6 +292,7 @@ export function DealCommissionsTab({
             quoteCode={quoteCode}
             totalDealBase={totalDealBase}
             commissionableBase={commissionableBase}
+            marginRate={marginRate}
             entries={entries}
             users={users}
             notes={notes}
@@ -297,37 +304,46 @@ export function DealCommissionsTab({
     return (
         <>
             <div className="space-y-5">
-                <div className="rounded-xl border border-[var(--card-border)] bg-[var(--surface-2)] p-4 sm:p-5">
-                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                        <div>
-                            <p className="text-sm font-semibold text-[var(--foreground)]">Comisiones de formalización</p>
-                            <p className="mt-1 text-sm text-[var(--muted-text)]">
-                                Base congelada desde la cotización aprobada <span className="font-medium text-[var(--foreground)]">{quoteCode}</span>. Solo comisiona el monto de pago único.
-                            </p>
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                    <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className="inline-flex items-center rounded-full border border-[var(--card-border)] bg-[var(--surface-2)] px-3 py-1 text-xs font-medium text-[var(--muted-text)]">
+                                Cotización aprobada: <span className="ml-1 font-semibold text-[var(--foreground)]">{quoteCode}</span>
+                            </span>
+                            <span className="inline-flex items-center rounded-full border border-nearby-dark/20 bg-nearby-dark/5 px-3 py-1 text-xs font-medium text-nearby-dark dark:text-nearby-dark-300">
+                                Margen aplicado: {formatPercent(marginRate)}
+                            </span>
                         </div>
-                        <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-3 text-sm">
-                            <div className="flex items-center justify-between gap-6">
-                                <span className="text-[var(--muted-text)]">Monto del negocio</span>
-                                <span className="font-semibold text-[var(--foreground)]">{formatCurrency(totalDealBase, currency)}</span>
-                            </div>
-                            <div className="mt-2 flex items-center justify-between gap-6">
-                                <span className="text-[var(--muted-text)]">Disponible para comisión</span>
-                                <span className="font-semibold text-nearby-dark dark:text-nearby-dark-300">{formatCurrency(commissionableBase, currency)}</span>
-                            </div>
+                        <p className="mt-3 text-sm text-[var(--muted-text)]">
+                            La base comisionable quedó congelada al aprobar la cotización y se calcula solo sobre el monto de pago único.
+                        </p>
+                    </div>
+                    <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-3 text-sm shadow-sm">
+                        <div className="flex items-center justify-between gap-5">
+                            <span className="text-[var(--muted-text)]">Negocio</span>
+                            <span className="font-semibold text-[var(--foreground)]">{dealCode}</span>
+                        </div>
+                        <div className="mt-2 flex items-center justify-between gap-5">
+                            <span className="text-[var(--muted-text)]">Cliente</span>
+                            <span className="max-w-[220px] truncate text-right font-semibold text-[var(--foreground)]">{companyName || "—"}</span>
                         </div>
                     </div>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-3">
-                    <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-4 shadow-sm">
+                        <p className="text-xs uppercase tracking-[0.14em] text-[var(--muted-text)]">Monto del negocio</p>
+                        <p className="mt-2 text-2xl font-bold text-[var(--foreground)]">{formatCurrency(totalDealBase, currency)}</p>
+                    </div>
+                    <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-4 shadow-sm">
                         <p className="text-xs uppercase tracking-[0.14em] text-[var(--muted-text)]">Base comisionable</p>
                         <p className="mt-2 text-2xl font-bold text-[var(--foreground)]">{formatCurrency(commissionableBase, currency)}</p>
                     </div>
-                    <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
+                    <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-4 shadow-sm">
                         <p className="text-xs uppercase tracking-[0.14em] text-[var(--muted-text)]">Comisiones cargadas</p>
                         <p className="mt-2 text-2xl font-bold text-[var(--foreground)]">{formatCurrency(totalAssigned, currency)}</p>
                     </div>
-                    <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
+                    <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-4 shadow-sm">
                         <p className="text-xs uppercase tracking-[0.14em] text-[var(--muted-text)]">Disponible restante</p>
                         <p className={`mt-2 text-2xl font-bold ${remaining < 0 ? "text-red-600" : "text-[var(--foreground)]"}`}>
                             {formatCurrency(remaining, currency)}
@@ -351,16 +367,16 @@ export function DealCommissionsTab({
                     </div>
                 )}
 
-                <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] shadow-sm overflow-hidden">
-                    <div className="flex items-center justify-between border-b border-[var(--card-border)] px-4 py-3">
+                <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] shadow-sm overflow-hidden">
+                    <div className="flex flex-col gap-3 border-b border-[var(--card-border)] px-4 py-4 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                            <h3 className="text-sm font-semibold text-[var(--foreground)]">Desglose de comisiones</h3>
-                            <p className="text-xs text-[var(--muted-text)] mt-1">Puedes asignar múltiples personas y mezclar porcentaje con montos fijos.</p>
+                            <h3 className="text-base font-semibold text-[var(--foreground)]">Desglose de comisiones</h3>
+                            <p className="text-sm text-[var(--muted-text)] mt-1">Asigna múltiples personas y combina porcentajes con montos fijos dentro de la misma liquidación.</p>
                         </div>
                         <button
                             type="button"
                             onClick={addEntry}
-                            className="inline-flex items-center rounded-lg border border-[var(--card-border)] bg-[var(--surface-2)] px-3 py-2 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--hover-bg)]"
+                            className="inline-flex items-center justify-center rounded-xl border border-[var(--card-border)] bg-[var(--surface-2)] px-4 py-2.5 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--hover-bg)]"
                         >
                             <Plus size={16} className="mr-2" />
                             Agregar
@@ -369,7 +385,7 @@ export function DealCommissionsTab({
 
                     <div className="space-y-4 p-4">
                         {entries.map((entry, index) => (
-                            <div key={`${index}-${entry.userId}`} className="rounded-xl border border-[var(--card-border)] bg-[var(--surface-2)] p-4">
+                            <div key={`${index}-${entry.userId}`} className="rounded-2xl border border-[var(--card-border)] bg-[var(--surface-2)] p-4">
                                 <div className="grid gap-4 lg:grid-cols-12">
                                     <div className="lg:col-span-3">
                                         <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">Persona</label>
@@ -436,7 +452,7 @@ export function DealCommissionsTab({
                                     </div>
                                     <div className="lg:col-span-2">
                                         <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">Monto a pagar</label>
-                                        <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-3 py-2.5 text-sm font-semibold text-[var(--foreground)]">
+                                        <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] px-3 py-2.5 text-sm font-semibold text-[var(--foreground)] shadow-sm">
                                             {formatCurrency(Number(entry.calculatedAmount || 0), currency)}
                                         </div>
                                     </div>
@@ -445,7 +461,7 @@ export function DealCommissionsTab({
                                             type="button"
                                             onClick={() => removeEntry(index)}
                                             disabled={entries.length === 1}
-                                            className="inline-flex h-[42px] w-full items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 disabled:opacity-40"
+                                            className="inline-flex h-[42px] w-full items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 disabled:opacity-40"
                                         >
                                             <Trash2 size={16} />
                                         </button>
@@ -508,6 +524,7 @@ function CommissionPDFTemplate({
     quoteCode,
     totalDealBase,
     commissionableBase,
+    marginRate,
     entries,
     users,
     notes,
@@ -521,6 +538,7 @@ function CommissionPDFTemplate({
     quoteCode: string;
     totalDealBase: number;
     commissionableBase: number;
+    marginRate: number;
     entries: CommissionEntryState[];
     users: WorkspaceUserOption[];
     notes: string;
@@ -586,6 +604,7 @@ function CommissionPDFTemplate({
                 <div style={{ border: `1px solid ${line}`, borderRadius: "8px", padding: "10px" }}>
                     <div style={{ textTransform: "uppercase", letterSpacing: "0.12em", fontSize: "6.8pt", color: muted, marginBottom: "6px" }}>Monto disponible para comisión</div>
                     <div style={{ fontSize: "12pt", fontWeight: 800 }}>{formatCurrency(commissionableBase, currency)}</div>
+                    <div style={{ marginTop: "4px", fontSize: "7.2pt", color: muted }}>Margen aplicado: {formatPercent(marginRate)}</div>
                 </div>
             </div>
 

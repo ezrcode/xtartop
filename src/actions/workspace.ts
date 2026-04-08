@@ -173,6 +173,17 @@ export type WorkspaceState = {
     message?: string;
 };
 
+const CommissionSettingsSchema = z.object({
+    commissionMarginRate: z.coerce.number().min(0, "El margen debe ser mayor o igual a 0.").max(100, "El margen no puede ser mayor de 100."),
+});
+
+export type CommissionSettingsState = {
+    errors?: {
+        commissionMarginRate?: string[];
+    };
+    message?: string;
+};
+
 export async function updateWorkspace(prevState: WorkspaceState | undefined, formData: FormData): Promise<WorkspaceState> {
     const session = await auth();
     if (!session?.user?.email) redirect("/login");
@@ -218,6 +229,45 @@ export async function updateWorkspace(prevState: WorkspaceState | undefined, for
     } catch (error) {
         console.error("Database Error:", error);
         return { message: "Database Error: Failed to update workspace." };
+    }
+}
+
+export async function updateCommissionSettings(
+    prevState: CommissionSettingsState | undefined,
+    formData: FormData
+): Promise<CommissionSettingsState> {
+    const session = await auth();
+    if (!session?.user?.email) redirect("/login");
+
+    const workspace = await getCurrentWorkspace();
+    if (!workspace) {
+        return { message: "Workspace not found." };
+    }
+
+    const validatedFields = CommissionSettingsSchema.safeParse({
+        commissionMarginRate: formData.get("commissionMarginRate"),
+    });
+
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: "Datos inválidos para la configuración de comisiones.",
+        };
+    }
+
+    try {
+        await prisma.workspace.update({
+            where: { id: workspace.id },
+            data: {
+                commissionMarginRate: validatedFields.data.commissionMarginRate,
+            },
+        });
+
+        revalidatePath("/app/settings");
+        return { message: "Configuración de comisiones actualizada exitosamente." };
+    } catch (error) {
+        console.error("Database Error:", error);
+        return { message: "No se pudo actualizar la configuración de comisiones." };
     }
 }
 

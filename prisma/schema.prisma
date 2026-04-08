@@ -244,6 +244,7 @@ model Workspace {
   billingEmailSubject  String?  // Email subject template
   billingEmailBody     String?  @db.Text  // Email body template
   billingFromUserId    String?  // User ID to use for sending emails
+  commissionMarginRate Decimal  @default(100)
   
   createdAt        DateTime @default(now())
   ownerId     String
@@ -574,6 +575,7 @@ model QuoteItem {
 model DealCommission {
   id               String               @id @default(cuid())
   status           DealCommissionStatus @default(ACTIVE)
+  marginRate       Decimal
   commissionableBase Decimal
   notes            String?              @db.Text
 

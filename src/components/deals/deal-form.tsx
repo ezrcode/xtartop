@@ -27,6 +27,7 @@ interface DealFormProps {
         commissions?: Array<{
             id: string;
             approvedQuoteId: string;
+            marginRate: unknown;
             commissionableBase: unknown;
             notes?: string | null;
             entries: Array<{
@@ -582,6 +583,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                         }}
                                         commission={activeCommission ? {
                                             id: activeCommission.id,
+                                            marginRate: activeCommission.marginRate,
                                             commissionableBase: activeCommission.commissionableBase,
                                             notes: activeCommission.notes,
                                             entries: activeCommission.entries,

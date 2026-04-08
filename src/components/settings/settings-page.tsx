@@ -24,6 +24,7 @@ import { BusinessLinesSection } from "./business-lines-section";
 import { ExchangeRatesSection } from "./exchange-rates-section";
 import { ProjectRateReferencesSection } from "./project-rate-references-section";
 import { TaxesSection } from "./taxes-section";
+import { CommissionSettingsSection } from "./commission-settings-section";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
@@ -204,7 +205,7 @@ function getDefaultContractTemplate(): string {
 <p>He leído y acepto los Términos y Condiciones de Uso de la plataforma Nearby CRM y la Cotización N° <strong>{{ID_COTIZACION}}</strong> vinculada a mi cuenta. Entiendo que esta aceptación digital tiene la misma validez legal que una firma manuscrita de acuerdo con la legislación vigente.</p>`;
 }
 
-type Section = 'workspace' | 'team' | 'contract' | 'business-lines' | 'rate-references' | 'exchange-rates' | 'taxes' | 'billing' | 'admcloud' | 'clickup' | 'decima';
+type Section = 'workspace' | 'team' | 'contract' | 'business-lines' | 'rate-references' | 'exchange-rates' | 'taxes' | 'commissions' | 'billing' | 'admcloud' | 'clickup' | 'decima';
 
 const sectionGroups = [
     {
@@ -224,6 +225,7 @@ const sectionGroups = [
             { id: "rate-references" as Section, label: "Tarifas Referencia", icon: DollarSign, description: "Catálogo de precios referenciales por proyecto" },
             { id: "exchange-rates" as Section, label: "Tasa de Cambio", icon: DollarSign, description: "Historial de tasas de cambio USD/DOP" },
             { id: "taxes" as Section, label: "Impuestos", icon: Percent, description: "Catálogo de impuestos aplicables en cotizaciones" },
+            { id: "commissions" as Section, label: "Comisiones", icon: Percent, description: "Margen de ganancia usado para congelar la base comisionable" },
         ],
     },
     {
@@ -728,6 +730,9 @@ export function SettingsPage({
 
             case 'taxes':
                 return <TaxesSection taxes={taxes} />;
+
+            case 'commissions':
+                return <CommissionSettingsSection commissionMarginRate={workspace.commissionMarginRate} />;
 
             case 'billing':
                 return (

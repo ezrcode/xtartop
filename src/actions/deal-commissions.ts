@@ -71,6 +71,7 @@ export async function syncApprovedQuoteArtifacts(
         approvedQuoteId: string;
         totalBase: number;
         commissionableBase: number;
+        marginRate: number;
         userId: string;
     }
 ) {
@@ -97,6 +98,7 @@ export async function syncApprovedQuoteArtifacts(
             where: { id: existingCommission.id },
             data: {
                 status: DealCommissionStatus.ACTIVE,
+                marginRate: params.marginRate,
                 commissionableBase: params.commissionableBase,
                 updatedById: params.userId,
             },
@@ -108,6 +110,7 @@ export async function syncApprovedQuoteArtifacts(
         data: {
             dealId: params.dealId,
             approvedQuoteId: params.approvedQuoteId,
+            marginRate: params.marginRate,
             commissionableBase: params.commissionableBase,
             createdById: params.userId,
             updatedById: params.userId,
@@ -238,7 +241,7 @@ export async function saveDealCommission(input: unknown) {
                 where: {
                     approvedQuoteId: approvedQuote.id,
                 },
-                select: { id: true },
+                select: { id: true, marginRate: true },
             });
 
             if (!commission) {
@@ -246,19 +249,21 @@ export async function saveDealCommission(input: unknown) {
                     data: {
                         dealId: validated.data.dealId,
                         approvedQuoteId: approvedQuote.id,
+                        marginRate: Number(workspace.commissionMarginRate || 100),
                         commissionableBase,
                         notes: validated.data.notes?.trim() || null,
                         status: DealCommissionStatus.ACTIVE,
                         createdById: user.id,
                         updatedById: user.id,
                     },
-                    select: { id: true },
+                    select: { id: true, marginRate: true },
                 });
             } else {
                 await tx.dealCommission.update({
                     where: { id: commission.id },
                     data: {
                         notes: validated.data.notes?.trim() || null,
+                        marginRate: commission.marginRate,
                         commissionableBase,
                         status: DealCommissionStatus.ACTIVE,
                         updatedById: user.id,
@@ -266,14 +271,16 @@ export async function saveDealCommission(input: unknown) {
                 });
             }
 
+            const commissionId = commission.id;
+
             await tx.dealCommissionEntry.deleteMany({
-                where: { dealCommissionId: commission.id },
+                where: { dealCommissionId: commissionId },
             });
 
             if (normalizedEntries.length > 0) {
                 await tx.dealCommissionEntry.createMany({
                     data: normalizedEntries.map((entry) => ({
-                        dealCommissionId: commission!.id,
+                        dealCommissionId: commissionId,
                         userId: entry.userId,
                         role: entry.role,
                         type: entry.type,
