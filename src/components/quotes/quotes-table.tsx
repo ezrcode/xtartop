@@ -109,6 +109,7 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
                     Cotizaciones ({quotes.length})
                 </h3>
                 <button
+                    type="button"
                     onClick={() => setShowModal(true)}
                     className="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-nearby-dark-600 transition-colors"
                 >
@@ -121,6 +122,7 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
                 <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
                     <p className="text-gray-500 mb-4">No hay cotizaciones creadas</p>
                     <button
+                        type="button"
                         onClick={() => setShowModal(true)}
                         className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-nearby-dark-600 transition-colors"
                     >
@@ -155,6 +157,7 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
                                 <tr key={quote.id} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <button
+                                            type="button"
                                             onClick={() => handleEdit(quote)}
                                             className="text-sm font-medium text-[var(--foreground)] hover:underline"
                                         >

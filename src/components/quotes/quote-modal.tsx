@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { X, Plus, Trash2, Save, Printer } from "lucide-react";
 import { createQuoteAction, updateQuoteAction, QuoteState } from "@/actions/quotes";
 import { QuoteStatus, Currency, TaxType, PaymentFrequency } from "@prisma/client";
@@ -85,6 +86,11 @@ export function QuoteModal({
     const [isPending, setIsPending] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const handleAddItem = () => {
         setItems([
@@ -307,9 +313,9 @@ export function QuoteModal({
     const showTaxBreakdown = showTaxSelector && Number(selectedTax?.rate || 0) > 0;
     const taxSummaryLabel = selectedTax ? `${selectedTax.name} (${formatRate(selectedTax.rate)})` : "Seleccione un impuesto";
 
-    if (!isOpen) return null;
+    if (!isOpen || !mounted) return null;
 
-    return (
+    const modal = (
         <div className="fixed inset-0 z-50 overflow-y-auto">
             <div className="flex min-h-full items-end sm:items-start justify-center p-0 sm:p-4 sm:pt-10">
                 {/* Overlay */}
@@ -323,6 +329,7 @@ export function QuoteModal({
                             {isEditMode ? `Editar Cotización #${String(quote.number).padStart(3, "0")}` : "Nueva Cotización"}
                         </h2>
                         <button
+                            type="button"
                             onClick={onClose}
                             className="p-2 text-[var(--muted-text)] hover:text-[var(--foreground)] hover:bg-[var(--hover-bg)] rounded-full transition-colors"
                         >
@@ -937,4 +944,6 @@ export function QuoteModal({
             )}
         </div>
     );
+
+    return createPortal(modal, document.body);
 }
