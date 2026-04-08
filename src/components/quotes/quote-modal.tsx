@@ -500,10 +500,12 @@ export function QuoteModal({
 
             // Capture the element as canvas
             const canvas = await html2canvas(element, {
-                scale: 2,
+                scale: 3,
                 useCORS: true,
                 logging: false,
-                backgroundColor: '#ffffff'
+                backgroundColor: '#ffffff',
+                windowWidth: element.scrollWidth,
+                windowHeight: element.scrollHeight,
             });
 
             // Hide the element again
@@ -535,8 +537,12 @@ export function QuoteModal({
             }
             
             // Download the PDF
-            const formatLabel = pdfFormat === "advanced" ? "Avanzado" : "Basico";
-            const fileName = `Cotizacion_${formatLabel}_${(quoteCode || String(quote.number).padStart(3, '0')).replace(/[^a-zA-Z0-9-]/g, "_")}_${companyName.replace(/\s+/g, '_')}.pdf`;
+            const safeClientName = (companyName || "Cliente")
+                .replace(/[\\/:*?"<>|]/g, " ")
+                .replace(/\s+/g, " ")
+                .trim();
+            const safeQuoteCode = (quoteCode || String(quote.number).padStart(3, '0')).replace(/[\\/:*?"<>|]/g, "-");
+            const fileName = `Propuesta ${safeClientName} ${safeQuoteCode}.pdf`;
             pdf.save(fileName);
         } catch (error) {
             console.error('Error generating PDF:', error);

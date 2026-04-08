@@ -123,13 +123,16 @@ export function QuotePDFTemplate({
                 minHeight: "297mm",
                 padding: "12mm 10mm",
                 backgroundColor: "#ffffff",
-                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+                fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
                 color: "#000000",
                 position: "absolute",
                 left: "-9999px",
                 top: "0",
                 fontSize: "8.5pt",
                 lineHeight: "1.4",
+                WebkitFontSmoothing: "antialiased",
+                MozOsxFontSmoothing: "grayscale",
+                textRendering: "geometricPrecision",
             }}
         >
             {/* Header */}
@@ -380,13 +383,16 @@ function AdvancedQuotePDFTemplate({
                 minHeight: "297mm",
                 padding: "0",
                 backgroundColor: "#f6f8fa",
-                fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+                fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
                 color: ink,
                 position: "absolute",
                 left: "-9999px",
                 top: "0",
                 fontSize: "8.4pt",
                 lineHeight: "1.52",
+                WebkitFontSmoothing: "antialiased",
+                MozOsxFontSmoothing: "grayscale",
+                textRendering: "geometricPrecision",
             }}
         >
             <div style={{ padding: "10mm", boxSizing: "border-box" }}>
