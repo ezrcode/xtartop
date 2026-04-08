@@ -723,7 +723,14 @@ function CommissionPDFTemplate({
                 <div style={{ border: `1px solid ${line}`, borderRadius: "8px", padding: "10px" }}>
                     <div style={{ textTransform: "uppercase", letterSpacing: "0.12em", fontSize: "6.8pt", color: muted, marginBottom: "6px" }}>Monto disponible para comisión</div>
                     <div style={{ fontSize: "12pt", fontWeight: 800 }}>{formatCurrency(commissionableBase, currency)}</div>
-                    <div style={{ marginTop: "4px", fontSize: "7.2pt", color: muted }}>Margen aplicado: {formatPercent(marginRate)}</div>
+                    <div style={{ marginTop: "4px", fontSize: "7.2pt", color: muted }}>
+                        Ganancia reservada: {formatPercent(100 - marginRate)} ({formatCurrency(
+                            marginRate > 0
+                                ? Number(((commissionableBase * (100 - marginRate)) / marginRate).toFixed(2))
+                                : 0,
+                            currency
+                        )})
+                    </div>
                 </div>
             </div>
 
