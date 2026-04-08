@@ -476,25 +476,32 @@ function AdvancedQuotePDFTemplate({
                 </section>
 
                 {/* Products Table */}
-                <div style={{ marginBottom: "14px" }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "8pt" }}>
+                <div style={{ marginBottom: "14px", border: `1px solid ${line}`, borderRadius: "7px", overflow: "hidden", background: "#ffffff" }}>
+                    <div style={{ padding: "12px 14px", borderBottom: `1px solid ${line}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                            <div style={{ width: "24px", height: "3px", borderRadius: "999px", background: accent }} />
+                            <div style={{ fontSize: "7.2pt", textTransform: "uppercase", letterSpacing: "0.16em", color: muted, fontWeight: 850 }}>Productos y servicios</div>
+                        </div>
+                        <div style={{ fontSize: "7.2pt", color: muted }}>{items.length} {items.length === 1 ? "línea" : "líneas"}</div>
+                    </div>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "8.2pt" }}>
                         <thead>
-                            <tr style={{ backgroundColor: "#ffffff" }}>
-                                <th style={{ padding: "8px 6px", textAlign: "left", border: "1px solid #dddddd", fontWeight: 700, width: "40%" }}>Descripción</th>
-                                <th style={{ padding: "8px 6px", textAlign: "right", border: "1px solid #dddddd", fontWeight: 700, width: "12%" }}>Cant.</th>
-                                <th style={{ padding: "8px 6px", textAlign: "right", border: "1px solid #dddddd", fontWeight: 700, width: "16%" }}>P. Unit.</th>
-                                <th style={{ padding: "8px 6px", textAlign: "center", border: "1px solid #dddddd", fontWeight: 700, width: "14%" }}>Frec.</th>
-                                <th style={{ padding: "8px 6px", textAlign: "right", border: "1px solid #dddddd", fontWeight: 700, width: "18%" }}>Total</th>
+                            <tr style={{ backgroundColor: "#f4f7f9", color: muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                                <th style={{ padding: "10px 12px", textAlign: "left", borderBottom: `1px solid ${line}`, fontWeight: 850, width: "40%" }}>Descripción</th>
+                                <th style={{ padding: "10px 10px", textAlign: "right", borderBottom: `1px solid ${line}`, fontWeight: 850, width: "12%" }}>Cant.</th>
+                                <th style={{ padding: "10px 10px", textAlign: "right", borderBottom: `1px solid ${line}`, fontWeight: 850, width: "16%" }}>P. Unit.</th>
+                                <th style={{ padding: "10px 10px", textAlign: "center", borderBottom: `1px solid ${line}`, fontWeight: 850, width: "14%" }}>Frec.</th>
+                                <th style={{ padding: "10px 12px", textAlign: "right", borderBottom: `1px solid ${line}`, fontWeight: 850, width: "18%" }}>Total</th>
                             </tr>
                         </thead>
                         <tbody>
                             {items.map((item, index) => (
-                                <tr key={index}>
-                                    <td style={{ padding: "8px 6px", border: "1px solid #dddddd" }}>{item.name}</td>
-                                    <td style={{ padding: "8px 6px", textAlign: "right", border: "1px solid #dddddd" }}>{item.quantity.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                                    <td style={{ padding: "8px 6px", textAlign: "right", border: "1px solid #dddddd" }}>{formatCurrency(item.price, quote.currency)}</td>
-                                    <td style={{ padding: "8px 6px", textAlign: "center", border: "1px solid #dddddd" }}>{item.frequency === "MENSUAL" ? "Mensual" : "Pago único"}</td>
-                                    <td style={{ padding: "8px 6px", textAlign: "right", border: "1px solid #dddddd" }}>{formatCurrency(item.netPrice, quote.currency)}</td>
+                                <tr key={index} style={{ backgroundColor: index % 2 === 0 ? "#ffffff" : "#fbfcfd" }}>
+                                    <td style={{ padding: "11px 12px", borderBottom: `1px solid ${line}`, color: ink, fontWeight: 750, lineHeight: "1.35" }}>{item.name}</td>
+                                    <td style={{ padding: "11px 10px", textAlign: "right", borderBottom: `1px solid ${line}`, color: ink, fontWeight: 650 }}>{item.quantity.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                    <td style={{ padding: "11px 10px", textAlign: "right", borderBottom: `1px solid ${line}`, color: ink }}>{formatCurrency(item.price, quote.currency)}</td>
+                                    <td style={{ padding: "11px 10px", textAlign: "center", borderBottom: `1px solid ${line}`, color: muted }}>{item.frequency === "MENSUAL" ? "Mensual" : "Pago único"}</td>
+                                    <td style={{ padding: "11px 12px", textAlign: "right", borderBottom: `1px solid ${line}`, color: ink, fontWeight: 850 }}>{formatCurrency(item.netPrice, quote.currency)}</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -503,37 +510,38 @@ function AdvancedQuotePDFTemplate({
 
                 {/* Totals */}
                 <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "14px" }}>
-                    <div style={{ width: "300px" }}>
+                    <div style={{ width: "330px", border: `1px solid ${line}`, borderRadius: "7px", background: "#ffffff", padding: "12px 14px" }}>
                         {hasOneTime && (
-                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
-                                <span>Pago único:</span>
-                                <span style={{ textAlign: "right" }}>{formatCurrency(breakdown.baseOneTime, quote.currency)}</span>
+                            <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", marginBottom: "6px" }}>
+                                <span style={{ color: muted }}>Pago único:</span>
+                                <span style={{ textAlign: "right", fontWeight: 700 }}>{formatCurrency(breakdown.baseOneTime, quote.currency)}</span>
                             </div>
                         )}
                         {hasMonthly && (
-                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
-                                <span>Pago mensual:</span>
-                                <span style={{ textAlign: "right" }}>{formatCurrency(breakdown.baseMonthly, quote.currency)}</span>
+                            <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", marginBottom: "6px" }}>
+                                <span style={{ color: muted }}>Pago mensual:</span>
+                                <span style={{ textAlign: "right", fontWeight: 700 }}>{formatCurrency(breakdown.baseMonthly, quote.currency)}</span>
                             </div>
                         )}
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px", fontWeight: 700 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", marginBottom: "6px", fontWeight: 800 }}>
                             <span>Total sin impuestos:</span>
                             <span style={{ textAlign: "right" }}>{formatCurrency(breakdown.totalBase, quote.currency)}</span>
                         </div>
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px", fontWeight: 700 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", marginBottom: "8px", fontWeight: 800 }}>
                             <span>{showTaxBreakdown ? `Impuestos (${taxName})` : "Impuestos"}</span>
                             <span style={{ textAlign: "right" }}>
                                 {showTaxBreakdown ? formatCurrency(breakdown.totalTax, quote.currency) : formatCurrency(0, quote.currency)}
                             </span>
                         </div>
+                        <div style={{ height: "3px", background: `linear-gradient(90deg, ${accent}, #c9d9de)`, borderRadius: "999px", margin: "10px 0" }} />
                         <div
                             style={{
                                 display: "flex",
                                 justifyContent: "space-between",
-                                marginTop: "6px",
-                                paddingTop: "6px",
-                                borderTop: "1px solid #dddddd",
-                                fontWeight: 700,
+                                gap: "12px",
+                                paddingTop: "4px",
+                                fontWeight: 900,
+                                fontSize: "9.2pt",
                             }}
                         >
                             <span>Total {quote.currency}:</span>
