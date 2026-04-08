@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { QuoteModal } from "./quote-modal";
-import { deleteQuote, getQuotesByDeal } from "@/actions/quotes";
+import { getQuotesByDeal } from "@/actions/quotes";
 import { getProjectRateReferences } from "@/actions/project-rate-references";
 import { getTaxes } from "@/actions/taxes";
 
@@ -27,8 +27,6 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [editingQuote, setEditingQuote] = useState<any>(null);
-    const [deleteError, setDeleteError] = useState("");
-    const [deletingQuoteId, setDeletingQuoteId] = useState<string | null>(null);
 
     const loadQuotes = async () => {
         setLoading(true);
@@ -59,35 +57,6 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
         setShowModal(false);
         setEditingQuote(null);
         loadQuotes();
-    };
-
-    const handleDelete = async (quote: any) => {
-        const quoteNumber = `#${String(quote.number).padStart(3, "0")}`;
-        const confirmed = window.confirm(`¿Eliminar la cotización ${quoteNumber}? Esta acción no se puede deshacer.`);
-        if (!confirmed) return;
-
-        setDeleteError("");
-        setDeletingQuoteId(quote.id);
-
-        try {
-            const result = await deleteQuote(quote.id);
-
-            if (result.message && !result.message.includes("exitosamente")) {
-                setDeleteError(result.message);
-                return;
-            }
-
-            setQuotes((prev) => prev.filter((item) => item.id !== quote.id));
-            if (editingQuote?.id === quote.id) {
-                setEditingQuote(null);
-                setShowModal(false);
-            }
-        } catch (error) {
-            console.error("Error deleting quote:", error);
-            setDeleteError("Error al eliminar la cotización.");
-        } finally {
-            setDeletingQuoteId(null);
-        }
     };
 
     const getStatusBadge = (status: string) => {
@@ -149,12 +118,6 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
                 </button>
             </div>
 
-            {deleteError && (
-                <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-                    {deleteError}
-                </div>
-            )}
-
             {quotes.length === 0 ? (
                 <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
                     <p className="text-gray-500 mb-4">No hay cotizaciones creadas</p>
@@ -187,9 +150,6 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Total Mensual
                                 </th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Acciones
-                                </th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -219,22 +179,6 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {formatCurrency(getFinalTotal(quote, "monthly"), quote.currency)}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                                        <button
-                                            type="button"
-                                            onClick={() => handleDelete(quote)}
-                                            disabled={deletingQuoteId === quote.id}
-                                            className="inline-flex items-center justify-center rounded-md border border-red-200 bg-red-50 px-2.5 py-2 text-red-700 transition-colors hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
-                                            title="Eliminar cotización"
-                                            aria-label={`Eliminar cotización #${String(quote.number).padStart(3, "0")}`}
-                                        >
-                                            {deletingQuoteId === quote.id ? (
-                                                <Loader2 size={15} className="animate-spin" />
-                                            ) : (
-                                                <Trash2 size={15} />
-                                            )}
-                                        </button>
                                     </td>
                                 </tr>
                             ))}

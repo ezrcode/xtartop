@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { X, Plus, Trash2, Save, Printer } from "lucide-react";
-import { createQuoteAction, updateQuoteAction, QuoteState } from "@/actions/quotes";
+import { createQuoteAction, deleteQuote, updateQuoteAction, QuoteState } from "@/actions/quotes";
 import { QuoteStatus, Currency, TaxType, PaymentFrequency } from "@prisma/client";
 import { QuotePDFTemplate } from "./quote-pdf-template";
 import { formatNumber } from "@/lib/format";
@@ -84,6 +84,7 @@ export function QuoteModal({
     const [selectedTaxType, setSelectedTaxType] = useState<TaxType>(quote?.taxType || "INCLUIDOS");
     const [selectedTaxId, setSelectedTaxId] = useState<string>(quote?.taxId || "");
     const [isPending, setIsPending] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
     const [mounted, setMounted] = useState(false);
@@ -102,6 +103,34 @@ export function QuoteModal({
     const handleRemoveItem = (index: number) => {
         if (items.length > 1) {
             setItems(items.filter((_, i) => i !== index));
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!quote?.id) return;
+
+        const quoteNumber = `#${String(quote.number).padStart(3, "0")}`;
+        const confirmed = window.confirm(`¿Eliminar la cotización ${quoteNumber}? Esta acción no se puede deshacer.`);
+        if (!confirmed) return;
+
+        setError("");
+        setSuccess(false);
+        setIsDeleting(true);
+
+        try {
+            const result = await deleteQuote(quote.id);
+
+            if (result.message && !result.message.includes("exitosamente")) {
+                setError(result.message || "Error al eliminar la cotización");
+                return;
+            }
+
+            onClose();
+        } catch (err: any) {
+            console.error("Quote delete error:", err);
+            setError(err.message || "Error al eliminar la cotización");
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -885,20 +914,33 @@ export function QuoteModal({
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-[var(--card-border)]">
                             <div>
                                 {isEditMode && (
-                                    <button
-                                        type="button"
-                                        onClick={generatePDF}
-                                        className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-3 sm:py-2 border border-[var(--card-border)] rounded-lg shadow-sm text-sm font-medium text-[var(--foreground)] bg-[var(--card-bg)] hover:bg-[var(--surface-2)] transition-colors"
-                                    >
-                                        <Printer size={16} className="mr-2" />
-                                        Imprimir PDF
-                                    </button>
+                                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={generatePDF}
+                                            disabled={isDeleting}
+                                            className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-3 sm:py-2 border border-[var(--card-border)] rounded-lg shadow-sm text-sm font-medium text-[var(--foreground)] bg-[var(--card-bg)] hover:bg-[var(--surface-2)] transition-colors disabled:opacity-50"
+                                        >
+                                            <Printer size={16} className="mr-2" />
+                                            Imprimir PDF
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={handleDelete}
+                                            disabled={isPending || isDeleting}
+                                            className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-3 sm:py-2 border border-red-200 rounded-lg shadow-sm text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                                        >
+                                            <Trash2 size={16} className="mr-2" />
+                                            {isDeleting ? "Eliminando..." : "Eliminar"}
+                                        </button>
+                                    </div>
                                 )}
                             </div>
                             <div className="flex flex-col-reverse sm:flex-row items-center gap-2 sm:gap-3">
                                 <button
                                     type="button"
                                     onClick={onClose}
+                                    disabled={isDeleting}
                                     className="w-full sm:w-auto px-4 py-3 sm:py-2 border border-[var(--card-border)] rounded-lg shadow-sm text-sm font-medium text-[var(--foreground)] bg-[var(--card-bg)] hover:bg-[var(--surface-2)] transition-colors"
                                 >
                                     Cancelar
@@ -906,7 +948,7 @@ export function QuoteModal({
                                 <button
                                     type="button"
                                     onClick={handleSave}
-                                    disabled={isPending}
+                                    disabled={isPending || isDeleting}
                                     className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-3 sm:py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-nearby-dark-600 transition-all active:scale-95 disabled:opacity-50"
                                 >
                                     {isPending ? (
