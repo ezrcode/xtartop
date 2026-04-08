@@ -394,7 +394,7 @@ function AdvancedQuotePDFTemplate({
                     style={{
                         background: `linear-gradient(135deg, ${navy} 0%, #1b2d44 72%, #263f5f 100%)`,
                         color: "#ffffff",
-                        borderRadius: "14px",
+                        borderRadius: "7px",
                         padding: "9mm",
                         position: "relative",
                         overflow: "hidden",
@@ -426,8 +426,8 @@ function AdvancedQuotePDFTemplate({
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12mm", position: "relative" }}>
                         <div style={{ width: "45%" }}>
                             {workspace?.logoUrl ? (
-                                <div style={{ background: "#ffffff", borderRadius: "10px", padding: "8px 10px", display: "inline-flex" }}>
-                                    <img src={workspace.logoUrl} alt="Logo" style={{ maxHeight: "36px", maxWidth: "160px", objectFit: "contain" }} />
+                                <div style={{ background: "#e8eef2", border: "1px solid rgba(255,255,255,0.55)", borderRadius: "5px", padding: "8px 12px", display: "inline-flex", alignItems: "center", justifyContent: "center", minWidth: "44mm", minHeight: "13mm" }}>
+                                    <img src={workspace.logoUrl} alt={workspace?.legalName || "Logo"} crossOrigin="anonymous" style={{ display: "block", maxHeight: "34px", maxWidth: "150px", width: "auto", height: "auto", objectFit: "contain" }} />
                                 </div>
                             ) : (
                                 <div style={{ fontSize: "12pt", fontWeight: 800, letterSpacing: "0.08em" }}>{workspace?.legalName || "NEARBY CRM"}</div>
@@ -450,11 +450,11 @@ function AdvancedQuotePDFTemplate({
                             <div style={{ color: "rgba(255,255,255,0.74)", marginTop: "6px" }}>Atención: <span style={{ color: "#ffffff", fontWeight: 650 }}>{contactName || "—"}</span></div>
                         </div>
                         <div style={{ width: "52mm", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-                            <div style={{ border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.08)", borderRadius: "10px", padding: "10px" }}>
+                            <div style={{ border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.08)", borderRadius: "5px", padding: "10px" }}>
                                 <div style={{ fontSize: "6.6pt", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)", marginBottom: "4px" }}>Fecha</div>
                                 <div style={{ fontWeight: 800, color: "#ffffff" }}>{formatDate(quote.date)}</div>
                             </div>
-                            <div style={{ border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.08)", borderRadius: "10px", padding: "10px" }}>
+                            <div style={{ border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.08)", borderRadius: "5px", padding: "10px" }}>
                                 <div style={{ fontSize: "6.6pt", textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.55)", marginBottom: "4px" }}>Validez</div>
                                 <div style={{ fontWeight: 800, color: "#ffffff" }}>{quote.validity}</div>
                             </div>
@@ -464,7 +464,7 @@ function AdvancedQuotePDFTemplate({
 
                 <div style={{ display: "flex", gap: "7mm", alignItems: "flex-start" }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                        <section style={{ background: "#ffffff", border: `1px solid ${line}`, borderRadius: "14px", padding: "7mm", marginBottom: "6mm" }}>
+                        <section style={{ background: "#ffffff", border: `1px solid ${line}`, borderRadius: "7px", padding: "7mm", marginBottom: "6mm" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "5mm" }}>
                                 <div style={{ width: "24px", height: "3px", borderRadius: "999px", background: accent }} />
                                 <div style={{ fontSize: "7.2pt", textTransform: "uppercase", letterSpacing: "0.16em", color: muted, fontWeight: 800 }}>Descripción de la Propuesta</div>
@@ -476,44 +476,13 @@ function AdvancedQuotePDFTemplate({
                             />
                         </section>
 
-                        <section style={{ background: "#ffffff", border: `1px solid ${line}`, borderRadius: "14px", overflow: "hidden", marginBottom: "6mm" }}>
-                            <div style={{ padding: "5mm 6mm", borderBottom: `1px solid ${line}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <div>
-                                    <div style={{ fontSize: "7.2pt", textTransform: "uppercase", letterSpacing: "0.16em", color: muted, fontWeight: 800 }}>Productos y servicios</div>
-                                </div>
-                                <div style={{ color: muted, fontSize: "7.5pt" }}>{items.length} {items.length === 1 ? "línea" : "líneas"}</div>
-                            </div>
-                            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "7.8pt" }}>
-                                <thead>
-                                    <tr style={{ backgroundColor: "#f3f6f8", color: muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                                        <th style={{ padding: "9px 10px", textAlign: "left", fontWeight: 800, width: "40%" }}>Descripción</th>
-                                        <th style={{ padding: "9px 8px", textAlign: "right", fontWeight: 800, width: "12%" }}>Cant.</th>
-                                        <th style={{ padding: "9px 8px", textAlign: "right", fontWeight: 800, width: "17%" }}>P. Unit.</th>
-                                        <th style={{ padding: "9px 8px", textAlign: "center", fontWeight: 800, width: "13%" }}>Frec.</th>
-                                        <th style={{ padding: "9px 10px", textAlign: "right", fontWeight: 800, width: "18%" }}>Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {items.map((item, index) => (
-                                        <tr key={index} style={{ borderTop: index === 0 ? "0" : `1px solid ${line}` }}>
-                                            <td style={{ padding: "10px", color: ink, fontWeight: 650 }}>{item.name}</td>
-                                            <td style={{ padding: "10px 8px", textAlign: "right", color: muted }}>{item.quantity.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                                            <td style={{ padding: "10px 8px", textAlign: "right", color: muted }}>{formatCurrency(item.price, quote.currency)}</td>
-                                            <td style={{ padding: "10px 8px", textAlign: "center", color: muted }}>{item.frequency === "MENSUAL" ? "Mensual" : "Pago único"}</td>
-                                            <td style={{ padding: "10px", textAlign: "right", color: ink, fontWeight: 800 }}>{formatCurrency(item.netPrice, quote.currency)}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </section>
-
                         {(quote.paymentConditions || quote.deliveryTime) && (
                             <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-                                <div style={{ background: "#ffffff", border: `1px solid ${line}`, borderRadius: "12px", padding: "12px" }}>
+                                <div style={{ background: "#ffffff", border: `1px solid ${line}`, borderRadius: "6px", padding: "12px" }}>
                                     <div style={{ color: muted, textTransform: "uppercase", letterSpacing: "0.12em", fontSize: "6.8pt", fontWeight: 800, marginBottom: "6px" }}>Condiciones de pago</div>
                                     <div style={{ whiteSpace: "pre-wrap", fontSize: "8pt", color: ink, lineHeight: "1.55" }}>{quote.paymentConditions || "—"}</div>
                                 </div>
-                                <div style={{ background: "#ffffff", border: `1px solid ${line}`, borderRadius: "12px", padding: "12px" }}>
+                                <div style={{ background: "#ffffff", border: `1px solid ${line}`, borderRadius: "6px", padding: "12px" }}>
                                     <div style={{ color: muted, textTransform: "uppercase", letterSpacing: "0.12em", fontSize: "6.8pt", fontWeight: 800, marginBottom: "6px" }}>Tiempo de entrega</div>
                                     <div style={{ whiteSpace: "pre-wrap", fontSize: "8pt", color: ink, lineHeight: "1.55" }}>{quote.deliveryTime || "—"}</div>
                                 </div>
@@ -522,7 +491,7 @@ function AdvancedQuotePDFTemplate({
                     </div>
 
                     <aside style={{ width: "60mm", position: "relative" }}>
-                        <div style={{ background: "#ffffff", border: `1px solid ${line}`, borderRadius: "14px", overflow: "hidden", marginBottom: "5mm" }}>
+                        <div style={{ background: "#ffffff", border: `1px solid ${line}`, borderRadius: "7px", overflow: "hidden", marginBottom: "5mm" }}>
                             <div style={{ background: navy, color: "#ffffff", padding: "5mm" }}>
                                 <div style={{ fontSize: "6.8pt", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.62)", marginBottom: "6px" }}>Resumen financiero</div>
                                 <div style={{ fontSize: "18pt", fontWeight: 850, lineHeight: "1" }}>{formatCurrency(grandTotal, quote.currency)}</div>
@@ -557,7 +526,7 @@ function AdvancedQuotePDFTemplate({
                             </div>
                         </div>
 
-                        <div style={{ background: "#ffffff", border: `1px solid ${line}`, borderRadius: "14px", padding: "5mm" }}>
+                        <div style={{ background: "#ffffff", border: `1px solid ${line}`, borderRadius: "7px", padding: "5mm" }}>
                             <div style={{ fontSize: "6.8pt", textTransform: "uppercase", letterSpacing: "0.14em", color: muted, fontWeight: 800, marginBottom: "8px" }}>Datos de emisión</div>
                             <div style={{ display: "grid", gap: "7px", fontSize: "7.8pt" }}>
                                 <div><span style={{ color: muted }}>Cotización:</span> <strong>{quoteCode}</strong></div>
@@ -569,6 +538,37 @@ function AdvancedQuotePDFTemplate({
                         </div>
                     </aside>
                 </div>
+
+                <section style={{ background: "#ffffff", border: `1px solid ${line}`, borderRadius: "7px", overflow: "hidden", marginTop: "6mm" }}>
+                    <div style={{ padding: "5mm 6mm", borderBottom: `1px solid ${line}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div>
+                            <div style={{ fontSize: "7.2pt", textTransform: "uppercase", letterSpacing: "0.16em", color: muted, fontWeight: 800 }}>Productos y servicios</div>
+                        </div>
+                        <div style={{ color: muted, fontSize: "7.5pt" }}>{items.length} {items.length === 1 ? "línea" : "líneas"}</div>
+                    </div>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "8pt" }}>
+                        <thead>
+                            <tr style={{ backgroundColor: "#f3f6f8", color: muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                                <th style={{ padding: "10px 12px", textAlign: "left", fontWeight: 800, width: "44%" }}>Descripción</th>
+                                <th style={{ padding: "10px 10px", textAlign: "right", fontWeight: 800, width: "10%" }}>Cant.</th>
+                                <th style={{ padding: "10px 10px", textAlign: "right", fontWeight: 800, width: "16%" }}>P. Unit.</th>
+                                <th style={{ padding: "10px 10px", textAlign: "center", fontWeight: 800, width: "12%" }}>Frec.</th>
+                                <th style={{ padding: "10px 12px", textAlign: "right", fontWeight: 800, width: "18%" }}>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {items.map((item, index) => (
+                                <tr key={index} style={{ borderTop: index === 0 ? "0" : `1px solid ${line}` }}>
+                                    <td style={{ padding: "12px", color: ink, fontWeight: 750, lineHeight: "1.35" }}>{item.name}</td>
+                                    <td style={{ padding: "12px 10px", textAlign: "right", color: ink, fontWeight: 650 }}>{item.quantity.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                    <td style={{ padding: "12px 10px", textAlign: "right", color: ink }}>{formatCurrency(item.price, quote.currency)}</td>
+                                    <td style={{ padding: "12px 10px", textAlign: "center", color: muted }}>{item.frequency === "MENSUAL" ? "Mensual" : "Pago único"}</td>
+                                    <td style={{ padding: "12px", textAlign: "right", color: ink, fontWeight: 850 }}>{formatCurrency(item.netPrice, quote.currency)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </section>
 
                 <div style={{ marginTop: "7mm", borderTop: `1px solid ${line}`, paddingTop: "4mm", display: "flex", justifyContent: "space-between", alignItems: "center", color: muted, fontSize: "7pt" }}>
                     <div>
