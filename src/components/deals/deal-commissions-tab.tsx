@@ -301,105 +301,86 @@ export function DealCommissionsTab({
         />
     ) : null;
 
+    const pct = commissionableBase > 0 ? Math.min(100, (totalAssigned / commissionableBase) * 100) : 0;
+    const over = remaining < 0;
+    const barColor = over ? "bg-red-500" : pct > 85 ? "bg-amber-500" : "bg-success-green";
+
     return (
         <>
-            <div className="space-y-5">
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-                    <div>
-                        <div className="flex flex-wrap items-center gap-2">
-                            <span className="inline-flex items-center rounded-full border border-[var(--card-border)] bg-[var(--surface-2)] px-3 py-1 text-xs font-medium text-[var(--muted-text)]">
-                                Cotización aprobada: <span className="ml-1 font-semibold text-[var(--foreground)]">{quoteCode}</span>
-                            </span>
-                            <span className="inline-flex items-center rounded-full border border-nearby-dark/20 bg-nearby-dark/5 px-3 py-1 text-xs font-medium text-nearby-dark dark:text-nearby-dark-300">
-                                Margen aplicado: {formatPercent(marginRate)}
-                            </span>
-                        </div>
-                        <p className="mt-3 text-sm text-[var(--muted-text)]">
-                            La base comisionable quedó congelada al aprobar la cotización y se calcula solo sobre el monto de pago único.
-                        </p>
-                    </div>
-                    <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-3 text-sm shadow-sm">
-                        <div className="flex items-center justify-between gap-5">
-                            <span className="text-[var(--muted-text)]">Negocio</span>
-                            <span className="font-semibold text-[var(--foreground)]">{dealCode}</span>
-                        </div>
-                        <div className="mt-2 flex items-center justify-between gap-5">
-                            <span className="text-[var(--muted-text)]">Cliente</span>
-                            <span className="max-w-[220px] truncate text-right font-semibold text-[var(--foreground)]">{companyName || "—"}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="grid gap-4 lg:grid-cols-3">
-                    <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-5 shadow-sm">
-                        <p className="text-[11px] uppercase tracking-[0.14em] text-[var(--muted-text)]">Monto del negocio</p>
-                        <p className="mt-2 text-2xl font-bold text-[var(--foreground)]">{formatCurrency(totalDealBase, currency)}</p>
-                        <p className="mt-1 text-xs text-[var(--muted-text)]">Pago único + recurrente</p>
-                    </div>
-                    <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-5 shadow-sm">
-                        <p className="text-[11px] uppercase tracking-[0.14em] text-[var(--muted-text)]">Base comisionable</p>
-                        <p className="mt-2 text-2xl font-bold text-[var(--foreground)]">{formatCurrency(commissionableBase, currency)}</p>
-                        <p className="mt-1 text-xs text-[var(--muted-text)]">Margen aplicado: {formatPercent(marginRate)}</p>
-                    </div>
-                    {(() => {
-                        const pct = commissionableBase > 0 ? Math.min(100, (totalAssigned / commissionableBase) * 100) : 0;
-                        const over = remaining < 0;
-                        const barColor = over ? "bg-red-500" : pct > 85 ? "bg-amber-500" : "bg-success-green";
-                        return (
-                            <div className={`rounded-2xl border p-5 shadow-sm ${over ? "border-red-200 bg-red-50/40 dark:bg-red-950/20" : "border-nearby-dark/20 bg-nearby-dark/[0.04]"}`}>
-                                <div className="flex items-baseline justify-between gap-3">
-                                    <p className="text-[11px] uppercase tracking-[0.14em] text-[var(--muted-text)]">Disponible restante</p>
-                                    <span className="text-[11px] font-semibold text-[var(--muted-text)]">{pct.toFixed(0)}% asignado</span>
-                                </div>
-                                <p className={`mt-2 text-2xl font-bold ${over ? "text-red-600" : "text-[var(--foreground)]"}`}>
-                                    {formatCurrency(remaining, currency)}
-                                </p>
-                                <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[var(--surface-3)]">
-                                    <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${pct}%` }} />
-                                </div>
-                                <p className="mt-2 text-xs text-[var(--muted-text)]">
-                                    Cargadas: <span className="font-semibold text-[var(--foreground)]">{formatCurrency(totalAssigned, currency)}</span>
-                                </p>
-                            </div>
-                        );
-                    })()}
-                </div>
-
+            <div className="space-y-4">
                 {message && (
-                    <div className="rounded-lg bg-green-50 px-4 py-3 text-sm text-green-800">
-                        {message}
-                    </div>
+                    <div className="rounded-lg bg-green-50 px-4 py-3 text-sm text-green-800 dark:bg-green-950/30 dark:text-green-300">{message}</div>
                 )}
                 {error && (
-                    <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">
-                        {error}
-                    </div>
+                    <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800 dark:bg-red-950/30 dark:text-red-300">{error}</div>
                 )}
                 {warning && (
-                    <div className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                        {warning}
-                    </div>
+                    <div className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">{warning}</div>
                 )}
 
-                <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] shadow-sm overflow-hidden">
-                    <div className="flex flex-col gap-3 border-b border-[var(--card-border)] px-4 py-4 sm:flex-row sm:items-end sm:justify-between">
-                        <div>
-                            <h3 className="text-base font-semibold text-[var(--foreground)]">Desglose de comisiones</h3>
-                            <p className="text-sm text-[var(--muted-text)] mt-1">Asigna múltiples personas y combina porcentajes con montos fijos dentro de la misma liquidación.</p>
+                <section className="overflow-hidden rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] shadow-sm">
+                    {/* Header */}
+                    <header className="flex flex-col gap-4 px-6 pt-6 pb-5 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="min-w-0">
+                            <h2 className="text-lg font-semibold tracking-tight text-[var(--foreground)]">Liquidación de comisiones</h2>
+                            <p className="mt-1 text-sm text-[var(--muted-text)]">
+                                {companyName || "Cliente"} · {dealCode} · Cotización {quoteCode}
+                            </p>
                         </div>
-                        <button
-                            type="button"
-                            onClick={addEntry}
-                            className="inline-flex items-center justify-center rounded-xl border border-[var(--card-border)] bg-[var(--surface-2)] px-4 py-2.5 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--hover-bg)]"
-                        >
-                            <Plus size={16} className="mr-2" />
-                            Agregar
-                        </button>
+                        <div className="flex flex-shrink-0 items-center gap-2 text-xs">
+                            <span className="inline-flex items-center rounded-full bg-[var(--surface-2)] px-2.5 py-1 font-medium text-[var(--muted-text)]">
+                                Margen {formatPercent(marginRate)}
+                            </span>
+                            <span className="inline-flex items-center rounded-full bg-nearby-dark/8 px-2.5 py-1 font-medium text-nearby-dark dark:text-nearby-dark-300">
+                                Base congelada
+                            </span>
+                        </div>
+                    </header>
+
+                    {/* Stat strip */}
+                    <div className="border-y border-[var(--card-border)] bg-[var(--surface-2)]/40 px-6 py-5">
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 sm:divide-x sm:divide-[var(--card-border)]">
+                            <div className="sm:pr-6">
+                                <p className="text-[10.5px] font-medium uppercase tracking-[0.12em] text-[var(--muted-text)]">Monto del negocio</p>
+                                <p className="mt-1.5 text-xl font-semibold tabular-nums text-[var(--foreground)]">{formatCurrency(totalDealBase, currency)}</p>
+                            </div>
+                            <div className="sm:px-6">
+                                <p className="text-[10.5px] font-medium uppercase tracking-[0.12em] text-[var(--muted-text)]">Base comisionable</p>
+                                <p className="mt-1.5 text-xl font-semibold tabular-nums text-[var(--foreground)]">{formatCurrency(commissionableBase, currency)}</p>
+                            </div>
+                            <div className="sm:pl-6">
+                                <div className="flex items-baseline justify-between gap-2">
+                                    <p className="text-[10.5px] font-medium uppercase tracking-[0.12em] text-[var(--muted-text)]">Disponible restante</p>
+                                    <span className="text-[10.5px] font-semibold tabular-nums text-[var(--muted-text)]">{pct.toFixed(0)}%</span>
+                                </div>
+                                <p className={`mt-1.5 text-xl font-semibold tabular-nums ${over ? "text-red-600" : "text-[var(--foreground)]"}`}>
+                                    {formatCurrency(remaining, currency)}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="mt-4 h-1 w-full overflow-hidden rounded-full bg-[var(--surface-3)]">
+                            <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${pct}%` }} />
+                        </div>
+                    </div>
+
+                    {/* Entries */}
+                    <div className="px-6 pt-6 pb-2">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-sm font-semibold tracking-tight text-[var(--foreground)]">Desglose</h3>
+                            <button
+                                type="button"
+                                onClick={addEntry}
+                                className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-nearby-dark hover:bg-nearby-dark/8 dark:text-nearby-dark-300"
+                            >
+                                <Plus size={14} />
+                                Agregar persona
+                            </button>
+                        </div>
                     </div>
 
                     {/* Desktop table */}
                     <div className="hidden lg:block">
-                        <div className="grid grid-cols-[minmax(0,2.4fr)_minmax(0,1.4fr)_minmax(0,1.3fr)_minmax(0,1.1fr)_minmax(0,1.4fr)_44px] gap-3 border-b border-[var(--card-border)] bg-[var(--surface-2)]/60 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--muted-text)]">
+                        <div className="grid grid-cols-[minmax(0,2.6fr)_minmax(0,1.3fr)_minmax(0,1.2fr)_minmax(0,1.1fr)_minmax(0,1.4fr)_36px] items-center gap-4 px-6 pb-2 text-[10.5px] font-medium uppercase tracking-[0.1em] text-[var(--muted-text)]">
                             <div>Persona</div>
                             <div>Rol</div>
                             <div>Tipo</div>
@@ -407,14 +388,17 @@ export function DealCommissionsTab({
                             <div className="text-right">Monto a pagar</div>
                             <div />
                         </div>
-                        <div className="divide-y divide-[var(--card-border)]">
+                        <div>
                             {entries.map((entry, index) => {
                                 const user = users.find((u) => u.id === entry.userId);
                                 const initials = (user?.name || user?.email || "?").trim().substring(0, 1).toUpperCase();
                                 return (
-                                    <div key={`${index}-${entry.userId}`} className="grid grid-cols-[minmax(0,2.4fr)_minmax(0,1.4fr)_minmax(0,1.3fr)_minmax(0,1.1fr)_minmax(0,1.4fr)_44px] items-center gap-3 px-5 py-3 hover:bg-[var(--surface-2)]/40">
-                                        <div className="flex items-center gap-2.5 min-w-0">
-                                            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-nearby-dark/10 text-xs font-semibold text-nearby-dark">
+                                    <div
+                                        key={`${index}-${entry.userId}`}
+                                        className="group grid grid-cols-[minmax(0,2.6fr)_minmax(0,1.3fr)_minmax(0,1.2fr)_minmax(0,1.1fr)_minmax(0,1.4fr)_36px] items-center gap-4 border-t border-[var(--card-border)] px-6 py-3 transition-colors hover:bg-[var(--surface-2)]/30"
+                                    >
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-nearby-dark/15 to-nearby-dark/5 text-xs font-semibold text-nearby-dark">
                                                 {user?.photoUrl ? (
                                                     // eslint-disable-next-line @next/next/no-img-element
                                                     <img src={user.photoUrl} alt="" className="h-full w-full object-cover" />
@@ -423,7 +407,7 @@ export function DealCommissionsTab({
                                             <select
                                                 value={entry.userId}
                                                 onChange={(event) => updateEntry(index, { userId: event.target.value })}
-                                                className="w-full min-w-0 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-2.5 py-2 text-sm"
+                                                className="w-full min-w-0 cursor-pointer appearance-none bg-transparent py-1 text-sm font-medium text-[var(--foreground)] outline-none focus:text-nearby-dark"
                                             >
                                                 <option value="">Seleccionar usuario</option>
                                                 {users.map((u) => (
@@ -434,7 +418,7 @@ export function DealCommissionsTab({
                                         <select
                                             value={entry.role}
                                             onChange={(event) => updateEntry(index, { role: event.target.value as CommissionRole })}
-                                            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-2.5 py-2 text-sm"
+                                            className="w-full cursor-pointer appearance-none bg-transparent py-1 text-sm text-[var(--foreground)] outline-none focus:text-nearby-dark"
                                         >
                                             {Object.entries(ROLE_LABELS).map(([value, label]) => (
                                                 <option key={value} value={value}>{label}</option>
@@ -443,7 +427,7 @@ export function DealCommissionsTab({
                                         <select
                                             value={entry.type}
                                             onChange={(event) => updateEntry(index, { type: event.target.value as CommissionValueType })}
-                                            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-2.5 py-2 text-sm"
+                                            className="w-full cursor-pointer appearance-none bg-transparent py-1 text-sm text-[var(--foreground)] outline-none focus:text-nearby-dark"
                                         >
                                             <option value={CommissionValueType.PERCENTAGE}>Porcentaje</option>
                                             <option value={CommissionValueType.FIXED_AMOUNT}>Monto fijo</option>
@@ -459,13 +443,13 @@ export function DealCommissionsTab({
                                                         value={entry.percentage}
                                                         onChange={(event) => updateEntry(index, { percentage: event.target.value })}
                                                         placeholder="0"
-                                                        className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] py-2 pl-2.5 pr-7 text-sm tabular-nums"
+                                                        className="w-full border-0 border-b border-transparent bg-transparent py-1 pl-0 pr-6 text-sm tabular-nums text-[var(--foreground)] outline-none transition-colors hover:border-[var(--card-border)] focus:border-nearby-dark"
                                                     />
-                                                    <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-medium text-[var(--muted-text)]">%</span>
+                                                    <span className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-xs text-[var(--muted-text)]">%</span>
                                                 </>
                                             ) : (
                                                 <>
-                                                    <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-medium text-[var(--muted-text)]">{currency === "USD" ? "$" : "RD$"}</span>
+                                                    <span className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 text-xs text-[var(--muted-text)]">{currency === "USD" ? "$" : "RD$"}</span>
                                                     <input
                                                         type="number"
                                                         min="0"
@@ -473,7 +457,7 @@ export function DealCommissionsTab({
                                                         value={entry.fixedAmount}
                                                         onChange={(event) => updateEntry(index, { fixedAmount: event.target.value })}
                                                         placeholder="0.00"
-                                                        className={`w-full rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] py-2 pr-2.5 text-sm tabular-nums ${currency === "USD" ? "pl-6" : "pl-10"}`}
+                                                        className={`w-full border-0 border-b border-transparent bg-transparent py-1 pr-0 text-sm tabular-nums text-[var(--foreground)] outline-none transition-colors hover:border-[var(--card-border)] focus:border-nearby-dark ${currency === "USD" ? "pl-4" : "pl-9"}`}
                                                     />
                                                 </>
                                             )}
@@ -486,9 +470,9 @@ export function DealCommissionsTab({
                                             onClick={() => removeEntry(index)}
                                             disabled={entries.length === 1}
                                             aria-label="Eliminar"
-                                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[var(--muted-text)] hover:bg-red-50 hover:text-red-600 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-[var(--muted-text)]"
+                                            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[var(--muted-text)] opacity-0 transition-all hover:bg-red-50 hover:text-red-600 group-hover:opacity-100 disabled:opacity-0 dark:hover:bg-red-950/30"
                                         >
-                                            <Trash2 size={15} />
+                                            <Trash2 size={14} />
                                         </button>
                                     </div>
                                 );
@@ -496,140 +480,152 @@ export function DealCommissionsTab({
                         </div>
                     </div>
 
-                    {/* Mobile cards */}
-                    <div className="space-y-3 p-4 lg:hidden">
-                        {entries.map((entry, index) => (
-                            <div key={`${index}-${entry.userId}`} className="rounded-xl border border-[var(--card-border)] bg-[var(--surface-2)] p-4 space-y-3">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-xs font-semibold uppercase tracking-wide text-[var(--muted-text)]">Comisión #{index + 1}</span>
-                                    <button
-                                        type="button"
-                                        onClick={() => removeEntry(index)}
-                                        disabled={entries.length === 1}
-                                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-red-600 hover:bg-red-50 disabled:opacity-30"
-                                    >
-                                        <Trash2 size={15} />
-                                    </button>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-medium text-[var(--muted-text)] mb-1">Persona</label>
-                                    <select
-                                        value={entry.userId}
-                                        onChange={(event) => updateEntry(index, { userId: event.target.value })}
-                                        className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-3 py-2.5 text-sm"
-                                    >
-                                        <option value="">Seleccionar usuario</option>
-                                        {users.map((u) => (
-                                            <option key={u.id} value={u.id}>{u.name || u.email}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label className="block text-xs font-medium text-[var(--muted-text)] mb-1">Rol</label>
-                                        <select
-                                            value={entry.role}
-                                            onChange={(event) => updateEntry(index, { role: event.target.value as CommissionRole })}
-                                            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-3 py-2.5 text-sm"
+                    {/* Mobile list */}
+                    <div className="space-y-4 px-6 pb-4 lg:hidden">
+                        {entries.map((entry, index) => {
+                            const user = users.find((u) => u.id === entry.userId);
+                            const initials = (user?.name || user?.email || "?").trim().substring(0, 1).toUpperCase();
+                            return (
+                                <div key={`${index}-${entry.userId}`} className="border-t border-[var(--card-border)] pt-4 first:border-t-0 first:pt-0">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                                            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-nearby-dark/15 to-nearby-dark/5 text-xs font-semibold text-nearby-dark">
+                                                {user?.photoUrl ? (
+                                                    // eslint-disable-next-line @next/next/no-img-element
+                                                    <img src={user.photoUrl} alt="" className="h-full w-full object-cover" />
+                                                ) : initials}
+                                            </div>
+                                            <select
+                                                value={entry.userId}
+                                                onChange={(event) => updateEntry(index, { userId: event.target.value })}
+                                                className="w-full min-w-0 bg-transparent text-sm font-medium text-[var(--foreground)] outline-none"
+                                            >
+                                                <option value="">Seleccionar usuario</option>
+                                                {users.map((u) => (
+                                                    <option key={u.id} value={u.id}>{u.name || u.email}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => removeEntry(index)}
+                                            disabled={entries.length === 1}
+                                            className="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md text-[var(--muted-text)] hover:text-red-600 disabled:opacity-30"
                                         >
-                                            {Object.entries(ROLE_LABELS).map(([value, label]) => (
-                                                <option key={value} value={value}>{label}</option>
-                                            ))}
-                                        </select>
+                                            <Trash2 size={14} />
+                                        </button>
                                     </div>
-                                    <div>
-                                        <label className="block text-xs font-medium text-[var(--muted-text)] mb-1">Tipo</label>
-                                        <select
-                                            value={entry.type}
-                                            onChange={(event) => updateEntry(index, { type: event.target.value as CommissionValueType })}
-                                            className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-3 py-2.5 text-sm"
-                                        >
-                                            <option value={CommissionValueType.PERCENTAGE}>Porcentaje</option>
-                                            <option value={CommissionValueType.FIXED_AMOUNT}>Monto fijo</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label className="block text-xs font-medium text-[var(--muted-text)] mb-1">
-                                            {entry.type === CommissionValueType.PERCENTAGE ? "Valor (%)" : "Monto fijo"}
-                                        </label>
-                                        {entry.type === CommissionValueType.PERCENTAGE ? (
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                max="100"
-                                                step="0.01"
-                                                value={entry.percentage}
-                                                onChange={(event) => updateEntry(index, { percentage: event.target.value })}
-                                                className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-3 py-2.5 text-sm tabular-nums"
-                                            />
-                                        ) : (
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                step="0.01"
-                                                value={entry.fixedAmount}
-                                                onChange={(event) => updateEntry(index, { fixedAmount: event.target.value })}
-                                                className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-3 py-2.5 text-sm tabular-nums"
-                                            />
-                                        )}
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-medium text-[var(--muted-text)] mb-1">Monto a pagar</label>
-                                        <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-3 py-2.5 text-sm font-semibold tabular-nums text-[var(--foreground)]">
-                                            {formatCurrency(Number(entry.calculatedAmount || 0), currency)}
+                                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                                        <div className="flex items-center justify-between border-b border-[var(--card-border)] pb-1">
+                                            <span className="text-xs text-[var(--muted-text)]">Rol</span>
+                                            <select
+                                                value={entry.role}
+                                                onChange={(event) => updateEntry(index, { role: event.target.value as CommissionRole })}
+                                                className="bg-transparent text-right text-sm text-[var(--foreground)] outline-none"
+                                            >
+                                                {Object.entries(ROLE_LABELS).map(([value, label]) => (
+                                                    <option key={value} value={value}>{label}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="flex items-center justify-between border-b border-[var(--card-border)] pb-1">
+                                            <span className="text-xs text-[var(--muted-text)]">Tipo</span>
+                                            <select
+                                                value={entry.type}
+                                                onChange={(event) => updateEntry(index, { type: event.target.value as CommissionValueType })}
+                                                className="bg-transparent text-right text-sm text-[var(--foreground)] outline-none"
+                                            >
+                                                <option value={CommissionValueType.PERCENTAGE}>Porcentaje</option>
+                                                <option value={CommissionValueType.FIXED_AMOUNT}>Monto fijo</option>
+                                            </select>
+                                        </div>
+                                        <div className="flex items-center justify-between border-b border-[var(--card-border)] pb-1">
+                                            <span className="text-xs text-[var(--muted-text)]">{entry.type === CommissionValueType.PERCENTAGE ? "Valor" : "Monto"}</span>
+                                            {entry.type === CommissionValueType.PERCENTAGE ? (
+                                                <div className="flex items-baseline gap-0.5">
+                                                    <input
+                                                        type="number"
+                                                        min="0"
+                                                        max="100"
+                                                        step="0.01"
+                                                        value={entry.percentage}
+                                                        onChange={(event) => updateEntry(index, { percentage: event.target.value })}
+                                                        placeholder="0"
+                                                        className="w-12 bg-transparent text-right text-sm tabular-nums text-[var(--foreground)] outline-none"
+                                                    />
+                                                    <span className="text-xs text-[var(--muted-text)]">%</span>
+                                                </div>
+                                            ) : (
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.01"
+                                                    value={entry.fixedAmount}
+                                                    onChange={(event) => updateEntry(index, { fixedAmount: event.target.value })}
+                                                    placeholder="0.00"
+                                                    className="w-24 bg-transparent text-right text-sm tabular-nums text-[var(--foreground)] outline-none"
+                                                />
+                                            )}
+                                        </div>
+                                        <div className="flex items-center justify-between border-b border-[var(--card-border)] pb-1">
+                                            <span className="text-xs text-[var(--muted-text)]">A pagar</span>
+                                            <span className="text-sm font-semibold tabular-nums text-[var(--foreground)]">
+                                                {formatCurrency(Number(entry.calculatedAmount || 0), currency)}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
-                </div>
 
-                <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
-                    <label className="block text-sm font-medium text-[var(--foreground)] mb-1.5">Observaciones</label>
-                    <textarea
-                        value={notes}
-                        onChange={(event) => setNotes(event.target.value)}
-                        rows={4}
-                        placeholder="Notas internas sobre criterios de reparto, acuerdos o validaciones."
-                        className="w-full rounded-lg border border-[var(--card-border)] bg-[var(--surface-2)] px-3 py-3 text-sm"
-                    />
-                </div>
+                    {/* Notes */}
+                    <div className="border-t border-[var(--card-border)] px-6 py-5">
+                        <label className="block text-[10.5px] font-medium uppercase tracking-[0.12em] text-[var(--muted-text)] mb-2">Observaciones</label>
+                        <textarea
+                            value={notes}
+                            onChange={(event) => setNotes(event.target.value)}
+                            rows={3}
+                            placeholder="Notas internas sobre criterios de reparto, acuerdos o validaciones."
+                            className="w-full resize-none border-0 bg-transparent p-0 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-text)] focus:outline-none focus:ring-0"
+                        />
+                    </div>
 
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="text-sm text-[var(--muted-text)]">
-                        {totalAssigned > commissionableBase
-                            ? "La suma de las comisiones supera la base disponible. Se permite guardar, pero quedará señalada."
-                            : "La base disponible para comisión permanece congelada desde la aprobación de la cotización."}
-                    </div>
-                    <div className="flex flex-col-reverse gap-2 sm:flex-row">
-                        <button
-                            type="button"
-                            onClick={generatePDF}
-                            className="inline-flex items-center justify-center rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-2.5 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--surface-2)]"
-                        >
-                            <Download size={16} className="mr-2" />
-                            Generar PDF
-                        </button>
-                        <button
-                            type="button"
-                            onClick={handleSave}
-                            disabled={saving}
-                            className="inline-flex items-center justify-center rounded-lg bg-nearby-dark px-4 py-2.5 text-sm font-medium text-white hover:bg-nearby-dark-600 disabled:opacity-60"
-                        >
-                            <Save size={16} className="mr-2" />
-                            {saving ? "Guardando..." : "Guardar comisiones"}
-                        </button>
-                    </div>
-                </div>
+                    {/* Footer */}
+                    <footer className="flex flex-col gap-3 border-t border-[var(--card-border)] bg-[var(--surface-2)]/40 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+                        <p className={`text-xs ${over ? "text-red-600" : "text-[var(--muted-text)]"}`}>
+                            {over
+                                ? "La suma supera la base disponible. Se permite guardar."
+                                : "Base congelada desde la aprobación de la cotización."}
+                        </p>
+                        <div className="flex flex-col-reverse gap-2 sm:flex-row">
+                            <button
+                                type="button"
+                                onClick={generatePDF}
+                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-4 py-2 text-sm font-medium text-[var(--foreground)] transition-colors hover:bg-[var(--surface-2)]"
+                            >
+                                <Download size={15} />
+                                PDF
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleSave}
+                                disabled={saving}
+                                className="inline-flex items-center justify-center gap-2 rounded-lg bg-nearby-dark px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-nearby-dark-600 disabled:opacity-60"
+                            >
+                                <Save size={15} />
+                                {saving ? "Guardando..." : "Guardar"}
+                            </button>
+                        </div>
+                    </footer>
+                </section>
             </div>
 
             {pdf ? createPortal(pdf, document.body) : null}
         </>
     );
 }
+
 
 function CommissionPDFTemplate({
     id,
