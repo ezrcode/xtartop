@@ -60,9 +60,10 @@ interface RichTextEditorProps {
     id: string;
     value: string;
     onChange: (value: string) => void;
+    disabled?: boolean;
 }
 
-function QuoteRichTextEditor({ id, value, onChange }: RichTextEditorProps) {
+function QuoteRichTextEditor({ id, value, onChange, disabled = false }: RichTextEditorProps) {
     const editorRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const savedRangeRef = useRef<Range | null>(null);
@@ -105,6 +106,7 @@ function QuoteRichTextEditor({ id, value, onChange }: RichTextEditorProps) {
     };
 
     const applyCommand = (command: string, value?: string) => {
+        if (disabled) return;
         focusEditor();
         document.execCommand(command, false, value);
         syncValue();
@@ -132,6 +134,7 @@ function QuoteRichTextEditor({ id, value, onChange }: RichTextEditorProps) {
     };
 
     const insertImage = async (file: File) => {
+        if (disabled) return;
         const formData = new FormData();
         formData.append("file", file);
         formData.append("category", "logo");
@@ -202,7 +205,7 @@ function QuoteRichTextEditor({ id, value, onChange }: RichTextEditorProps) {
                         rememberSelection();
                     }}
                     onClick={() => fileInputRef.current?.click()}
-                    disabled={uploadingImage}
+                    disabled={uploadingImage || disabled}
                 >
                     <ImagePlus size={16} />
                     {uploadingImage ? "Subiendo..." : "Imagen"}
@@ -218,7 +221,7 @@ function QuoteRichTextEditor({ id, value, onChange }: RichTextEditorProps) {
             <div
                 id={id}
                 ref={editorRef}
-                contentEditable
+                contentEditable={!disabled}
                 role="textbox"
                 aria-multiline="true"
                 aria-label="Descripción de la propuesta"
@@ -232,7 +235,7 @@ function QuoteRichTextEditor({ id, value, onChange }: RichTextEditorProps) {
                     selectedImageRef.current = target instanceof HTMLImageElement ? target : null;
                     rememberSelection();
                 }}
-                className="quote-rich-editor min-h-[180px] w-full px-3 py-3 text-base sm:text-sm leading-relaxed text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-nearby-dark/15"
+                className={`quote-rich-editor min-h-[180px] w-full px-3 py-3 text-base sm:text-sm leading-relaxed text-[var(--foreground)] ${disabled ? "bg-[var(--surface-2)]" : ""} focus:outline-none focus:ring-2 focus:ring-inset focus:ring-nearby-dark/15`}
             />
             <p className="border-t border-[var(--card-border)] px-3 py-2 text-xs text-[var(--muted-text)]">
                 Tip: selecciona una imagen y usa los botones de alineación para ubicarla en el PDF.
@@ -253,6 +256,7 @@ export function QuoteModal({
     taxes = [],
 }: QuoteModalProps) {
     const isEditMode = !!quote;
+    const isApprovedFrozen = isEditMode && quote?.status === "APROBADA";
     
     // Convert Decimal values to numbers when loading from database
     const initialItems = quote?.items
@@ -636,6 +640,12 @@ export function QuoteModal({
                             </div>
                         )}
 
+                        {isApprovedFrozen && (
+                            <div className="p-4 rounded-md bg-amber-50 text-amber-900 text-sm">
+                                Esta cotización fue aprobada y quedó congelada. Solo puedes marcarla como rechazada si el negocio se cae durante formalización.
+                            </div>
+                        )}
+
                         {/* Company & Contact (Read-only) */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
@@ -673,6 +683,7 @@ export function QuoteModal({
                                     id="quote-date"
                                     defaultValue={quote?.date ? new Date(quote.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]}
                                     required
+                                    disabled={isApprovedFrozen}
                                     className="w-full min-w-0 max-w-full appearance-none px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                                 />
                             </div>
@@ -684,6 +695,7 @@ export function QuoteModal({
                                     id="quote-validity"
                                     defaultValue={quote?.validity || "30 días"}
                                     required
+                                    disabled={isApprovedFrozen}
                                     className="w-full min-w-0 max-w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors bg-[var(--card-bg)]"
                                 >
                                     <option value="10 días">10 días</option>
@@ -700,6 +712,7 @@ export function QuoteModal({
                                     value={selectedCurrency}
                                     onChange={(e) => setSelectedCurrency(e.target.value as Currency)}
                                     required
+                                    disabled={isApprovedFrozen}
                                     className="w-full min-w-0 max-w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors bg-[var(--card-bg)]"
                                 >
                                     <option value="USD">USD</option>
@@ -717,6 +730,7 @@ export function QuoteModal({
                                 <button
                                     type="button"
                                     onClick={handleAddItem}
+                                    disabled={isApprovedFrozen}
                                     className="inline-flex items-center px-2 py-1 text-xs sm:text-sm text-[var(--foreground)] font-medium hover:bg-[var(--hover-bg)] rounded transition-colors"
                                 >
                                     <Plus size={16} className="mr-1" />
@@ -739,7 +753,7 @@ export function QuoteModal({
                                             <button
                                                 type="button"
                                                 onClick={() => handleRemoveItem(index)}
-                                                disabled={items.length === 1}
+                                                disabled={items.length === 1 || isApprovedFrozen}
                                                 className="text-error-red hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed p-1"
                                                 aria-label={`Eliminar producto ${index + 1}`}
                                             >
@@ -757,6 +771,7 @@ export function QuoteModal({
                                                 onChange={(e) => handleItemChange(index, "name", e.target.value)}
                                                 placeholder="Nombre"
                                                 required
+                                                disabled={isApprovedFrozen}
                                                 className="w-full min-w-0 max-w-full px-3 py-3 text-base border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)]"
                                             />
                                         </div>
@@ -772,6 +787,7 @@ export function QuoteModal({
                                                     value={item.price}
                                                     onChange={(e) => handleItemChange(index, "price", parseFloat(e.target.value) || 0)}
                                                     required
+                                                    disabled={isApprovedFrozen}
                                                     className="w-full min-w-0 max-w-full px-3 py-3 text-base border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)]"
                                                 />
                                             </div>
@@ -785,6 +801,7 @@ export function QuoteModal({
                                                     value={item.quantity}
                                                     onChange={(e) => handleItemChange(index, "quantity", parseFloat(e.target.value) || 1)}
                                                     required
+                                                    disabled={isApprovedFrozen}
                                                     className="w-full min-w-0 max-w-full px-3 py-3 text-base border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)]"
                                                 />
                                             </div>
@@ -798,6 +815,7 @@ export function QuoteModal({
                                                 <select
                                                     value={item.frequency}
                                                     onChange={(e) => handleItemChange(index, "frequency", e.target.value as PaymentFrequency)}
+                                                    disabled={isApprovedFrozen}
                                                     className="w-full min-w-0 max-w-full px-3 py-3 text-base border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)]"
                                                 >
                                                     <option value="PAGO_UNICO">Único</option>
@@ -840,6 +858,7 @@ export function QuoteModal({
                                                         onChange={(e) => handleItemChange(index, "name", e.target.value)}
                                                         placeholder="Nombre"
                                                         required
+                                                        disabled={isApprovedFrozen}
                                                         className="w-full min-w-[120px] px-2 py-1 border border-[var(--card-border)] rounded text-xs sm:text-sm"
                                                     />
                                                 </td>
@@ -850,6 +869,7 @@ export function QuoteModal({
                                                         value={item.price}
                                                         onChange={(e) => handleItemChange(index, "price", parseFloat(e.target.value) || 0)}
                                                         required
+                                                        disabled={isApprovedFrozen}
                                                         className="w-full min-w-[80px] px-2 py-1 border border-[var(--card-border)] rounded text-xs sm:text-sm"
                                                     />
                                                 </td>
@@ -860,6 +880,7 @@ export function QuoteModal({
                                                         value={item.quantity}
                                                         onChange={(e) => handleItemChange(index, "quantity", parseFloat(e.target.value) || 1)}
                                                         required
+                                                        disabled={isApprovedFrozen}
                                                         className="w-full min-w-[60px] px-2 py-1 border border-[var(--card-border)] rounded text-xs sm:text-sm"
                                                     />
                                                 </td>
@@ -867,6 +888,7 @@ export function QuoteModal({
                                                     <select
                                                         value={item.frequency}
                                                         onChange={(e) => handleItemChange(index, "frequency", e.target.value as PaymentFrequency)}
+                                                        disabled={isApprovedFrozen}
                                                         className="w-full min-w-[100px] px-2 py-1 border border-[var(--card-border)] rounded text-xs sm:text-sm"
                                                     >
                                                         <option value="PAGO_UNICO">Único</option>
@@ -880,7 +902,7 @@ export function QuoteModal({
                                                     <button
                                                         type="button"
                                                         onClick={() => handleRemoveItem(index)}
-                                                        disabled={items.length === 1}
+                                                        disabled={items.length === 1 || isApprovedFrozen}
                                                         className="text-error-red hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed"
                                                     >
                                                         <Trash2 size={14} className="sm:w-4 sm:h-4" />
@@ -925,6 +947,7 @@ export function QuoteModal({
                                             }
                                         }}
                                         required
+                                        disabled={isApprovedFrozen}
                                         className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors bg-[var(--card-bg)]"
                                     >
                                         <option value="INCLUIDOS">Aplicar impuesto</option>
@@ -939,7 +962,7 @@ export function QuoteModal({
                                         id="quote-taxId"
                                         value={selectedTaxId}
                                         onChange={(e) => setSelectedTaxId(e.target.value)}
-                                        disabled={!showTaxSelector}
+                                        disabled={!showTaxSelector || isApprovedFrozen}
                                         className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors bg-[var(--card-bg)] disabled:opacity-60"
                                     >
                                         <option value="">
@@ -1062,6 +1085,7 @@ export function QuoteModal({
                                 id="quote-proposalDescription"
                                 value={proposalDescription}
                                 onChange={setProposalDescription}
+                                disabled={isApprovedFrozen}
                             />
                         </div>
 
@@ -1076,6 +1100,7 @@ export function QuoteModal({
                                     rows={2}
                                     defaultValue={quote?.paymentConditions || ""}
                                     placeholder="Ej: 50% adelanto, 50% contra entrega"
+                                    disabled={isApprovedFrozen}
                                     className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                                 />
                             </div>
@@ -1088,6 +1113,7 @@ export function QuoteModal({
                                     id="quote-deliveryTime"
                                     defaultValue={quote?.deliveryTime || ""}
                                     placeholder="Ej: 15 días hábiles"
+                                    disabled={isApprovedFrozen}
                                     className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors"
                                 />
                             </div>
@@ -1105,10 +1131,19 @@ export function QuoteModal({
                                     required
                                     className="w-full px-3 py-3 sm:py-2.5 text-base sm:text-sm border border-[var(--card-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 transition-colors bg-[var(--card-bg)]"
                                 >
-                                    <option value="BORRADOR">Borrador</option>
-                                    <option value="ACTIVA">Activa</option>
-                                    <option value="RECHAZADA">Rechazada</option>
-                                    <option value="APROBADA">Aprobada</option>
+                                    {isApprovedFrozen ? (
+                                        <>
+                                            <option value="APROBADA">Aprobada</option>
+                                            <option value="RECHAZADA">Rechazada</option>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <option value="BORRADOR">Borrador</option>
+                                            <option value="ACTIVA">Activa</option>
+                                            <option value="RECHAZADA">Rechazada</option>
+                                            <option value="APROBADA">Aprobada</option>
+                                        </>
+                                    )}
                                 </select>
                             </div>
                             <div>

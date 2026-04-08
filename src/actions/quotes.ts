@@ -10,6 +10,7 @@ import { QuoteStatus, Currency, TaxType, PaymentFrequency } from "@prisma/client
 import { calculateQuoteTaxBreakdown } from "@/lib/quote-taxes";
 import { formatQuoteNumber } from "@/lib/deal-number";
 import { sanitizeQuoteRichText } from "@/lib/rich-text";
+import { rejectApprovedQuoteArtifacts, syncApprovedQuoteArtifacts } from "./deal-commissions";
 
 const UNIQUE_FINAL_STATUSES: QuoteStatus[] = ["ACTIVA", "APROBADA"];
 
@@ -212,6 +213,23 @@ export async function createQuoteAction(
         return { message: "Negocio no encontrado." };
     }
 
+    const approvedQuoteExists = await prisma.quote.findFirst({
+        where: {
+            dealId: deal.id,
+            status: QuoteStatus.APROBADA,
+        },
+        select: {
+            id: true,
+            number: true,
+        },
+    });
+
+    if (approvedQuoteExists) {
+        return {
+            message: `Este negocio ya tiene una cotización aprobada (${formatQuoteNumber(deal.number, approvedQuoteExists.number)}). Debes rechazarla si necesitas volver a cotizar.`,
+        };
+    }
+
     // Parse items from formData
     const itemsJson = formData.get("items");
     let items: any[] = [];
@@ -304,38 +322,52 @@ export async function createQuoteAction(
 
         const nextNumber = (lastQuote?.number || 0) + 1;
 
-        const quote = await prisma.quote.create({
-            data: {
-                number: nextNumber,
-                date: validatedFields.data.date,
-                validity: validatedFields.data.validity,
-                status: validatedFields.data.status,
-                proposalDescription: validatedFields.data.proposalDescription,
-                paymentConditions: validatedFields.data.paymentConditions,
-                currency: validatedFields.data.currency,
-                deliveryTime: validatedFields.data.deliveryTime,
-                taxType: validatedFields.data.taxType,
-                taxId: quoteTax.taxId,
-                taxName: quoteTax.taxName,
-                taxRate: quoteTax.taxRate,
-                taxAmountOneTime: quoteTax.taxAmountOneTime,
-                taxAmountMonthly: quoteTax.taxAmountMonthly,
-                totalOneTime,
-                totalMonthly,
-                dealId: deal.id,
-                companyId: deal.companyId,
-                contactId: deal.contactId,
-                createdById: user.id,
-                items: {
-                    create: validatedFields.data.items.map((item) => ({
-                        name: item.name,
-                        price: item.price,
-                        quantity: item.quantity,
-                        frequency: item.frequency,
-                        netPrice: item.price * item.quantity,
-                    })),
+        const quote = await prisma.$transaction(async (tx) => {
+            const createdQuote = await tx.quote.create({
+                data: {
+                    number: nextNumber,
+                    date: validatedFields.data.date,
+                    validity: validatedFields.data.validity,
+                    status: validatedFields.data.status,
+                    proposalDescription: validatedFields.data.proposalDescription,
+                    paymentConditions: validatedFields.data.paymentConditions,
+                    currency: validatedFields.data.currency,
+                    deliveryTime: validatedFields.data.deliveryTime,
+                    taxType: validatedFields.data.taxType,
+                    taxId: quoteTax.taxId,
+                    taxName: quoteTax.taxName,
+                    taxRate: quoteTax.taxRate,
+                    taxAmountOneTime: quoteTax.taxAmountOneTime,
+                    taxAmountMonthly: quoteTax.taxAmountMonthly,
+                    totalOneTime,
+                    totalMonthly,
+                    dealId: deal.id,
+                    companyId: deal.companyId,
+                    contactId: deal.contactId,
+                    createdById: user.id,
+                    items: {
+                        create: validatedFields.data.items.map((item) => ({
+                            name: item.name,
+                            price: item.price,
+                            quantity: item.quantity,
+                            frequency: item.frequency,
+                            netPrice: item.price * item.quantity,
+                        })),
+                    },
                 },
-            },
+            });
+
+            if (validatedFields.data.status === QuoteStatus.APROBADA) {
+                await syncApprovedQuoteArtifacts(tx, {
+                    dealId: deal.id,
+                    approvedQuoteId: createdQuote.id,
+                    totalBase: totalOneTime + totalMonthly,
+                    commissionableBase: totalOneTime,
+                    userId: user.id,
+                });
+            }
+
+            return createdQuote;
         });
 
         console.log('Quote created successfully:', quote.id);
@@ -358,6 +390,12 @@ export async function updateQuoteAction(
     const workspace = await getCurrentWorkspace();
     if (!workspace) redirect("/login");
 
+    const currentUser = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        select: { id: true },
+    });
+    if (!currentUser) redirect("/login");
+
     // Verify quote belongs to workspace
     const existingQuote = await prisma.quote.findFirst({
         where: {
@@ -369,6 +407,7 @@ export async function updateQuoteAction(
         select: {
             dealId: true,
             number: true,
+            status: true,
             deal: { select: { number: true } },
         },
     });
@@ -409,6 +448,54 @@ export async function updateQuoteAction(
             errors: validatedFields.error.flatten().fieldErrors,
             message: "Campos inválidos. Por favor revise el formulario.",
         };
+    }
+
+    if (existingQuote.status !== QuoteStatus.APROBADA) {
+        const approvedSibling = await prisma.quote.findFirst({
+            where: {
+                dealId: existingQuote.dealId,
+                status: QuoteStatus.APROBADA,
+                id: { not: quoteId },
+            },
+            select: {
+                number: true,
+            },
+        });
+
+        if (approvedSibling) {
+            return {
+                message: `Este negocio ya tiene una cotización aprobada (${formatQuoteNumber(existingQuote.deal.number, approvedSibling.number)}). No puedes seguir editando otras cotizaciones hasta rechazarla.`,
+            };
+        }
+    }
+
+    if (existingQuote.status === QuoteStatus.APROBADA) {
+        if (validatedFields.data.status !== QuoteStatus.RECHAZADA) {
+            return {
+                message: `La cotización ${formatQuoteNumber(existingQuote.deal.number, existingQuote.number)} está congelada por haber sido aprobada. Solo puedes cambiarla a rechazada si el negocio se cae en formalización.`,
+            };
+        }
+
+        try {
+            await prisma.$transaction(async (tx) => {
+                await tx.quote.update({
+                    where: { id: quoteId },
+                    data: { status: QuoteStatus.RECHAZADA },
+                });
+
+                await rejectApprovedQuoteArtifacts(tx, {
+                    dealId: existingQuote.dealId,
+                    approvedQuoteId: quoteId,
+                    userId: currentUser.id,
+                });
+            });
+
+            revalidatePath(`/app/deals/${existingQuote.dealId}`);
+            return { message: "La cotización fue rechazada y el negocio pasó a cierre perdido." };
+        } catch (error) {
+            console.error("Database Error:", error);
+            return { message: "Error al rechazar la cotización aprobada." };
+        }
     }
 
     if (UNIQUE_FINAL_STATUSES.includes(validatedFields.data.status)) {
@@ -454,41 +541,52 @@ export async function updateQuoteAction(
     }
 
     try {
-        await prisma.quote.update({
-            where: { id: quoteId },
-            data: {
-                date: validatedFields.data.date,
-                validity: validatedFields.data.validity,
-                status: validatedFields.data.status,
-                proposalDescription: validatedFields.data.proposalDescription,
-                paymentConditions: validatedFields.data.paymentConditions,
-                currency: validatedFields.data.currency,
-                deliveryTime: validatedFields.data.deliveryTime,
-                taxType: validatedFields.data.taxType,
-                taxId: quoteTax.taxId,
-                taxName: quoteTax.taxName,
-                taxRate: quoteTax.taxRate,
-                taxAmountOneTime: quoteTax.taxAmountOneTime,
-                taxAmountMonthly: quoteTax.taxAmountMonthly,
-                totalOneTime,
-                totalMonthly,
-            },
-        });
+        await prisma.$transaction(async (tx) => {
+            await tx.quote.update({
+                where: { id: quoteId },
+                data: {
+                    date: validatedFields.data.date,
+                    validity: validatedFields.data.validity,
+                    status: validatedFields.data.status,
+                    proposalDescription: validatedFields.data.proposalDescription,
+                    paymentConditions: validatedFields.data.paymentConditions,
+                    currency: validatedFields.data.currency,
+                    deliveryTime: validatedFields.data.deliveryTime,
+                    taxType: validatedFields.data.taxType,
+                    taxId: quoteTax.taxId,
+                    taxName: quoteTax.taxName,
+                    taxRate: quoteTax.taxRate,
+                    taxAmountOneTime: quoteTax.taxAmountOneTime,
+                    taxAmountMonthly: quoteTax.taxAmountMonthly,
+                    totalOneTime,
+                    totalMonthly,
+                },
+            });
 
-        // Delete existing items and create new ones
-        await prisma.quoteItem.deleteMany({
-            where: { quoteId },
-        });
+            await tx.quoteItem.deleteMany({
+                where: { quoteId },
+            });
 
-        await prisma.quoteItem.createMany({
-            data: validatedFields.data.items.map((item) => ({
-                quoteId,
-                name: item.name,
-                price: item.price,
-                quantity: item.quantity,
-                frequency: item.frequency,
-                netPrice: item.price * item.quantity,
-            })),
+            await tx.quoteItem.createMany({
+                data: validatedFields.data.items.map((item) => ({
+                    quoteId,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity,
+                    frequency: item.frequency,
+                    netPrice: item.price * item.quantity,
+                })),
+            });
+
+            if (validatedFields.data.status === QuoteStatus.APROBADA) {
+                await syncApprovedQuoteArtifacts(tx, {
+                    dealId: existingQuote.dealId,
+                    approvedQuoteId: quoteId,
+                    totalBase: totalOneTime + totalMonthly,
+                    commissionableBase: totalOneTime,
+                    userId: currentUser.id,
+                });
+            }
         });
 
         revalidatePath(`/app/deals/${existingQuote.dealId}`);
@@ -516,11 +614,16 @@ export async function deleteQuote(quoteId: string) {
             },
             select: {
                 dealId: true,
+                status: true,
             },
         });
 
         if (!quote) {
             return { message: "Cotización no encontrada." };
+        }
+
+        if (quote.status === QuoteStatus.APROBADA) {
+            return { message: "No puedes eliminar una cotización aprobada. Debes rechazarla para dejar trazabilidad del negocio." };
         }
 
         await prisma.quote.delete({

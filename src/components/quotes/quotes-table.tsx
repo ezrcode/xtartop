@@ -84,6 +84,8 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
         }).format(numValue || 0);
     };
 
+    const approvedQuote = quotes.find((quote) => quote.status === "APROBADA");
+
     const getFinalTotal = (quote: any, type: "oneTime" | "monthly") => {
         const base = Number(type === "oneTime" ? quote.totalOneTime : quote.totalMonthly) || 0;
         const tax = Number(type === "oneTime" ? quote.taxAmountOneTime : quote.taxAmountMonthly) || 0;
@@ -112,6 +114,7 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
                 <button
                     type="button"
                     onClick={() => setShowModal(true)}
+                    disabled={Boolean(approvedQuote)}
                     className="inline-flex items-center px-3 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-nearby-dark-600 transition-colors"
                 >
                     <Plus size={16} className="mr-1" />
@@ -119,12 +122,19 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
                 </button>
             </div>
 
+            {approvedQuote && (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                    Ya existe una cotización aprobada ({formatQuoteNumber(approvedQuote.deal?.number, approvedQuote.number)}). Mientras siga aprobada, el negocio queda congelado para nuevas cotizaciones.
+                </div>
+            )}
+
             {quotes.length === 0 ? (
                 <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
                     <p className="text-gray-500 mb-4">No hay cotizaciones creadas</p>
                     <button
                         type="button"
                         onClick={() => setShowModal(true)}
+                        disabled={Boolean(approvedQuote)}
                         className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-nearby-dark hover:bg-nearby-dark-600 transition-colors"
                     >
                         <Plus size={16} className="mr-2" />

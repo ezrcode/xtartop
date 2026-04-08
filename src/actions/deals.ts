@@ -89,6 +89,44 @@ export async function getDeal(id: string) {
             company: true,
             contact: true,
             businessLine: true,
+            quotes: {
+                include: {
+                    items: true,
+                },
+                orderBy: {
+                    number: "asc",
+                },
+            },
+            commissions: {
+                where: {
+                    status: "ACTIVE",
+                },
+                include: {
+                    approvedQuote: {
+                        include: {
+                            items: true,
+                        },
+                    },
+                    entries: {
+                        include: {
+                            user: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    email: true,
+                                    photoUrl: true,
+                                },
+                            },
+                        },
+                        orderBy: {
+                            createdAt: "asc",
+                        },
+                    },
+                },
+                orderBy: {
+                    updatedAt: "desc",
+                },
+            },
             createdBy: {
                 select: {
                     id: true,

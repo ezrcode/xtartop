@@ -8,6 +8,7 @@ import { createDealAction, updateDealAction, deleteDeal, DealState, createCompan
 import { Deal, Company, Contact, User, BusinessLine } from "@prisma/client";
 import { ActivitiesWithSuspense } from "../activities/activities-with-suspense";
 import { QuotesTable } from "../quotes/quotes-table";
+import { DealCommissionsTab } from "./deal-commissions-tab";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 import { formatDealNumber } from "@/lib/deal-number";
 
@@ -15,6 +16,29 @@ interface DealFormProps {
     deal?: (Deal & {
         description?: string | null;
         recurrence?: "ONETIME_PROJECT" | "SUSCRIPCION" | null;
+        quotes?: Array<{
+            id: string;
+            number: number;
+            status: "BORRADOR" | "ACTIVA" | "RECHAZADA" | "APROBADA";
+            currency: "USD" | "DOP";
+            totalOneTime: unknown;
+            totalMonthly: unknown;
+        }>;
+        commissions?: Array<{
+            id: string;
+            approvedQuoteId: string;
+            commissionableBase: unknown;
+            notes?: string | null;
+            entries: Array<{
+                id: string;
+                role: "MARKETING" | "COMERCIAL" | "TECNICO" | "FUNCIONAL" | "ADMINISTRATIVO";
+                type: "PERCENTAGE" | "FIXED_AMOUNT";
+                percentage?: unknown;
+                fixedAmount?: unknown;
+                calculatedAmount: unknown;
+                user: Pick<User, "id" | "name" | "email" | "photoUrl">;
+            }>;
+        }>;
     }) & {
         company?: Company | null; 
         contact?: Contact | null;
@@ -25,6 +49,8 @@ interface DealFormProps {
     contacts: Contact[];
     businessLines?: BusinessLine[];
     isEditMode?: boolean;
+    workspaceUsers?: Array<Pick<User, "id" | "name" | "email" | "photoUrl">>;
+    currentUserName?: string | null;
     workspace?: {
         legalName?: string | null;
         rnc?: string | null;
@@ -93,9 +119,9 @@ function DeleteButton() {
     );
 }
 
-export function DealForm({ deal, companies, contacts, businessLines = [], isEditMode = false, workspace }: DealFormProps) {
+export function DealForm({ deal, companies, contacts, businessLines = [], isEditMode = false, workspaceUsers = [], currentUserName, workspace }: DealFormProps) {
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState<"general" | "quotes">("general");
+    const [activeTab, setActiveTab] = useState<"general" | "quotes" | "commissions">("general");
     const [companiesState, setCompaniesState] = useState<Company[]>(companies);
     const [contactsState, setContactsState] = useState<Contact[]>(contacts);
     const [selectedCompanyId, setSelectedCompanyId] = useState<string>(deal?.companyId || "null");
@@ -115,6 +141,10 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
     const initialState: DealState = { message: "", errors: {} };
     const [state, action] = useFormState(isEditMode ? updateAction : createDealAction, initialState);
     const dealCode = isEditMode && typeof deal?.number === "number" ? formatDealNumber(deal.number) : null;
+    const approvedQuote = deal?.quotes?.find((quote) => quote.status === "APROBADA");
+    const activeCommission = approvedQuote
+        ? deal?.commissions?.find((commission) => commission.approvedQuoteId === approvedQuote.id)
+        : null;
 
     const filteredContacts = useMemo(() => {
         if (selectedCompanyId === "null") return contactsState;
@@ -255,6 +285,19 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                     >
                                         Cotizaciones
                                     </button>
+                                    {isEditMode && approvedQuote && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setActiveTab("commissions")}
+                                            className={`py-3 px-3 sm:px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap ${
+                                                activeTab === "commissions"
+                                                    ? "border-nearby-dark/50 text-[var(--foreground)] font-medium"
+                                                    : "border-transparent text-[var(--muted-text)] hover:text-[var(--foreground)] hover:border-[var(--card-border)]"
+                                            }`}
+                                        >
+                                            Comisiones
+                                        </button>
+                                    )}
                                 </nav>
                             </div>
 
@@ -523,6 +566,30 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                             Guarda el negocio primero para poder crear cotizaciones
                                         </p>
                                     </div>
+                                )}
+
+                                {activeTab === "commissions" && isEditMode && deal && approvedQuote && (
+                                    <DealCommissionsTab
+                                        dealId={deal.id}
+                                        dealNumber={deal.number}
+                                        companyName={deal.company?.name}
+                                        approvedQuote={{
+                                            id: approvedQuote.id,
+                                            number: approvedQuote.number,
+                                            currency: approvedQuote.currency,
+                                            totalOneTime: approvedQuote.totalOneTime,
+                                            totalMonthly: approvedQuote.totalMonthly,
+                                        }}
+                                        commission={activeCommission ? {
+                                            id: activeCommission.id,
+                                            commissionableBase: activeCommission.commissionableBase,
+                                            notes: activeCommission.notes,
+                                            entries: activeCommission.entries,
+                                        } : null}
+                                        users={workspaceUsers}
+                                        currentUserName={currentUserName}
+                                        workspace={workspace}
+                                    />
                                 )}
                             </div>
                         </div>

@@ -2,6 +2,7 @@ import { getDeal, getCompanies, getContacts } from "@/actions/deals";
 import { getActiveBusinessLines } from "@/actions/business-lines";
 import { DealForm } from "@/components/deals/deal-form";
 import { getWorkspaceWithMembers } from "@/actions/workspace";
+import { auth } from "@/auth";
 import { notFound } from "next/navigation";
 import { ClientOnly } from "@/components/client-only";
 
@@ -15,6 +16,7 @@ export default async function EditDealPage({
     params: Promise<{ id: string }> 
 }) {
     const { id } = await params;
+    const session = await auth();
     
     // Don't fetch activities here - let Suspense handle it
     const [deal, companies, contacts, businessLines, workspace] = await Promise.all([
@@ -29,6 +31,13 @@ export default async function EditDealPage({
         notFound();
     }
 
+    const workspaceUsers = workspace
+        ? [
+            workspace.owner,
+            ...workspace.members.map((member) => member.user),
+        ].filter((user, index, array) => user && array.findIndex((candidate) => candidate.id === user.id) === index)
+        : [];
+
     return (
         <ClientOnly>
             <DealForm 
@@ -37,6 +46,8 @@ export default async function EditDealPage({
                 contacts={contacts}
                 businessLines={businessLines}
                 isEditMode={true} 
+                workspaceUsers={workspaceUsers}
+                currentUserName={session?.user?.name || null}
                 workspace={workspace ? {
                     legalName: workspace.legalName,
                     rnc: workspace.rnc,

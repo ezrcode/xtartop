@@ -93,6 +93,24 @@ enum PaymentFrequency {
   MENSUAL
 }
 
+enum CommissionRole {
+  MARKETING
+  COMERCIAL
+  TECNICO
+  FUNCIONAL
+  ADMINISTRATIVO
+}
+
+enum CommissionValueType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
+enum DealCommissionStatus {
+  ACTIVE
+  CANCELLED
+}
+
 enum ProjectRateUnit {
   POR_HORA
   POR_PROYECTO
@@ -176,6 +194,9 @@ model User {
   deals           Deal[]
   activities      Activity[]
   quotes          Quote[]
+  createdDealCommissions DealCommission[]      @relation("DealCommissionCreatedBy")
+  updatedDealCommissions DealCommission[]      @relation("DealCommissionUpdatedBy")
+  dealCommissionEntries  DealCommissionEntry[]
   purchaseOrders  PurchaseOrder[]
 }
 
@@ -463,6 +484,7 @@ model Deal {
 
   activities Activity[]
   quotes     Quote[]
+  commissions DealCommission[]
   
   @@unique([workspaceId, number])
   @@index([businessLineId])
@@ -528,6 +550,7 @@ model Quote {
   updatedAt DateTime @updatedAt
   
   items QuoteItem[]
+  commissions DealCommission[]
   
   @@unique([dealId, number])
   @@index([taxId])
@@ -546,6 +569,54 @@ model QuoteItem {
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model DealCommission {
+  id               String               @id @default(cuid())
+  status           DealCommissionStatus @default(ACTIVE)
+  commissionableBase Decimal
+  notes            String?              @db.Text
+
+  dealId           String
+  deal             Deal                 @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  approvedQuoteId  String
+  approvedQuote    Quote                @relation(fields: [approvedQuoteId], references: [id], onDelete: Cascade)
+
+  createdById      String
+  createdBy        User                 @relation("DealCommissionCreatedBy", fields: [createdById], references: [id])
+
+  updatedById      String
+  updatedBy        User                 @relation("DealCommissionUpdatedBy", fields: [updatedById], references: [id])
+
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  entries          DealCommissionEntry[]
+
+  @@index([dealId])
+  @@unique([approvedQuoteId])
+}
+
+model DealCommissionEntry {
+  id               String              @id @default(cuid())
+  role             CommissionRole
+  type             CommissionValueType
+  percentage       Decimal?
+  fixedAmount      Decimal?
+  calculatedAmount Decimal
+
+  dealCommissionId String
+  dealCommission   DealCommission      @relation(fields: [dealCommissionId], references: [id], onDelete: Cascade)
+
+  userId           String
+  user             User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  @@index([dealCommissionId])
+  @@index([userId])
 }
 
 model Activity {
