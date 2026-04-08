@@ -229,12 +229,19 @@ export function DealCommissionsTab({
     };
 
     const generatePDF = async () => {
-        const element = document.getElementById(`deal-commission-pdf-${dealId}`);
-        if (!element) return;
-
         try {
             setPdfOpen(true);
-            await new Promise((resolve) => setTimeout(resolve, 40));
+            // Wait for React to commit the portal and the DOM to paint
+            await new Promise<void>((resolve) => {
+                requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(resolve, 100)));
+            });
+
+            const element = document.getElementById(`deal-commission-pdf-${dealId}`);
+            if (!element) {
+                setError("No se pudo preparar la plantilla del PDF.");
+                setPdfOpen(false);
+                return;
+            }
 
             const originalLeft = element.style.left;
             const originalTop = element.style.top;
@@ -380,7 +387,7 @@ export function DealCommissionsTab({
 
                     {/* Desktop table */}
                     <div className="hidden lg:block">
-                        <div className="grid grid-cols-[minmax(0,2.6fr)_minmax(0,1.3fr)_minmax(0,1.2fr)_minmax(0,1.1fr)_minmax(0,1.4fr)_36px] items-center gap-4 px-6 pb-2 text-[10.5px] font-medium uppercase tracking-[0.1em] text-[var(--muted-text)]">
+                        <div className="grid grid-cols-[minmax(0,2.4fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_minmax(0,1.5fr)_minmax(0,1.4fr)_36px] items-center gap-4 px-6 pb-2 text-[10.5px] font-medium uppercase tracking-[0.1em] text-[var(--muted-text)]">
                             <div>Persona</div>
                             <div>Rol</div>
                             <div>Tipo</div>
@@ -395,7 +402,7 @@ export function DealCommissionsTab({
                                 return (
                                     <div
                                         key={`${index}-${entry.userId}`}
-                                        className="group grid grid-cols-[minmax(0,2.6fr)_minmax(0,1.3fr)_minmax(0,1.2fr)_minmax(0,1.1fr)_minmax(0,1.4fr)_36px] items-center gap-4 border-t border-[var(--card-border)] px-6 py-3 transition-colors hover:bg-[var(--surface-2)]/30"
+                                        className="group grid grid-cols-[minmax(0,2.4fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_minmax(0,1.5fr)_minmax(0,1.4fr)_36px] items-center gap-4 border-t border-[var(--card-border)] px-6 py-3 transition-colors hover:bg-[var(--surface-2)]/30"
                                     >
                                         <div className="flex items-center gap-3 min-w-0">
                                             <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-nearby-dark/15 to-nearby-dark/5 text-xs font-semibold text-nearby-dark">
@@ -585,7 +592,7 @@ export function DealCommissionsTab({
                         <textarea
                             value={notes}
                             onChange={(event) => setNotes(event.target.value)}
-                            rows={3}
+                            rows={10}
                             placeholder="Notas internas sobre criterios de reparto, acuerdos o validaciones."
                             className="w-full resize-none border-0 bg-transparent p-0 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-text)] focus:outline-none focus:ring-0"
                         />
