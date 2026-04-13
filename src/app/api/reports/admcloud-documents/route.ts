@@ -104,6 +104,16 @@ function getNumberFromAliases(record: Record<string, unknown>, aliases: string[]
     return null;
 }
 
+function getDiscountAmount(record: Record<string, unknown>): number | null {
+    return getNumberFromAliases(record, [
+        "DiscountAmount",
+        "DiscountAmountLocalCurrency",
+        "DiscountValue",
+        "DiscAmount",
+        "DiscValue",
+    ]);
+}
+
 function getDiscountPercent(record: Record<string, unknown>, quantity: number, unitPrice: number): number {
     const percent = getNumberFromAliases(record, [
         "DiscountPercent",
@@ -119,13 +129,7 @@ function getDiscountPercent(record: Record<string, unknown>, quantity: number, u
     ]);
     if (percent !== null) return percent;
 
-    const discountAmount = getNumberFromAliases(record, [
-        "DiscountAmount",
-        "DiscountAmountLocalCurrency",
-        "DiscountValue",
-        "DiscAmount",
-        "DiscValue",
-    ]);
+    const discountAmount = getDiscountAmount(record);
 
     const gross = quantity * unitPrice;
     if (discountAmount !== null && gross > 0) {
@@ -141,6 +145,39 @@ function getDiscountPercent(record: Record<string, unknown>, quantity: number, u
     return 0;
 }
 
+function getLineNetAmount(
+    record: Record<string, unknown>,
+    quantity: number,
+    unitPrice: number,
+    discountPercent: number,
+    fallbackAmount?: number | null
+): number {
+    const gross = quantity * unitPrice;
+    const netAmount = getNumberFromAliases(record, [
+        "NetAmount",
+        "CalculatedNetAmount",
+        "LineNetAmount",
+        "AmountAfterDiscount",
+    ]);
+
+    if (netAmount !== null) return netAmount;
+
+    const discountAmount = getDiscountAmount(record);
+    if (discountAmount !== null && gross > 0) {
+        return gross - discountAmount;
+    }
+
+    if (discountPercent > 0 && gross > 0) {
+        return gross * (1 - discountPercent / 100);
+    }
+
+    return (
+        getNumberFromAliases(record, ["Extended", "Amount", "LineTotal"]) ??
+        fallbackAmount ??
+        gross
+    );
+}
+
 function normalizeInvoiceItems(invoice: AdmCloudInvoice, clientName: string, clientId: string): ReportLine[] {
     const items = invoice.Items || [];
     const docDate = extractDocDate(invoice);
@@ -152,10 +189,7 @@ function normalizeInvoiceItems(invoice: AdmCloudInvoice, clientName: string, cli
         const quantity = getNumberFromAliases(record, ["Quantity"]) ?? item.Quantity ?? 0;
         const unitPrice = getNumberFromAliases(record, ["UnitPrice", "Price", "SalesPrice"]) ?? item.UnitPrice ?? 0;
         let discountPercent = getDiscountPercent(record, quantity, unitPrice);
-        const extended =
-            getNumberFromAliases(record, ["Extended", "Amount", "LineTotal"]) ??
-            item.Amount ??
-            quantity * unitPrice * (1 - discountPercent / 100);
+        const extended = getLineNetAmount(record, quantity, unitPrice, discountPercent, item.Amount);
         if (discountPercent === 0 && quantity > 0 && unitPrice > 0 && extended < quantity * unitPrice) {
             discountPercent = ((quantity * unitPrice - extended) / (quantity * unitPrice)) * 100;
         }
@@ -190,9 +224,7 @@ function normalizeQuoteItems(quote: AdmCloudQuote, clientName: string, clientId:
         const quantity = getNumberFromAliases(record, ["Quantity"]) ?? item.Quantity ?? 0;
         const unitPrice = getNumberFromAliases(record, ["UnitPrice", "Price", "SalesPrice"]) ?? item.Price ?? 0;
         let discountPercent = getDiscountPercent(record, quantity, unitPrice);
-        const extended =
-            getNumberFromAliases(record, ["Extended", "Amount", "LineTotal"]) ??
-            quantity * unitPrice * (1 - discountPercent / 100);
+        const extended = getLineNetAmount(record, quantity, unitPrice, discountPercent);
         if (discountPercent === 0 && quantity > 0 && unitPrice > 0 && extended < quantity * unitPrice) {
             discountPercent = ((quantity * unitPrice - extended) / (quantity * unitPrice)) * 100;
         }
