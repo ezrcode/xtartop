@@ -47,7 +47,6 @@ function toExcelDate(dateStr: string): Date | string {
 export function AdmCloudLicensePurchasesReport() {
     const [dateFrom, setDateFrom] = useState("");
     const [dateTo, setDateTo] = useState("");
-    const [search, setSearch] = useState("");
     const [onlyDecimaTech, setOnlyDecimaTech] = useState(true);
     const [lines, setLines] = useState<LicensePurchaseReportLine[]>([]);
     const [loading, setLoading] = useState(false);
@@ -71,7 +70,6 @@ export function AdmCloudLicensePurchasesReport() {
             const params = new URLSearchParams();
             if (dateFrom) params.set("dateFrom", dateFrom);
             if (dateTo) params.set("dateTo", dateTo);
-            if (search.trim()) params.set("search", search.trim());
             if (onlyDecimaTech) params.set("vendorName", DEFAULT_VENDOR_NAME);
 
             const res = await fetch(`/api/reports/admcloud-license-purchases?${params.toString()}`);
@@ -90,7 +88,7 @@ export function AdmCloudLicensePurchasesReport() {
         } finally {
             setLoading(false);
         }
-    }, [dateFrom, dateTo, onlyDecimaTech, search]);
+    }, [dateFrom, dateTo, onlyDecimaTech]);
 
     const handleExport = useCallback(() => {
         if (lines.length === 0) return;
@@ -259,18 +257,22 @@ export function AdmCloudLicensePurchasesReport() {
                         </div>
                         <div className="min-w-0">
                             <label className="block text-xs font-medium text-[var(--muted-text)] uppercase tracking-wider mb-2">
-                                Buscar
+                                Suplidor
                             </label>
-                            <div className="relative">
-                                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted-text)]" />
+                            <label className="flex min-h-[42px] items-center gap-3 rounded-lg border border-[var(--card-border)] bg-[var(--surface-1)] px-3 py-2 cursor-pointer hover:border-nearby-dark/30 transition-colors">
                                 <input
-                                    type="search"
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    placeholder="Proveedor, artículo, referencia o número..."
-                                    className="w-full px-3 py-2 pl-9 text-sm rounded-lg border border-[var(--card-border)] bg-[var(--surface-0)] text-[var(--foreground)] focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 outline-none transition-colors"
+                                    type="checkbox"
+                                    checked={onlyDecimaTech}
+                                    onChange={(e) => setOnlyDecimaTech(e.target.checked)}
+                                    className="rounded border-[var(--card-border)] text-nearby-dark focus:ring-nearby-dark/30"
                                 />
-                            </div>
+                                <span>
+                                    <span className="block text-sm font-semibold text-[var(--foreground)]">{DEFAULT_VENDOR_NAME}</span>
+                                    <span className="block text-[11px] text-[var(--muted-text)]">
+                                        Desmarcar para consultar todos
+                                    </span>
+                                </span>
+                            </label>
                         </div>
                         <button
                             onClick={handleQuery}
@@ -281,20 +283,6 @@ export function AdmCloudLicensePurchasesReport() {
                             {loading ? "Consultando..." : "Consultar"}
                         </button>
                     </div>
-                    <label className="mt-4 inline-flex items-start gap-3 rounded-lg border border-[var(--card-border)] bg-[var(--surface-1)] px-3 py-2.5 cursor-pointer hover:border-nearby-dark/30 transition-colors">
-                        <input
-                            type="checkbox"
-                            checked={onlyDecimaTech}
-                            onChange={(e) => setOnlyDecimaTech(e.target.checked)}
-                            className="mt-0.5 rounded border-[var(--card-border)] text-nearby-dark focus:ring-nearby-dark/30"
-                        />
-                        <span>
-                            <span className="block text-sm font-semibold text-[var(--foreground)]">{DEFAULT_VENDOR_NAME}</span>
-                            <span className="block text-xs text-[var(--muted-text)]">
-                                Filtrar por el proveedor principal de licencias. Desmárcalo para consultar todos los suplidores.
-                            </span>
-                        </span>
-                    </label>
                 </div>
 
                 {error && (

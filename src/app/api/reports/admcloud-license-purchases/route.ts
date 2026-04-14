@@ -154,7 +154,6 @@ export async function GET(request: NextRequest) {
         const { searchParams } = request.nextUrl;
         const dateFrom = searchParams.get("dateFrom") || undefined;
         const dateTo = searchParams.get("dateTo") || undefined;
-        const search = (searchParams.get("search") || "").trim().toLowerCase();
         const vendorName = (searchParams.get("vendorName") || "").trim().toLowerCase();
 
         const client = createAdmCloudClient({
@@ -170,12 +169,10 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: result.error || "Error consultando facturas de proveedor" }, { status: 502 });
         }
 
-        const docs = vendorName
-            ? (result.data || []).filter((doc) => String(doc.RelationshipName || "").trim().toLowerCase() === vendorName)
-            : result.data || [];
+        const docs = result.data || [];
         const detailedDocs = await Promise.all(
             docs.map(async (doc) => {
-                if (doc.Items && doc.Items.length > 0) return doc;
+                if (doc.Items && doc.Items.length > 0 && (!vendorName || doc.RelationshipName)) return doc;
                 const id = doc.ID || (doc as Record<string, unknown>).id;
                 if (!id) return doc;
                 const detail = await client.getVendorBill(String(id));
@@ -183,17 +180,11 @@ export async function GET(request: NextRequest) {
             })
         );
 
-        let lines = detailedDocs.flatMap(normalizeVendorBill);
+        const filteredDocs = vendorName
+            ? detailedDocs.filter((doc) => String(doc.RelationshipName || "").trim().toLowerCase() === vendorName)
+            : detailedDocs;
 
-        if (search) {
-            lines = lines.filter((line) => [
-                line.documentNumber,
-                line.reference,
-                line.vendorName,
-                line.itemCode,
-                line.description,
-            ].some((value) => value.toLowerCase().includes(search)));
-        }
+        const lines = filteredDocs.flatMap(normalizeVendorBill);
 
         lines.sort((a, b) => {
             const dateCompare = a.documentDate.localeCompare(b.documentDate);
