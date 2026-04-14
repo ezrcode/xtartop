@@ -119,6 +119,44 @@ export interface AdmCloudInvoiceItem {
     TaxAmount?: number;
 }
 
+export interface AdmCloudVendorBillItem {
+    ID?: string;
+    ItemID?: string;
+    ItemSKU?: string;
+    ItemCode?: string;
+    Name?: string;
+    Description?: string;
+    Quantity?: number;
+    UOMName?: string | null;
+    Unit?: string | null;
+    Price?: number | string;
+    UnitPrice?: number | string;
+    DiscountPercent?: number | string;
+    DiscountAmount?: number | string;
+    Extended?: number | string;
+    NetAmount?: number | string;
+    Amount?: number | string;
+    TaxAmount?: number | string;
+    [key: string]: unknown;
+}
+
+export interface AdmCloudVendorBill {
+    ID?: string;
+    DocID?: string;
+    DocDate?: string;
+    DocDateString?: string | null;
+    Reference?: string | null;
+    RelationshipID?: string;
+    RelationshipName?: string;
+    CurrencyID?: string;
+    ExchangeRate?: number | string;
+    TotalAmount?: number | string;
+    CalculatedNetAmount?: number | string;
+    CalculatedDiscountAmount?: number | string;
+    Items?: AdmCloudVendorBillItem[];
+    [key: string]: unknown;
+}
+
 export interface AdmCloudItemPrice {
     ID?: string;
     ItemID?: string;
@@ -566,6 +604,26 @@ class AdmCloudClient {
 
     async getCreditInvoice(id: string): Promise<AdmCloudApiResponse<AdmCloudInvoice>> {
         return this.request<AdmCloudInvoice>(`/CreditInvoices/${id}`);
+    }
+
+    async getVendorBills(dateFrom?: string, dateTo?: string): Promise<AdmCloudApiResponse<AdmCloudVendorBill[]>> {
+        const response = await this.request<AdmCloudVendorBill[] | AdmCloudVendorBill>(
+            '/VendorBills',
+            {},
+            {
+                skip: "0",
+                ...(dateFrom ? { DateFrom: dateFrom } : {}),
+                ...(dateTo ? { DateTo: dateTo } : {}),
+            }
+        );
+        if (!response.success) {
+            return { success: false, error: response.error };
+        }
+        return { success: true, data: this.normalizeList(response.data) };
+    }
+
+    async getVendorBill(id: string): Promise<AdmCloudApiResponse<AdmCloudVendorBill>> {
+        return this.request<AdmCloudVendorBill>(`/VendorBills/${id}`);
     }
 
     async getCreditInvoicesByDateRange(dateFrom: string, dateTo: string): Promise<AdmCloudApiResponse<AdmCloudTransaction[]>> {

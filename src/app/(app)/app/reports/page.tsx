@@ -1,5 +1,5 @@
 import { PageHeader } from "@/components/ui/page-header";
-import { BarChart3, FileSpreadsheet, ArrowRight, LifeBuoy } from "lucide-react";
+import { BarChart3, FileSpreadsheet, ArrowRight, LifeBuoy, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { LucideIcon } from "lucide-react";
 import { getUserWorkspaceRole } from "@/actions/workspace";
@@ -23,7 +23,7 @@ type ReportGroup = {
 const reportGroups: ReportGroup[] = [
     {
         key: "sales",
-        title: "Ventas",
+        title: "Administración / Ventas",
         description: "Indicadores y análisis de facturación, cotizaciones y desempeño comercial.",
         reports: [
             {
@@ -34,6 +34,15 @@ const reportGroups: ReportGroup[] = [
                 icon: FileSpreadsheet,
                 gradient: "from-ocean-blue/20 to-ocean-blue/5",
                 iconColor: "text-ocean-blue",
+            },
+            {
+                title: "Compra de licencias",
+                description:
+                    "Consulta facturas de proveedor desde ADMCloud por rango de fechas, con tasa de cambio, monto USD/DOP y exportación ejecutiva a Excel.",
+                href: "/app/reports/admcloud-license-purchases",
+                icon: ShoppingBag,
+                gradient: "from-nearby-dark/15 to-nearby-dark/5",
+                iconColor: "text-nearby-dark",
             },
         ],
     },

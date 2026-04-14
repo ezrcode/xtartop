@@ -14,6 +14,7 @@ const routeNames: Record<string, string> = {
     "purchases": "Órdenes de Compra",
     "reports": "Reportes",
     "admcloud-documents": "Facturación con Detalle",
+    "admcloud-license-purchases": "Compra de licencias",
     "customer-success-tickets": "Tickets Cerrados (ClickUp)",
     "settings": "Configuración",
     "profile": "Mi Perfil",
