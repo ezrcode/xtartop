@@ -155,6 +155,7 @@ export async function GET(request: NextRequest) {
         const dateFrom = searchParams.get("dateFrom") || undefined;
         const dateTo = searchParams.get("dateTo") || undefined;
         const search = (searchParams.get("search") || "").trim().toLowerCase();
+        const vendorName = (searchParams.get("vendorName") || "").trim().toLowerCase();
 
         const client = createAdmCloudClient({
             appId: workspaceData.admCloudAppId,
@@ -169,7 +170,9 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: result.error || "Error consultando facturas de proveedor" }, { status: 502 });
         }
 
-        const docs = result.data || [];
+        const docs = vendorName
+            ? (result.data || []).filter((doc) => String(doc.RelationshipName || "").trim().toLowerCase() === vendorName)
+            : result.data || [];
         const detailedDocs = await Promise.all(
             docs.map(async (doc) => {
                 if (doc.Items && doc.Items.length > 0) return doc;

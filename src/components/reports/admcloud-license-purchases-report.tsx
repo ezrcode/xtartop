@@ -6,6 +6,8 @@ import Link from "next/link";
 import { AlertCircle, ArrowLeft, Download, FileSpreadsheet, Filter, Loader2, Search } from "lucide-react";
 import * as XLSX from "xlsx";
 
+const DEFAULT_VENDOR_NAME = "DECIMA TECH LLC";
+
 interface LicensePurchaseReportLine {
     documentNumber: string;
     reference: string;
@@ -46,6 +48,7 @@ export function AdmCloudLicensePurchasesReport() {
     const [dateFrom, setDateFrom] = useState("");
     const [dateTo, setDateTo] = useState("");
     const [search, setSearch] = useState("");
+    const [onlyDecimaTech, setOnlyDecimaTech] = useState(true);
     const [lines, setLines] = useState<LicensePurchaseReportLine[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -69,6 +72,7 @@ export function AdmCloudLicensePurchasesReport() {
             if (dateFrom) params.set("dateFrom", dateFrom);
             if (dateTo) params.set("dateTo", dateTo);
             if (search.trim()) params.set("search", search.trim());
+            if (onlyDecimaTech) params.set("vendorName", DEFAULT_VENDOR_NAME);
 
             const res = await fetch(`/api/reports/admcloud-license-purchases?${params.toString()}`);
             const data = await res.json();
@@ -86,7 +90,7 @@ export function AdmCloudLicensePurchasesReport() {
         } finally {
             setLoading(false);
         }
-    }, [dateFrom, dateTo, search]);
+    }, [dateFrom, dateTo, onlyDecimaTech, search]);
 
     const handleExport = useCallback(() => {
         if (lines.length === 0) return;
@@ -129,6 +133,7 @@ export function AdmCloudLicensePurchasesReport() {
         const data = [
             ["Compra de licencias"],
             [`Rango: ${dateFrom || "inicio"} - ${dateTo || "fin"}`],
+            [`Proveedor: ${onlyDecimaTech ? DEFAULT_VENDOR_NAME : "Todos"}`],
             [`Generado: ${generatedAt.toLocaleString("es-DO")}`],
             [],
             headers,
@@ -142,6 +147,7 @@ export function AdmCloudLicensePurchasesReport() {
             { s: { r: 0, c: 0 }, e: { r: 0, c: headers.length - 1 } },
             { s: { r: 1, c: 0 }, e: { r: 1, c: headers.length - 1 } },
             { s: { r: 2, c: 0 }, e: { r: 2, c: headers.length - 1 } },
+            { s: { r: 3, c: 0 }, e: { r: 3, c: headers.length - 1 } },
         ];
         ws["!cols"] = [
             { wch: 12 },
@@ -159,10 +165,10 @@ export function AdmCloudLicensePurchasesReport() {
             { wch: 16 },
             { wch: 16 },
         ];
-        ws["!autofilter"] = { ref: `A5:N${Math.max(lines.length + 5, 5)}` };
-        ws["!freeze"] = { xSplit: 0, ySplit: 5 };
+        ws["!autofilter"] = { ref: `A6:N${Math.max(lines.length + 6, 6)}` };
+        ws["!freeze"] = { xSplit: 0, ySplit: 6 };
 
-        for (let r = 6; r <= lines.length + 5; r += 1) {
+        for (let r = 7; r <= lines.length + 6; r += 1) {
             ws[`C${r}`] && (ws[`C${r}`].z = "dd mmm yyyy");
             ws[`H${r}`] && (ws[`H${r}`].z = "#,##0.00");
             ws[`J${r}`] && (ws[`J${r}`].z = "#,##0.000");
@@ -172,7 +178,7 @@ export function AdmCloudLicensePurchasesReport() {
             ws[`N${r}`] && (ws[`N${r}`].z = "#,##0.00");
         }
 
-        const totalRow = lines.length + 7;
+        const totalRow = lines.length + 8;
         ws[`L${totalRow}`] && (ws[`L${totalRow}`].z = "#,##0.00");
         ws[`N${totalRow}`] && (ws[`N${totalRow}`].z = "#,##0.00");
 
@@ -186,7 +192,7 @@ export function AdmCloudLicensePurchasesReport() {
         XLSX.utils.book_append_sheet(wb, ws, "Compra Licencias");
         const today = generatedAt.toISOString().split("T")[0];
         XLSX.writeFile(wb, `Compra_de_Licencias_${today}.xlsx`);
-    }, [dateFrom, dateTo, lines, totals]);
+    }, [dateFrom, dateTo, lines, onlyDecimaTech, totals]);
 
     return (
         <div className="min-h-screen bg-[var(--surface-0)] py-6 sm:py-8 overflow-x-hidden">
@@ -275,6 +281,20 @@ export function AdmCloudLicensePurchasesReport() {
                             {loading ? "Consultando..." : "Consultar"}
                         </button>
                     </div>
+                    <label className="mt-4 inline-flex items-start gap-3 rounded-lg border border-[var(--card-border)] bg-[var(--surface-1)] px-3 py-2.5 cursor-pointer hover:border-nearby-dark/30 transition-colors">
+                        <input
+                            type="checkbox"
+                            checked={onlyDecimaTech}
+                            onChange={(e) => setOnlyDecimaTech(e.target.checked)}
+                            className="mt-0.5 rounded border-[var(--card-border)] text-nearby-dark focus:ring-nearby-dark/30"
+                        />
+                        <span>
+                            <span className="block text-sm font-semibold text-[var(--foreground)]">{DEFAULT_VENDOR_NAME}</span>
+                            <span className="block text-xs text-[var(--muted-text)]">
+                                Filtrar por el proveedor principal de licencias. Desmárcalo para consultar todos los suplidores.
+                            </span>
+                        </span>
+                    </label>
                 </div>
 
                 {error && (
