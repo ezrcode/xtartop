@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentWorkspace } from "@/actions/workspace";
-import { createAdmCloudClient, AdmCloudInvoice, AdmCloudQuote } from "@/lib/admcloud/client";
+import { createAdmCloudClient, AdmCloudCustomerCreditNote, AdmCloudInvoice, AdmCloudQuote } from "@/lib/admcloud/client";
 
 export interface ReportLine {
     clientName: string;
@@ -17,6 +17,21 @@ export interface ReportLine {
     documentType: "proforma" | "credit_invoice";
     documentDate: string;
     extendedPrice: number;
+}
+
+interface InternalReportLine extends ReportLine {
+    sourceDocumentId?: string;
+    sourceDocumentNcf?: string;
+    itemId?: string;
+    itemSku?: string;
+}
+
+interface CreditNoteLineCredit {
+    invoiceIds: Set<string>;
+    invoiceDocNumbers: Set<string>;
+    invoiceNcfs: Set<string>;
+    itemKeys: Set<string>;
+    remainingAmount: number;
 }
 
 function parseDate(dateStr?: string): Date | null {
@@ -34,11 +49,41 @@ function extractDocNumber(doc: AdmCloudInvoice | AdmCloudQuote): string {
     return (doc.DocID || (doc as AdmCloudInvoice).TransactionNumber || doc.ID || "").toString();
 }
 
+function extractDocId(doc: AdmCloudInvoice | AdmCloudQuote | AdmCloudCustomerCreditNote): string {
+    return String(doc.ID || (doc as Record<string, unknown>).id || "");
+}
+
 function extractExchangeRate(doc: AdmCloudInvoice | AdmCloudQuote): number {
     const ref = doc.Reference;
     if (!ref) return 0;
     const num = parseFloat(String(ref));
     return isNaN(num) ? 0 : num;
+}
+
+function normalizeKey(value: unknown): string {
+    return String(value || "").trim().toLowerCase();
+}
+
+function getItemKeys(record: Record<string, unknown>): Set<string> {
+    const keys = new Set<string>();
+    const itemId = normalizeKey(record.ItemID || record.itemId || record.ItemId);
+    const itemSku = normalizeKey(record.ItemSKU || record.SKU || record.Sku || record.sku);
+    const itemCode = normalizeKey(record.ItemCode || record.Code || record.code);
+    const name = normalizeKey(record.Name || record.Description || record.ItemName);
+
+    if (itemId) keys.add(`id:${itemId}`);
+    if (itemSku) keys.add(`sku:${itemSku}`);
+    if (itemCode) keys.add(`code:${itemCode}`);
+    if (name) keys.add(`name:${name}`);
+
+    return keys;
+}
+
+function setsIntersect(a: Set<string>, b: Set<string>): boolean {
+    for (const value of a) {
+        if (b.has(value)) return true;
+    }
+    return false;
 }
 
 function parseNumericValue(value: unknown): number | null {
@@ -178,11 +223,124 @@ function getLineNetAmount(
     );
 }
 
-function normalizeInvoiceItems(invoice: AdmCloudInvoice, clientName: string, clientId: string): ReportLine[] {
+function getCreditNoteInvoiceIds(note: AdmCloudCustomerCreditNote): Set<string> {
+    return new Set(
+        [
+            note.InvoiceID,
+            note.RelatedID,
+            (note as Record<string, unknown>).invoiceId,
+            (note as Record<string, unknown>).relatedId,
+        ]
+            .map(normalizeKey)
+            .filter(Boolean)
+    );
+}
+
+function getCreditNoteInvoiceDocNumbers(note: AdmCloudCustomerCreditNote): Set<string> {
+    return new Set(
+        [
+            note.RelatedDocID,
+            (note as Record<string, unknown>).RelatedDocumentNumber,
+            (note as Record<string, unknown>).InvoiceDocID,
+        ]
+            .map(normalizeKey)
+            .filter(Boolean)
+    );
+}
+
+function getCreditNoteInvoiceNcfs(note: AdmCloudCustomerCreditNote): Set<string> {
+    return new Set(
+        [
+            note.RelatedNCF,
+            (note as Record<string, unknown>).InvoiceNCF,
+        ]
+            .map(normalizeKey)
+            .filter(Boolean)
+    );
+}
+
+function noteMatchesAnyInvoice(
+    note: AdmCloudCustomerCreditNote,
+    invoiceIds: Set<string>,
+    invoiceDocNumbers: Set<string>,
+    invoiceNcfs: Set<string>
+): boolean {
+    if (note.Void) return false;
+    return (
+        setsIntersect(getCreditNoteInvoiceIds(note), invoiceIds) ||
+        setsIntersect(getCreditNoteInvoiceDocNumbers(note), invoiceDocNumbers) ||
+        setsIntersect(getCreditNoteInvoiceNcfs(note), invoiceNcfs)
+    );
+}
+
+function createCreditNoteLineCredits(note: AdmCloudCustomerCreditNote): CreditNoteLineCredit[] {
+    if (note.Void || !note.Items?.length) return [];
+
+    const invoiceIds = getCreditNoteInvoiceIds(note);
+    const invoiceDocNumbers = getCreditNoteInvoiceDocNumbers(note);
+    const invoiceNcfs = getCreditNoteInvoiceNcfs(note);
+
+    return note.Items.map((item) => {
+        const record = item as Record<string, unknown>;
+        const quantity = getNumberFromAliases(record, ["Quantity"]) ?? item.Quantity ?? 0;
+        const unitPrice = getNumberFromAliases(record, ["UnitPrice", "Price", "SalesPrice"]) ?? item.UnitPrice ?? item.Price ?? 0;
+        const discountPercent = getDiscountPercent(record, quantity, unitPrice);
+        const amount = getLineNetAmount(record, quantity, unitPrice, discountPercent, item.Amount);
+
+        return {
+            invoiceIds,
+            invoiceDocNumbers,
+            invoiceNcfs,
+            itemKeys: getItemKeys(record),
+            remainingAmount: Math.max(0, amount),
+        };
+    }).filter((credit) => credit.remainingAmount > 0 && credit.itemKeys.size > 0);
+}
+
+function applyCreditNoteLineCredits(
+    lines: InternalReportLine[],
+    credits: CreditNoteLineCredit[]
+): InternalReportLine[] {
+    return lines.flatMap((line) => {
+        let adjustedAmount = line.extendedPrice;
+        const lineInvoiceIds = new Set([normalizeKey(line.sourceDocumentId)].filter(Boolean));
+        const lineDocNumbers = new Set([normalizeKey(line.documentNumber)].filter(Boolean));
+        const lineNcfs = new Set([normalizeKey(line.sourceDocumentNcf)].filter(Boolean));
+        const lineItemKeys = new Set(
+            [
+                line.itemId ? `id:${normalizeKey(line.itemId)}` : "",
+                line.itemSku ? `sku:${normalizeKey(line.itemSku)}` : "",
+                line.itemCode ? `code:${normalizeKey(line.itemCode)}` : "",
+                line.itemDescription ? `name:${normalizeKey(line.itemDescription)}` : "",
+            ].filter(Boolean)
+        );
+
+        for (const credit of credits) {
+            if (adjustedAmount <= 0) break;
+            if (credit.remainingAmount <= 0) continue;
+            const matchesInvoice =
+                setsIntersect(credit.invoiceIds, lineInvoiceIds) ||
+                setsIntersect(credit.invoiceDocNumbers, lineDocNumbers) ||
+                setsIntersect(credit.invoiceNcfs, lineNcfs);
+            if (!matchesInvoice || !setsIntersect(credit.itemKeys, lineItemKeys)) continue;
+
+            const amountToApply = Math.min(adjustedAmount, credit.remainingAmount);
+            adjustedAmount -= amountToApply;
+            credit.remainingAmount -= amountToApply;
+        }
+
+        if (adjustedAmount <= 0.005) return [];
+        return [{ ...line, extendedPrice: adjustedAmount }];
+    });
+}
+
+function normalizeInvoiceItems(invoice: AdmCloudInvoice, clientName: string, clientId: string): InternalReportLine[] {
     const items = invoice.Items || [];
     const docDate = extractDocDate(invoice);
     const docNumber = extractDocNumber(invoice);
     const exchangeRate = extractExchangeRate(invoice);
+    const sourceDocumentId = extractDocId(invoice);
+    const sourceDocumentNcf = (invoice.NCF || (invoice as unknown as Record<string, unknown>).ncf || "").toString();
 
     return items.map((item) => {
         const record = item as Record<string, unknown>;
@@ -195,6 +353,8 @@ function normalizeInvoiceItems(invoice: AdmCloudInvoice, clientName: string, cli
         }
         const itemCode = String(record.ItemCode || record.ItemSKU || record.Code || "");
         const itemDesc = String(record.Description || record.Name || record.ItemName || item.Description || "");
+        const itemId = String(record.ItemID || record.itemId || record.ItemId || "");
+        const itemSku = String(record.ItemSKU || record.SKU || record.Sku || record.sku || "");
 
         return {
             clientName,
@@ -209,6 +369,10 @@ function normalizeInvoiceItems(invoice: AdmCloudInvoice, clientName: string, cli
             documentType: "credit_invoice" as const,
             documentDate: docDate?.toISOString().split("T")[0] || "",
             extendedPrice: extended,
+            sourceDocumentId,
+            sourceDocumentNcf,
+            itemId,
+            itemSku,
         };
     });
 }
@@ -325,13 +489,14 @@ export async function GET(request: NextRequest) {
                 const companyLabel = useLegalName
                     ? (company.legalName?.trim() || company.name)
                     : company.name;
-                const lines: ReportLine[] = [];
+                const lines: InternalReportLine[] = [];
 
                 for (const relId of relIds) {
                     if (includeCredit) {
                         const res = await client.getCreditInvoices(relId, dateFrom || undefined, dateTo || undefined);
                         if (res.success && res.data) {
                             const INV_BATCH = 5;
+                            const fullInvoices: AdmCloudInvoice[] = [];
                             for (let q = 0; q < res.data.length; q += INV_BATCH) {
                                 const invBatch = res.data.slice(q, q + INV_BATCH);
                                 const detailResults = await Promise.all(
@@ -345,26 +510,70 @@ export async function GET(request: NextRequest) {
                                         return detail.success && detail.data ? detail.data : invoice;
                                     })
                                 );
-                                for (const fullInvoice of detailResults) {
-                                    const invoiceLines = normalizeInvoiceItems(fullInvoice, companyLabel, company.id);
-                                    if (invoiceLines.length > 0) {
-                                        lines.push(...invoiceLines);
-                                    } else {
-                                        lines.push({
-                                            clientName: companyLabel,
-                                            clientId: company.id,
-                                            itemDescription: "(Sin detalle de items)",
-                                            itemCode: "",
-                                            quantity: 1,
-                                            unitPrice: Number(fullInvoice.SubtotalAmount || fullInvoice.SubTotal || fullInvoice.Total || 0),
-                                            exchangeRate: extractExchangeRate(fullInvoice),
-                                            discountPercent: 0,
-                                            documentNumber: extractDocNumber(fullInvoice),
-                                            documentType: "credit_invoice",
-                                            documentDate: extractDocDate(fullInvoice)?.toISOString().split("T")[0] || "",
-                                            extendedPrice: Number(fullInvoice.TotalAmount || fullInvoice.Total || 0),
-                                        });
-                                    }
+                                fullInvoices.push(...detailResults);
+                            }
+
+                            const invoiceIds = new Set(fullInvoices.map(extractDocId).map(normalizeKey).filter(Boolean));
+                            const invoiceDocNumbers = new Set(fullInvoices.map(extractDocNumber).map(normalizeKey).filter(Boolean));
+                            const invoiceNcfs = new Set(
+                                fullInvoices
+                                    .map((invoice) => normalizeKey(invoice.NCF || (invoice as unknown as Record<string, unknown>).ncf))
+                                    .filter(Boolean)
+                            );
+                            const creditNoteCredits: CreditNoteLineCredit[] = [];
+
+                            if (invoiceIds.size > 0 || invoiceDocNumbers.size > 0 || invoiceNcfs.size > 0) {
+                                const creditNotesResult = await client.getCustomerCreditNotes(relId);
+                                if (creditNotesResult.success && creditNotesResult.data) {
+                                    const relevantCreditNotes = creditNotesResult.data.filter((note) =>
+                                        noteMatchesAnyInvoice(note, invoiceIds, invoiceDocNumbers, invoiceNcfs)
+                                    );
+                                    const detailedCreditNotes = await Promise.all(
+                                        relevantCreditNotes.map(async (note) => {
+                                            if (note.Items && note.Items.length > 0) return note;
+                                            const noteId = extractDocId(note);
+                                            if (!noteId) return note;
+                                            const detail = await client.getCustomerCreditNote(noteId);
+                                            return detail.success && detail.data
+                                                ? {
+                                                    ...note,
+                                                    ...detail.data,
+                                                    RelatedID: detail.data.RelatedID ?? note.RelatedID,
+                                                    RelatedDocID: detail.data.RelatedDocID ?? note.RelatedDocID,
+                                                    RelatedNCF: detail.data.RelatedNCF ?? note.RelatedNCF,
+                                                }
+                                                : note;
+                                        })
+                                    );
+
+                                    creditNoteCredits.push(...detailedCreditNotes.flatMap(createCreditNoteLineCredits));
+                                }
+                            }
+
+                            for (const fullInvoice of fullInvoices) {
+                                const invoiceLines = applyCreditNoteLineCredits(
+                                    normalizeInvoiceItems(fullInvoice, companyLabel, company.id),
+                                    creditNoteCredits
+                                );
+                                if (invoiceLines.length > 0) {
+                                    lines.push(...invoiceLines);
+                                } else if (!fullInvoice.Items?.length) {
+                                    lines.push({
+                                        clientName: companyLabel,
+                                        clientId: company.id,
+                                        itemDescription: "(Sin detalle de items)",
+                                        itemCode: "",
+                                        quantity: 1,
+                                        unitPrice: Number(fullInvoice.SubtotalAmount || fullInvoice.SubTotal || fullInvoice.Total || 0),
+                                        exchangeRate: extractExchangeRate(fullInvoice),
+                                        discountPercent: 0,
+                                        documentNumber: extractDocNumber(fullInvoice),
+                                        documentType: "credit_invoice",
+                                        documentDate: extractDocDate(fullInvoice)?.toISOString().split("T")[0] || "",
+                                        extendedPrice: Number(fullInvoice.TotalAmount || fullInvoice.Total || 0),
+                                        sourceDocumentId: extractDocId(fullInvoice),
+                                        sourceDocumentNcf: String(fullInvoice.NCF || (fullInvoice as unknown as Record<string, unknown>).ncf || ""),
+                                    });
                                 }
                             }
                         }

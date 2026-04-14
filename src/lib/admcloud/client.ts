@@ -112,11 +112,45 @@ export interface AdmCloudInvoice {
 
 export interface AdmCloudInvoiceItem {
     ID?: string;
+    ItemID?: string;
+    ItemSKU?: string;
+    ItemCode?: string;
+    Name?: string;
     Description?: string;
     Quantity?: number;
     UnitPrice?: number;
+    Price?: number;
+    DiscountPercent?: number;
+    DiscountAmount?: number;
+    Extended?: number;
+    NetAmount?: number;
     Amount?: number;
     TaxAmount?: number;
+    [key: string]: unknown;
+}
+
+export interface AdmCloudCustomerCreditNote {
+    ID?: string;
+    id?: string;
+    DocID?: string;
+    DocDate?: string;
+    DocDateString?: string;
+    Reference?: string | null;
+    RelationshipID?: string;
+    RelationshipName?: string | null;
+    CurrencyID?: string;
+    ExchangeRate?: number | string;
+    TotalAmount?: number | string;
+    AppliedPayments?: number | string;
+    UnappliedAmount?: number | string;
+    InvoiceID?: string | null;
+    RelatedID?: string | null;
+    RelatedDocID?: string | null;
+    RelatedNCF?: string | null;
+    NCF?: string | null;
+    Void?: boolean;
+    Items?: AdmCloudInvoiceItem[];
+    [key: string]: unknown;
 }
 
 export interface AdmCloudVendorBillItem {
@@ -613,6 +647,22 @@ class AdmCloudClient {
 
     async getCreditInvoice(id: string): Promise<AdmCloudApiResponse<AdmCloudInvoice>> {
         return this.request<AdmCloudInvoice>(`/CreditInvoices/${id}`);
+    }
+
+    async getCustomerCreditNotes(relationshipId: string): Promise<AdmCloudApiResponse<AdmCloudCustomerCreditNote[]>> {
+        const response = await this.request<AdmCloudCustomerCreditNote[] | AdmCloudCustomerCreditNote>(
+            '/CustomerCreditNotes',
+            {},
+            { RelationshipID: relationshipId, skip: "0" }
+        );
+        if (!response.success) {
+            return { success: false, error: response.error };
+        }
+        return { success: true, data: this.normalizeList(response.data) };
+    }
+
+    async getCustomerCreditNote(id: string): Promise<AdmCloudApiResponse<AdmCloudCustomerCreditNote>> {
+        return this.request<AdmCloudCustomerCreditNote>(`/CustomerCreditNotes/${id}`);
     }
 
     async getVendorBills(dateFrom?: string, dateTo?: string): Promise<AdmCloudApiResponse<AdmCloudVendorBill[]>> {
