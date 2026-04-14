@@ -74,18 +74,34 @@ function QuoteRichTextEditor({ id, value, onChange, disabled = false }: RichText
     const fileInputRef = useRef<HTMLInputElement>(null);
     const savedRangeRef = useRef<Range | null>(null);
     const selectedImageRef = useRef<HTMLImageElement | null>(null);
+    const lastAppliedValueRef = useRef<string>("");
+    const internalChangeRef = useRef(false);
     const [uploadingImage, setUploadingImage] = useState(false);
 
     useEffect(() => {
         const editor = editorRef.current;
         if (!editor) return;
-        if (editor.innerHTML !== value) {
-            editor.innerHTML = value || "";
+
+        const nextValue = value || "";
+
+        if (internalChangeRef.current) {
+            internalChangeRef.current = false;
+            lastAppliedValueRef.current = nextValue;
+            return;
         }
+
+        if (lastAppliedValueRef.current !== nextValue && editor.innerHTML !== nextValue) {
+            editor.innerHTML = nextValue;
+        }
+
+        lastAppliedValueRef.current = nextValue;
     }, [value]);
 
     const syncValue = () => {
-        onChange(sanitizeQuoteRichText(editorRef.current?.innerHTML || ""));
+        const nextValue = sanitizeQuoteRichText(editorRef.current?.innerHTML || "");
+        internalChangeRef.current = true;
+        lastAppliedValueRef.current = nextValue;
+        onChange(nextValue);
     };
 
     const rememberSelection = () => {
