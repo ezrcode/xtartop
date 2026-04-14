@@ -590,11 +590,20 @@ class AdmCloudClient {
     /**
      * Obtener facturas a crédito de un cliente
      */
-    async getCreditInvoices(relationshipId: string): Promise<AdmCloudApiResponse<AdmCloudInvoice[]>> {
+    async getCreditInvoices(
+        relationshipId: string,
+        dateFrom?: string,
+        dateTo?: string
+    ): Promise<AdmCloudApiResponse<AdmCloudInvoice[]>> {
         const response = await this.request<AdmCloudInvoice[] | AdmCloudInvoice>(
             '/CreditInvoices',
             {},
-            { RelationshipID: relationshipId, skip: "0" }
+            {
+                RelationshipID: relationshipId,
+                skip: "0",
+                ...(dateFrom ? { DateFrom: dateFrom } : {}),
+                ...(dateTo ? { DateTo: dateTo } : {}),
+            }
         );
         if (!response.success) {
             return { success: false, error: response.error };
@@ -777,11 +786,20 @@ class AdmCloudClient {
     /**
      * Obtener cotizaciones de un cliente
      */
-    async getQuotesByCustomer(relationshipId: string): Promise<AdmCloudApiResponse<AdmCloudQuote[]>> {
+    async getQuotesByCustomer(
+        relationshipId: string,
+        dateFrom?: string,
+        dateTo?: string
+    ): Promise<AdmCloudApiResponse<AdmCloudQuote[]>> {
         const response = await this.request<AdmCloudQuote[] | AdmCloudQuote>(
             '/Quotes',
             {},
-            { RelationshipID: relationshipId, skip: "0" }
+            {
+                RelationshipID: relationshipId,
+                skip: "0",
+                ...(dateFrom ? { DateFrom: dateFrom } : {}),
+                ...(dateTo ? { DateTo: dateTo } : {}),
+            }
         );
         if (!response.success) {
             return { success: false, error: response.error };

@@ -329,7 +329,7 @@ export async function GET(request: NextRequest) {
 
                 for (const relId of relIds) {
                     if (includeCredit) {
-                        const res = await client.getCreditInvoices(relId);
+                        const res = await client.getCreditInvoices(relId, dateFrom || undefined, dateTo || undefined);
                         if (res.success && res.data) {
                             const INV_BATCH = 5;
                             for (let q = 0; q < res.data.length; q += INV_BATCH) {
@@ -371,7 +371,7 @@ export async function GET(request: NextRequest) {
                     }
 
                     if (includeProformas) {
-                        const res = await client.getQuotesByCustomer(relId);
+                        const res = await client.getQuotesByCustomer(relId, dateFrom || undefined, dateTo || undefined);
                         if (res.success && res.data) {
                             const QUOTE_BATCH = 5;
                             for (let q = 0; q < res.data.length; q += QUOTE_BATCH) {
