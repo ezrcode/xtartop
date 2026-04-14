@@ -36,7 +36,18 @@ function formatCurrency(value: number, currency = "US$"): string {
 function formatDate(dateStr: string): string {
     if (!dateStr) return "-";
     const d = new Date(`${dateStr}T00:00:00`);
-    return d.toLocaleDateString("es-DO", { day: "2-digit", month: "short", year: "numeric" });
+    return d.toLocaleDateString("es-DO", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
+function formatDateTime(date: Date): string {
+    return date.toLocaleString("es-DO", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+    });
 }
 
 function toExcelDate(dateStr: string): Date | string {
@@ -130,9 +141,9 @@ export function AdmCloudLicensePurchasesReport() {
 
         const data = [
             ["Compra de licencias"],
-            [`Rango: ${dateFrom || "inicio"} - ${dateTo || "fin"}`],
+            [`Rango: ${dateFrom ? formatDate(dateFrom) : "inicio"} - ${dateTo ? formatDate(dateTo) : "fin"}`],
             [`Proveedor: ${onlyDecimaTech ? DEFAULT_VENDOR_NAME : "Todos"}`],
-            [`Generado: ${generatedAt.toLocaleString("es-DO")}`],
+            [`Generado: ${formatDateTime(generatedAt)}`],
             [],
             headers,
             ...rows,
@@ -167,7 +178,7 @@ export function AdmCloudLicensePurchasesReport() {
         ws["!freeze"] = { xSplit: 0, ySplit: 6 };
 
         for (let r = 7; r <= lines.length + 6; r += 1) {
-            ws[`C${r}`] && (ws[`C${r}`].z = "dd mmm yyyy");
+            ws[`C${r}`] && (ws[`C${r}`].z = "dd/mm/yyyy");
             ws[`H${r}`] && (ws[`H${r}`].z = "#,##0.00");
             ws[`J${r}`] && (ws[`J${r}`].z = "#,##0.000");
             ws[`K${r}`] && (ws[`K${r}`].z = "0.0000");
