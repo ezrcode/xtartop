@@ -23,6 +23,7 @@ interface DealFormProps {
             currency: "USD" | "DOP";
             totalOneTime: unknown;
             totalMonthly: unknown;
+            totalAnnual: unknown;
         }>;
         commissions?: Array<{
             id: string;
@@ -580,6 +581,7 @@ export function DealForm({ deal, companies, contacts, businessLines = [], isEdit
                                             currency: approvedQuote.currency,
                                             totalOneTime: approvedQuote.totalOneTime,
                                             totalMonthly: approvedQuote.totalMonthly,
+                                            totalAnnual: approvedQuote.totalAnnual,
                                         }}
                                         commission={activeCommission ? {
                                             id: activeCommission.id,

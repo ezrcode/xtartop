@@ -63,6 +63,12 @@ interface RichTextEditorProps {
     disabled?: boolean;
 }
 
+const PAYMENT_FREQUENCY_OPTIONS: Array<{ value: PaymentFrequency; label: string }> = [
+    { value: "PAGO_UNICO" as PaymentFrequency, label: "Único" },
+    { value: "MENSUAL" as PaymentFrequency, label: "Mensual" },
+    { value: "ANUAL" as PaymentFrequency, label: "Anual" },
+];
+
 function QuoteRichTextEditor({ id, value, onChange, disabled = false }: RichTextEditorProps) {
     const editorRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -358,18 +364,21 @@ export function QuoteModal({
     const calculateTotals = () => {
         let oneTime = 0;
         let monthly = 0;
+        let annual = 0;
 
         items.forEach((item) => {
             const netPriceValue = item.netPrice;
             const netPrice = typeof netPriceValue === 'number' ? netPriceValue : parseFloat(String(netPriceValue) || '0');
             if (item.frequency === "PAGO_UNICO") {
                 oneTime += netPrice;
-            } else {
+            } else if (item.frequency === "MENSUAL") {
                 monthly += netPrice;
+            } else if (item.frequency === "ANUAL") {
+                annual += netPrice;
             }
         });
 
-        return { oneTime, monthly };
+        return { oneTime, monthly, annual };
     };
 
     const formatCurrency = (value: number, currency: string) => {
@@ -596,6 +605,7 @@ export function QuoteModal({
     const taxBreakdown = calculateQuoteTaxBreakdown({
         totalOneTime: totals.oneTime,
         totalMonthly: totals.monthly,
+        totalAnnual: totals.annual,
         taxRate: selectedTaxType === "INCLUIDOS" ? Number(selectedTax?.rate || 0) : null,
     });
     const showTaxSelector = selectedTaxType === "INCLUIDOS";
@@ -818,8 +828,9 @@ export function QuoteModal({
                                                     disabled={isApprovedFrozen}
                                                     className="w-full min-w-0 max-w-full px-3 py-3 text-base border border-[var(--card-border)] rounded-lg bg-[var(--card-bg)]"
                                                 >
-                                                    <option value="PAGO_UNICO">Único</option>
-                                                    <option value="MENSUAL">Mensual</option>
+                                                    {PAYMENT_FREQUENCY_OPTIONS.map((option) => (
+                                                        <option key={option.value} value={option.value}>{option.label}</option>
+                                                    ))}
                                                 </select>
                                             </div>
                                             <div className="min-w-0">
@@ -891,8 +902,9 @@ export function QuoteModal({
                                                         disabled={isApprovedFrozen}
                                                         className="w-full min-w-[100px] px-2 py-1 border border-[var(--card-border)] rounded text-xs sm:text-sm"
                                                     >
-                                                        <option value="PAGO_UNICO">Único</option>
-                                                        <option value="MENSUAL">Mensual</option>
+                                                        {PAYMENT_FREQUENCY_OPTIONS.map((option) => (
+                                                            <option key={option.value} value={option.value}>{option.label}</option>
+                                                        ))}
                                                     </select>
                                                 </td>
                                                 <td className="px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium whitespace-nowrap">
@@ -1007,7 +1019,7 @@ export function QuoteModal({
                                 )}
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
                                     <label className="block text-xs uppercase tracking-wide text-[var(--muted-text)] mb-3">
                                         Pago único
@@ -1069,6 +1081,39 @@ export function QuoteModal({
                                             <div className="flex items-center justify-between pt-2 border-t border-[var(--card-border)]">
                                                 <span className="text-sm font-semibold text-[var(--foreground)]">Total mensual</span>
                                                 <span className="text-lg font-bold text-[var(--foreground)]">{formatCurrency(totals.monthly, selectedCurrency)}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
+                                    <label className="block text-xs uppercase tracking-wide text-[var(--muted-text)] mb-3">
+                                        Anual
+                                    </label>
+                                    {showTaxBreakdown ? (
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between text-sm">
+                                                <span className="text-[var(--muted-text)]">Base imponible</span>
+                                                <span className="font-medium text-[var(--foreground)]">{formatCurrency(taxBreakdown.baseAnnual, selectedCurrency)}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between text-sm">
+                                                <span className="text-[var(--muted-text)]">{selectedTax?.name || "Impuesto"}</span>
+                                                <span className="font-medium text-[var(--foreground)]">{formatCurrency(taxBreakdown.taxAnnual, selectedCurrency)}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between pt-2 border-t border-[var(--card-border)]">
+                                                <span className="text-sm font-semibold text-[var(--foreground)]">Total anual con impuesto</span>
+                                                <span className="text-lg font-bold text-[var(--foreground)]">{formatCurrency(taxBreakdown.totalAnnual, selectedCurrency)}</span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between text-sm">
+                                                <span className="text-[var(--muted-text)]">Base imponible</span>
+                                                <span className="font-medium text-[var(--foreground)]">{formatCurrency(totals.annual, selectedCurrency)}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between pt-2 border-t border-[var(--card-border)]">
+                                                <span className="text-sm font-semibold text-[var(--foreground)]">Total anual</span>
+                                                <span className="text-lg font-bold text-[var(--foreground)]">{formatCurrency(totals.annual, selectedCurrency)}</span>
                                             </div>
                                         </div>
                                     )}

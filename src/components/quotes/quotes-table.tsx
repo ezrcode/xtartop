@@ -86,9 +86,21 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
 
     const approvedQuote = quotes.find((quote) => quote.status === "APROBADA");
 
-    const getFinalTotal = (quote: any, type: "oneTime" | "monthly") => {
-        const base = Number(type === "oneTime" ? quote.totalOneTime : quote.totalMonthly) || 0;
-        const tax = Number(type === "oneTime" ? quote.taxAmountOneTime : quote.taxAmountMonthly) || 0;
+    const getFinalTotal = (quote: any, type: "oneTime" | "monthly" | "annual") => {
+        const base = Number(
+            type === "oneTime"
+                ? quote.totalOneTime
+                : type === "monthly"
+                    ? quote.totalMonthly
+                    : quote.totalAnnual
+        ) || 0;
+        const tax = Number(
+            type === "oneTime"
+                ? quote.taxAmountOneTime
+                : type === "monthly"
+                    ? quote.taxAmountMonthly
+                    : quote.taxAmountAnnual
+        ) || 0;
 
         if (quote.taxType === "INCLUIDOS") {
             return base + tax;
@@ -161,6 +173,9 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Total Mensual
                                 </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Total Anual
+                                </th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -190,6 +205,9 @@ export function QuotesTable({ dealId, companyName, contactName, workspace }: Quo
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         {formatCurrency(getFinalTotal(quote, "monthly"), quote.currency)}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {formatCurrency(getFinalTotal(quote, "annual"), quote.currency)}
                                     </td>
                                 </tr>
                             ))}

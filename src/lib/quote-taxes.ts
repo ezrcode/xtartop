@@ -6,6 +6,9 @@ export type QuoteTaxBreakdown = {
   baseMonthly: number;
   taxMonthly: number;
   totalMonthly: number;
+  baseAnnual: number;
+  taxAnnual: number;
+  totalAnnual: number;
   totalBase: number;
   totalTax: number;
   grandTotal: number;
@@ -30,18 +33,22 @@ function addTaxFromBase(base: number, rate: number) {
 export function calculateQuoteTaxBreakdown({
   totalOneTime,
   totalMonthly,
+  totalAnnual = 0,
   taxRate,
 }: {
   totalOneTime: number;
   totalMonthly: number;
+  totalAnnual?: number;
   taxRate?: number | null;
 }): QuoteTaxBreakdown {
   const rate = Number(taxRate || 0);
   const oneTime = Number(totalOneTime || 0);
   const monthly = Number(totalMonthly || 0);
+  const annual = Number(totalAnnual || 0);
 
   const oneTimeValues = addTaxFromBase(oneTime, rate);
   const monthlyValues = addTaxFromBase(monthly, rate);
+  const annualValues = addTaxFromBase(annual, rate);
 
   return {
     rate,
@@ -51,8 +58,11 @@ export function calculateQuoteTaxBreakdown({
     baseMonthly: monthlyValues.base,
     taxMonthly: monthlyValues.tax,
     totalMonthly: monthlyValues.total,
-    totalBase: roundMoney(oneTimeValues.base + monthlyValues.base),
-    totalTax: roundMoney(oneTimeValues.tax + monthlyValues.tax),
-    grandTotal: roundMoney(oneTimeValues.total + monthlyValues.total),
+    baseAnnual: annualValues.base,
+    taxAnnual: annualValues.tax,
+    totalAnnual: annualValues.total,
+    totalBase: roundMoney(oneTimeValues.base + monthlyValues.base + annualValues.base),
+    totalTax: roundMoney(oneTimeValues.tax + monthlyValues.tax + annualValues.tax),
+    grandTotal: roundMoney(oneTimeValues.total + monthlyValues.total + annualValues.total),
   };
 }

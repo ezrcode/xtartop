@@ -91,6 +91,7 @@ enum TaxType {
 enum PaymentFrequency {
   PAGO_UNICO
   MENSUAL
+  ANUAL
 }
 
 enum CommissionRole {
@@ -519,6 +520,7 @@ model Quote {
   // Totals
   totalOneTime       Decimal           @default(0)
   totalMonthly       Decimal           @default(0)
+  totalAnnual        Decimal           @default(0)
   
   // Additional fields
   proposalDescription String?          @db.Text
@@ -530,6 +532,7 @@ model Quote {
   taxRate             Decimal?
   taxAmountOneTime    Decimal           @default(0)
   taxAmountMonthly    Decimal           @default(0)
+  taxAmountAnnual     Decimal           @default(0)
   
   // Relations
   dealId      String

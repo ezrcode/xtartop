@@ -35,6 +35,7 @@ interface DealCommissionsTabProps {
         currency: "USD" | "DOP";
         totalOneTime: unknown;
         totalMonthly: unknown;
+        totalAnnual: unknown;
     };
     commission?: {
         id: string;
@@ -136,7 +137,7 @@ export function DealCommissionsTab({
     workspace,
     currentUserName,
 }: DealCommissionsTabProps) {
-    const totalDealBase = toNumber(approvedQuote.totalOneTime) + toNumber(approvedQuote.totalMonthly);
+    const totalDealBase = toNumber(approvedQuote.totalOneTime) + toNumber(approvedQuote.totalMonthly) + toNumber(approvedQuote.totalAnnual);
     const oneTimeBase = toNumber(approvedQuote.totalOneTime);
     const marginRate = toNumber(commission?.marginRate ?? 100);
     const commissionableBase = Number(((oneTimeBase * marginRate) / 100).toFixed(2));

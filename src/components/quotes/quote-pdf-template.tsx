@@ -20,7 +20,7 @@ interface QuotePDFTemplateProps {
     items: QuoteItem[];
     companyName: string;
     contactName: string;
-    totals: { oneTime: number; monthly: number };
+    totals: { oneTime: number; monthly: number; annual: number };
     format?: QuotePDFFormat;
     workspace?: {
         legalName?: string | null;
@@ -56,9 +56,11 @@ function createQuotePDFContext({
     const taxName = quote.taxName ? `${quote.taxName}${quote.taxRate ? ` (${Number(quote.taxRate).toLocaleString("es-DO", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}%)` : ""}` : taxLabel;
     const hasOneTime = totals.oneTime > 0;
     const hasMonthly = totals.monthly > 0;
+    const hasAnnual = totals.annual > 0;
     const breakdown = calculateQuoteTaxBreakdown({
         totalOneTime: totals.oneTime,
         totalMonthly: totals.monthly,
+        totalAnnual: totals.annual,
         taxRate: quote.taxType === "INCLUIDOS" ? Number(quote.taxRate || 0) : null,
     });
     const showTaxBreakdown = quote.taxType === "INCLUIDOS" && Number(quote.taxRate || 0) > 0;
@@ -72,12 +74,19 @@ function createQuotePDFContext({
         taxName,
         hasOneTime,
         hasMonthly,
+        hasAnnual,
         breakdown,
         showTaxBreakdown,
         grandTotal,
         quoteCode,
         proposalDescriptionHtml,
     };
+}
+
+function formatFrequencyLabel(frequency: PaymentFrequency) {
+    if (frequency === "MENSUAL") return "Mensual";
+    if (frequency === "ANUAL") return "Anual";
+    return "Pago único";
 }
 
 export function QuotePDFTemplate({
@@ -108,6 +117,7 @@ export function QuotePDFTemplate({
         taxName,
         hasOneTime,
         hasMonthly,
+        hasAnnual,
         breakdown,
         showTaxBreakdown,
         grandTotal,
@@ -263,7 +273,7 @@ export function QuotePDFTemplate({
                                 <td style={{ padding: "8px 6px", border: "1px solid #dddddd" }}>{item.name}</td>
                                 <td style={{ padding: "8px 6px", textAlign: "right", border: "1px solid #dddddd" }}>{item.quantity.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                 <td style={{ padding: "8px 6px", textAlign: "right", border: "1px solid #dddddd" }}>{formatCurrency(item.price, quote.currency)}</td>
-                                <td style={{ padding: "8px 6px", textAlign: "center", border: "1px solid #dddddd" }}>{item.frequency === "MENSUAL" ? "Mensual" : "Pago único"}</td>
+                                <td style={{ padding: "8px 6px", textAlign: "center", border: "1px solid #dddddd" }}>{formatFrequencyLabel(item.frequency)}</td>
                                 <td style={{ padding: "8px 6px", textAlign: "right", border: "1px solid #dddddd" }}>{formatCurrency(item.netPrice, quote.currency)}</td>
                             </tr>
                         ))}
@@ -288,6 +298,12 @@ export function QuotePDFTemplate({
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
                             <span>Pago mensual:</span>
                             <span style={{ textAlign: "right" }}>{formatCurrency(breakdown.baseMonthly, quote.currency)}</span>
+                        </div>
+                    )}
+                    {hasAnnual && (
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+                            <span>Pago anual:</span>
+                            <span style={{ textAlign: "right" }}>{formatCurrency(breakdown.baseAnnual, quote.currency)}</span>
                         </div>
                     )}
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px", fontWeight: 700 }}>
@@ -366,6 +382,7 @@ function AdvancedQuotePDFTemplate({
         taxName,
         hasOneTime,
         hasMonthly,
+        hasAnnual,
         breakdown,
         showTaxBreakdown,
         grandTotal,
@@ -510,7 +527,7 @@ function AdvancedQuotePDFTemplate({
                                     <td style={{ padding: "11px 12px", borderBottom: `1px solid ${line}`, color: ink, fontWeight: 750, lineHeight: "1.35" }}>{item.name}</td>
                                     <td style={{ padding: "11px 10px", textAlign: "right", borderBottom: `1px solid ${line}`, color: ink, fontWeight: 650 }}>{item.quantity.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                     <td style={{ padding: "11px 10px", textAlign: "right", borderBottom: `1px solid ${line}`, color: ink }}>{formatCurrency(item.price, quote.currency)}</td>
-                                    <td style={{ padding: "11px 10px", textAlign: "center", borderBottom: `1px solid ${line}`, color: muted }}>{item.frequency === "MENSUAL" ? "Mensual" : "Pago único"}</td>
+                                    <td style={{ padding: "11px 10px", textAlign: "center", borderBottom: `1px solid ${line}`, color: muted }}>{formatFrequencyLabel(item.frequency)}</td>
                                     <td style={{ padding: "11px 12px", textAlign: "right", borderBottom: `1px solid ${line}`, color: ink, fontWeight: 850 }}>{formatCurrency(item.netPrice, quote.currency)}</td>
                                 </tr>
                             ))}
@@ -535,6 +552,12 @@ function AdvancedQuotePDFTemplate({
                             <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", marginBottom: "6px" }}>
                                 <span style={{ color: muted }}>Pago mensual:</span>
                                 <span style={{ textAlign: "right", fontWeight: 700 }}>{formatCurrency(breakdown.baseMonthly, quote.currency)}</span>
+                            </div>
+                        )}
+                        {hasAnnual && (
+                            <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", marginBottom: "6px" }}>
+                                <span style={{ color: muted }}>Pago anual:</span>
+                                <span style={{ textAlign: "right", fontWeight: 700 }}>{formatCurrency(breakdown.baseAnnual, quote.currency)}</span>
                             </div>
                         )}
                         <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", marginBottom: "6px", fontWeight: 800 }}>

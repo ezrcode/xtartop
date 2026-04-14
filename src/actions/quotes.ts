@@ -70,12 +70,14 @@ async function resolveQuoteTax({
     taxId,
     totalOneTime,
     totalMonthly,
+    totalAnnual,
 }: {
     workspaceId: string;
     taxType: TaxType;
     taxId?: string;
     totalOneTime: number;
     totalMonthly: number;
+    totalAnnual: number;
 }) {
     if (taxType !== "INCLUIDOS" || !taxId) {
         return {
@@ -84,6 +86,7 @@ async function resolveQuoteTax({
             taxRate: null,
             taxAmountOneTime: 0,
             taxAmountMonthly: 0,
+            taxAmountAnnual: 0,
         };
     }
 
@@ -113,6 +116,7 @@ async function resolveQuoteTax({
     const breakdown = calculateQuoteTaxBreakdown({
         totalOneTime,
         totalMonthly,
+        totalAnnual,
         taxRate: Number(tax.rate),
     });
 
@@ -122,6 +126,7 @@ async function resolveQuoteTax({
         taxRate: Number(tax.rate),
         taxAmountOneTime: breakdown.taxOneTime,
         taxAmountMonthly: breakdown.taxMonthly,
+        taxAmountAnnual: breakdown.taxAnnual,
     };
 }
 
@@ -295,13 +300,16 @@ export async function createQuoteAction(
     // Calculate totals
     let totalOneTime = 0;
     let totalMonthly = 0;
+    let totalAnnual = 0;
 
     validatedFields.data.items.forEach((item) => {
         const netPrice = item.price * item.quantity;
         if (item.frequency === "PAGO_UNICO") {
             totalOneTime += netPrice;
-        } else {
+        } else if (item.frequency === "MENSUAL") {
             totalMonthly += netPrice;
+        } else if (item.frequency === "ANUAL") {
+            totalAnnual += netPrice;
         }
     });
 
@@ -311,6 +319,7 @@ export async function createQuoteAction(
         taxId: validatedFields.data.taxId,
         totalOneTime,
         totalMonthly,
+        totalAnnual,
     });
 
     if ("error" in quoteTax) {
@@ -344,8 +353,10 @@ export async function createQuoteAction(
                     taxRate: quoteTax.taxRate,
                     taxAmountOneTime: quoteTax.taxAmountOneTime,
                     taxAmountMonthly: quoteTax.taxAmountMonthly,
+                    taxAmountAnnual: quoteTax.taxAmountAnnual,
                     totalOneTime,
                     totalMonthly,
+                    totalAnnual,
                     dealId: deal.id,
                     companyId: deal.companyId,
                     contactId: deal.contactId,
@@ -366,7 +377,7 @@ export async function createQuoteAction(
                 await syncApprovedQuoteArtifacts(tx, {
                     dealId: deal.id,
                     approvedQuoteId: createdQuote.id,
-                    totalBase: totalOneTime + totalMonthly,
+                    totalBase: totalOneTime + totalMonthly + totalAnnual,
                     commissionableBase: calculateCommissionableBase(totalOneTime, workspace.commissionMarginRate),
                     marginRate: Number(workspace.commissionMarginRate || 0),
                     userId: user.id,
@@ -524,13 +535,16 @@ export async function updateQuoteAction(
     // Calculate totals
     let totalOneTime = 0;
     let totalMonthly = 0;
+    let totalAnnual = 0;
 
     validatedFields.data.items.forEach((item) => {
         const netPrice = item.price * item.quantity;
         if (item.frequency === "PAGO_UNICO") {
             totalOneTime += netPrice;
-        } else {
+        } else if (item.frequency === "MENSUAL") {
             totalMonthly += netPrice;
+        } else if (item.frequency === "ANUAL") {
+            totalAnnual += netPrice;
         }
     });
 
@@ -540,6 +554,7 @@ export async function updateQuoteAction(
         taxId: validatedFields.data.taxId,
         totalOneTime,
         totalMonthly,
+        totalAnnual,
     });
 
     if ("error" in quoteTax) {
@@ -564,8 +579,10 @@ export async function updateQuoteAction(
                     taxRate: quoteTax.taxRate,
                     taxAmountOneTime: quoteTax.taxAmountOneTime,
                     taxAmountMonthly: quoteTax.taxAmountMonthly,
+                    taxAmountAnnual: quoteTax.taxAmountAnnual,
                     totalOneTime,
                     totalMonthly,
+                    totalAnnual,
                 },
             });
 
@@ -588,7 +605,7 @@ export async function updateQuoteAction(
                 await syncApprovedQuoteArtifacts(tx, {
                     dealId: existingQuote.dealId,
                     approvedQuoteId: quoteId,
-                    totalBase: totalOneTime + totalMonthly,
+                    totalBase: totalOneTime + totalMonthly + totalAnnual,
                     commissionableBase: calculateCommissionableBase(totalOneTime, workspace.commissionMarginRate),
                     marginRate: Number(workspace.commissionMarginRate || 0),
                     userId: currentUser.id,
