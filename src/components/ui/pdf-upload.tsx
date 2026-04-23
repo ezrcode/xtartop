@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { upload } from "@vercel/blob/client";
 import { Upload, X, Loader2, FileText, ExternalLink } from "lucide-react";
 
 interface PdfUploadProps {
@@ -12,6 +13,27 @@ interface PdfUploadProps {
     label?: string;
     disabled?: boolean;
 }
+
+const MAX_PDF_SIZE = 50 * 1024 * 1024;
+const DIRECT_UPLOAD_THRESHOLD = 4 * 1024 * 1024;
+
+const sanitizePathSegment = (value: string, fallback: string) => {
+    const sanitized = value.replace(/[^a-zA-Z0-9_-]/g, "_").substring(0, 60);
+    return sanitized || fallback;
+};
+
+const getUploadPathname = (file: File, category: string, folder: string) => {
+    const timestamp = Date.now();
+    const safeCategory = sanitizePathSegment(category, "attachment");
+    const safeFolder = sanitizePathSegment(folder, "uploads");
+    const extension = file.name.split(".").pop()?.toLowerCase() || "pdf";
+    const baseName = file.name
+        .replace(/\.[^/.]+$/, "")
+        .replace(/[^a-zA-Z0-9.-]/g, "_")
+        .substring(0, 50) || "archivo";
+
+    return `${safeFolder}/${safeCategory}-${timestamp}-${baseName}.${extension}`;
+};
 
 export function PdfUpload({
     currentFile,
@@ -39,24 +61,24 @@ export function PdfUpload({
         setFileName(file.name);
 
         try {
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("category", category);
-            formData.append("folder", folder);
-
-            const response = await fetch("/api/upload", {
-                method: "POST",
-                body: formData,
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || "Error al subir archivo");
+            if (file.type !== "application/pdf") {
+                throw new Error("Solo se permiten archivos PDF");
             }
 
-            setFileUrl(data.url);
-            onFileChange(data.url);
+            if (file.size > MAX_PDF_SIZE) {
+                throw new Error("El archivo es muy grande. Máximo: 50MB");
+            }
+
+            const blob = await upload(getUploadPathname(file, category, folder), file, {
+                access: "public",
+                handleUploadUrl: "/api/upload",
+                clientPayload: JSON.stringify({ category, folder }),
+                contentType: file.type,
+                multipart: file.size > DIRECT_UPLOAD_THRESHOLD,
+            });
+
+            setFileUrl(blob.url);
+            onFileChange(blob.url);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Error al subir archivo");
             setFileUrl(currentFile || null);
