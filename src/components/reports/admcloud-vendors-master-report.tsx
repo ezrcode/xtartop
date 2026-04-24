@@ -62,8 +62,8 @@ export function AdmCloudVendorsMasterReport() {
         if (lines.length === 0) return;
 
         const generatedAt = new Date();
-        const headers = ["Nombre", "ID fiscal"];
-        const rows = lines.map((line) => [line.name, line.fiscalId]);
+        const headers = ["ID fiscal", "Nombre"];
+        const rows = lines.map((line) => [line.fiscalId, line.name]);
         const data = [
             ["Maestro de proveedores"],
             [`Generado: ${formatDateTime(generatedAt)}`],
@@ -168,17 +168,17 @@ export function AdmCloudVendorsMasterReport() {
                             <table className="w-full min-w-[640px] text-left">
                                 <thead>
                                     <tr className="border-b border-[var(--card-border)] bg-[var(--surface-1)]">
-                                        <TableHead>Nombre</TableHead>
                                         <TableHead>ID fiscal</TableHead>
+                                        <TableHead>Nombre</TableHead>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {lines.map((line, index) => (
                                         <tr key={`${line.id}-${index}`} className="border-b border-[var(--card-border)] last:border-b-0">
+                                            <TableCell>{line.fiscalId || "-"}</TableCell>
                                             <TableCell className="font-medium text-[var(--foreground)]">
                                                 {line.name || "-"}
                                             </TableCell>
-                                            <TableCell>{line.fiscalId || "-"}</TableCell>
                                         </tr>
                                     ))}
                                 </tbody>
