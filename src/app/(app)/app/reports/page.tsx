@@ -1,5 +1,5 @@
 import { PageHeader } from "@/components/ui/page-header";
-import { BarChart3, FileSpreadsheet, ArrowRight, LifeBuoy, ShoppingBag } from "lucide-react";
+import { BarChart3, FileSpreadsheet, ArrowRight, LifeBuoy, ShoppingBag, Truck } from "lucide-react";
 import Link from "next/link";
 import { LucideIcon } from "lucide-react";
 import { getUserWorkspaceRole } from "@/actions/workspace";
@@ -43,6 +43,15 @@ const reportGroups: ReportGroup[] = [
                 icon: ShoppingBag,
                 gradient: "from-nearby-dark/15 to-nearby-dark/5",
                 iconColor: "text-nearby-dark",
+            },
+            {
+                title: "Maestro de proveedores",
+                description:
+                    "Lista el nombre y el ID fiscal de todos los proveedores existentes en ADMCloud, con exportación directa a Excel.",
+                href: "/app/reports/admcloud-vendors-master",
+                icon: Truck,
+                gradient: "from-success-green/20 to-success-green/5",
+                iconColor: "text-success-green",
             },
         ],
     },

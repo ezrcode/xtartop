@@ -77,6 +77,16 @@ export interface AdmCloudCustomer {
     Contacts?: AdmCloudContact[];
 }
 
+export interface AdmCloudVendor {
+    ID?: string;
+    Name?: string;
+    FiscalID?: string;
+    IsVendor?: boolean;
+    Inactive?: boolean;
+    ComercialName?: string;
+    [key: string]: unknown;
+}
+
 export interface AdmCloudInvoice {
     ID: string;
     TransactionNumber?: string;
@@ -674,6 +684,18 @@ class AdmCloudClient {
                 ...(dateFrom ? { DateFrom: dateFrom } : {}),
                 ...(dateTo ? { DateTo: dateTo } : {}),
             }
+        );
+        if (!response.success) {
+            return { success: false, error: response.error };
+        }
+        return { success: true, data: this.normalizeList(response.data) };
+    }
+
+    async getVendors(): Promise<AdmCloudApiResponse<AdmCloudVendor[]>> {
+        const response = await this.request<AdmCloudVendor[] | AdmCloudVendor>(
+            '/Vendors',
+            {},
+            { skip: "0" }
         );
         if (!response.success) {
             return { success: false, error: response.error };
