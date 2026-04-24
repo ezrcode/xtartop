@@ -540,6 +540,60 @@ class AdmCloudClient {
         return [data];
     }
 
+    private getRecordKey(record: unknown, fallbackIndex: number): string {
+        if (record && typeof record === "object") {
+            const value = record as Record<string, unknown>;
+            const key = value.ID || value.Id || value.id;
+            if (key) return String(key);
+        }
+
+        return `row-${fallbackIndex}-${JSON.stringify(record).slice(0, 120)}`;
+    }
+
+    private async getPagedCollection<T>(
+        endpoint: string,
+        filters: Record<string, string> = {}
+    ): Promise<AdmCloudApiResponse<T[]>> {
+        const allRecords: T[] = [];
+        const seenRecordKeys = new Set<string>();
+        const seenPageSignatures = new Set<string>();
+        let skip = Number(filters.skip || "0");
+        const maxPages = 100;
+
+        for (let page = 0; page < maxPages; page += 1) {
+            const response = await this.request<T[] | T>(
+                endpoint,
+                {},
+                { ...filters, skip: String(skip) }
+            );
+
+            if (!response.success) {
+                return { success: false, error: response.error };
+            }
+
+            const records = this.normalizeList(response.data);
+            if (records.length === 0) break;
+
+            const pageSignature = records
+                .map((record, index) => this.getRecordKey(record, index))
+                .join("|");
+
+            if (seenPageSignatures.has(pageSignature)) break;
+            seenPageSignatures.add(pageSignature);
+
+            for (const record of records) {
+                const recordKey = this.getRecordKey(record, allRecords.length);
+                if (seenRecordKeys.has(recordKey)) continue;
+                seenRecordKeys.add(recordKey);
+                allRecords.push(record);
+            }
+
+            skip += records.length;
+        }
+
+        return { success: true, data: allRecords };
+    }
+
     private async getTransactionCollection(
         endpoint: string,
         filters: Record<string, string> = {}
@@ -692,15 +746,7 @@ class AdmCloudClient {
     }
 
     async getVendors(): Promise<AdmCloudApiResponse<AdmCloudVendor[]>> {
-        const response = await this.request<AdmCloudVendor[] | AdmCloudVendor>(
-            '/Vendors',
-            {},
-            { skip: "0" }
-        );
-        if (!response.success) {
-            return { success: false, error: response.error };
-        }
-        return { success: true, data: this.normalizeList(response.data) };
+        return this.getPagedCollection<AdmCloudVendor>('/Vendors');
     }
 
     async getVendorBill(id: string): Promise<AdmCloudApiResponse<AdmCloudVendorBill>> {
