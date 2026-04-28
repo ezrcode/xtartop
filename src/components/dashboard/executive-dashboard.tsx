@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { CeoDashboardPdfExport } from "@/components/dashboard/ceo-dashboard-pdf-export";
 import {
     ArrowUpRight,
     BriefcaseBusiness,
@@ -201,7 +202,12 @@ export function ExecutiveDashboard({ firstName, stats, pipeline, selector }: Exe
     return (
         <div className="min-h-screen bg-[var(--surface-0)] py-4 md:py-8">
             <div className="mx-auto max-w-7xl space-y-5 px-4 sm:px-6 lg:px-8 md:space-y-6">
-                {selector}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    {selector ? <div>{selector}</div> : <div />}
+                    <CeoDashboardPdfExport targetId="ceo-dashboard-export-root" />
+                </div>
+
+                <div id="ceo-dashboard-export-root" className="space-y-5 md:space-y-6">
                 <section className="relative overflow-hidden rounded-[var(--radius-lg)] border border-[#1a2430] bg-[#0b1420] text-white shadow-[0_35px_100px_rgba(15,23,42,0.28)]">
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(252,90,52,0.24),transparent_32%),radial-gradient(circle_at_84%_18%,rgba(59,130,246,0.24),transparent_28%),radial-gradient(circle_at_78%_82%,rgba(20,184,166,0.22),transparent_26%),linear-gradient(180deg,rgba(11,20,32,0.98),rgba(8,13,22,0.98))]" />
                     <div className="absolute left-1/2 top-[12%] h-64 w-64 -translate-x-1/2 rounded-full border border-white/6 bg-white/5 blur-3xl" />
@@ -691,6 +697,7 @@ export function ExecutiveDashboard({ firstName, stats, pipeline, selector }: Exe
                         </div>
                     </div>
                 </section>
+                </div>
             </div>
         </div>
     );
