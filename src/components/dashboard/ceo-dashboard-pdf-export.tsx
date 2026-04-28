@@ -69,6 +69,57 @@ function sanitizeUnsupportedColors(sourceRoot: HTMLElement, clonedRoot: HTMLElem
     }
 }
 
+function prepareCloneForHtml2Canvas(clonedDocument: Document, clonedRoot: HTMLElement) {
+    const safeStyle = clonedDocument.createElement("style");
+    safeStyle.textContent = `
+        .ceo-dashboard-pdf-safe,
+        .ceo-dashboard-pdf-safe * {
+            background-image: none !important;
+            box-shadow: none !important;
+            caret-color: #1f2937 !important;
+            text-shadow: none !important;
+        }
+
+        .ceo-dashboard-pdf-safe *::before,
+        .ceo-dashboard-pdf-safe *::after {
+            background-image: none !important;
+            box-shadow: none !important;
+            color: inherit !important;
+        }
+    `;
+    clonedDocument.head.appendChild(safeStyle);
+    clonedRoot.classList.add("ceo-dashboard-pdf-safe");
+
+    const allElements = [clonedRoot, ...Array.from(clonedRoot.querySelectorAll<HTMLElement>("*"))];
+    const firstSection = clonedRoot.querySelector("section");
+
+    clonedRoot.style.backgroundColor = "#f7f8fb";
+    clonedRoot.style.color = "#1f2937";
+
+    for (const element of allElements) {
+        const isHeroElement = Boolean(firstSection && (element === firstSection || firstSection.contains(element)));
+        const textColor = isHeroElement ? "#ffffff" : "#1f2937";
+        const borderColor = isHeroElement ? "rgba(255,255,255,0.18)" : "#d8dee9";
+
+        element.style.backgroundImage = "none";
+        element.style.boxShadow = "none";
+        element.style.textShadow = "none";
+        element.style.color = textColor;
+        element.style.borderColor = borderColor;
+        element.style.outlineColor = borderColor;
+        element.style.fill = "currentColor";
+        element.style.stroke = "currentColor";
+
+        if (element === clonedRoot) {
+            element.style.backgroundColor = "#f7f8fb";
+        } else if (element === firstSection) {
+            element.style.backgroundColor = "#0b1420";
+        } else {
+            element.style.backgroundColor = "transparent";
+        }
+    }
+}
+
 export function CeoDashboardPdfExport({ targetId }: CeoDashboardPdfExportProps) {
     const [exporting, setExporting] = useState(false);
 
@@ -85,8 +136,10 @@ export function CeoDashboardPdfExport({ targetId }: CeoDashboardPdfExportProps) 
                 useCORS: true,
                 windowWidth: target.scrollWidth,
                 windowHeight: target.scrollHeight,
-                onclone: (_, clonedElement) => {
-                    sanitizeUnsupportedColors(target, clonedElement as HTMLElement);
+                onclone: (clonedDocument, clonedElement) => {
+                    const clonedRoot = clonedElement as HTMLElement;
+                    prepareCloneForHtml2Canvas(clonedDocument, clonedRoot);
+                    sanitizeUnsupportedColors(target, clonedRoot);
                 },
             });
 
