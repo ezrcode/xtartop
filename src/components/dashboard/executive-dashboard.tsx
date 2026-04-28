@@ -204,7 +204,7 @@ export function ExecutiveDashboard({ firstName, stats, pipeline, selector }: Exe
             <div className="mx-auto max-w-7xl space-y-5 px-4 sm:px-6 lg:px-8 md:space-y-6">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     {selector ? <div>{selector}</div> : <div />}
-                    <CeoDashboardPdfExport targetId="ceo-dashboard-export-root" />
+                    <CeoDashboardPdfExport firstName={firstName} stats={stats} pipeline={pipeline} />
                 </div>
 
                 <div id="ceo-dashboard-export-root" className="space-y-5 md:space-y-6">
