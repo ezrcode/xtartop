@@ -19,6 +19,56 @@ function addPageNumbers(pdf: jsPDF) {
     }
 }
 
+const UNSUPPORTED_COLOR_FUNCTIONS = ["oklab(", "oklch(", "lab(", "lch(", "color-mix("];
+const COLOR_PROPERTIES = [
+    "background",
+    "backgroundColor",
+    "borderColor",
+    "borderTopColor",
+    "borderRightColor",
+    "borderBottomColor",
+    "borderLeftColor",
+    "boxShadow",
+    "caretColor",
+    "color",
+    "columnRuleColor",
+    "fill",
+    "outlineColor",
+    "stroke",
+] as const;
+
+function hasUnsupportedColor(value: string) {
+    const normalized = value.toLowerCase();
+    return UNSUPPORTED_COLOR_FUNCTIONS.some((colorFunction) => normalized.includes(colorFunction));
+}
+
+function sanitizeUnsupportedColors(sourceRoot: HTMLElement, clonedRoot: HTMLElement) {
+    const sourceElements = [sourceRoot, ...Array.from(sourceRoot.querySelectorAll<HTMLElement>("*"))];
+    const clonedElements = [clonedRoot, ...Array.from(clonedRoot.querySelectorAll<HTMLElement>("*"))];
+
+    for (let index = 0; index < clonedElements.length; index += 1) {
+        const sourceElement = sourceElements[index];
+        const clonedElement = clonedElements[index];
+        if (!sourceElement || !clonedElement) continue;
+
+        const sourceStyles = window.getComputedStyle(sourceElement);
+
+        for (const property of COLOR_PROPERTIES) {
+            const value = sourceStyles[property];
+            if (!value || !hasUnsupportedColor(value)) continue;
+
+            if (property === "boxShadow") {
+                clonedElement.style.boxShadow = "none";
+                continue;
+            }
+
+            clonedElement.style[property] = property === "background"
+                ? sourceStyles.backgroundColor || "transparent"
+                : sourceStyles[property] || "transparent";
+        }
+    }
+}
+
 export function CeoDashboardPdfExport({ targetId }: CeoDashboardPdfExportProps) {
     const [exporting, setExporting] = useState(false);
 
@@ -35,6 +85,9 @@ export function CeoDashboardPdfExport({ targetId }: CeoDashboardPdfExportProps) 
                 useCORS: true,
                 windowWidth: target.scrollWidth,
                 windowHeight: target.scrollHeight,
+                onclone: (_, clonedElement) => {
+                    sanitizeUnsupportedColors(target, clonedElement as HTMLElement);
+                },
             });
 
             const imageData = canvas.toDataURL("image/png");
