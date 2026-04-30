@@ -65,6 +65,8 @@ export default async function SubscriptionsPage() {
     if (!workspace) redirect("/login");
 
     const subscriptions = await getSubscriptions(workspace.id);
+    const totalUsers = subscriptions.reduce((sum, subscription) => sum + subscription.users, 0);
+    const totalProjects = subscriptions.reduce((sum, subscription) => sum + subscription.projects, 0);
 
     return (
         <div className="min-h-screen bg-[var(--surface-0)] py-6 sm:py-8">
@@ -72,6 +74,7 @@ export default async function SubscriptionsPage() {
                 <PageHeader
                     title="Suscripciones"
                     count={subscriptions.length}
+                    meta={`Total usuarios: ${totalUsers} | Total proyectos: ${totalProjects}`}
                     description="Gestión de cobros, proformas y facturas de clientes"
                     icon={CreditCard}
                 />

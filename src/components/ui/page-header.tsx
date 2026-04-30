@@ -4,13 +4,14 @@ import { cn } from "@/lib/utils";
 interface PageHeaderProps {
     title: string;
     count?: number;
+    meta?: React.ReactNode;
     description?: string;
     icon?: LucideIcon;
     actions?: React.ReactNode;
     className?: string;
 }
 
-export function PageHeader({ title, count, description, icon: Icon, actions, className }: PageHeaderProps) {
+export function PageHeader({ title, count, meta, description, icon: Icon, actions, className }: PageHeaderProps) {
     return (
         <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6", className)}>
             <div className="flex items-center gap-3">
@@ -25,6 +26,11 @@ export function PageHeader({ title, count, description, icon: Icon, actions, cla
                         {count !== undefined && (
                             <span className="text-sm font-medium text-[var(--muted-text)] bg-[var(--hover-bg)] px-2 py-0.5 rounded-md">
                                 {count}
+                            </span>
+                        )}
+                        {meta && (
+                            <span className="text-sm font-medium text-[var(--muted-text)]">
+                                {meta}
                             </span>
                         )}
                     </h1>
