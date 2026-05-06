@@ -158,8 +158,8 @@ export function QuotePDFTemplate({
                     navy: "#b07de2",
                     line: "#d8d9f0",
                     pageBg: "#f7f6fb",
-                    heroGradient: "linear-gradient(135deg, #b07de2 0%, #7d79c8 42%, #128f92 100%)",
-                    heroGlow: "rgba(255, 255, 255, 0.20)",
+                    heroGradient: "linear-gradient(135deg, #2fb9aa 0%, #3AC7B5 56%, #269f96 100%)",
+                    heroGlow: "rgba(255, 255, 255, 0.18)",
                     sectionStripe: "linear-gradient(90deg, #10a0a2, #b07de2)",
                     rowAlt: "#faf8fd",
                 }}
