@@ -555,8 +555,9 @@ export function QuoteModal({
             }
 
             // Capture the element as canvas
+            const renderScale = pdfFormat === "basic" ? 2.2 : 2;
             const canvas = await html2canvas(element, {
-                scale: 3,
+                scale: renderScale,
                 useCORS: true,
                 logging: false,
                 backgroundColor: '#ffffff',
@@ -573,11 +574,12 @@ export function QuoteModal({
             element.style.top = originalTop;
 
             // Convert canvas to PDF
-            const imgData = canvas.toDataURL('image/png');
+            const imgData = canvas.toDataURL('image/jpeg', 0.86);
             const pdf = new jsPDF({
                 orientation: 'portrait',
                 unit: 'mm',
-                format: 'a4'
+                format: 'a4',
+                compress: true,
             });
 
             const imgWidth = 210; // A4 width in mm
@@ -587,13 +589,13 @@ export function QuoteModal({
             let heightLeft = imgHeight;
             let position = 0;
 
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
             heightLeft -= pageHeight;
 
             while (heightLeft > 0) {
                 position = heightLeft - imgHeight;
                 pdf.addPage();
-                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
                 heightLeft -= pageHeight;
             }
             
@@ -1276,6 +1278,7 @@ export function QuoteModal({
                                             >
                                                 <option value="basic">Básico</option>
                                                 <option value="advanced">Avanzado</option>
+                                                <option value="lobii">Lobii</option>
                                             </select>
                                             <button
                                                 type="button"

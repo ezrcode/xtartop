@@ -5,7 +5,7 @@ import { calculateQuoteTaxBreakdown } from "@/lib/quote-taxes";
 import { formatQuoteNumber } from "@/lib/deal-number";
 import { normalizeQuoteRichText } from "@/lib/rich-text";
 
-export type QuotePDFFormat = "basic" | "advanced";
+export type QuotePDFFormat = "basic" | "advanced" | "lobii";
 
 interface QuoteItem {
     name: string;
@@ -29,6 +29,21 @@ interface QuotePDFTemplateProps {
         phone?: string | null;
         logoUrl?: string | null;
     };
+}
+
+interface PremiumQuoteTheme {
+    logoUrl?: string | null;
+    fallbackName: string;
+    muted: string;
+    ink: string;
+    accent: string;
+    navy: string;
+    line: string;
+    pageBg: string;
+    heroGradient: string;
+    heroGlow: string;
+    sectionStripe: string;
+    rowAlt: string;
 }
 
 function createQuotePDFContext({
@@ -100,13 +115,54 @@ export function QuotePDFTemplate({
 }: QuotePDFTemplateProps) {
     if (format === "advanced") {
         return (
-            <AdvancedQuotePDFTemplate
+            <PremiumQuotePDFTemplate
                 quote={quote}
                 items={items}
                 companyName={companyName}
                 contactName={contactName}
                 totals={totals}
                 workspace={workspace}
+                theme={{
+                    logoUrl: workspace?.logoUrl,
+                    fallbackName: workspace?.legalName || "NEARBY CRM",
+                    muted: "#667085",
+                    ink: "#17212f",
+                    accent: "#ff5b35",
+                    navy: "#101928",
+                    line: "#d9e3e8",
+                    pageBg: "#f6f8fa",
+                    heroGradient: "linear-gradient(135deg, #101928 0%, #1b2d44 76%, #263f5f 100%)",
+                    heroGlow: "rgba(255, 91, 53, 0.18)",
+                    sectionStripe: "linear-gradient(90deg, #ff5b35, #c9d9de)",
+                    rowAlt: "#fbfcfd",
+                }}
+            />
+        );
+    }
+
+    if (format === "lobii") {
+        return (
+            <PremiumQuotePDFTemplate
+                quote={quote}
+                items={items}
+                companyName={companyName}
+                contactName={contactName}
+                totals={totals}
+                workspace={workspace}
+                theme={{
+                    logoUrl: "/brands/lobii-logo.png",
+                    fallbackName: "Lobii",
+                    muted: "#667085",
+                    ink: "#1b2430",
+                    accent: "#10a0a2",
+                    navy: "#b07de2",
+                    line: "#d8d9f0",
+                    pageBg: "#f7f6fb",
+                    heroGradient: "linear-gradient(135deg, #b07de2 0%, #7d79c8 42%, #128f92 100%)",
+                    heroGlow: "rgba(255, 255, 255, 0.20)",
+                    sectionStripe: "linear-gradient(90deg, #10a0a2, #b07de2)",
+                    rowAlt: "#faf8fd",
+                }}
             />
         );
     }
@@ -368,14 +424,15 @@ export function QuotePDFTemplate({
     );
 }
 
-function AdvancedQuotePDFTemplate({
+function PremiumQuotePDFTemplate({
     quote,
     items,
     companyName,
     contactName,
     totals,
     workspace,
-}: Omit<QuotePDFTemplateProps, "format">) {
+    theme,
+}: Omit<QuotePDFTemplateProps, "format"> & { theme: PremiumQuoteTheme }) {
     const {
         formatCurrency,
         formatDate,
@@ -390,11 +447,7 @@ function AdvancedQuotePDFTemplate({
         proposalDescriptionHtml,
     } = createQuotePDFContext({ quote, totals });
 
-    const muted = "#667085";
-    const ink = "#17212f";
-    const accent = "#ff5b35";
-    const navy = "#101928";
-    const line = "#d9e3e8";
+    const { muted, ink, accent, navy, line, pageBg, heroGradient, heroGlow, sectionStripe, rowAlt, logoUrl, fallbackName } = theme;
 
     return (
         <div
@@ -403,7 +456,7 @@ function AdvancedQuotePDFTemplate({
                 width: "210mm",
                 minHeight: "297mm",
                 padding: "0",
-                backgroundColor: "#f6f8fa",
+                backgroundColor: pageBg,
                 fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
                 color: ink,
                 position: "absolute",
@@ -428,18 +481,18 @@ function AdvancedQuotePDFTemplate({
                 >
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12mm", padding: "7mm 8mm 6mm" }}>
                         <div style={{ width: "42%" }}>
-                            {workspace?.logoUrl ? (
+                            {logoUrl ? (
                                 <img
-                                    src={workspace.logoUrl}
-                                    alt={workspace?.legalName || "Logo"}
+                                    src={logoUrl}
+                                    alt={fallbackName}
                                     style={{ display: "block", maxHeight: "44px", maxWidth: "175px", objectFit: "contain" }}
                                 />
                             ) : (
-                                <div style={{ fontSize: "12pt", fontWeight: 850, letterSpacing: "0.08em", color: navy }}>{workspace?.legalName || "NEARBY CRM"}</div>
+                                <div style={{ fontSize: "12pt", fontWeight: 850, letterSpacing: "0.08em", color: navy }}>{fallbackName}</div>
                             )}
                         </div>
                         <div style={{ width: "58%", textAlign: "right", color: muted, fontSize: "7.4pt", lineHeight: "1.55" }}>
-                            <div style={{ fontWeight: 850, color: navy }}>{workspace?.legalName || "NEARBY CRM"}</div>
+                            <div style={{ fontWeight: 850, color: navy }}>{workspace?.legalName || fallbackName}</div>
                             {workspace?.rnc && <div>RNC: {workspace.rnc}</div>}
                             {workspace?.address && <div>{workspace.address}</div>}
                             <div>República Dominicana{workspace?.phone ? ` · Tel: ${workspace.phone}` : ""}</div>
@@ -448,7 +501,7 @@ function AdvancedQuotePDFTemplate({
 
                     <div
                         style={{
-                            background: `linear-gradient(135deg, ${navy} 0%, #1b2d44 76%, #263f5f 100%)`,
+                            background: heroGradient,
                             color: "#ffffff",
                             padding: "8mm",
                             position: "relative",
@@ -463,7 +516,7 @@ function AdvancedQuotePDFTemplate({
                                 borderRadius: "999px",
                                 right: "-28mm",
                                 top: "-38mm",
-                                background: "rgba(255, 91, 53, 0.18)",
+                                background: heroGlow,
                             }}
                         />
                         <div style={{ display: "flex", justifyContent: "space-between", gap: "12mm", position: "relative" }}>
@@ -523,7 +576,7 @@ function AdvancedQuotePDFTemplate({
                         </thead>
                         <tbody>
                             {items.map((item, index) => (
-                                <tr key={index} style={{ backgroundColor: index % 2 === 0 ? "#ffffff" : "#fbfcfd" }}>
+                                <tr key={index} style={{ backgroundColor: index % 2 === 0 ? "#ffffff" : rowAlt }}>
                                     <td style={{ padding: "11px 12px", borderBottom: `1px solid ${line}`, color: ink, fontWeight: 750, lineHeight: "1.35" }}>{item.name}</td>
                                     <td style={{ padding: "11px 10px", textAlign: "right", borderBottom: `1px solid ${line}`, color: ink, fontWeight: 650 }}>{item.quantity.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                     <td style={{ padding: "11px 10px", textAlign: "right", borderBottom: `1px solid ${line}`, color: ink }}>{formatCurrency(item.price, quote.currency)}</td>
@@ -570,7 +623,7 @@ function AdvancedQuotePDFTemplate({
                                 {showTaxBreakdown ? formatCurrency(breakdown.totalTax, quote.currency) : formatCurrency(0, quote.currency)}
                             </span>
                         </div>
-                        <div style={{ height: "3px", background: `linear-gradient(90deg, ${accent}, #c9d9de)`, borderRadius: "999px", margin: "10px 0" }} />
+                        <div style={{ height: "3px", background: sectionStripe, borderRadius: "999px", margin: "10px 0" }} />
                         <div
                             style={{
                                 display: "flex",
