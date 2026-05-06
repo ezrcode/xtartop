@@ -38,6 +38,7 @@ interface PremiumQuoteTheme {
     ink: string;
     accent: string;
     navy: string;
+    headerTitleColor?: string;
     line: string;
     pageBg: string;
     heroGradient: string;
@@ -129,6 +130,7 @@ export function QuotePDFTemplate({
                     ink: "#17212f",
                     accent: "#ff5b35",
                     navy: "#101928",
+                    headerTitleColor: "#101928",
                     line: "#d9e3e8",
                     pageBg: "#f6f8fa",
                     heroGradient: "linear-gradient(135deg, #101928 0%, #1b2d44 76%, #263f5f 100%)",
@@ -156,9 +158,10 @@ export function QuotePDFTemplate({
                     ink: "#1b2430",
                     accent: "#10a0a2",
                     navy: "#b07de2",
+                    headerTitleColor: "#111111",
                     line: "#d8d9f0",
                     pageBg: "#f7f6fb",
-                    heroGradient: "linear-gradient(135deg, #2fb9aa 0%, #3AC7B5 56%, #269f96 100%)",
+                    heroGradient: "linear-gradient(135deg, #124f53 0%, #1b6e70 46%, #21817e 100%)",
                     heroGlow: "rgba(255, 255, 255, 0.18)",
                     sectionStripe: "linear-gradient(90deg, #10a0a2, #b07de2)",
                     rowAlt: "#faf8fd",
@@ -447,7 +450,7 @@ function PremiumQuotePDFTemplate({
         proposalDescriptionHtml,
     } = createQuotePDFContext({ quote, totals });
 
-    const { muted, ink, accent, navy, line, pageBg, heroGradient, heroGlow, sectionStripe, rowAlt, logoUrl, fallbackName } = theme;
+    const { muted, ink, accent, navy, headerTitleColor, line, pageBg, heroGradient, heroGlow, sectionStripe, rowAlt, logoUrl, fallbackName } = theme;
 
     return (
         <div
@@ -488,11 +491,11 @@ function PremiumQuotePDFTemplate({
                                     style={{ display: "block", maxHeight: "44px", maxWidth: "175px", objectFit: "contain" }}
                                 />
                             ) : (
-                                <div style={{ fontSize: "12pt", fontWeight: 850, letterSpacing: "0.08em", color: navy }}>{fallbackName}</div>
+                                <div style={{ fontSize: "12pt", fontWeight: 850, letterSpacing: "0.08em", color: headerTitleColor || navy }}>{fallbackName}</div>
                             )}
                         </div>
                         <div style={{ width: "58%", textAlign: "right", color: muted, fontSize: "7.4pt", lineHeight: "1.55" }}>
-                            <div style={{ fontWeight: 850, color: navy }}>{workspace?.legalName || fallbackName}</div>
+                            <div style={{ fontWeight: 850, color: headerTitleColor || navy }}>{workspace?.legalName || fallbackName}</div>
                             {workspace?.rnc && <div>RNC: {workspace.rnc}</div>}
                             {workspace?.address && <div>{workspace.address}</div>}
                             <div>República Dominicana{workspace?.phone ? ` · Tel: ${workspace.phone}` : ""}</div>
