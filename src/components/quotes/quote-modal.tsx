@@ -69,6 +69,53 @@ const PAYMENT_FREQUENCY_OPTIONS: Array<{ value: PaymentFrequency; label: string 
     { value: "ANUAL" as PaymentFrequency, label: "Anual" },
 ];
 
+function cropCanvasTrailingWhitespace(sourceCanvas: HTMLCanvasElement, bottomPadding = 16) {
+    const context = sourceCanvas.getContext("2d");
+    if (!context) return sourceCanvas;
+
+    const { width, height } = sourceCanvas;
+    const { data } = context.getImageData(0, 0, width, height);
+    const tolerance = 250;
+    let lastContentRow = -1;
+
+    rowLoop:
+    for (let y = height - 1; y >= 0; y -= 1) {
+        for (let x = 0; x < width; x += 1) {
+            const index = (y * width + x) * 4;
+            const alpha = data[index + 3];
+            const red = data[index];
+            const green = data[index + 1];
+            const blue = data[index + 2];
+
+            const hasVisibleContent =
+                alpha > 0 &&
+                (red < tolerance || green < tolerance || blue < tolerance);
+
+            if (hasVisibleContent) {
+                lastContentRow = y;
+                break rowLoop;
+            }
+        }
+    }
+
+    if (lastContentRow < 0) return sourceCanvas;
+
+    const croppedHeight = Math.min(height, Math.max(lastContentRow + bottomPadding, 1));
+    if (croppedHeight >= height) return sourceCanvas;
+
+    const croppedCanvas = document.createElement("canvas");
+    croppedCanvas.width = width;
+    croppedCanvas.height = croppedHeight;
+    const croppedContext = croppedCanvas.getContext("2d");
+    if (!croppedContext) return sourceCanvas;
+
+    croppedContext.fillStyle = "#ffffff";
+    croppedContext.fillRect(0, 0, width, croppedHeight);
+    croppedContext.drawImage(sourceCanvas, 0, 0, width, croppedHeight, 0, 0, width, croppedHeight);
+
+    return croppedCanvas;
+}
+
 function QuoteRichTextEditor({ id, value, onChange, disabled = false }: RichTextEditorProps) {
     const editorRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -556,7 +603,7 @@ export function QuoteModal({
 
             // Capture the element as canvas
             const renderScale = pdfFormat === "basic" ? 2.2 : 2;
-            const canvas = await html2canvas(element, {
+            const rawCanvas = await html2canvas(element, {
                 scale: renderScale,
                 useCORS: true,
                 logging: false,
@@ -564,6 +611,7 @@ export function QuoteModal({
                 windowWidth: element.scrollWidth,
                 windowHeight: element.scrollHeight,
             });
+            const canvas = cropCanvasTrailingWhitespace(rawCanvas);
 
             // Hide the element again
             if (spacer) {
@@ -592,7 +640,7 @@ export function QuoteModal({
             pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
             heightLeft -= pageHeight;
 
-            while (heightLeft > 0) {
+            while (heightLeft > 1) {
                 position = heightLeft - imgHeight;
                 pdf.addPage();
                 pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
