@@ -98,6 +98,24 @@ export default async function PortalDashboard() {
                 </form>
             </div>
 
+            <PortalDocumentsCard
+                company={{
+                    name: company.name,
+                    legalName: company.legalName,
+                    taxId: company.taxId,
+                    fiscalAddress: company.fiscalAddress,
+                    initialProjects: company.initialProjects,
+                    initialUsers: company.initialUsers,
+                    quoteId: company.quoteId,
+                    quoteFileUrl: company.quoteFileUrl,
+                    termsAccepted: company.termsAccepted,
+                    termsAcceptedAt: company.termsAcceptedAt,
+                    termsAcceptedByName: company.termsAcceptedByName,
+                }}
+                workspace={company.workspace}
+                approverEmail={approvedByContact?.email || user.contact.email || user.email}
+            />
+
             {/* Status Card */}
             <div className="bg-white rounded-lg border border-graphite-gray p-6">
                 <div className="flex items-center space-x-3 mb-4">
@@ -182,24 +200,6 @@ export default async function PortalDashboard() {
                     </div>
                 )}
             </div>
-
-            <PortalDocumentsCard
-                company={{
-                    name: company.name,
-                    legalName: company.legalName,
-                    taxId: company.taxId,
-                    fiscalAddress: company.fiscalAddress,
-                    initialProjects: company.initialProjects,
-                    initialUsers: company.initialUsers,
-                    quoteId: company.quoteId,
-                    quoteFileUrl: company.quoteFileUrl,
-                    termsAccepted: company.termsAccepted,
-                    termsAcceptedAt: company.termsAcceptedAt,
-                    termsAcceptedByName: company.termsAcceptedByName,
-                }}
-                workspace={company.workspace}
-                approverEmail={approvedByContact?.email || user.contact.email || user.email}
-            />
         </div>
     );
 }
