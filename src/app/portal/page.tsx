@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { LogOut, Building2, FileText, CheckCircle, AlertCircle } from "lucide-react";
 import { logout } from "@/actions/auth";
+import { PortalDocumentsCard } from "@/components/portal/portal-documents-card";
 
 // Force dynamic rendering
 export const dynamic = "force-dynamic";
@@ -18,7 +19,24 @@ export default async function PortalDashboard() {
         include: {
             contact: {
                 include: {
-                    company: true,
+                    company: {
+                        include: {
+                            workspace: {
+                                select: {
+                                    name: true,
+                                    legalName: true,
+                                    contractTemplate: true,
+                                },
+                            },
+                            contacts: {
+                                select: {
+                                    id: true,
+                                    fullName: true,
+                                    email: true,
+                                },
+                            },
+                        },
+                    },
                 },
             },
         },
@@ -58,6 +76,7 @@ export default async function PortalDashboard() {
     }
 
     const company = user.contact.company;
+    const approvedByContact = company.contacts.find((contact) => contact.id === company.termsAcceptedById) || null;
 
     return (
         <div className="space-y-6">
@@ -163,6 +182,24 @@ export default async function PortalDashboard() {
                     </div>
                 )}
             </div>
+
+            <PortalDocumentsCard
+                company={{
+                    name: company.name,
+                    legalName: company.legalName,
+                    taxId: company.taxId,
+                    fiscalAddress: company.fiscalAddress,
+                    initialProjects: company.initialProjects,
+                    initialUsers: company.initialUsers,
+                    quoteId: company.quoteId,
+                    quoteFileUrl: company.quoteFileUrl,
+                    termsAccepted: company.termsAccepted,
+                    termsAcceptedAt: company.termsAcceptedAt,
+                    termsAcceptedByName: company.termsAcceptedByName,
+                }}
+                workspace={company.workspace}
+                approverEmail={approvedByContact?.email || user.contact.email || user.email}
+            />
         </div>
     );
 }
