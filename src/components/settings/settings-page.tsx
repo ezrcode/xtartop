@@ -48,7 +48,7 @@ type WorkspaceWithDetails = Workspace & {
         id: string;
         name: string;
         keyPrefix: string;
-        scope: "FULL_ACCESS";
+        scope: "FULL_READ" | "FULL_WRITE" | "FULL_ACCESS";
         isActive: boolean;
         lastUsedAt: Date | null;
         revokedAt: Date | null;

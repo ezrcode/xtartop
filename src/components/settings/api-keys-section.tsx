@@ -13,7 +13,7 @@ type ApiKeyRecord = {
     id: string;
     name: string;
     keyPrefix: string;
-    scope: "FULL_ACCESS";
+    scope: "FULL_READ" | "FULL_WRITE" | "FULL_ACCESS";
     isActive: boolean;
     lastUsedAt: Date | null;
     revokedAt: Date | null;
@@ -41,6 +41,7 @@ function formatDate(value: Date | string | null) {
 
 export function ApiKeysSection({ apiKeys }: ApiKeysSectionProps) {
     const [name, setName] = useState("Agente full access");
+    const [scope, setScope] = useState<"FULL_READ" | "FULL_WRITE">("FULL_READ");
     const [generatedKey, setGeneratedKey] = useState<string | null>(null);
     const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
     const [copied, setCopied] = useState(false);
@@ -52,7 +53,7 @@ export function ApiKeysSection({ apiKeys }: ApiKeysSectionProps) {
         setMessage(null);
         setCopied(false);
         startTransition(async () => {
-            const result = await createWorkspaceApiKey(name);
+            const result = await createWorkspaceApiKey(name, scope);
             if (result.success && result.apiKey) {
                 setGeneratedKey(result.apiKey);
                 setMessage({ type: "success", text: "API key generada. Guárdala ahora; no volverá a mostrarse completa." });
@@ -120,7 +121,7 @@ export function ApiKeysSection({ apiKeys }: ApiKeysSectionProps) {
                     </div>
                 )}
 
-                <div className="grid gap-4 rounded-md border border-[var(--card-border)] bg-[var(--hover-bg)] p-4 sm:grid-cols-[1fr_auto] sm:items-end">
+                <div className="grid gap-4 rounded-md border border-[var(--card-border)] bg-[var(--hover-bg)] p-4 lg:grid-cols-[1fr_260px_auto] lg:items-end">
                     <div className="space-y-2">
                         <Label htmlFor="api-key-name">Nombre de la clave</Label>
                         <Input
@@ -129,6 +130,18 @@ export function ApiKeysSection({ apiKeys }: ApiKeysSectionProps) {
                             onChange={(event) => setName(event.target.value)}
                             placeholder="Ej. Agente CEO dashboard"
                         />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="api-key-scope">Permiso</Label>
+                        <select
+                            id="api-key-scope"
+                            value={scope}
+                            onChange={(event) => setScope(event.target.value as "FULL_READ" | "FULL_WRITE")}
+                            className="h-10 w-full rounded-md border border-[var(--card-border)] bg-[var(--input-bg)] px-3 text-sm text-[var(--foreground)] shadow-sm focus:border-nearby-dark/50 focus:ring-2 focus:ring-nearby-dark/15"
+                        >
+                            <option value="FULL_READ">Solo lectura</option>
+                            <option value="FULL_WRITE">Lectura y escritura</option>
+                        </select>
                     </div>
                     <Button type="button" onClick={handleCreate} disabled={pending}>
                         <Plus size={16} />
@@ -154,7 +167,9 @@ export function ApiKeysSection({ apiKeys }: ApiKeysSectionProps) {
                                     <div className="min-w-0 space-y-1">
                                         <div className="flex flex-wrap items-center gap-2">
                                             <p className="font-medium text-[var(--foreground)]">{apiKey.name}</p>
-                                            <Badge variant={apiKey.scope === "FULL_ACCESS" ? "warning" : "secondary"}>Full access</Badge>
+                                            <Badge variant={apiKey.scope === "FULL_READ" ? "info" : "warning"}>
+                                                {apiKey.scope === "FULL_READ" ? "Solo lectura" : "Lectura y escritura"}
+                                            </Badge>
                                         </div>
                                         <p className="font-mono text-xs text-[var(--muted-text)]">{apiKey.keyPrefix}</p>
                                         <p className="text-xs text-[var(--muted-text)]">
@@ -186,7 +201,7 @@ export function ApiKeysSection({ apiKeys }: ApiKeysSectionProps) {
                 </div>
 
                 <div className="rounded-md border border-[var(--card-border)] bg-[var(--card-bg)] p-4 text-sm text-[var(--muted-text)]">
-                    Usa la clave con <code className="text-[var(--foreground)]">Authorization: Bearer API_KEY</code> o <code className="text-[var(--foreground)]">X-API-Key: API_KEY</code>. Endpoints disponibles: <code className="text-[var(--foreground)]">/api/agent/v1</code> y <code className="text-[var(--foreground)]">/api/agent/v1/companies</code>.
+                    Usa la clave con <code className="text-[var(--foreground)]">Authorization: Bearer API_KEY</code> o <code className="text-[var(--foreground)]">X-API-Key: API_KEY</code>. Las claves con escritura registran auditoría automática por recurso y registro afectado.
                 </div>
             </CardContent>
         </Card>

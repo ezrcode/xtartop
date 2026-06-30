@@ -6,7 +6,8 @@ export type AgentAuthContext = {
     workspaceId: string;
     workspaceName: string;
     apiKeyId: string;
-    scope: "FULL_ACCESS";
+    createdById: string;
+    scope: "FULL_READ" | "FULL_WRITE" | "FULL_ACCESS";
 };
 
 function hashApiKey(apiKey: string) {
@@ -66,9 +67,14 @@ export async function authenticateAgentRequest(request: NextRequest): Promise<
             workspaceId: record.workspaceId,
             workspaceName: record.workspace.name,
             apiKeyId: record.id,
+            createdById: record.createdById,
             scope: record.scope,
         },
     };
+}
+
+export function agentCanWrite(scope: AgentAuthContext["scope"]) {
+    return scope === "FULL_WRITE" || scope === "FULL_ACCESS";
 }
 
 export function jsonAgentResponse(data: unknown, init?: ResponseInit) {

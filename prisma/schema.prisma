@@ -72,7 +72,15 @@ enum UserDashboardPreference {
 }
 
 enum ApiKeyScope {
+  FULL_READ
+  FULL_WRITE
   FULL_ACCESS
+}
+
+enum AgentApiAction {
+  CREATE
+  UPDATE
+  DELETE
 }
 
 enum QuoteStatus {
@@ -204,6 +212,7 @@ model User {
   dealCommissionEntries  DealCommissionEntry[]
   purchaseOrders  PurchaseOrder[]
   createdApiKeys  WorkspaceApiKey[]
+  agentApiAuditLogs AgentApiAuditLog[]
 }
 
 model Workspace {
@@ -271,6 +280,7 @@ model Workspace {
   purchaseOrders PurchaseOrder[]
   admCloudTaxGroups AdmCloudTaxGroup[]
   apiKeys      WorkspaceApiKey[]
+  agentApiAuditLogs AgentApiAuditLog[]
 }
 
 model WorkspaceMember {
@@ -304,9 +314,35 @@ model WorkspaceApiKey {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
+  auditLogs   AgentApiAuditLog[]
+
   @@index([workspaceId])
   @@index([keyHash])
   @@index([workspaceId, isActive])
+}
+
+model AgentApiAuditLog {
+  id          String         @id @default(cuid())
+  action      AgentApiAction
+  resource    String
+  recordId    String?
+  payload     Json?
+
+  workspaceId String
+  workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  apiKeyId    String
+  apiKey      WorkspaceApiKey @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+
+  createdById String
+  createdBy   User           @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  createdAt   DateTime       @default(now())
+
+  @@index([workspaceId])
+  @@index([apiKeyId])
+  @@index([resource, recordId])
+  @@index([createdAt])
 }
 
 model Invitation {

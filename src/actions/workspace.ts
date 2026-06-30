@@ -197,6 +197,7 @@ export type CommissionSettingsState = {
 
 const ApiKeySchema = z.object({
     name: z.string().trim().min(2, "El nombre debe tener al menos 2 caracteres").max(80, "Nombre demasiado largo"),
+    scope: z.enum(["FULL_READ", "FULL_WRITE"]),
 });
 
 function hashApiKey(apiKey: string) {
@@ -294,7 +295,7 @@ export async function updateCommissionSettings(
     }
 }
 
-export async function createWorkspaceApiKey(name: string) {
+export async function createWorkspaceApiKey(name: string, scope: "FULL_READ" | "FULL_WRITE" = "FULL_READ") {
     const session = await auth();
     if (!session?.user?.email) redirect("/login");
 
@@ -303,7 +304,7 @@ export async function createWorkspaceApiKey(name: string) {
         return { success: false, message: "No autorizado." };
     }
 
-    const validatedFields = ApiKeySchema.safeParse({ name });
+    const validatedFields = ApiKeySchema.safeParse({ name, scope });
     if (!validatedFields.success) {
         return {
             success: false,
@@ -331,7 +332,7 @@ export async function createWorkspaceApiKey(name: string) {
                 keyPrefix,
                 workspaceId: userRole.workspaceId,
                 createdById: user.id,
-                scope: "FULL_ACCESS",
+                scope: validatedFields.data.scope,
             },
         });
 

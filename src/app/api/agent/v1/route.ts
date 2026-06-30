@@ -27,6 +27,13 @@ export async function GET(request: NextRequest) {
         usage: {
             auth: "Authorization: Bearer API_KEY o X-API-Key: API_KEY",
             resourceUrl: "/api/agent/v1/{resource}?page=1&limit=100&search=texto",
+            writeUrl: "/api/agent/v1/{resource}?id=record_id",
+            methods: {
+                readonly: ["GET"],
+                crud: ["GET", "POST", "PATCH", "DELETE"],
+            },
+            crudResources: ["companies", "contacts", "deals", "projects", "client-users", "activities"],
+            readonlyResources: ["workspace", "quotes", "subscriptions"],
             maxLimit: 200,
         },
     });
