@@ -71,6 +71,10 @@ enum UserDashboardPreference {
   CUSTOMER_SUCCESS
 }
 
+enum ApiKeyScope {
+  FULL_ACCESS
+}
+
 enum QuoteStatus {
   BORRADOR
   ACTIVA
@@ -199,6 +203,7 @@ model User {
   updatedDealCommissions DealCommission[]      @relation("DealCommissionUpdatedBy")
   dealCommissionEntries  DealCommissionEntry[]
   purchaseOrders  PurchaseOrder[]
+  createdApiKeys  WorkspaceApiKey[]
 }
 
 model Workspace {
@@ -265,6 +270,7 @@ model Workspace {
   taxes        Tax[]
   purchaseOrders PurchaseOrder[]
   admCloudTaxGroups AdmCloudTaxGroup[]
+  apiKeys      WorkspaceApiKey[]
 }
 
 model WorkspaceMember {
@@ -277,6 +283,30 @@ model WorkspaceMember {
   joinedAt    DateTime   @default(now())
 
   @@unique([workspaceId, userId])
+}
+
+model WorkspaceApiKey {
+  id          String      @id @default(cuid())
+  name        String
+  keyHash     String      @unique
+  keyPrefix   String
+  scope       ApiKeyScope @default(FULL_ACCESS)
+  isActive    Boolean     @default(true)
+  lastUsedAt  DateTime?
+  revokedAt   DateTime?
+
+  workspaceId String
+  workspace   Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  createdById String
+  createdBy   User        @relation(fields: [createdById], references: [id])
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([workspaceId])
+  @@index([keyHash])
+  @@index([workspaceId, isActive])
 }
 
 model Invitation {

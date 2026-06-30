@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { randomBytes } from "crypto";
+import { createHash, randomBytes } from "crypto";
 import { sendEmailWithGmail } from "@/lib/email/sender";
 import bcrypt from "bcryptjs";
 
@@ -146,6 +146,17 @@ export async function getWorkspaceWithMembers() {
                 }
             },
             subscription: true,
+            apiKeys: {
+                orderBy: { createdAt: "desc" },
+                include: {
+                    createdBy: {
+                        select: {
+                            name: true,
+                            email: true,
+                        },
+                    },
+                },
+            },
             _count: {
                 select: {
                     contacts: true,
@@ -183,6 +194,18 @@ export type CommissionSettingsState = {
     };
     message?: string;
 };
+
+const ApiKeySchema = z.object({
+    name: z.string().trim().min(2, "El nombre debe tener al menos 2 caracteres").max(80, "Nombre demasiado largo"),
+});
+
+function hashApiKey(apiKey: string) {
+    return createHash("sha256").update(apiKey).digest("hex");
+}
+
+function generateWorkspaceApiKey() {
+    return `nby_live_${randomBytes(32).toString("base64url")}`;
+}
 
 export async function updateWorkspace(prevState: WorkspaceState | undefined, formData: FormData): Promise<WorkspaceState> {
     const session = await auth();
@@ -268,6 +291,94 @@ export async function updateCommissionSettings(
     } catch (error) {
         console.error("Database Error:", error);
         return { message: "No se pudo actualizar la configuración de comisiones." };
+    }
+}
+
+export async function createWorkspaceApiKey(name: string) {
+    const session = await auth();
+    if (!session?.user?.email) redirect("/login");
+
+    const userRole = await getUserWorkspaceRole();
+    if (userRole?.role !== "OWNER" && userRole?.role !== "ADMIN") {
+        return { success: false, message: "No autorizado." };
+    }
+
+    const validatedFields = ApiKeySchema.safeParse({ name });
+    if (!validatedFields.success) {
+        return {
+            success: false,
+            message: validatedFields.error.issues[0]?.message || "Nombre inválido.",
+        };
+    }
+
+    const user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+        select: { id: true },
+    });
+
+    if (!user) {
+        return { success: false, message: "Usuario no encontrado." };
+    }
+
+    const apiKey = generateWorkspaceApiKey();
+    const keyPrefix = `${apiKey.slice(0, 13)}...${apiKey.slice(-4)}`;
+
+    try {
+        await prisma.workspaceApiKey.create({
+            data: {
+                name: validatedFields.data.name,
+                keyHash: hashApiKey(apiKey),
+                keyPrefix,
+                workspaceId: userRole.workspaceId,
+                createdById: user.id,
+                scope: "FULL_ACCESS",
+            },
+        });
+
+        revalidatePath("/app/settings");
+        return {
+            success: true,
+            message: "API key creada correctamente.",
+            apiKey,
+        };
+    } catch (error) {
+        console.error("Database Error:", error);
+        return { success: false, message: "No se pudo crear la API key." };
+    }
+}
+
+export async function revokeWorkspaceApiKey(apiKeyId: string) {
+    const session = await auth();
+    if (!session?.user?.email) redirect("/login");
+
+    const userRole = await getUserWorkspaceRole();
+    if (userRole?.role !== "OWNER" && userRole?.role !== "ADMIN") {
+        return { success: false, message: "No autorizado." };
+    }
+
+    try {
+        const apiKey = await prisma.workspaceApiKey.findUnique({
+            where: { id: apiKeyId },
+            select: { workspaceId: true },
+        });
+
+        if (!apiKey || apiKey.workspaceId !== userRole.workspaceId) {
+            return { success: false, message: "API key no encontrada." };
+        }
+
+        await prisma.workspaceApiKey.update({
+            where: { id: apiKeyId },
+            data: {
+                isActive: false,
+                revokedAt: new Date(),
+            },
+        });
+
+        revalidatePath("/app/settings");
+        return { success: true, message: "API key revocada correctamente." };
+    } catch (error) {
+        console.error("Database Error:", error);
+        return { success: false, message: "No se pudo revocar la API key." };
     }
 }
 

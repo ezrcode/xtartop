@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useFormState } from "react-dom";
 import { useRouter } from "next/navigation";
-import { Save, UserPlus, Mail, Trash2, X, Building2, Users2, FileText, Loader2, Cloud, Settings2, DollarSign, BriefcaseBusiness, ChevronRight, Percent } from "lucide-react";
+import { Save, UserPlus, Mail, Trash2, X, Building2, Users2, FileText, Loader2, Cloud, Settings2, DollarSign, BriefcaseBusiness, ChevronRight, Percent, KeyRound } from "lucide-react";
 import { ImageUpload } from "../ui/image-upload";
 import {
     updateWorkspace,
@@ -25,6 +25,7 @@ import { ExchangeRatesSection } from "./exchange-rates-section";
 import { ProjectRateReferencesSection } from "./project-rate-references-section";
 import { TaxesSection } from "./taxes-section";
 import { CommissionSettingsSection } from "./commission-settings-section";
+import { ApiKeysSection } from "./api-keys-section";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
@@ -43,6 +44,17 @@ type WorkspaceWithDetails = Workspace & {
     invitations: (Invitation & {
         inviter: Pick<User, 'name' | 'email'>;
     })[];
+    apiKeys: {
+        id: string;
+        name: string;
+        keyPrefix: string;
+        scope: "FULL_ACCESS";
+        isActive: boolean;
+        lastUsedAt: Date | null;
+        revokedAt: Date | null;
+        createdAt: Date;
+        createdBy: Pick<User, 'name' | 'email'>;
+    }[];
     subscription: Subscription | null;
     contractTemplate?: string | null;
     contractVersion?: string | null;
@@ -205,7 +217,7 @@ function getDefaultContractTemplate(): string {
 <p>He leído y acepto los Términos y Condiciones de Uso de la plataforma Nearby CRM y la Cotización N° <strong>{{ID_COTIZACION}}</strong> vinculada a mi cuenta. Entiendo que esta aceptación digital tiene la misma validez legal que una firma manuscrita de acuerdo con la legislación vigente.</p>`;
 }
 
-type Section = 'workspace' | 'team' | 'contract' | 'business-lines' | 'rate-references' | 'exchange-rates' | 'taxes' | 'commissions' | 'billing' | 'admcloud' | 'clickup' | 'decima';
+type Section = 'workspace' | 'team' | 'contract' | 'business-lines' | 'rate-references' | 'exchange-rates' | 'taxes' | 'commissions' | 'billing' | 'admcloud' | 'clickup' | 'decima' | 'api-keys';
 
 const sectionGroups = [
     {
@@ -236,6 +248,7 @@ const sectionGroups = [
             { id: "admcloud" as Section, label: "ADMCloud", icon: Cloud, description: "Conexión con el ERP de facturación" },
             { id: "clickup" as Section, label: "ClickUp", icon: Settings2, description: "Integración con gestión de tickets" },
             { id: "decima" as Section, label: "Décima Portal", icon: Cloud, description: "Órdenes de compra con Décima Tech" },
+            { id: "api-keys" as Section, label: "API Keys", icon: KeyRound, description: "Acceso externo para agentes y automatizaciones" },
         ],
     },
 ];
@@ -792,6 +805,9 @@ export function SettingsPage({
                         }}
                     />
                 );
+
+            case 'api-keys':
+                return <ApiKeysSection apiKeys={workspace.apiKeys} />;
 
             default:
                 return null;
