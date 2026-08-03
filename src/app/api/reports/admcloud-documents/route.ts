@@ -303,6 +303,7 @@ function applyCreditNoteLineCredits(
 ): InternalReportLine[] {
     return lines.flatMap((line) => {
         let adjustedAmount = line.extendedPrice;
+        let appliedCreditAmount = 0;
         const lineInvoiceIds = new Set([normalizeKey(line.sourceDocumentId)].filter(Boolean));
         const lineDocNumbers = new Set([normalizeKey(line.documentNumber)].filter(Boolean));
         const lineNcfs = new Set([normalizeKey(line.sourceDocumentNcf)].filter(Boolean));
@@ -327,9 +328,10 @@ function applyCreditNoteLineCredits(
             const amountToApply = Math.min(adjustedAmount, credit.remainingAmount);
             adjustedAmount -= amountToApply;
             credit.remainingAmount -= amountToApply;
+            appliedCreditAmount += amountToApply;
         }
 
-        if (adjustedAmount <= 0.005) return [];
+        if (appliedCreditAmount > 0 && adjustedAmount <= 0.005) return [];
         return [{ ...line, extendedPrice: adjustedAmount }];
     });
 }
