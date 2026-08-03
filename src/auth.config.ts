@@ -9,10 +9,21 @@ export const authConfig = {
         authorized({ auth, request: { nextUrl } }) {
             const isLoggedIn = !!auth?.user;
             const userType = (auth?.user as { userType?: string } | undefined)?.userType;
+            const isRoot = nextUrl.pathname === "/";
             const isOnApp = nextUrl.pathname.startsWith("/app");
             const isOnPortal = nextUrl.pathname.startsWith("/portal");
             const isOnPortalOnboarding = nextUrl.pathname.startsWith("/portal/onboarding");
             const isOnPortalLogin = nextUrl.pathname === "/portal/login";
+
+            if (isRoot) {
+                if (!isLoggedIn) {
+                    return Response.redirect(new URL("/login", nextUrl));
+                }
+                if (userType === "CLIENT") {
+                    return Response.redirect(new URL("/portal", nextUrl));
+                }
+                return Response.redirect(new URL("/app", nextUrl));
+            }
             
             // Portal onboarding is public (token-based)
             if (isOnPortalOnboarding) {
