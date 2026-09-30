@@ -1,0 +1,4 @@
+{
+  "name": "NBY Internal CRM",
+  "install": "npm ci"
+}
