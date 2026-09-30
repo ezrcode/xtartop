@@ -422,6 +422,10 @@ export async function addSubscriptionItem(
         throw new Error("Empresa no encontrada");
     }
 
+    if (!Number.isFinite(data.price) || data.price < 0 || data.price > 999_999_999.99) {
+        throw new Error("Precio inválido");
+    }
+
     // Get or create billing record
     let billing = await prisma.subscriptionBilling.findUnique({
         where: { companyId },
@@ -494,6 +498,10 @@ export async function updateSubscriptionItem(
 
     if (!item || item.subscriptionBilling.company.workspaceId !== workspace.id) {
         throw new Error("Item no encontrado");
+    }
+
+    if (!Number.isFinite(data.price) || data.price < 0 || data.price > 999_999_999.99) {
+        throw new Error("Precio inválido");
     }
 
     // Update item

@@ -717,6 +717,32 @@ function UsageMiniChartCard({
     );
 }
 
+function formatPriceInputValue(amount: number): string {
+    if (!Number.isFinite(amount)) return "";
+    return amount.toFixed(2);
+}
+
+function parseUnitPriceInput(
+    raw: string
+): { ok: true; value: number } | { ok: false; message: string } {
+    const normalized = raw.trim().replace(/,/g, "");
+    if (!normalized) {
+        return { ok: false, message: "Ingresa un precio" };
+    }
+    const value = Number(normalized);
+    if (!Number.isFinite(value) || value < 0) {
+        return { ok: false, message: "El precio debe ser un número mayor o igual a 0" };
+    }
+    if (value > 999_999_999.99) {
+        return { ok: false, message: "El precio es demasiado alto" };
+    }
+    const decimalPart = normalized.split(".")[1];
+    if (decimalPart && decimalPart.length > 2) {
+        return { ok: false, message: "Usa máximo 2 decimales" };
+    }
+    return { ok: true, value: Math.round(value * 100) / 100 };
+}
+
 // Modal component for adding/editing subscription items
 interface SubscriptionItemModalProps {
     companyId: string;
@@ -737,6 +763,9 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
     const [selectedItem, setSelectedItem] = useState<AdmCloudItem | null>(null);
     const [selectedPriceListId, setSelectedPriceListId] = useState<string>("");
     const [selectedPrice, setSelectedPrice] = useState<PriceOption | null>(null);
+    const [priceInput, setPriceInput] = useState(
+        item ? formatPriceInputValue(Number(item.price)) : ""
+    );
     const [countType, setCountType] = useState<CountType>(item?.countType || "MANUAL");
     const [manualQuantity, setManualQuantity] = useState(item?.manualQuantity?.toString() || "");
     const [calculatedBase, setCalculatedBase] = useState<CalculatedBase>(item?.calculatedBase || "PROJECTS");
@@ -792,6 +821,7 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                                 setSelectedPriceListId(matchingPrice.priceListId);
                                 setSelectedPrice(matchingPrice);
                             }
+                            setPriceInput(formatPriceInputValue(savedPrice));
                         } else {
                             console.log("[SubscriptionItemModal] Item not found in ADMCloud, creating placeholder");
                             // Item not found in ADMCloud, create a placeholder
@@ -810,6 +840,7 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                             setSelectedItemId(item.admCloudItemId);
                             setSelectedPriceListId("saved");
                             setSelectedPrice(placeholderPrice);
+                            setPriceInput(formatPriceInputValue(Number(item.price)));
                         }
                     }
                     
@@ -839,12 +870,18 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                 if (found.prices.length > 0) {
                     setSelectedPriceListId(found.prices[0].priceListId);
                     setSelectedPrice(found.prices[0]);
+                    setPriceInput(formatPriceInputValue(found.prices[0].price));
+                } else {
+                    setSelectedPrice(null);
+                    setSelectedPriceListId("");
+                    setPriceInput("");
                 }
             }
         } else {
             setSelectedItem(null);
             setSelectedPrice(null);
             setSelectedPriceListId("");
+            setPriceInput("");
         }
     };
 
@@ -857,9 +894,17 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
             const price = selectedItem.prices.find(p => p.priceListId === newPriceListId);
             if (price) {
                 setSelectedPrice(price);
+                setPriceInput(formatPriceInputValue(price.price));
             }
         }
     };
+
+    const listReferencePrice = selectedPrice?.price ?? null;
+    const parsedPricePreview = parseUnitPriceInput(priceInput);
+    const priceDiffersFromList =
+        parsedPricePreview.ok &&
+        listReferencePrice !== null &&
+        parsedPricePreview.value !== listReferencePrice;
 
     const handleSubmit = async (e: React.FormEvent) => {
         console.log("[SubscriptionItemModal] handleSubmit called");
@@ -877,9 +922,9 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
             return;
         }
 
-        if (!selectedPrice) {
-            console.log("[SubscriptionItemModal] No selectedPrice, showing error");
-            setError("Selecciona una lista de precios");
+        const parsedPrice = parseUnitPriceInput(priceInput);
+        if (!parsedPrice.ok) {
+            setError(parsedPrice.message);
             return;
         }
 
@@ -903,7 +948,7 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                 admCloudItemId: selectedItem.id,
                 code: selectedItem.code,
                 description: selectedItem.name,
-                price: selectedPrice.price,
+                price: parsedPrice.value,
                 countType,
                 manualQuantity: countType === "MANUAL" ? parseInt(manualQuantity) : undefined,
                 calculatedBase: countType === "CALCULATED" ? calculatedBase : undefined,
@@ -1010,22 +1055,32 @@ function SubscriptionItemModal({ companyId, item, onClose, onSaved }: Subscripti
                             </div>
                         )}
 
-                        {/* Price (read-only) */}
+                        {/* Unit price (editable; used on proforma generation) */}
                         <div>
                             <label className="block text-sm font-medium text-[var(--foreground)] mb-1">
-                                Precio {selectedItem && selectedItem.prices.length === 1 && (
+                                Precio unitario (USD)
+                                {selectedPrice && (
                                     <span className="font-normal text-[var(--muted-text)]">
-                                        ({selectedItem.prices[0]?.priceListName})
+                                        {" "}
+                                        — referencia lista: {formatMoney(selectedPrice.price)} ({selectedPrice.currency})
                                     </span>
                                 )}
                             </label>
-                            <div className="px-3 py-2.5 min-h-[44px] flex items-center text-base sm:text-sm border border-[var(--input-border)] rounded-lg bg-[var(--hover-bg)] text-[var(--foreground)]">
-                                {selectedPrice ? (
-                                    <span className="font-medium">
-                                        {formatMoney(selectedPrice.price)} <span className="text-[var(--muted-text)] font-normal">{selectedPrice.currency}</span>
-                                    </span>
-                                ) : "-"}
-                            </div>
+                            <input
+                                type="text"
+                                inputMode="decimal"
+                                value={priceInput}
+                                onChange={(e) => setPriceInput(e.target.value)}
+                                placeholder="0.00"
+                                disabled={!selectedItem}
+                                className="w-full px-3 py-2.5 min-h-[44px] text-base sm:text-sm bg-[var(--input-bg)] text-[var(--foreground)] border border-[var(--input-border)] rounded-lg focus:ring-2 focus:ring-nearby-dark/15 focus:border-nearby-dark/50 disabled:opacity-60"
+                                required
+                            />
+                            {priceDiffersFromList && (
+                                <p className="text-xs text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-900/20 rounded-md px-2 py-1.5 mt-2">
+                                    Este precio se usará en las proformas generadas desde el CRM. No modifica el precio maestro del artículo en ADMCloud.
+                                </p>
+                            )}
                         </div>
 
                         {/* Count type */}
