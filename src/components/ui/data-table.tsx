@@ -1,7 +1,8 @@
 "use client";
 
 import { ReactNode, useState, useMemo, useEffect, useCallback, useRef } from "react";
-import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Search, Filter, Columns, Check, X, Save, MoreHorizontal } from "lucide-react";
+import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Search, Filter, Columns, Check, X, Save, MoreHorizontal, Download } from "lucide-react";
+import * as XLSX from "xlsx";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
@@ -22,6 +23,8 @@ export interface Column<T> {
     key: keyof T | string;
     header: string;
     render?: (item: T) => ReactNode;
+    /** Valor plano para exportación (Excel). Si no se define, se usa el campo del registro. */
+    exportValue?: (item: T) => string | number | boolean;
     sortable?: boolean;
     filterable?: boolean;
     filterOptions?: { value: string; label: string }[];
@@ -45,6 +48,10 @@ interface DataTableProps<T> {
     // Pagination
     paginated?: boolean;
     itemsPerPage?: ItemsPerPage;
+    /** Muestra botón de exportar (columnas visibles, datos filtrados/ordenados, sin paginación). */
+    exportable?: boolean;
+    exportFileName?: string;
+    exportSheetName?: string;
 }
 
 export function DataTable<T>({
@@ -61,6 +68,9 @@ export function DataTable<T>({
     showSaveButton = true,
     paginated = true,
     itemsPerPage = 10,
+    exportable = false,
+    exportFileName = "export",
+    exportSheetName = "Datos",
 }: DataTableProps<T>) {
     const [sortKey, setSortKey] = useState<string | null>(initialPreferences?.sortKey || null);
     const [sortDirection, setSortDirection] = useState<"asc" | "desc">(initialPreferences?.sortDirection || "asc");
@@ -259,6 +269,34 @@ export function DataTable<T>({
 
     const activeFiltersCount = Object.keys(filters).length;
 
+    const getCellExportValue = useCallback((item: T, column: Column<T>): string | number | boolean => {
+        if (column.exportValue) {
+            return column.exportValue(item);
+        }
+        const raw = (item as Record<string, unknown>)[String(column.key)];
+        if (raw == null) return "";
+        if (typeof raw === "string" || typeof raw === "number" || typeof raw === "boolean") {
+            return raw;
+        }
+        return String(raw);
+    }, []);
+
+    const handleExportExcel = useCallback(() => {
+        if (sortedData.length === 0) return;
+
+        const exportColumns = displayColumns;
+        const headers = exportColumns.map((col) => col.header);
+        const rows = sortedData.map((item) =>
+            exportColumns.map((col) => getCellExportValue(item, col))
+        );
+
+        const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, exportSheetName.slice(0, 31));
+        const date = new Date().toISOString().slice(0, 10);
+        XLSX.writeFile(wb, `${exportFileName}_${date}.xlsx`);
+    }, [sortedData, displayColumns, getCellExportValue, exportFileName, exportSheetName]);
+
     return (
         <div className="bg-[var(--card-bg)] rounded-lg border border-[var(--card-border)] overflow-hidden shadow-sm">
             {/* Toolbar */}
@@ -379,6 +417,20 @@ export function DataTable<T>({
                                 </div>
                             )}
                         </div>
+                    )}
+
+                    {exportable && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleExportExcel}
+                            disabled={sortedData.length === 0}
+                            className="gap-2"
+                            title="Exportar a Excel"
+                        >
+                            <Download size={16} />
+                            <span className="hidden sm:inline">Exportar</span>
+                        </Button>
                     )}
                     
                     {/* Save Button */}

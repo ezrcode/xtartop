@@ -48,6 +48,7 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
             key: "mrr",
             header: "MRR",
             sortable: true,
+            exportValue: (item) => formatMoney(item.mrr),
             render: (item) => (
                 <span className="text-sm font-mono tabular-nums font-medium text-[var(--foreground)]">
                     {formatMoney(item.mrr)}
@@ -68,6 +69,7 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
             key: "autoBilling",
             header: "Auto",
             sortable: true,
+            exportValue: (item) => (item.autoBilling ? "Sí" : "No"),
             render: (item) => (
                 <Badge variant={item.autoBilling ? "success" : "secondary"}>
                     {item.autoBilling ? "Sí" : "No"}
@@ -101,6 +103,9 @@ export function SubscriptionsTable({ subscriptions }: SubscriptionsTableProps) {
             searchable
             searchPlaceholder="Buscar empresa..."
             searchKeys={["companyName" as keyof SubscriptionRow]}
+            exportable
+            exportFileName="suscripciones"
+            exportSheetName="Suscripciones"
             emptyState={
                 <div className="text-center py-12">
                     <p className="text-[var(--muted-text)]">No hay suscripciones configuradas</p>
